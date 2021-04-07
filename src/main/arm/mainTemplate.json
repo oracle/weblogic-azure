@@ -1,0 +1,122 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "defaultValue": "[deployment().properties.templateLink.uri]"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "identity": {
+            "type": "object"
+        },
+        "createAKSCluster": {
+            "defaultValue": true,
+            "type": "bool"
+        },
+        "aksClusterName": {
+            "type": "string",
+            "defaultValue": ""
+        }, 
+        "aksClusterRGName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "createACR": {
+            "defaultValue": true,
+            "type": "bool"
+        },
+        "acrName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "uploadAppPackage": {
+            "defaultValue": false,
+            "type": "bool"
+        },
+        "appPackageUrl": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "contextRoot": {
+            "defaultValue": "/",
+            "type": "string"
+        },
+        "useOpenLibertyImage": {
+            "defaultValue": true,
+            "type": "bool"
+        },
+         "useJava8": {
+            "defaultValue": true,
+            "type": "bool"
+        },
+        "appReplicas": {
+            "type": "int",
+            "defaultValue": 1
+        },
+        "guidValue": {
+            "defaultValue": "[newGuid()]",
+            "type": "string"
+        }
+    },
+    "variables": {
+        "const_aksClusterRGName": "[if(parameters('createAKSCluster'), resourceGroup().name, parameters('aksClusterRGName'))]",
+        "const_appName": "[concat('app', variables('const_suffix'))]",
+        "const_appPackageUrl": "[if(parameters('uploadAppPackage'), parameters('appPackageUrl'), 'N/A')]",
+        "const_arguments": "[concat(variables('const_aksClusterRGName'), ' ', variables('name_aksClusterName'), ' ', variables('name_acrName'), ' ', parameters('uploadAppPackage'), ' ', variables('const_appPackageUrl'), ' ', parameters('contextRoot'), ' ', parameters('useOpenLibertyImage'), ' ', parameters('useJava8'), ' ', parameters('appReplicas'), ' ', variables('const_appName'))]",
+        "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
+        "const_suffix": "[take(replace(parameters('guidValue'), '-', ''), 6)]",
+        "name_acrName": "[if(parameters('createACR'), concat('acr', variables('const_suffix')), parameters('acrName'))]",
+        "name_aksClusterName": "[if(parameters('createAKSCluster'), concat('cluster', variables('const_suffix')), parameters('aksClusterName'))]",
+        "name_deploymentScriptName": "[concat('script', variables('const_suffix'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-09-01",
+            "name": "[${tracking.pid}]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "aksClusterName": {
+            "value": "[variables('name_aksClusterName')]",
+            "type": "string"
+        },
+        "aksClusterRGName": {
+            "value": "[variables('const_aksClusterRGName')]",
+            "type": "string"
+        },
+        "acrName": {
+            "value": "[variables('name_acrName')]",
+            "type": "string"
+        },
+        "appImage": {
+            "value": "[if(parameters('uploadAppPackage'), variables('const_appName'), 'Open Liberty/WebSphere Liberty base image')]",
+            "type": "string"
+        },
+        "appName": {
+            "value": "[variables('const_appName')]",
+            "type": "string"
+        },
+        "result": {
+            "value": "[reference(variables('name_deploymentScriptName')).outputs]",
+            "type": "object"
+        }
+    }
+}
