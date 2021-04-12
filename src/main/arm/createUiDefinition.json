@@ -198,43 +198,32 @@
                         "visible": "[bool(steps('Application').uploadAppPackage)]"
                     },
                     {
-                        "name": "useOpenLibertyImage",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Application server runtime",
-                        "defaultValue": "Open Liberty",
-                        "toolTip": "Select 'Open Liberty' if you prefer Open Source runtime, or select 'WebSphere Liberty' if you prefer commercial version of Open Liberty.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Open Liberty",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "WebSphere Liberty",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
+                        "name": "fromImageText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                          "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement.",
+                          "link": {
+                            "label": "Must be a valid tag value from Oracle Container Registry",
+                            "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                          }
                         }
                     },
                     {
-                        "name": "useJava8",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Application Java runtime",
-                        "defaultValue": "Java 8",
-                        "toolTip": "Select Java version for your application.",
+                        "name": "fromImage",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "WebLogic Docker tag",
+                        "defaultValue": "12.2.1.4-ol8",
+                        "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromImage option to 'imagetool'.",
+                        "multiLine": false,
                         "constraints": {
-                            "allowedValues": [
+                            "required": true,
+                            "validations": [
                                 {
-                                    "label": "Java 8",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "Java 11",
-                                    "value": "false"
+                                    "regex": "^[a-z0-9\\-\\.]+$",
+                                    "message": "Must be a valid Docker tag for WebLogic on Oracle Container Registry"
                                 }
-                            ],
-                            "required": true
+                            ]
                         }
                     },
                     {
@@ -247,6 +236,25 @@
                             "required": true,
                             "regex": "^(1|2|3|4|5)$",
                             "validationMessage": "Number of application replicas to deploy, limit 1-5."
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "section_autoScaling",
+                "type": "Microsoft.Common.Section",
+                "label": "Configure horizontal pod autoscaling",
+                "elements": [
+                    {
+                        "name": "enableAutoScalingText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision Prometheus and Grafana with scaling rules to enable horizontal pod auto-scaling.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/wls-aks-autoscaling"
+                            }
                         }
                     }
                 ]
@@ -263,8 +271,7 @@
             "uploadAppPackage": "[bool(steps('Application').uploadAppPackage)]",
             "appPackageUrl": "[steps('Application').appPackageInfo.appPackageUrl]",
             "contextRoot": "[steps('Application').appPackageInfo.contextRoot]",
-            "useOpenLibertyImage": "[bool(steps('Application').useOpenLibertyImage)]",
-            "useJava8": "[bool(steps('Application').useJava8)]",
+            "fromImage": "[bool(steps('Application').fromImage)]",
             "appReplicas": "[int(steps('Application').appReplicas)]"
         }
     }
