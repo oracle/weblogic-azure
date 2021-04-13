@@ -5,6 +5,145 @@
     "parameters": {
         "basics": [
             {
+                "name": "basicsRequired",
+                "type": "Microsoft.Common.Section",
+                "label": "Credentials for WebLogic",
+                "elements": [
+                    {
+                        "name": "wlsUserName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for WebLogic Administrator",
+                        "defaultValue": "weblogic",
+                        "toolTip": "Use only letters and numbers",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "wlsPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for WebLogic Administrator",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "Password for WebLogic Administrator",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "wdtRuntimePassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for model WDT runtime encrytion",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "The Model WDT runtime encrytion secret.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "identity",
+                        "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                        "label": "Managed Identity Configuration",
+                        "toolTip": {
+                            "userAssignedIdentity": "Add user-assigned identities to enable the app deployment."
+                        },
+                        "defaultValue": {
+                            "systemAssignedIdentity": "Off"
+                        },
+                        "options": {
+                            "hideSystemAssignedIdentity": true,
+                            "hideUserAssignedIdentity": false
+                        }
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "basicsOptional",
+                "type": "Microsoft.Common.Section",
+                "label": "Optional Basic Configuration",
+                "elements": [
+                    {
+                        "name": "basicsOptionalAcceptDefaults",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Accept defaults for optional configuration?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'No' to edit optional basic configuration.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "false"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "true"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "managedServerPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Managed Server Prefix",
+                        "toolTip": "The string to prepend to the name of the managed server.",
+                        "defaultValue": "managed-server",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,20}$",
+                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsDomainName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "WebLogic Domain Name",
+                        "toolTip": "The name of the WebLogic Domain to create.",
+                        "defaultValue": "domain1",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,20}$",
+                            "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsDomainUID",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "WebLogic Domain UID",
+                        "toolTip": "The UID of the WebLogic Domain to create.",
+                        "defaultValue": "sample-domain1",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,20}$",
+                            "validationMessage": "The Domain UID must be between 3 and 20 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    }
+                ],
+                "visible": true
+            },
+            {
                 "name": "About",
                 "type": "Microsoft.Common.InfoBox",
                 "options": {
@@ -12,21 +151,6 @@
                     "text": "Template version ${project.version}"
                 },
                 "visible": "[bool('${template.version.visible}')]"
-            },
-            {
-                "name": "identity",
-                "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                "label": "Managed Identity Configuration",
-                "toolTip": {
-                    "userAssignedIdentity": "Add user-assigned identities to enable the app deployment."
-                },
-                "defaultValue": {
-                    "systemAssignedIdentity": "Off"
-                },
-                "options": {
-                    "hideSystemAssignedIdentity": true,
-                    "hideUserAssignedIdentity": false
-                }
             }
         ],
         "steps": [
@@ -202,11 +326,11 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                          "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement.",
-                          "link": {
-                            "label": "Must be a valid tag value from Oracle Container Registry",
-                            "uri": "https://aka.ms/wls-aks-fromImage-tag"
-                          }
+                            "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement.",
+                            "link": {
+                                "label": "Must be a valid tag value from Oracle Container Registry",
+                                "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                            }
                         }
                     },
                     {
@@ -241,40 +365,42 @@
                 ]
             },
             {
-				"name": "section_sslConfiguration",
-				"type": "Microsoft.Common.Section",
-				"label": "TLS/SSL Configuration",
-				"elements": [{
-						"name": "sslConfigurationText",
-						"type": "Microsoft.Common.TextBlock",
-						"visible": true,
-						"options": {
-							"text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate.",
-							"link": {
-								"label": "Learn more",
-								"uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
-							}
-						}
-					},
-					{
-						"name": "enableCustomSSL",
-						"type": "Microsoft.Common.OptionsGroup",
-						"label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate?",
-						"defaultValue": "No",
-						"toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own SSL Certificate.",
-						"constraints": {
-							"allowedValues": [{
-									"label": "Yes",
-									"value": true
-								},
-								{
-									"label": "No",
-									"value": false
-								}
-							],
-							"required": false
-						}
-					},
+                "name": "section_sslConfiguration",
+                "type": "Microsoft.Common.Section",
+                "label": "TLS/SSL Configuration",
+                "elements": [
+                    {
+                        "name": "sslConfigurationText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
+                            }
+                        }
+                    },
+                    {
+                        "name": "enableCustomSSL",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own SSL Certificate.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": false
+                        }
+                    },
                     {
                         "name": "sslConfigurationAccessOption",
                         "type": "Microsoft.Common.OptionsGroup",
@@ -456,11 +582,11 @@
                         ]
                     },
                     {
-						"name": "keyVaultStoredCustomSSLSettings",
-						"type": "Microsoft.Common.Section",
+                        "name": "keyVaultStoredCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
-						"label": "TLS/SSL Configuration Settings",
-						"elements": [
+                        "label": "TLS/SSL Configuration Settings",
+                        "elements": [
                             {
                                 "name": "sslKeystoreInfo1",
                                 "type": "Microsoft.Common.InfoBox",
@@ -543,7 +669,8 @@
                                 "defaultValue": "JKS",
                                 "toolTip": "One of the supported KeyStore types",
                                 "constraints": {
-                                    "allowedValues": [{
+                                    "allowedValues": [
+                                        {
                                             "label": "JKS",
                                             "value": "JKS"
                                         },
@@ -615,7 +742,8 @@
                                 "defaultValue": "JKS",
                                 "toolTip": "One of the supported KeyStore types",
                                 "constraints": {
-                                    "allowedValues": [{
+                                    "allowedValues": [
+                                        {
                                             "label": "JKS",
                                             "value": "JKS"
                                         },
@@ -627,10 +755,10 @@
                                     "required": true
                                 }
                             }
-                     ]
-                  }
-				]
-			},
+                        ]
+                    }
+                ]
+            },
             {
                 "name": "section_appGateway",
                 "type": "Microsoft.Common.Section",
@@ -727,7 +855,8 @@
                             ],
                             "required": true
                         },
-                        "visible": "[steps('section_appGateway').enableAppGateway]"                    },
+                        "visible": "[steps('section_appGateway').enableAppGateway]"
+                    },
                     {
                         "name": "keyVaultSSLCertData",
                         "type": "Microsoft.Common.FileUpload",
@@ -1532,23 +1661,155 @@
                                 "uri": "https://aka.ms/wls-aks-autoscaling"
                             }
                         }
+                    },
+                    {
+                        "name": "enableautoScaling",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Enable auto scaling?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Prometheus and Grafana.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "autoScalingInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Prometheus and Grafana settings",
+                        "elements": [
+                            {
+                                "name": "wlsPrometheusRulesInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Prometheus rules allow you to define alert conditions based on Prometheus expression language expressions and to send notifications about firing alerts to the scaling service.",
+                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/"
+                                }
+                            },
+                            {
+                                "name": "wlsPrometheusRules",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Prometheus rules for WebLogic cluster scaling",
+                                "multiLine": true,
+                                "placeholder": "",
+                                "defaultValue": "- record: webapp:webapp_config_open_sessions_current_count:avg\n   expr: avg(webapp_config_open_sessions_current_count{webapp=\"myapp2\"})\n- alert: scaleup\n   for: 1m\n  expr: webapp:webapp_config_open_sessions_current_count:avg > 10\n  annotations:\n  description: 'Scale up when current sessions is greater than 15.'\n  summary: 'Firing when total sessions active greater than 15.'\n- alert: scaledown\n   for: 1m\n   expr: webapp:webapp_config_open_sessions_current_count:avg < 4\n   annotations:\n   description: 'Scale down when current sessions is less than 4.'\n   summary: 'Firing when total sessions active less than 4'",
+                                "toolTip": "Define the scaling up and scaling down rules.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "alertNameForScaleUp",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Alert name for scaling up",
+                                "placeholder": "",
+                                "defaultValue": "scaleup",
+                                "toolTip": "Use only allowed characters",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "alertNameForScaleDown",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Alert name for scaling down",
+                                "placeholder": "",
+                                "defaultValue": "scaledown",
+                                "toolTip": "Use only allowed characters",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "grafanaDashboards",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Grafana dashboards",
+                                "toolTip": "",
+                                "constraints": {
+                                    "required": false,
+                                    "accept": ".json"
+                                },
+                                "options": {
+                                    "multiple": true,
+                                    "uploadMode": "file",
+                                    "openMode": "text",
+                                    "encoding": "UTF-8"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "prometheusAdditionalScrapeConfigsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "The additional scrape configs specify a set of targets and parameters describing how to scrape them.\nThis application provides default scrape configs to scrape all managed ports of in the created WebLogic domain.",
+                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config"
+                                }
+                            },
+                            {
+                                "name": "prometheusAdditionalScrapeConfigs",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Prometheus additional scrape configs",
+                                "toolTip": "",
+                                "constraints": {
+                                    "accept": ".yaml"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "text",
+                                    "encoding": "UTF-8"
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": "[bool(steps('section_autoScaling').enableautoScaling)]"
                     }
                 ]
             }
         ],
         "outputs": {
-            "location": "[location()]",
-            "identity": "[basics('identity')]",
-            "createAKSCluster": "[bool(steps('AKSCluster').createAKSCluster)]",
+            "acrName": "[last(split(steps('ACRInstance').acrInfo.acrSelector.id, '/'))]",
+            "alertNameForScaleDown": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleDown]",
+            "alertNameForScaleUp": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleUp]",
             "aksClusterName": "[last(split(steps('AKSCluster').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('AKSCluster').clusterInfo.aksClusterSelector.id, '/'), 5))]",
-            "createACR": "[bool(steps('ACRInstance').createACR)]",
-            "acrName": "[last(split(steps('ACRInstance').acrInfo.acrSelector.id, '/'))]",
-            "uploadAppPackage": "[bool(steps('Application').uploadAppPackage)]",
             "appPackageUrl": "[steps('Application').appPackageInfo.appPackageUrl]",
+            "appReplicas": "[int(steps('Application').appReplicas)]",
             "contextRoot": "[steps('Application').appPackageInfo.contextRoot]",
+            "createACR": "[bool(steps('ACRInstance').createACR)]",
+            "createAKSCluster": "[bool(steps('AKSCluster').createAKSCluster)]",
+            "enableautoScaling": "[bool(steps('section_autoScaling').enableautoScaling)]",
             "fromImage": "[bool(steps('Application').fromImage)]",
-            "appReplicas": "[int(steps('Application').appReplicas)]"
+            "grafanaDashboards": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleDown]",
+            "identity": "[basics('basicsRequired').identity]",
+            "location": "[location()]",
+            "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
+            "uploadAppPackage": "[bool(steps('Application').uploadAppPackage)]",
+            "prometheusAdditionalScrapeConfigs": "[steps('section_autoScaling').autoScalingInfo.prometheusAdditionalScrapeConfigs]",
+            "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
+            "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
+            "wlsDomainUID": "[basics('basicsOptional').wlsDomainUID]",
+            "wlsPassword": "[basics('basicsRequired').wlsPassword]",
+            "wlsPrometheusRules": "[steps('section_autoScaling').autoScalingInfo.wlsPrometheusRules]",
+            "wlsUserName": "[basics('basicsRequired').wlsUserName]"
         }
     }
 }
