@@ -59,6 +59,47 @@
                         "visible": true
                     },
                     {
+                        "name": "ocrSSOInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "Info",
+                            "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Click the link to create Oracle SSO account.",
+                            "uri": "https://profile.oracle.com/myprofile/account/create-account.jspx"
+                        }
+                    },
+                    {
+                        "name": "ocrSSOUserName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for Oracle Single Sign-On authentication",
+                        "defaultValue": "example@foo.com",
+                        "toolTip": "Username for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                            "validationMessage": "The value must be an email address."
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "ocrSSOPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for Oracle Single Sign-On authentication",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "Password for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d\\$\\&\\+\\,:;\\=\\?@#|'.\\^\\*!\\-_~/'\\[\\]\\{\\}\"]{8,}$",
+                            "validationMessage": "The password must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
                         "name": "identity",
                         "type": "Microsoft.ManagedIdentity.IdentitySelector",
                         "label": "Managed Identity Configuration",
@@ -155,7 +196,7 @@
         ],
         "steps": [
             {
-                "name": "AKSCluster",
+                "name": "section_aks",
                 "label": "Configure AKS cluster",
                 "subLabel": {
                     "preValidation": "Provide required info for AKS cluster configuration",
@@ -164,30 +205,30 @@
                 "bladeTitle": "Configure AKS cluster",
                 "elements": [
                     {
-                        "name": "createAKSCluster",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Create a new AKS cluster?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' to create a new AKS cluster, or select 'No' to provide an existing AKS cluster.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
                         "name": "clusterInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Provide information for an existing AKS cluster",
+                        "label": "Azure Kubernetes Service",
                         "elements": [
+                            {
+                                "name": "createAKSCluster",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create a new AKS cluster?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to create a new AKS cluster, or select 'No' to provide an existing AKS cluster.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
                             {
                                 "name": "aksClusterSelector",
                                 "type": "Microsoft.Solutions.ResourceSelector",
@@ -199,47 +240,71 @@
                                         "subscription": "onBasics",
                                         "location": "onBasics"
                                     }
-                                }
-                            }
-                        ],
-                        "visible": "[not(bool(steps('AKSCluster').createAKSCluster))]"
-                    }
-                ]
-            },
-            {
-                "name": "ACRInstance",
-                "label": "Configure ACR instance",
-                "subLabel": {
-                    "preValidation": "Provide required info for ACR instance configuration",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Configure ACR instance",
-                "elements": [
-                    {
-                        "name": "createACR",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Create a new ACR instance?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' to create a new ACR instance, or select 'No' to provide an existing ACR instance.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
                                 },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
+                                "visible": "[not(bool(steps('section_aks').clusterInfo.createAKSCluster))]"
+                            },
+                            {
+                                "name": "aksNodeCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 1,
+                                "max": 1000,
+                                "label": "Node count",
+                                "defaultValue": 2,
+                                "showStepMarkers": false,
+                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "nodeVMSizeSelector",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "Size",
+                                "toolTip": "",
+                                "recommendedSizes": [
+                                    "Standard_DS2_v2"
+                                ],
+                                "constraints": {
+                                    "allowedSizes": [],
+                                    "excludedSizes": [],
+                                    "numAvailabilityZonesRequired": 3,
+                                    "zone": "3"
+                                },
+                                "options": {
+                                    "hideDiskTypeFilter": false
+                                },
+                                "osPlatform": "Linux",
+                                "count": 2,
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            }
+                        ]
                     },
                     {
                         "name": "acrInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Provide information for an existing ACR instance",
+                        "label": "Azure Container Registry",
                         "elements": [
+                            {
+                                "name": "createACR",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create a new ACR instance?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to create a new ACR instance, or select 'No' to provide an existing ACR instance.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
                             {
                                 "name": "acrSelector",
                                 "type": "Microsoft.Solutions.ResourceSelector",
@@ -251,15 +316,52 @@
                                         "subscription": "onBasics",
                                         "location": "onBasics"
                                     }
+                                },
+                                "visible": "[not(bool(steps('section_aks').acrInfo.createACR))]"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "imageInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Oracle WebLogic Image",
+                        "elements": [
+                            {
+                                "name": "fromImageText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
+                                    "link": {
+                                        "label": "Must be a valid tag value from Oracle Container Registry",
+                                        "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "fromImage",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "WebLogic Docker tag",
+                                "defaultValue": "12.2.1.4-ol8",
+                                "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromImage option to 'imagetool'.",
+                                "multiLine": false,
+                                "constraints": {
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^[a-z0-9\\-\\.]+$",
+                                            "message": "Must be a valid Docker tag for WebLogic on Oracle Container Registry"
+                                        }
+                                    ]
                                 }
                             }
                         ],
-                        "visible": "[not(bool(steps('ACRInstance').createACR))]"
+                        "visible": true
                     }
                 ]
             },
             {
-                "name": "Application",
+                "name": "section_application",
                 "label": "Configure Java EE Application",
                 "subLabel": {
                     "preValidation": "Provide required info for application",
@@ -295,7 +397,7 @@
                             {
                                 "name": "appPackageUrl",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Application package (.war)",
+                                "label": "Application package (.war,.ear)",
                                 "toolTip": "The application war package to deploy.",
                                 "constraints": {
                                     "required": true
@@ -305,50 +407,9 @@
                                     "uploadMode": "url",
                                     "openMode": "binary"
                                 }
-                            },
-                            {
-                                "name": "contextRoot",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Application context root",
-                                "defaultValue": "/",
-                                "toolTip": "Specify the context root of your application.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^\/.*$",
-                                    "validationMessage": "The value must start with '/'."
-                                }
                             }
                         ],
-                        "visible": "[bool(steps('Application').uploadAppPackage)]"
-                    },
-                    {
-                        "name": "fromImageText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement.",
-                            "link": {
-                                "label": "Must be a valid tag value from Oracle Container Registry",
-                                "uri": "https://aka.ms/wls-aks-fromImage-tag"
-                            }
-                        }
-                    },
-                    {
-                        "name": "fromImage",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "WebLogic Docker tag",
-                        "defaultValue": "12.2.1.4-ol8",
-                        "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromImage option to 'imagetool'.",
-                        "multiLine": false,
-                        "constraints": {
-                            "required": true,
-                            "validations": [
-                                {
-                                    "regex": "^[a-z0-9\\-\\.]+$",
-                                    "message": "Must be a valid Docker tag for WebLogic on Oracle Container Registry"
-                                }
-                            ]
-                        }
+                        "visible": "[bool(steps('section_application').uploadAppPackage)]"
                     },
                     {
                         "name": "appReplicas",
@@ -1593,10 +1654,10 @@
                                 }
                             },
                             {
-                                "name": "logsToIntegrate",
+                                "name": "domainLogsToIntegrate",
                                 "type": "Microsoft.Common.DropDown",
-                                "label": "WebLogic Server logs to export",
-                                "toolTip": "The logs selected will be exported to Elasticsearch.",
+                                "label": "WebLogic Domain logs to export",
+                                "toolTip": "The logs selected will be exported to the Elasticsearch server.",
                                 "defaultValue": [
                                     "Server Log"
                                 ],
@@ -1639,6 +1700,11 @@
                                     ],
                                     "required": true
                                 }
+                            },
+                            {
+                                "name": "operatorLog",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "WebLogic Operator logs"
                             }
                         ],
                         "visible": "[bool(steps('section_elk').enableELK)]"
@@ -1740,7 +1806,7 @@
                             {
                                 "name": "grafanaDashboards",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Grafana dashboards",
+                                "label": "Grafana dashboards (.json)",
                                 "toolTip": "",
                                 "constraints": {
                                     "required": false,
@@ -1766,7 +1832,7 @@
                             {
                                 "name": "prometheusAdditionalScrapeConfigs",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Prometheus additional scrape configs",
+                                "label": "Prometheus additional scrape configs (.yaml)",
                                 "toolTip": "",
                                 "constraints": {
                                     "accept": ".yaml"
@@ -1786,23 +1852,23 @@
             }
         ],
         "outputs": {
-            "acrName": "[last(split(steps('ACRInstance').acrInfo.acrSelector.id, '/'))]",
+            "acrName": "[last(split(steps('section_aks').acrInfo.acrSelector.id, '/'))]",
             "alertNameForScaleDown": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleDown]",
             "alertNameForScaleUp": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleUp]",
-            "aksClusterName": "[last(split(steps('AKSCluster').clusterInfo.aksClusterSelector.id, '/'))]",
-            "aksClusterRGName": "[last(take(split(steps('AKSCluster').clusterInfo.aksClusterSelector.id, '/'), 5))]",
-            "appPackageUrl": "[steps('Application').appPackageInfo.appPackageUrl]",
-            "appReplicas": "[int(steps('Application').appReplicas)]",
-            "contextRoot": "[steps('Application').appPackageInfo.contextRoot]",
-            "createACR": "[bool(steps('ACRInstance').createACR)]",
-            "createAKSCluster": "[bool(steps('AKSCluster').createAKSCluster)]",
+            "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
+            "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
+            "appPackageUrl": "[steps('section_application').appPackageInfo.appPackageUrl]",
+            "appReplicas": "[int(steps('section_application').appReplicas)]",
+            "contextRoot": "[steps('section_application').appPackageInfo.contextRoot]",
+            "createACR": "[bool(steps('section_aks').createACR)]",
+            "createAKSCluster": "[bool(steps('section_aks').createAKSCluster)]",
             "enableautoScaling": "[bool(steps('section_autoScaling').enableautoScaling)]",
-            "fromImage": "[bool(steps('Application').fromImage)]",
+            "fromImage": "[bool(steps('section_application').fromImage)]",
             "grafanaDashboards": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleDown]",
             "identity": "[basics('basicsRequired').identity]",
             "location": "[location()]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
-            "uploadAppPackage": "[bool(steps('Application').uploadAppPackage)]",
+            "uploadAppPackage": "[bool(steps('section_application').uploadAppPackage)]",
             "prometheusAdditionalScrapeConfigs": "[steps('section_autoScaling').autoScalingInfo.prometheusAdditionalScrapeConfigs]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
