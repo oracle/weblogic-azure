@@ -277,6 +277,12 @@
                                 "osPlatform": "Linux",
                                 "count": 2,
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "enableAzureFileShare",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Create Azure file share service",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             }
                         ]
                     },
@@ -357,24 +363,340 @@
                             }
                         ],
                         "visible": true
+                    },
+                    {
+                        "name": "jeeAppInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Java EE Application",
+                        "elements": [
+                            {
+                                "name": "uploadAppPackage",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Deploy your application package?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to deploy your application, or select 'No' to deploy a default 'hello world' open liberty application.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "appPackageUrl",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Application package (.war,.ear)",
+                                "toolTip": "The application war package to deploy.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "url",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
+                            },
+                            {
+                                "name": "appReplicas",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Number of application replicas",
+                                "defaultValue": "2",
+                                "toolTip": "The number of application replicas to deploy.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(1|2|3|4|5)$",
+                                    "validationMessage": "Number of application replicas to deploy, limit 1-5."
+                                }
+                            }
+                        ],
+                        "visible": true
                     }
                 ]
             },
             {
-                "name": "section_application",
-                "label": "Configure Java EE Application",
+                "name": "section_appGateway",
+                "type": "Microsoft.Common.Section",
+                "label": "Networking",
                 "subLabel": {
-                    "preValidation": "Provide required info for application",
+                    "preValidation": "Provide required info for networking",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Configure Java EE Application",
+                "bladeTitle": "Networking",
                 "elements": [
                     {
-                        "name": "uploadAppPackage",
+                        "name": "connectToAGText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision Load Balancer service or Ingress service for WebLogic Administration Console and WebLogic cluster.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
+                            }
+                        }
+                    },
+                    {
+                        "name": "lbSVCInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Standard Load Balancer service",
+                        "elements": [
+                            {
+                                "name": "lbSVC",
+                                "type": "Microsoft.Common.EditableGrid",
+                                "ariaLabel": "Enter information",
+                                "label": "Standard Load Balancer service",
+                                "constraints": {
+                                    "width": "Full",
+                                    "rows": {
+                                        "count": {
+                                            "min": 1,
+                                            "max": 10
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "id": "colName",
+                                            "header": "Service Name",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "Full name",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "colGender",
+                                            "header": "Target",
+                                            "width": "1fr",
+                                            "element": {
+                                                "name": "dropDown1",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "placeholder": "Select a target...",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "Admin Console",
+                                                            "value": "adConsole"
+                                                        },
+                                                        {
+                                                            "label": "cluster-1",
+                                                            "value": "cluster1"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "colName",
+                                            "header": "Port",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "Full name",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[0-9]{1,5}$",
+                                                            "message": "Only numbers are allowed, and the value must be 1-65535."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "enableInternalLB",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use Internal Load Balancer"
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "ingressInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Ingress controller",
+                        "elements": [
+                            {
+                                "name": "ingressSVC",
+                                "type": "Microsoft.Common.EditableGrid",
+                                "ariaLabel": "Enter information",
+                                "label": "Ingresses",
+                                "constraints": {
+                                    "width": "Full",
+                                    "rows": {
+                                        "count": {
+                                            "min": 1,
+                                            "max": 10
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "id": "colName",
+                                            "header": "Service Name",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "Full name",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "colGender",
+                                            "header": "Target",
+                                            "width": "1fr",
+                                            "element": {
+                                                "name": "dropDown1",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "placeholder": "Select a target...",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "Admin Console",
+                                                            "value": "adConsole"
+                                                        },
+                                                        {
+                                                            "label": "cluster-1",
+                                                            "value": "cluster1"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "enableAppGateway",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Eanble Azure Application Gateway?",
+                                "placeholder": "",
+                                "defaultValue": "No",
+                                "toolTip": "",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "keyVaultResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Resource group name in current subscription containing the Key Vault",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                                    "validationMessage": "[if(greater(length(steps('section_appGateway').ingressInfo.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                },
+                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Name of the Azure Key Vault containing secrets for the certificate for TLS/SSL Termination",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "validationMessage": "[if(or(greater(length(steps('section_appGateway').keyVaultName), 24), less(length(steps('section_appGateway').keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                },
+                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the TLS/SSL certificate data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertPasswordSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the password for the TLS/SSL certificate",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "section_autoScaling",
+                "type": "Microsoft.Common.Section",
+                "label": "Autoscaling",
+                "elements": [
+                    {
+                        "name": "enableAutoScalingText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision Prometheus and Grafana with scaling rules to enable horizontal pod auto-scaling.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/wls-aks-autoscaling"
+                            }
+                        }
+                    },
+                    {
+                        "name": "enableautoScaling",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Deploy your application package?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' to deploy your application, or select 'No' to deploy a default 'hello world' open liberty application.",
+                        "label": "Enable auto scaling?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Prometheus and Grafana.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -390,38 +712,104 @@
                         }
                     },
                     {
-                        "name": "appPackageInfo",
+                        "name": "autoScalingInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Provide information for your application package",
+                        "label": "Prometheus and Grafana settings",
                         "elements": [
                             {
-                                "name": "appPackageUrl",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Application package (.war,.ear)",
-                                "toolTip": "The application war package to deploy.",
+                                "name": "wlsPrometheusRulesInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Prometheus rules allow you to define alert conditions based on Prometheus expression language expressions and to send notifications about firing alerts to the scaling service.",
+                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/"
+                                }
+                            },
+                            {
+                                "name": "wlsPrometheusRules",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Prometheus rules for WebLogic cluster scaling",
+                                "multiLine": true,
+                                "placeholder": "",
+                                "defaultValue": "- record: webapp:webapp_config_open_sessions_current_count:avg\n   expr: avg(webapp_config_open_sessions_current_count{webapp=\"myapp2\"})\n- alert: scaleup\n   for: 1m\n  expr: webapp:webapp_config_open_sessions_current_count:avg > 10\n  annotations:\n  description: 'Scale up when current sessions is greater than 15.'\n  summary: 'Firing when total sessions active greater than 15.'\n- alert: scaledown\n   for: 1m\n   expr: webapp:webapp_config_open_sessions_current_count:avg < 4\n   annotations:\n   description: 'Scale down when current sessions is less than 4.'\n   summary: 'Firing when total sessions active less than 4'",
+                                "toolTip": "Define the scaling up and scaling down rules.",
                                 "constraints": {
                                     "required": true
                                 },
+                                "visible": true
+                            },
+                            {
+                                "name": "alertNameForScaleUp",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Alert name for scaling up",
+                                "placeholder": "",
+                                "defaultValue": "scaleup",
+                                "toolTip": "Use only allowed characters",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "alertNameForScaleDown",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Alert name for scaling down",
+                                "placeholder": "",
+                                "defaultValue": "scaledown",
+                                "toolTip": "Use only allowed characters",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "grafanaDashboards",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Grafana dashboards (.json)",
+                                "toolTip": "",
+                                "constraints": {
+                                    "required": false,
+                                    "accept": ".json"
+                                },
+                                "options": {
+                                    "multiple": true,
+                                    "uploadMode": "file",
+                                    "openMode": "text",
+                                    "encoding": "UTF-8"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "prometheusAdditionalScrapeConfigsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "The additional scrape configs specify a set of targets and parameters describing how to scrape them.\nThis application provides default scrape configs to scrape all managed ports of in the created WebLogic domain.",
+                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config"
+                                }
+                            },
+                            {
+                                "name": "prometheusAdditionalScrapeConfigs",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Prometheus additional scrape configs (.yaml)",
+                                "toolTip": "",
+                                "constraints": {
+                                    "accept": ".yaml"
+                                },
                                 "options": {
                                     "multiple": false,
-                                    "uploadMode": "url",
-                                    "openMode": "binary"
-                                }
+                                    "uploadMode": "file",
+                                    "openMode": "text",
+                                    "encoding": "UTF-8"
+                                },
+                                "visible": true
                             }
                         ],
-                        "visible": "[bool(steps('section_application').uploadAppPackage)]"
-                    },
-                    {
-                        "name": "appReplicas",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Number of application replicas",
-                        "defaultValue": "2",
-                        "toolTip": "The number of application replicas to deploy.",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(1|2|3|4|5)$",
-                            "validationMessage": "Number of application replicas to deploy, limit 1-5."
-                        }
+                        "visible": "[bool(steps('section_autoScaling').enableautoScaling)]"
                     }
                 ]
             },
@@ -819,240 +1207,6 @@
                         ]
                     }
                 ]
-            },
-            {
-                "name": "section_appGateway",
-                "type": "Microsoft.Common.Section",
-                "label": "Azure Application Gateway",
-                "elements": [
-                    {
-                        "name": "connectToAGText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision an Azure Application Gateway (WAF_v2 or later SKU), a public IP, and a backend pool consisting of the worker nodes in the cluster.  Further configuration may be necessary after deployment.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableAppGateway",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Connect to Azure Application Gateway?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to create an Azure Application Gateway as the load balancer for the cluster.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "keyVaultText00",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": "[steps('section_appGateway').enableAppGateway]",
-                        "options": {
-                            "text": "Choose an option for providing the TLS/SSL certificate and whether or not to deny public traffic to the managed servers:"
-                        }
-                    },
-                    {
-                        "name": "keyVaultText01",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": "[steps('section_appGateway').enableAppGateway]",
-                        "options": {
-                            "text": "    ⁃ Upload a TLS/SSL certificate: Upload the pre-signed certificate now."
-                        }
-                    },
-                    {
-                        "name": "keyVaultText02",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": "[steps('section_appGateway').enableAppGateway]",
-                        "options": {
-                            "text": "    ⁃ Identify an Azure Key Vault: The Key Vault must already contain the certificate and its password stored as secrets."
-                        }
-                    },
-                    {
-                        "name": "keyVaultText03",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": "[steps('section_appGateway').enableAppGateway]",
-                        "options": {
-                            "text": "    ⁃ Generate a self-signed certificate: generate a self-signed certificate and apply it during deployment.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
-                            }
-                        }
-                    },
-                    {
-                        "name": "certificateOption",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Select desired TLS/SSL certificate option",
-                        "defaultValue": "Upload a TLS/SSL certificate",
-                        "toolTip": "Select desired TLS/SSL certificate option",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Upload a TLS/SSL certificate",
-                                    "value": "haveCert"
-                                },
-                                {
-                                    "label": "Identify an Azure Key Vault",
-                                    "value": "haveKeyVault"
-                                },
-                                {
-                                    "label": "Generate a self-signed certificate",
-                                    "value": "generateCert"
-                                }
-                            ],
-                            "required": true
-                        },
-                        "visible": "[steps('section_appGateway').enableAppGateway]"
-                    },
-                    {
-                        "name": "keyVaultSSLCertData",
-                        "type": "Microsoft.Common.FileUpload",
-                        "label": "TLS/SSL certificate(.pfx)",
-                        "toolTip": "TLS/SSL certificate used for App Gateway",
-                        "constraints": {
-                            "required": true,
-                            "accept": ".pfx"
-                        },
-                        "options": {
-                            "multiple": false,
-                            "uploadMode": "file",
-                            "openMode": "binary"
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'haveCert')]"
-                    },
-                    {
-                        "name": "appGatewaySSLCertPassword",
-                        "type": "Microsoft.Common.PasswordBox",
-                        "label": {
-                            "password": "Password",
-                            "confirmPassword": "Confirm password"
-                        },
-                        "toolTip": "TLS/SSL certificate password",
-                        "constraints": {
-                            "required": "[equals(steps('section_appGateway').certificateOption, 'haveCert')]",
-                            "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
-                            "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
-                        },
-                        "options": {
-                            "hideConfirmation": false
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'haveCert')]"
-                    },
-                    {
-                        "name": "keyVaultResourceGroup",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Resource group name in current subscription containing the Key Vault",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                            "validationMessage": "[if(greater(length(steps('section_appGateway').keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'haveKeyVault')]"
-                    },
-                    {
-                        "name": "keyVaultName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Name of the Azure Key Vault containing secrets for the certificate for TLS/SSL Termination",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
-                            "validationMessage": "[if(or(greater(length(steps('section_appGateway').keyVaultName), 24), less(length(steps('section_appGateway').keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'haveKeyVault')]"
-                    },
-                    {
-                        "name": "keyVaultSSLCertDataSecretName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "The name of the secret in the specified Key Vault whose value is the TLS/SSL certificate data",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'haveKeyVault')]"
-                    },
-                    {
-                        "name": "keyVaultSSLCertPasswordSecretName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "The name of the secret in the specified Key Vault whose value is the password for the TLS/SSL certificate",
-                        "defaultValue": "",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'haveKeyVault')]"
-                    },
-                    {
-                        "name": "infoGatewayIndentity",
-                        "type": "Microsoft.Common.InfoBox",
-                        "visible": "[and(equals(steps('section_appGateway').certificateOption, 'generateCert'), less(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities), 1))]",
-                        "options": {
-                            "icon": "Error",
-                            "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. This option requires at least one user-assigned identity to access Azure resources.",
-                            "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
-                        }
-                    },
-                    {
-                        "name": "gatewayIdentity",
-                        "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                        "label": "Managed Identity Configuration",
-                        "toolTip": {
-                            "userAssignedIdentity": "Add user-assigned identities to enable creation of TLS/SSL certificate."
-                        },
-                        "defaultValue": {
-                            "systemAssignedIdentity": "Off"
-                        },
-                        "options": {
-                            "hideSystemAssignedIdentity": true,
-                            "hideUserAssignedIdentity": false
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'generateCert')]"
-                    },
-                    {
-                        "name": "denyPublicTrafficForManagedServer",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Deny public traffic for managed server?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' to deny traffic from the public Internet from reaching managed servers directly. This setting has a higher priority than 'Ports and port ranges to expose' in basic blade.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "No",
-                                    "value": false
-                                },
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                }
-                            ],
-                            "required": true
-                        },
-                        "visible": "[steps('section_appGateway').enableAppGateway]"
-                    }
-                ],
-                "visible": true
             },
             {
                 "name": "section_dnsConfiguration",
@@ -1708,145 +1862,6 @@
                             }
                         ],
                         "visible": "[bool(steps('section_elk').enableELK)]"
-                    }
-                ]
-            },
-            {
-                "name": "section_autoScaling",
-                "type": "Microsoft.Common.Section",
-                "label": "Autoscaling",
-                "elements": [
-                    {
-                        "name": "enableAutoScalingText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Prometheus and Grafana with scaling rules to enable horizontal pod auto-scaling.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/wls-aks-autoscaling"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableautoScaling",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Enable auto scaling?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Prometheus and Grafana.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "autoScalingInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Prometheus and Grafana settings",
-                        "elements": [
-                            {
-                                "name": "wlsPrometheusRulesInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "Prometheus rules allow you to define alert conditions based on Prometheus expression language expressions and to send notifications about firing alerts to the scaling service.",
-                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/"
-                                }
-                            },
-                            {
-                                "name": "wlsPrometheusRules",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Prometheus rules for WebLogic cluster scaling",
-                                "multiLine": true,
-                                "placeholder": "",
-                                "defaultValue": "- record: webapp:webapp_config_open_sessions_current_count:avg\n   expr: avg(webapp_config_open_sessions_current_count{webapp=\"myapp2\"})\n- alert: scaleup\n   for: 1m\n  expr: webapp:webapp_config_open_sessions_current_count:avg > 10\n  annotations:\n  description: 'Scale up when current sessions is greater than 15.'\n  summary: 'Firing when total sessions active greater than 15.'\n- alert: scaledown\n   for: 1m\n   expr: webapp:webapp_config_open_sessions_current_count:avg < 4\n   annotations:\n   description: 'Scale down when current sessions is less than 4.'\n   summary: 'Firing when total sessions active less than 4'",
-                                "toolTip": "Define the scaling up and scaling down rules.",
-                                "constraints": {
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "alertNameForScaleUp",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Alert name for scaling up",
-                                "placeholder": "",
-                                "defaultValue": "scaleup",
-                                "toolTip": "Use only allowed characters",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "alertNameForScaleDown",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Alert name for scaling down",
-                                "placeholder": "",
-                                "defaultValue": "scaledown",
-                                "toolTip": "Use only allowed characters",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "grafanaDashboards",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Grafana dashboards (.json)",
-                                "toolTip": "",
-                                "constraints": {
-                                    "required": false,
-                                    "accept": ".json"
-                                },
-                                "options": {
-                                    "multiple": true,
-                                    "uploadMode": "file",
-                                    "openMode": "text",
-                                    "encoding": "UTF-8"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "prometheusAdditionalScrapeConfigsInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "The additional scrape configs specify a set of targets and parameters describing how to scrape them.\nThis application provides default scrape configs to scrape all managed ports of in the created WebLogic domain.",
-                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config"
-                                }
-                            },
-                            {
-                                "name": "prometheusAdditionalScrapeConfigs",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Prometheus additional scrape configs (.yaml)",
-                                "toolTip": "",
-                                "constraints": {
-                                    "accept": ".yaml"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "text",
-                                    "encoding": "UTF-8"
-                                },
-                                "visible": true
-                            }
-                        ],
-                        "visible": "[bool(steps('section_autoScaling').enableautoScaling)]"
                     }
                 ]
             }
