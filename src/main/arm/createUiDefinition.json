@@ -279,6 +279,12 @@
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
+                                "name": "enableAzureMonitoring",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Create Azure file share service",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
                                 "name": "enableAzureFileShare",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Create Azure file share service",
