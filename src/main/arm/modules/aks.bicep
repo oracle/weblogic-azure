@@ -30,7 +30,9 @@ param enableAzureMonitoring bool = false
 
 param location string = 'eastus'
 
-var aciWorkspaceName = 'Workspace-${guid(subscription().subscriptionId)}-${location}'
+param utcValue string = utcNow()
+
+var aciWorkspaceName = 'Workspace-${guid(utcValue)}-${location}'
 var aciDisableOmsAgent = {
   enabled: false
 }
@@ -49,8 +51,8 @@ var aksAvailabilityZones = [
 ]
 // Generate a unique AKS name scoped to subscription. 
 // Create different cluster name for different deployment to avoid template validation error.
-var aksClusterNameDefault = '${aksClusterNamePrefix}0${uniqueString(subscription().subscriptionId)}'
-var aksClusterNameForSV = '${aksClusterNamePrefix}1${uniqueString(subscription().subscriptionId)}'
+var aksClusterNameDefault = '${aksClusterNamePrefix}0${uniqueString(utcValue)}'
+var aksClusterNameForSV = '${aksClusterNamePrefix}1${uniqueString(utcValue)}'
 
 resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@2020-08-01' = if (enableAzureMonitoring) {
   name: aciWorkspaceName
