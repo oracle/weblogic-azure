@@ -22,33 +22,22 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.oracle.weblogic.azure</groupId>
-    <artifactId>wls-on-aks-azure-marketplace</artifactId>
-    <version>1.0.0</version>
-    
-    <parent>
-        <groupId>com.microsoft.azure.iaas</groupId>
-        <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.8</version>
-        <relativePath></relativePath>
-    </parent>
-    
-    <packaging>jar</packaging>
-    <name>wls-on-aks-azure-marketplace</name>
-    <properties>
-      <!--
-        <template.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/develop/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/develop/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
-      -->
+  <groupId>com.oracle.weblogic.azure</groupId>
+  <artifactId>wls-on-aks-azure-marketplace</artifactId>
+  <version>1.0.0</version>
 
-        <!-- `tracking.pid` is deprecated, use `template.pid.properties.url` & `template.microsoft.pid.properties.url` instead -->
-        <tracking.pid>pid-35859ecc-219b-4930-9431-38c95bb76cee</tracking.pid>
-        <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
-    </properties>
-	
-    <description>
-        
-    </description>
+  <parent>
+    <groupId>com.microsoft.azure.iaas</groupId>
+    <artifactId>azure-javaee-iaas-parent</artifactId>
+    <version>1.0.9</version>
+    <relativePath></relativePath>
+  </parent>
+
+  <packaging>jar</packaging>
+  <name>wls-on-aks-azure-marketplace</name>
+  <properties>
+    <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
+  </properties>
 </project>

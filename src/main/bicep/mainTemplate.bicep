@@ -4,8 +4,11 @@
 * aks is short for Azure Kubernetes Service
 *
 * Run the template:
-*   $ bicep build main.bicep
-*   $ az deployment group create -f main.json -g <rg-name>
+*   $ bicep build mainTemplate.bicep
+*   $ az deployment group create -f mainTemplate.json -g <rg-name>
+*
+* Build marketplace offer for test:
+*   $ mvn -Pbicep -Ddev -Passembly clean install
 */
 
 @description('true to use resource or workspace permissions. false to require workspace permissions.')
@@ -43,11 +46,30 @@ param enableAzureMonitoring bool = false
 
 param location string = 'eastus'
 
+var defaultPidDeploymentName = 'pid'
+
 /*
- * Deploy AKS cluster
+* Beginning of the offer deployment
+*/
+module pids './modules/pids/pid.bicep' = {
+  name: 'initialization'
+}
+
+/*
+* Deploy a pid to tract an offer deployment starts
+*/
+module pidStart './modules/pids/pid.bicep' = {
+  name: 'wls-aks-start-pid-deployment'
+  params:{
+    name: pids.outputs.wlsAKSStart == '' ? defaultPidDeploymentName: pids.outputs.wlsAKSStart
+  }
+}
+
+/*
+* Deploy AKS cluster
 */
 module AKSClusterDeployment './modules/aks.bicep' = if(createAKSCluster){
-  name: 'aksDeploy'
+  name: 'aks-cluster-deployment'
   params: {
     aciResourcePermissions: aciResourcePermissions
     aciRetentionInDays: aciRetentionInDays
@@ -60,6 +82,20 @@ module AKSClusterDeployment './modules/aks.bicep' = if(createAKSCluster){
     enableAzureMonitoring: enableAzureMonitoring
     location: location
   }
+}
+
+/*
+* Deploy a pid to tract an offer deployment ends
+* Make sure all the dependencies added to dependsOn
+*/
+module pidEnd './modules/pids/pid.bicep' = {
+  name: 'wls-aks-end-pid-deployment'
+  params:{
+    name: pids.outputs.wlsAKSEnd == '' ? defaultPidDeploymentName: pids.outputs.wlsAKSEnd
+  }
+  dependsOn:[
+    AKSClusterDeployment
+  ]
 }
 
 output aksClusterName string = AKSClusterDeployment.outputs.aksClusterName
