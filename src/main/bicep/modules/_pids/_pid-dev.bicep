@@ -1,9 +1,12 @@
+// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+// Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
 // Deployment for pids.
 
 param name string = 'pid'
 
 // create a pid deployment if there is a specified name
-module pidStart './empty.bicep' = if (name != 'pid'){
+module pidStart './_empty.bicep' = if (name != 'pid'){
   name: name
 }
 

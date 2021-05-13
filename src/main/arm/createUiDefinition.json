@@ -17,8 +17,16 @@
                         "toolTip": "Use only letters and numbers",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                            "validations": [
+                                {
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "message": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                {
+                                    "isValid": "[greaterOrEquals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                                    "message": "Please select at least one user assigned managed identity from User assigned managed identity control below."
+                                }
+                            ]
                         },
                         "visible": true
                     },
@@ -44,10 +52,10 @@
                         "name": "wdtRuntimePassword",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                            "password": "Password for model WDT runtime encrytion",
+                            "password": "Password for WebLogic Deploy Tooling runtime encrytion",
                             "confirmPassword": "Confirm password"
                         },
-                        "toolTip": "The Model WDT runtime encrytion secret.",
+                        "toolTip": "The model WebLogic Deploy Tooling runtime encrytion secret.",
                         "constraints": {
                             "required": true,
                             "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
@@ -100,11 +108,21 @@
                         "visible": true
                     },
                     {
+                        "name": "errInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": "[less(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                        "options": {
+                            "icon": "Error",
+                            "text": "Please select at least one user assigned managed identity.",
+                            "uri": "https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal"
+                        }
+                    },
+                    {
                         "name": "identity",
                         "type": "Microsoft.ManagedIdentity.IdentitySelector",
                         "label": "Managed Identity Configuration",
                         "toolTip": {
-                            "userAssignedIdentity": "Add user-assigned identities to enable the app deployment."
+                            "userAssignedIdentity": "Add user assigned identities to enable the WebLogic domain deployment."
                         },
                         "defaultValue": {
                             "systemAssignedIdentity": "Off"
@@ -145,13 +163,13 @@
                     {
                         "name": "managedServerPrefix",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Managed Server Prefix",
+                        "label": "Name prefix for Managed Server",
                         "toolTip": "The string to prepend to the name of the managed server.",
                         "defaultValue": "managed-server",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,20}$",
-                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
+                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
+                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and -."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
@@ -176,10 +194,68 @@
                         "defaultValue": "sample-domain1",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,20}$",
-                            "validationMessage": "The Domain UID must be between 3 and 20 characters long and contain letters, numbers only."
+                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
+                            "validationMessage": "The Domain UID must be between 3 and 20 characters long and contain letters, numbers and -."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsClusterSize",
+                        "type": "Microsoft.Common.Slider",
+                        "min": 5,
+                        "max": 1000,
+                        "label": "Cluster size",
+                        "defaultValue": 5,
+                        "showStepMarkers": false,
+                        "toolTip": "The maximum size of the WebLogic cluster.",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "howToReportIssues",
+                "type": "Microsoft.Common.Section",
+                "label": "Report issues, get help, and share feedback",
+                "elements": [
+                    {
+                        "name": "howToReportIssueText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
+                            "link": {
+                                "label": "Issue tracker",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues"
+                            }
+                        }
+                    },
+                    {
+                        "name": "howToJoinSlack",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you want to interact directly with the Oracle WebLogic community, join the public Slack channel named 'oracle-weblogic'.",
+                            "link": {
+                                "label": "Join Slack",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-slack"
+                            }
+                        }
+                    },
+                    {
+                        "name": "survey",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "To get free help with Azure migration from the development team, fill out this survey.",
+                            "link": {
+                                "label": "Take survey",
+                                "uri": "https://aka.ms/wls-on-azure-survey"
+                            }
+                        }
                     }
                 ],
                 "visible": true
@@ -281,13 +357,13 @@
                             {
                                 "name": "enableAzureMonitoring",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Create Azure file share service",
+                                "label": "Enable Azure Monitoring",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
                                 "name": "enableAzureFileShare",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Create Azure file share service",
+                                "label": "Create Persistent Volume using Azure File share service",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             }
                         ]
@@ -315,6 +391,16 @@
                                         }
                                     ],
                                     "required": true
+                                }
+                            },
+                            {
+                                "name": "acrInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[not(bool(steps('section_aks').acrInfo.createACR))]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Make sure the Azure Container Registry has enabled admin user.",
+                                    "uri": "https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account"
                                 }
                             },
                             {
@@ -404,7 +490,7 @@
                                     "required": true
                                 },
                                 "options": {
-                                    "multiple": false,
+                                    "multiple": true,
                                     "uploadMode": "url",
                                     "openMode": "binary"
                                 },
@@ -426,1476 +512,31 @@
                         "visible": true
                     }
                 ]
-            },
-            {
-                "name": "section_appGateway",
-                "type": "Microsoft.Common.Section",
-                "label": "Networking",
-                "subLabel": {
-                    "preValidation": "Provide required info for networking",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Networking",
-                "elements": [
-                    {
-                        "name": "connectToAGText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Load Balancer service or Ingress service for WebLogic Administration Console and WebLogic cluster.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
-                            }
-                        }
-                    },
-                    {
-                        "name": "lbSVCInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Standard Load Balancer service",
-                        "elements": [
-                            {
-                                "name": "lbSVC",
-                                "type": "Microsoft.Common.EditableGrid",
-                                "ariaLabel": "Enter information",
-                                "label": "Standard Load Balancer service",
-                                "constraints": {
-                                    "width": "Full",
-                                    "rows": {
-                                        "count": {
-                                            "min": 1,
-                                            "max": 10
-                                        }
-                                    },
-                                    "columns": [
-                                        {
-                                            "id": "colName",
-                                            "header": "Service Name",
-                                            "width": "1fr",
-                                            "element": {
-                                                "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "Full name",
-                                                "constraints": {
-                                                    "required": true,
-                                                    "validations": [
-                                                        {
-                                                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "id": "colGender",
-                                            "header": "Target",
-                                            "width": "1fr",
-                                            "element": {
-                                                "name": "dropDown1",
-                                                "type": "Microsoft.Common.DropDown",
-                                                "placeholder": "Select a target...",
-                                                "constraints": {
-                                                    "allowedValues": [
-                                                        {
-                                                            "label": "Admin Console",
-                                                            "value": "adConsole"
-                                                        },
-                                                        {
-                                                            "label": "cluster-1",
-                                                            "value": "cluster1"
-                                                        }
-                                                    ],
-                                                    "required": true
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "id": "colName",
-                                            "header": "Port",
-                                            "width": "1fr",
-                                            "element": {
-                                                "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "Full name",
-                                                "constraints": {
-                                                    "required": true,
-                                                    "validations": [
-                                                        {
-                                                            "regex": "^[0-9]{1,5}$",
-                                                            "message": "Only numbers are allowed, and the value must be 1-65535."
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "enableInternalLB",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Use Internal Load Balancer"
-                            }
-                        ],
-                        "visible": true
-                    },
-                    {
-                        "name": "ingressInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Ingress controller",
-                        "elements": [
-                            {
-                                "name": "ingressSVC",
-                                "type": "Microsoft.Common.EditableGrid",
-                                "ariaLabel": "Enter information",
-                                "label": "Ingresses",
-                                "constraints": {
-                                    "width": "Full",
-                                    "rows": {
-                                        "count": {
-                                            "min": 1,
-                                            "max": 10
-                                        }
-                                    },
-                                    "columns": [
-                                        {
-                                            "id": "colName",
-                                            "header": "Service Name",
-                                            "width": "1fr",
-                                            "element": {
-                                                "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "Full name",
-                                                "constraints": {
-                                                    "required": true,
-                                                    "validations": [
-                                                        {
-                                                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "id": "colGender",
-                                            "header": "Target",
-                                            "width": "1fr",
-                                            "element": {
-                                                "name": "dropDown1",
-                                                "type": "Microsoft.Common.DropDown",
-                                                "placeholder": "Select a target...",
-                                                "constraints": {
-                                                    "allowedValues": [
-                                                        {
-                                                            "label": "Admin Console",
-                                                            "value": "adConsole"
-                                                        },
-                                                        {
-                                                            "label": "cluster-1",
-                                                            "value": "cluster1"
-                                                        }
-                                                    ],
-                                                    "required": true
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "enableAppGateway",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "Eanble Azure Application Gateway?",
-                                "placeholder": "",
-                                "defaultValue": "No",
-                                "toolTip": "",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "keyVaultResourceGroup",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Resource group name in current subscription containing the Key Vault",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_appGateway').ingressInfo.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                                },
-                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
-                            },
-                            {
-                                "name": "keyVaultName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Name of the Azure Key Vault containing secrets for the certificate for TLS/SSL Termination",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
-                                    "validationMessage": "[if(or(greater(length(steps('section_appGateway').keyVaultName), 24), less(length(steps('section_appGateway').keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
-                                },
-                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
-                            },
-                            {
-                                "name": "keyVaultSSLCertDataSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the TLS/SSL certificate data",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
-                            },
-                            {
-                                "name": "keyVaultSSLCertPasswordSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the password for the TLS/SSL certificate",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                "visible": "[bool(steps('section_appGateway').ingressInfo.enableAppGateway)]"
-                            }
-                        ],
-                        "visible": true
-                    }
-                ]
-            },
-            {
-                "name": "section_autoScaling",
-                "type": "Microsoft.Common.Section",
-                "label": "Autoscaling",
-                "elements": [
-                    {
-                        "name": "enableAutoScalingText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Prometheus and Grafana with scaling rules to enable horizontal pod auto-scaling.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/wls-aks-autoscaling"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableautoScaling",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Enable auto scaling?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Prometheus and Grafana.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "autoScalingInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Prometheus and Grafana settings",
-                        "elements": [
-                            {
-                                "name": "wlsPrometheusRulesInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "Prometheus rules allow you to define alert conditions based on Prometheus expression language expressions and to send notifications about firing alerts to the scaling service.",
-                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/"
-                                }
-                            },
-                            {
-                                "name": "wlsPrometheusRules",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Prometheus rules for WebLogic cluster scaling",
-                                "multiLine": true,
-                                "placeholder": "",
-                                "defaultValue": "- record: webapp:webapp_config_open_sessions_current_count:avg\n   expr: avg(webapp_config_open_sessions_current_count{webapp=\"myapp2\"})\n- alert: scaleup\n   for: 1m\n  expr: webapp:webapp_config_open_sessions_current_count:avg > 10\n  annotations:\n  description: 'Scale up when current sessions is greater than 15.'\n  summary: 'Firing when total sessions active greater than 15.'\n- alert: scaledown\n   for: 1m\n   expr: webapp:webapp_config_open_sessions_current_count:avg < 4\n   annotations:\n   description: 'Scale down when current sessions is less than 4.'\n   summary: 'Firing when total sessions active less than 4'",
-                                "toolTip": "Define the scaling up and scaling down rules.",
-                                "constraints": {
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "alertNameForScaleUp",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Alert name for scaling up",
-                                "placeholder": "",
-                                "defaultValue": "scaleup",
-                                "toolTip": "Use only allowed characters",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "alertNameForScaleDown",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Alert name for scaling down",
-                                "placeholder": "",
-                                "defaultValue": "scaledown",
-                                "toolTip": "Use only allowed characters",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "grafanaDashboards",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Grafana dashboards (.json)",
-                                "toolTip": "",
-                                "constraints": {
-                                    "required": false,
-                                    "accept": ".json"
-                                },
-                                "options": {
-                                    "multiple": true,
-                                    "uploadMode": "file",
-                                    "openMode": "text",
-                                    "encoding": "UTF-8"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "prometheusAdditionalScrapeConfigsInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "The additional scrape configs specify a set of targets and parameters describing how to scrape them.\nThis application provides default scrape configs to scrape all managed ports of in the created WebLogic domain.",
-                                    "uri": "https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config"
-                                }
-                            },
-                            {
-                                "name": "prometheusAdditionalScrapeConfigs",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Prometheus additional scrape configs (.yaml)",
-                                "toolTip": "",
-                                "constraints": {
-                                    "accept": ".yaml"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "text",
-                                    "encoding": "UTF-8"
-                                },
-                                "visible": true
-                            }
-                        ],
-                        "visible": "[bool(steps('section_autoScaling').enableautoScaling)]"
-                    }
-                ]
-            },
-            {
-                "name": "section_sslConfiguration",
-                "type": "Microsoft.Common.Section",
-                "label": "TLS/SSL Configuration",
-                "elements": [
-                    {
-                        "name": "sslConfigurationText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableCustomSSL",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own SSL Certificate.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "sslConfigurationAccessOption",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
-                        "label": "How would you like to provide required configuration",
-                        "defaultValue": "Upload existing KeyStores",
-                        "toolTip": "Select 'Upload existing KeyStores' to use local stored KeyStores.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Upload existing KeyStores",
-                                    "value": "uploadConfig"
-                                },
-                                {
-                                    "label": "Use KeyStores stored in Azure Key Vault",
-                                    "value": "keyVaultStoredConfig"
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "uploadedCustomSSLSettings",
-                        "type": "Microsoft.Common.Section",
-                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
-                        "label": "TLS/SSL Configuration Settings",
-                        "elements": [
-                            {
-                                "name": "sslKeystoreInfo0",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "true",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
-                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
-                                }
-                            },
-                            {
-                                "name": "uploadedCustomIdentityKeyStoreData",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Identity KeyStore Data file(.jks,.p12)",
-                                "toolTip": "Identity KeyStore for TLS/SSL configuration",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".jks,.p12"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomIdentityKeyStorePassphrase",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": " The passphrase for the Identity KeyStore",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^.{6,}$",
-                                    "validationMessage": "Keypass must be at least 6 characters long."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomIdentityKeyStoreType",
-                                "type": "Microsoft.Common.DropDown",
-                                "visible": "true",
-                                "label": "The Identity KeyStore type (JKS,PKCS12)",
-                                "defaultValue": "JKS",
-                                "toolTip": "One of the supported KeyStore types",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "JKS",
-                                            "value": "JKS"
-                                        },
-                                        {
-                                            "label": "PKCS12",
-                                            "value": "PKCS12"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "uploadedPrivateKeyAlias",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The alias of the server's private key within the Identity KeyStore",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "uploadedPrivateKeyPassPhrase",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "visible": "true",
-                                "label": {
-                                    "password": "The passphrase for the server's private key within the Identity KeyStore",
-                                    "confirmPassword": "Confirm passphrase"
-                                },
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^.{6,}$",
-                                    "validationMessage": "Keypass must be at least 6 characters long."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                }
-                            },
-                            {
-                                "name": "uploadedCustomTrustKeyStoreData",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Trust KeyStore Data file(.jks,.p12)",
-                                "toolTip": "Trust KeyStore for TLS/SSL configuration.",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".jks,.p12"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomTrustKeyStorePassPhrase",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": " The passphrase for the Trust KeyStore",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^.{6,}$",
-                                    "validationMessage": "Keypass must be at least 6 characters long."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomTrustKeyStoreType",
-                                "type": "Microsoft.Common.DropDown",
-                                "visible": "true",
-                                "label": "The Trust KeyStore type (JKS,PKCS12)",
-                                "defaultValue": "JKS",
-                                "toolTip": "One of the supported KeyStore types",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "JKS",
-                                            "value": "JKS"
-                                        },
-                                        {
-                                            "label": "PKCS12",
-                                            "value": "PKCS12"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "name": "keyVaultStoredCustomSSLSettings",
-                        "type": "Microsoft.Common.Section",
-                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
-                        "label": "TLS/SSL Configuration Settings",
-                        "elements": [
-                            {
-                                "name": "sslKeystoreInfo1",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "true",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
-                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
-                                }
-                            },
-                            {
-                                "name": "keyVaultText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "true",
-                                "options": {
-                                    "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL Certificate. The template will look for the certificate and other configuration items in the Azure Key Vault specified here.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "adminSSLKeyVaultResourceGroup",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "Resource group name in current subscription containing the Key Vault",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.adminSSLKeyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                                }
-                            },
-                            {
-                                "name": "adminSSLKeyVaultName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "Name of the Azure Key Vault containing secrets for the TLS/SSL Certificate",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
-                                    "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.adminSSLKeyVaultName), 24), less(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.adminSSLKeyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
-                                }
-                            },
-                            {
-                                "name": "keyVaultCustomIdentityKeyStoreDataSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The name of the secret in the specified Key Vault whose value is the Identity KeyStore Data",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "keyVaultCustomIdentityKeyStorePassPhraseSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The name of the secret in the specified Key Vault whose value is the passphrase for the Identity KeyStore",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "keyVaultCustomIdentityKeyStoreType",
-                                "type": "Microsoft.Common.DropDown",
-                                "visible": "true",
-                                "label": "The Identity KeyStore type (JKS,PKCS12)",
-                                "defaultValue": "JKS",
-                                "toolTip": "One of the supported KeyStore types",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "JKS",
-                                            "value": "JKS"
-                                        },
-                                        {
-                                            "label": "PKCS12",
-                                            "value": "PKCS12"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "keyVaultPrivateKeyAliasSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The name of the secret in the specified Key Vault whose value is the Private Key Alias",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "keyVaultPrivateKeyPassPhraseSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The name of the secret in the specified Key Vault whose value is the passphrase for the Private Key",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "keyVaultCustomTrustKeyStoreDataSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The name of the secret in the specified Key Vault whose value is the Trust KeyStore Data",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "keyVaultCustomTrustKeyStorePassPhraseSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The name of the secret in the specified Key Vault whose value is the passphrase for the Trust KeyStore",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "keyVaultCustomTrustKeyStoreType",
-                                "type": "Microsoft.Common.DropDown",
-                                "visible": "true",
-                                "label": "The Trust KeyStore type (JKS,PKCS12)",
-                                "defaultValue": "JKS",
-                                "toolTip": "One of the supported KeyStore types",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "JKS",
-                                            "value": "JKS"
-                                        },
-                                        {
-                                            "label": "PKCS12",
-                                            "value": "PKCS12"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "name": "section_dnsConfiguration",
-                "type": "Microsoft.Common.Section",
-                "label": "DNS Configuration",
-                "elements": [
-                    {
-                        "name": "dnsConfigurationText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console and Application Gateway using a custom DNS Name (for example: applications.contoso.com)",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableCustomDNS",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "visible": true,
-                        "label": "Configure Custom DNS Alias?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "customDNSSettings",
-                        "type": "Microsoft.Common.Section",
-                        "label": "DNS Configuration Settings",
-                        "visible": "[bool(steps('section_dnsConfiguration').enableCustomDNS)]",
-                        "elements": [
-                            {
-                                "name": "bringDNSZone",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use an existing Azure DNS Zone",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "createDNSZoneText",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[not(bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone))]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You must perform DNS Domain Delegation at your DNS Registry after deployment.",
-                                    "uri": "https://aka.ms/dns-domain-delegation"
-                                }
-                            },
-                            {
-                                "name": "deplymentScriptInfo",
-                                "type": "Microsoft.Common.TextBlock",
-                                "options": {
-                                    "text": "If you choose to use an existing Azure DNS Zone, you must select a user-assigned managed identity to enable the necessary configuration."
-                                },
-                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
-                            },
-                            {
-                                "name": "dnszoneName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DNS Zone Name",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers and periods to separate Domains",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
-                                    "validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                }
-                            },
-                            {
-                                "name": "dnsZoneResourceGroup",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Name of the resource group contains the DNS Zone in current subscription",
-                                "defaultValue": "",
-                                "toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').existingDNSZonesSettings.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                                },
-                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
-                            },
-                            {
-                                "name": "dnszoneAdminConsoleLabel",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Label for Oracle WebLogic Administration Console",
-                                "defaultValue": "admin",
-                                "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
-                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                        },
-                                        {
-                                            "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
-                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "dnszoneGatewayLabel",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Label for Application Gateway",
-                                "defaultValue": "www",
-                                "toolTip": "Specify a label to generate subdomain of Application Gateway",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
-                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                        },
-                                        {
-                                            "isValid": "[less(sub(length(concat(if(empty(steps('section_dnsConfiguration').customDNSSettings.dnszoneGatewayLabel), '', steps('section_dnsConfiguration').customDNSSettings.dnszoneGatewayLabel),'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(if(empty(steps('section_dnsConfiguration').customDNSSettings.dnszoneGatewayLabel), '', steps('section_dnsConfiguration').customDNSSettings.dnszoneGatewayLabel),'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
-                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
-                                        }
-                                    ]
-                                },
-                                "visible": "[and(bool(steps('section_appGateway').enableAppGateway), bool(steps('section_dnsConfiguration').enableCustomDNS))]"
-                            },
-                            {
-                                "name": "reuseIdentity",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use the Managed Identity seleted previousely?",
-                                "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to reuse the Managed Identity seleted previousely, 'No' to input a new identity.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
-                                },
-                                "visible": "[and(greater(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities),0), bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone))]"
-                            },
-                            {
-                                "name": "infoDNSIndentity",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone), less(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities),1), less(length(steps('section_dnsConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user-assigned identity to access Azure resources.",
-                                    "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
-                                }
-                            },
-                            {
-                                "name": "dnsIdentity",
-                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                                "label": "Managed Identity Configuration",
-                                "toolTip": {
-                                    "userAssignedIdentity": "Add user-assigned identities to grant the resource access to Azure resources."
-                                },
-                                "defaultValue": {
-                                    "systemAssignedIdentity": "Off"
-                                },
-                                "options": {
-                                    "hideSystemAssignedIdentity": true,
-                                    "hideUserAssignedIdentity": false
-                                },
-                                "visible": "[if(greater(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities),0),and(equals(steps('section_dnsConfiguration').customDNSSettings.reuseIdentity, false), bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone)), bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone))]"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "name": "section_database",
-                "type": "Microsoft.Common.Section",
-                "label": "Database",
-                "subLabel": {
-                    "preValidation": "Configure integrations to database",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Database",
-                "elements": [
-                    {
-                        "name": "aboutDatabase",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the template."
-                        }
-                    },
-                    {
-                        "name": "enableDB",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Connect to database?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "databaseConnectionInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Connection settings",
-                        "elements": [
-                            {
-                                "name": "databaseType",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "Choose database type",
-                                "toolTip": "Choose database type",
-                                "defaultValue": "Oracle database",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Azure database for PostgreSQL",
-                                            "value": "postgresql"
-                                        },
-                                        {
-                                            "label": "Oracle database",
-                                            "value": "oracle"
-                                        },
-                                        {
-                                            "label": "Azure SQL",
-                                            "value": "sqlserver"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "jdbcDataSourceName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "JNDI Name",
-                                "toolTip": "The JNDI name for the database JDBC connection",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^[a-z0-9A-Z/]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "dsConnectionURL",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DataSource Connection String",
-                                "toolTip": "The JDBC connection string for the database",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "dbUser",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Database username",
-                                "toolTip": "Use only letters and numbers",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
-                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "dbPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Database Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Database Password",
-                                "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
-                                    "validationMessage": "The password must be between five and 128 characters long and have at least one number."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": true
-                            }
-                        ],
-                        "visible": "[bool(steps('section_database').enableDB)]"
-                    }
-                ]
-            },
-            {
-                "name": "section_aad",
-                "label": "Azure Active Directory",
-                "subLabel": {
-                    "preValidation": "Configure the connection to Azure Active Directory.",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Azure Active Directory",
-                "elements": [
-                    {
-                        "name": "aboutAad",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "icon": "None",
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the connection to Azure Active Directory.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-aad-ldap"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableAAD",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Connect to Azure Active Directory?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Azure Active Directory.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "aadInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Connection settings",
-                        "elements": [
-                            {
-                                "name": "aadsServerHost",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Server Host",
-                                "toolTip": "The LDAP server host.",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]",
-                                    "validationMessage": "The value must be a valid host name."
-                                }
-                            },
-                            {
-                                "name": "aadsPublicIP",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Secure LDAP external IP address",
-                                "toolTip": "Secure LDAP external IP address.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b",
-                                    "validationMessage": "The value must be a valid IP address."
-                                }
-                            },
-                            {
-                                "name": "aadsPortNumber",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Port",
-                                "toolTip": "The port number of LDAP Server, default is 636.",
-                                "defaultValue": "636",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[0-9]+$",
-                                    "validationMessage": "The value must be numbers."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPProviderName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Provider Name",
-                                "defaultValue": "AzureActiveDirectoryProvider",
-                                "toolTip": "The value used for creating authentication provider name of WebLogic Server.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{3,50}$",
-                                    "validationMessage": "The Provider Name must be between 3 and 50 characters long and contain letters, numbers only."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPPrincipal",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Principal",
-                                "toolTip": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
-                                    "validationMessage": "The value must be valid LDAP user distinguished name."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPPrincipalPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password for Principal",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
-                                "constraints": {
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPUserBaseDN",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "User Base DN",
-                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains users.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
-                                    "validationMessage": "The value must be valid LDAP user based distinguished name."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPGroupBaseDN",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Group Base DN",
-                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
-                                    "validationMessage": "The value must be valid LDAP group based distinguished name."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPSSLCertificate",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Client certificate for TLS/SSL Configuration (.cer)",
-                                "toolTip": "Client certificate of AAD LADP server, used to configure the Trust Keystore to enable TLS/SSL in Oracle WebLogic Server.",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".cer"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                }
-                            }
-                        ],
-                        "visible": "[bool(steps('section_aad').enableAAD)]"
-                    }
-                ]
-            },
-            {
-                "name": "section_elk",
-                "label": "Elasticsearch and Kibana",
-                "subLabel": {
-                    "preValidation": "Configure the connection to Elasticsearch and Kibana to store WLS logs.",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Elasticsearch and Kibana",
-                "elements": [
-                    {
-                        "name": "aboutelk",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "icon": "None",
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure Elasticsearch and Kibana to store WLS logs.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-elk-tutorial"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableELK",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Export logs to Elasticsearch?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Elasticsearch.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "elkInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Connection settings",
-                        "elements": [
-                            {
-                                "name": "elkMemoryRequiredText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "icon": "None",
-                                    "text": "To ensure Logstash works correctly, the selected Virtual Machines have at least 2.5GB memory.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-elk"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "elkMemoryRequired",
-                                "type": "Microsoft.Common.InfoBox",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "Your selected Virtual Machines have less than 2.5GB memory to set up Elasticsearch and Kibana, please go to Basics -> Virtual machine size to change it, recommended size is Standard_A2_v2."
-                                },
-                                "visible": "[and(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')),bool(steps('section_elk').enableELK))]"
-                            },
-                            {
-                                "name": "elasticsearchEndpoint",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Elasticsearch endpoint URL",
-                                "toolTip": "Elasticsearch endpoint.",
-                                "defaultValue": "https://example.location.azure.elastic-cloud.com:9243",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*):[0-9]{1,6}$",
-                                            "message": "The value must be a valid endpoint."
-                                        },
-                                        {
-                                            "isValid": "[not(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')))]",
-                                            "message": "Your selected Virtual Machines have less than 2.5GB memory to set up Elasticsearch and Kibana, please go to Basics -> Virtual machine size to change it, recommended size is Standard_A2_v2."
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "elasticsearchUserName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Elasticsearch User Name",
-                                "defaultValue": "elastic",
-                                "toolTip": "User name of Elasticsearch account.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
-                                    "validationMessage": "The value must be valid Elasticsearch user name."
-                                }
-                            },
-                            {
-                                "name": "elasticsearchPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password for Elasticsearch account",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Password for Elasticsearch account.",
-                                "constraints": {
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "domainLogsToIntegrate",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "WebLogic Domain logs to export",
-                                "toolTip": "The logs selected will be exported to the Elasticsearch server.",
-                                "defaultValue": [
-                                    "Server Log"
-                                ],
-                                "multiselect": true,
-                                "selectAll": true,
-                                "multiLine": true,
-                                "defaultDescription": "The logs selected will be exported to Elasticsearch",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Data Source Log",
-                                            "description": "Export Datasource logs to Elasticsearch.",
-                                            "value": "DataSourceLog"
-                                        },
-                                        {
-                                            "label": "Domain Log",
-                                            "description": "Export Domain logs to Elasticsearch.",
-                                            "value": "DomainLog"
-                                        },
-                                        {
-                                            "label": "HTTP Access Log",
-                                            "description": "Export HTTP logs to Elasticsearch.",
-                                            "value": "HTTPAccessLog"
-                                        },
-                                        {
-                                            "label": "Node Manager Logs",
-                                            "description": "Export Node Manager logs to Elasticsearch.",
-                                            "value": "NodeManagerLog"
-                                        },
-                                        {
-                                            "label": "Server Log",
-                                            "description": "Export Server logs to Elasticsearch.",
-                                            "value": "ServerLog"
-                                        },
-                                        {
-                                            "label": "Standard error and output",
-                                            "description": "Export standard error and output to Elasticsearch.",
-                                            "value": "StandardErrorAndOutput"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "operatorLog",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "WebLogic Operator logs"
-                            }
-                        ],
-                        "visible": "[bool(steps('section_elk').enableELK)]"
-                    }
-                ]
             }
         ],
         "outputs": {
             "acrName": "[last(split(steps('section_aks').acrInfo.acrSelector.id, '/'))]",
-            "alertNameForScaleDown": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleDown]",
-            "alertNameForScaleUp": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleUp]",
+            "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
-            "appPackageUrl": "[steps('section_application').appPackageInfo.appPackageUrl]",
-            "appReplicas": "[int(steps('section_application').appReplicas)]",
-            "contextRoot": "[steps('section_application').appPackageInfo.contextRoot]",
-            "createACR": "[bool(steps('section_aks').createACR)]",
-            "createAKSCluster": "[bool(steps('section_aks').createAKSCluster)]",
-            "enableautoScaling": "[bool(steps('section_autoScaling').enableautoScaling)]",
-            "fromImage": "[bool(steps('section_application').fromImage)]",
-            "grafanaDashboards": "[steps('section_autoScaling').autoScalingInfo.alertNameForScaleDown]",
+            "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
+            "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
+            "createACR": "[bool(steps('section_aks').acrInfo.createACR)]",
+            "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+            "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
+            "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
             "identity": "[basics('basicsRequired').identity]",
             "location": "[location()]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
-            "uploadAppPackage": "[bool(steps('section_application').uploadAppPackage)]",
-            "prometheusAdditionalScrapeConfigs": "[steps('section_autoScaling').autoScalingInfo.prometheusAdditionalScrapeConfigs]",
+            "ocrSSOPSW": "[basics('basicsRequired').ocrSSOPassword]",
+            "ocrSSOUser": "[basics('basicsRequired').ocrSSOUserName]",
+            "uploadAppPackage": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
+            "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
             "wlsDomainUID": "[basics('basicsOptional').wlsDomainUID]",
+            "wlsImageTag": "[steps('section_aks').imageInfo.fromImage]",
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
-            "wlsPrometheusRules": "[steps('section_autoScaling').autoScalingInfo.wlsPrometheusRules]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]"
         }
     }

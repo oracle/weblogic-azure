@@ -1,23 +1,24 @@
 // Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-/* 
-* Terms:
-* aci is short for Azure Container Insight
-* aks is short for Azure Kubernetes Service
-* acr is short for Azure Container Registry
-*
-* Run the template:
-*   $ bicep build mainTemplate.bicep
-*   $ az deployment group create -f mainTemplate.json -g <rg-name>
-*
-* Build marketplace offer for test:
-*   $ mvn -Pbicep -Ddev -Passembly clean install
+/*
+* The script is to create a simple WLS cluster, including:
+* Create Azure resources:
+*  - Azure Kubenetes Cluster Service instance
+*  - Azure Container Registry instance
+*  - Azure Storage Account and file share
+*  - Azure Container Insight
+* Initialize WebLogic cluster:
+*  - Build WebLogic domain image and push to ACR.
+*  - Install WebLogic Operator
+*  - Create WebLogic cluster and make sure the servers are running
 */
 
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
+param _pidEnd string
+param _pidStart string
 @description('true to use resource or workspace permissions. false to require workspace permissions.')
 param aciResourcePermissions bool = true
 @description('Number of days to retain data in Azure Monitor workspace.')
@@ -87,47 +88,81 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
-var name_defaultPidDeployment = 'pid'
-
 /*
-* Beginning of the offer deployment
+* Deploy a pid to tract an offer deployment starts
 */
-module pids './modules/_pids/_pid.bicep' = {
-  name: 'initialization'
+module pidStart './_pids/_pid.bicep'= {
+  name: 'wls-aks-start-pid-deployment'
+  params: {
+    name: _pidStart
+  }
 }
 
-module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = {
-  name: 'setup-wls-cluster'
+/*
+* Deploy AKS cluster
+*/
+module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSCluster) {
+  name: 'aks-cluster-deployment'
   params: {
-    _artifactsLocation: _artifactsLocation
-    _artifactsLocationSasToken: _artifactsLocationSasToken
-    _pidEnd: pids.outputs.wlsAKSEnd == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSEnd
-    _pidStart: pids.outputs.wlsAKSStart == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSStart
     aciResourcePermissions: aciResourcePermissions
     aciRetentionInDays: aciRetentionInDays
     aciWorkspaceSku: aciWorkspaceSku
-    acrName: acrName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolVMSize: aksAgentPoolVMSize
     aksClusterNamePrefix: aksClusterNamePrefix
-    aksClusterRGName: aksClusterRGName
-    aksClusterName: aksClusterName
     aksVersion: aksVersion
+    enableAzureMonitoring: enableAzureMonitoring
+    location: location
+  }
+  dependsOn: [
+    pidStart
+  ]
+}
+
+/*
+* Deploy ACR
+*/
+module acrDeployment './_azure-resoruces/_acr.bicep' = if (createACR) {
+  name: 'acr-deployment'
+  params: {
+    location: location
+  }
+  dependsOn: [
+    pidStart
+  ]
+}
+
+module storageDeployment './_azure-resoruces/_storage.bicep' = if (enableAzureFileShare) {
+  name: 'storage-deployment'
+  params: {
+    location: location
+  }
+  dependsOn: [
+    pidStart
+  ]
+}
+
+/*
+* Deploy WLS domain
+*/
+module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' = {
+  name: 'wls-domain-deployment'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
+    aksClusterName: createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
+    acrName: createACR ? acrDeployment.outputs.acrName : acrName
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
-    createACR: createACR
-    createAKSCluster: createAKSCluster
-    enableAzureMonitoring: enableAzureMonitoring
-    enableAzureFileShare: enableAzureFileShare
     identity: identity
     location: location
     managedServerPrefix: managedServerPrefix
-    ocrSSOPSW: ocrSSOPSW
+    storageAccountName: enableAzureFileShare ? storageDeployment.outputs.storageAccountName : 'null'
     ocrSSOUser: ocrSSOUser
-    uploadAppPackage: uploadAppPackage
+    ocrSSOPSW: ocrSSOPSW
     wdtRuntimePassword: wdtRuntimePassword
-    wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
@@ -136,8 +171,27 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = {
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
   }
+  dependsOn: [
+    aksClusterDeployment
+    acrDeployment
+    storageDeployment
+  ]
 }
 
-output aksClusterName string = wlsDomainDeployment.outputs.aksClusterName
-output adminServerUrl string = wlsDomainDeployment.outputs.adminServerUrl
-output clusterSVCUrl string = wlsDomainDeployment.outputs.clusterSVCUrl
+/*
+* Deploy a pid to tract an offer deployment ends
+* Make sure all the dependencies added to dependsOn array
+*/
+module pidEnd './_pids/_pid.bicep' = {
+  name: 'wls-aks-end-pid-deployment'
+  params: {
+    name: _pidEnd
+  }
+  dependsOn: [
+    wlsDomainDeployment
+  ]
+}
+
+output aksClusterName string = createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
+output adminServerUrl string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console',wlsDomainUID)
+output clusterSVCUrl string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)

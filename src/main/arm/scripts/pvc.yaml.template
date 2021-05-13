@@ -1,0 +1,18 @@
+# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
+# Based on ./kubernetes/samples/scripts/create-weblogic-domain-on-azure-kubernetes-service/azure-file-pvc-template.yaml
+# in https://github.com/oracle/weblogic-kubernetes-operator.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: @PVC_NAME@
+  namespace: @NAMESPACE@
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 5Gi
