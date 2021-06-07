@@ -1,6 +1,8 @@
 # Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+echo "Script  ${0} starts"
+
 #Function to output message to StdErr
 function echo_stderr() {
     echo "$@" >&2

@@ -12,3 +12,7 @@ module pidStart './_empty.bicep' = if (name != 'pid'){
 
 output wlsAKSEnd string = '17328b4d-841f-57b5-a9c5-861ad48f9d0d'
 output wlsAKSStart string = 'c46a11b1-e8d2-5053-9741-45294b2e15c9'
+output networkingEnd string = '39d32fcd-1d02-50b6-9455-4b767a8e769e'
+output networkingStart string = 'ed47756f-2475-56dd-b13a-26027749b6e1'
+output appgwEnd string = '38647ff6-ea8d-59e5-832d-b036a4d29c73'
+output appgwStart string = '8ba7beaa-96fd-576a-acd8-28f7a6efa83a'

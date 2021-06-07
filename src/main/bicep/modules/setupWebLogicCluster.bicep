@@ -193,5 +193,6 @@ module pidEnd './_pids/_pid.bicep' = {
 }
 
 output aksClusterName string = createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
+output aksClusterRGName string = createAKSCluster ? resourceGroup().name : aksClusterRGName
 output adminServerUrl string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console',wlsDomainUID)
 output clusterSVCUrl string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)

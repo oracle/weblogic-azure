@@ -1,7 +1,7 @@
 # Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-echo "Script starts"
+echo "Script ${0} starts"
 
 #Function to output message to stdout
 function echo_stderr() {
@@ -149,13 +149,12 @@ function install_utilities() {
     helmLatestVersion=${browserURL#*download\/}
     helmLatestVersion=${helmLatestVersion%%\/helm*}
     helmPackageName=helm-${helmLatestVersion}-linux-amd64.tar.gz
-    curl -LO -s https://get.helm.sh/${helmPackageName}
-    tar -zxvf ${helmPackageName}
-    chmod +x linux-amd64/helm
-    mv linux-amd64/helm /usr/local/bin/helm
+    curl -m 120 -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
+    tar -zxvf /tmp/${helmPackageName} -C /tmp
+    mv /tmp/linux-amd64/helm /usr/local/bin/helm
     echo "helm version"
-    ret=$(helm version)
-    validate_status ${ret}
+    helm version
+    validate_status "Finished installing helm."
 
     echo "az cli version"
     ret=$(az --version)
@@ -218,7 +217,7 @@ function query_acr_credentials() {
 #    * push the image to ACR
 function build_docker_image() {
     # Create vm to build docker image
-    vmName="VM-UBUNTU"
+    vmName="VM-UBUNTU-WLS-AKS-$(date +%s)"
 
     # MICROSOFT_INTERNAL
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'

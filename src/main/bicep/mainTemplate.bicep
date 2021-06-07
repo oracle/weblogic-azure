@@ -24,7 +24,7 @@ param aciResourcePermissions bool = true
 param aciRetentionInDays int = 120
 @description('Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.')
 param aciWorkspaceSku string = 'pergb2018'
-param acrName string = ''
+param acrName string = 'acr-contoso'
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
@@ -38,11 +38,27 @@ param aksAgentPoolVMSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
 param aksClusterNamePrefix string = 'wlsonaks'
 @description('Resource group name of an existing AKS cluster.')
-param aksClusterRGName string = ''
+param aksClusterRGName string = 'aks-contoso-rg'
 @description('Name of an existing AKS cluster.')
-param aksClusterName string = ''
+param aksClusterName string = 'aks-contoso'
 @description('The AKS version.')
 param aksVersion string = 'default'
+@allowed([
+  'haveCert'
+  'haveKeyVault'
+  'generateCert'
+])
+@description('Three scenarios we support for deploying app gateway')
+param appGatewayCertificateOption string = 'haveCert'
+@description('Public IP Name for the Application Gateway')
+param appGatewayPublicIPAddressName string = 'gwip'
+@description('The one-line, base64 string of the SSL certificate data.')
+param appGatewaySSLCertData string = 'appgw-ssl-data'
+@secure()
+@description('The value of the password for the SSL Certificate')
+param appGatewaySSLCertPassword string = newGuid()
+@description('Create Application Gateway ingress for admin console.')
+param appgwForAdminServer bool = true
 @description('Urls of Java EE application packages.')
 param appPackageUrls array = []
 @description('The number of managed server to start.')
@@ -51,13 +67,38 @@ param appReplicas int = 2
 param createACR bool = false
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
+@description('If true, the template will update records to the existing DNS Zone. If false, the template will create a new DNS Zone.')
+param createDNSZone bool = false
+@description('DNS prefix for ApplicationGateway')
+param dnsNameforApplicationGateway string = 'wlsgw'
+@description('Azure DNS Zone name.')
+param dnszoneAdminConsoleLabel string = 'admin'
+@description('Specify a label used to generate subdomain of Application Gateway. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
+param dnszoneAppGatewayLabel string = 'www'
+param dnszoneName string = 'contoso.xyz'
+param dnszoneRGName string = 'dns-contoso-rg'
+@description('true to set up Application Gateway ingress.')
+param enableAppGWIngress bool = false
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
 param enableAzureFileShare bool = false
+param enableDNSConfiguration bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
+@description('Existing Key Vault Name')
+param keyVaultName string = 'kv-contoso'
+@description('Resource group name in current subscription containing the KeyVault')
+param keyVaultResourceGroup string = 'kv-contoso-rg'
+@description('Price tier for Key Vault.')
+param keyVaultSku string = 'Standard'
+@description('The name of the secret in the specified KeyVault whose value is the SSL Certificate Data')
+param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
+@description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate')
+param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
 param location string = 'eastus'
+@description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
+param lbSvcValues array = []
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
 @secure()
@@ -65,8 +106,12 @@ param managedServerPrefix string = 'managed-server'
 param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
+@secure()
+@description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth | base64 -w0')
+param servicePrincipal string = newGuid()
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
 param uploadAppPackage bool = false
+param utcValue string = utcNow()
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -87,8 +132,13 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
+var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
+var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
+var const_azureSubjectName = '${format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, '.cloudapp.azure.com')}'
 var name_defaultPidDeployment = 'pid'
-
+var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
+var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(resourceGroup().name), '-', toLower(wlsDomainName)), 63)}'
+var name_keyVaultName = '${take(concat('wls-kv', uniqueString(utcValue)), 24)}'
 /*
 * Beginning of the offer deployment
 */
@@ -138,6 +188,61 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = {
   }
 }
 
+module keyvaultDeployment 'modules/_azure-resoruces/_keyvaultAdapter.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+  name: 'keyvault-deployment'
+  params: {
+    certificateDataValue: appGatewaySSLCertData
+    certificatePasswordValue: appGatewaySSLCertPassword
+    identity: identity
+    sku: keyVaultSku
+    subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
+    useExistingAppGatewaySSLCertificate: (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
+    keyVaultName: name_keyVaultName
+  }
+  dependsOn: [
+    wlsDomainDeployment
+  ]
+}
+
+module networkingDeployment 'modules/networking.bicep' = {
+  name: 'networking-deployment'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    _pidNetworkingEnd: pids.outputs.networkingEnd == '' ? name_defaultPidDeployment : pids.outputs.networkingEnd
+    _pidNetworkingStart: pids.outputs.networkingStart == '' ? name_defaultPidDeployment : pids.outputs.networkingStart
+    _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
+    _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
+    aksClusterRGName: wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: wlsDomainDeployment.outputs.aksClusterName
+    appGatewayCertificateOption: appGatewayCertificateOption
+    appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
+    appgwForAdminServer: appgwForAdminServer
+    createDNSZone: createDNSZone
+    dnsNameforApplicationGateway: dnsNameforApplicationGateway
+    dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
+    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneName: dnszoneName
+    dnszoneRGName: dnszoneRGName
+    enableAppGWIngress: enableAppGWIngress
+    enableDNSConfiguration: enableDNSConfiguration
+    identity: identity
+    keyVaultName: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultName : keyvaultDeployment.outputs.keyVaultName
+    keyVaultResourceGroup: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultResourceGroup : resourceGroup().name
+    keyVaultSSLCertDataSecretName: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : keyvaultDeployment.outputs.sslCertDataSecretName
+    keyVaultSSLCertPasswordSecretName: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : keyvaultDeployment.outputs.sslCertPwdSecretName
+    location: location
+    lbSvcValues: lbSvcValues
+    servicePrincipal: servicePrincipal
+    wlsDomainName: wlsDomainName
+    wlsDomainUID: wlsDomainUID
+  }
+}
+
 output aksClusterName string = wlsDomainDeployment.outputs.aksClusterName
-output adminServerUrl string = wlsDomainDeployment.outputs.adminServerUrl
-output clusterSVCUrl string = wlsDomainDeployment.outputs.clusterSVCUrl
+output adminConsoleInternalUrl string = wlsDomainDeployment.outputs.adminServerUrl
+output adminConsoleExternalUrl string = networkingDeployment.outputs.adminConsoleExternalUrl
+output adminConsoleExternalSecuredUrl string = networkingDeployment.outputs.adminConsoleExternalSecuredUrl
+output clusterInternalUrl string = wlsDomainDeployment.outputs.clusterSVCUrl
+output clusterExternalUrl string = networkingDeployment.outputs.clusterExternalUrl
+output clusterExternalSecuredURL string = networkingDeployment.outputs.clusterExternalSecuredURL
