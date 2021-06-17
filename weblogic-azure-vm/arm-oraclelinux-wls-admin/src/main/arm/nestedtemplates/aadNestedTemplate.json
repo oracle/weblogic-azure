@@ -1,0 +1,205 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationAADTemplate": {
+            "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
+            "type": "string",
+            "metadata": {
+                "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "defaultValue":"",
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
+        },
+        "aadsPortNumber": {
+            "type": "string",
+            "defaultValue": "636",
+            "metadata": {
+                "description": "Accessible port of the LDAP server."
+            }
+        },
+        "aadsPublicIP": {
+            "type": "string",
+            "defaultValue": "The LDAP server public IP address"
+        },
+        "aadsServerHost": {
+            "type": "string",
+            "defaultValue": "ldaps.example.com",
+            "metadata": {
+                "description": "The LDAP server host."
+            }
+        },
+        "adminVMName": {
+            "type": "string",
+            "defaultValue": "adminVM",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsLDAPGroupBaseDN": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
+            }
+        },
+        "wlsLDAPPrincipal": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
+            }
+        },
+        "wlsLDAPPrincipalPassword": {
+            "type": "securestring",
+            "defaultValue": "[newGuid()]",
+            "metadata": {
+                "description": "The credential (usually a password) used to connect to the LDAP server."
+            }
+        },
+        "wlsLDAPProviderName": {
+            "type": "string",
+            "defaultValue": "AzureActiveDirectoryProvider",
+            "metadata": {
+                "description": "The value used for creating authentication provider name of WebLogic Server."
+            }
+        },
+        "wlsLDAPSSLCertificate": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Client certificate that will be imported to trust store of SSL."
+            }
+        },
+        "wlsLDAPUserBaseDN": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        },
+        "enableCustomSSL": {
+           "type": "bool",
+           "defaultValue": false,
+           "metadata": {
+              "description": "Boolean value indicating, if custom SSL is enabled or not"
+           }
+        },
+        "keyVaultCustomTrustKeyStorePassPhrase": {
+           "type": "string",
+           "defaultValue": "null",
+           "metadata": {
+              "description": "Weblogic Custom Trust Store Passphrase"
+           }
+        },
+        "keyVaultCustomTrustKeyStoreType": {
+           "type": "string",
+           "defaultValue": "null",
+           "metadata": {
+              "description": "Weblogic Custom Trust Store Type (JKS or PKCS12)"
+           }
+        }
+    },
+    "variables": {
+        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'),' ',parameters('enableCustomSSL'),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')))]",
+        "const_adminServerName": "admin",
+        "const_wlsAdminPort": "7005",
+        "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
+        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+        "name_scriptAADConfiguration": "aadIntegration.sh"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${admin.aad.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationAADTemplate'), concat('../scripts/', variables('name_scriptAADConfiguration'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${admin.aad.end}",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "artifactsLocationPassedIn": {
+            "type": "string",
+            "value": "[parameters('_artifactsLocation')]"
+        }
+    }
+}

@@ -1,0 +1,425 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            },
+            "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-dynamic-cluster/${git.tag}/addnode-coherence/src/main/"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        },
+        "adminPasswordOrKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "weblogic",
+            "metadata": {
+                "description": "User name for the Virtual Machine."
+            }
+        },
+        "adminVMName": {
+            "defaultValue": "adminVM",
+            "type": "string",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "authenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+            }
+        },
+        "dnsLabelPrefix": {
+            "type": "string",
+            "defaultValue": "wls",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
+        },
+        "elkSettings": {
+            "type": "object",
+            "defaultValue": {
+                "enable": false,
+                "elasticsearchEndpoint": "null",
+                "elasticsearchPassword": "null",
+                "elasticsearchUserName": "null",
+                "logIndex": "null",
+                "logsToIntegrate": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ]
+            },
+            "metadata": {
+                "description": "If enable is true, must specify all the properties of elkSettings. logsToIntegrate must be value of an array."
+            }
+        },
+        "enableCoherenceWebLocalStorage": {
+            "defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "Specifies whether Local Storage is enabled for the Coherence*Web cluster tier."
+            }
+        },
+        "guidValue": {
+            "type": "string",
+            "defaultValue": "[newGuid()]"
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "managedServerPrefix": {
+            "type": "string",
+            "defaultValue": "msp",
+            "metadata": {
+                "description": "Provide managed server prefix name"
+            }
+        },
+        "numberOfExistingCacheNodes": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of existing Coherence cache servers, used to name new Virtual Machines and new Managed Server for cache."
+            }
+        },
+        "numberOfNewCacheNodes": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of new Coherence cahce servers, used to create Virtual Machines and Managed Server for cache."
+            }
+        },
+        "skuUrnVersion": {
+            "type": "string",
+            "defaultValue": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+            "allowedValues": [
+                "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
+                "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
+                "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
+                "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
+                "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
+            ],
+            "metadata": {
+                "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of storage account. One storage account can store 20 vitual machines with 2 VHDs of 500 IOPS."
+            }
+        },
+        "usePreviewImage": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
+            }
+        },
+        "vmSizeSelectForCoherence": {
+            "defaultValue": "Standard_A3",
+            "type": "string",
+            "metadata": {
+                "description": "Select appropriate VM Size for Coherence"
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "defaultValue": "wlsd",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
+        "wlsUserName": {
+            "defaultValue": "weblogic",
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        },
+        "customSSLSettings": {
+             "type": "object",
+             "defaultValue": {
+                "enable": false,
+                "customIdentityKeyStoreBase64String": "null",
+                "customIdentityKeyStorePassPhrase": "null",
+                "customIdentityKeyStoreType": "null",
+                "customTrustKeyStoreBase64String": "null",
+                "customTrustKeyStorePassPhrase": "null",
+                "customTrustKeyStoreType": "null",
+                "privateKeyAlias":"null",
+                "privateKeyPassPhrase":"null"
+             },
+             "metadata": {
+                "description": "If enable is true, must specify all customSSLSettings configured in WebLogic Admin Server. customIdentityKeyStoreBase64String & customTrustKeyStoreBase64String are the custom identity & trust keystore data repectively, i.e., contents of identity.jks, trust.jks keystore files in base64 encoding. Similarly, all other custom ssl settings are also required to configure SSL settings"
+             }
+        }
+    },
+    "variables": {
+        "const_cacheServerIndexOffset": "[add(parameters('numberOfExistingCacheNodes'), 1)]",
+        "const_hyphen": "-",
+        "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
+        "const_imagePublisher": "oracle",
+        "const_linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('adminPasswordOrKey')]"
+                    }
+                ]
+            }
+        },
+        "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
+        "const_publicIPAddressType": "Dynamic",
+        "const_vmSize": "[parameters('vmSizeSelectForCoherence')]",
+        "const_wlsDomainPath": "/u01/domains",
+        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+        "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
+        "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
+        "name_nic": "_NIC",
+        "name_publicIPAddress": "_PublicIP",
+        "name_scriptCoherenceFile": "setupCoherence.sh",
+        "name_scriptELKConfiguration": "elkIntegrationForConfiguredCluster.sh",
+        "name_share": "wlsshare",
+        "name_subnet": "Subnet",
+        "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+        "name_vmMachine": "[concat(parameters('managedServerPrefix'),'StorageVM')]",
+        "name_wlsServerPrefix": "[concat(parameters('managedServerPrefix'),'Storage')]",
+        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
+    },
+    "functions": [
+        {
+            "namespace": "array",
+            "members": {
+                "join": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[replace(replace(replace(string(parameters('items')), '[\"', ''), '\"]', ''), '\",\"', ',')]"
+                    }
+                }
+            }
+        }
+    ],
+    "resources": [
+        {
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${dynamic.addnode.coherence.start}",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_vmMachine'),copyIndex(variables('const_cacheServerIndexOffset')),variables('name_publicIPAddress'))]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "publicIPLoop",
+                "count": "[parameters('numberOfNewCacheNodes')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(variables('const_cacheServerIndexOffset')),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_virtualNetwork'), '/', variables('name_subnet'))]",
+            "condition": "[and(empty(variables('name_virtualNetwork')), empty(variables('name_subnet')))]"
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')), variables('name_nic'))]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[parameters('numberOfNewCacheNodes')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('name_vmMachine'),copyIndex(variables('const_cacheServerIndexOffset')),variables('name_publicIPAddress')))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('name_vmMachine'),copyIndex(variables('const_cacheServerIndexOffset')),variables('name_publicIPAddress')))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('ref_subnet')]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')))]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "virtualMachineLoop",
+                "count": "[parameters('numberOfNewCacheNodes')]"
+            },
+            "dependsOn": [
+                "nicLoop"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('const_vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPasswordOrKey')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('const_imagePublisher')]",
+                        "offer": "[variables('const_imageOffer')]",
+                        "sku": "[variables('name_linuxImageOfferSKU')]",
+                        "version": "[variables('name_linuxImageVersion')]"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "createOption": "FromImage",
+                            "diskSizeGB": 900,
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')), variables('name_nic')))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                    }
+                }
+            },
+            "plan": {
+                "name": "[variables('name_linuxImageOfferSKU')]",
+                "publisher": "[variables('const_imagePublisher')]",
+                "product": "[variables('const_imageOffer')]"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')),'/newuserscript')]",
+            "apiVersion": "${azure.apiVersion}",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "virtualMachineExtensionLoop",
+                "count": "[parameters('numberOfNewCacheNodes')]"
+            },
+            "dependsOn": [
+                "virtualMachineLoop"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocation'), concat('../../../arm-oraclelinux-wls-dynamic-cluster/src/main/scripts/', variables('name_scriptCoherenceFile'), parameters('_artifactsLocationSasToken')))]",
+                        "[uri(parameters('_artifactsLocation'), concat('../../../arm-oraclelinux-wls-dynamic-cluster/src/main/scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptCoherenceFile'), ' ', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2019-04-01').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'),' ',parameters('elkSettings').enable, ' ',parameters('elkSettings').elasticsearchEndpoint,' ', parameters('elkSettings').elasticsearchUserName,' ', parameters('elkSettings').elasticsearchPassword, ' ', array.join(parameters('elkSettings').logsToIntegrate), ' ',parameters('elkSettings').logIndex, ' ',variables('name_wlsServerPrefix'),' ',copyIndex(variables('const_cacheServerIndexOffset')),' ',parameters('customSSLSettings').enable,' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').customIdentityKeyStoreBase64String), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').customIdentityKeyStorePassPhrase), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').customIdentityKeyStoreType), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').customTrustKeyStoreBase64String), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').customTrustKeyStorePassPhrase), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').customTrustKeyStoreType), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').privateKeyAlias), 'null'),' ',if(parameters('customSSLSettings').enable,base64(parameters('customSSLSettings').privateKeyPassPhrase), 'null'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${dynamic.addnode.coherence.end}",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "virtualMachineExtensionLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "artifactsLocationPassedIn": {
+            "type": "string",
+            "value": "[parameters('_artifactsLocation')]"
+        }
+    }
+}

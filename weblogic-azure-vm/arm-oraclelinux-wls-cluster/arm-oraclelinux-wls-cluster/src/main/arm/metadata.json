@@ -1,0 +1,10 @@
+{
+  "$schema": "https://aka.ms/azure-quickstart-templates-metadata-schema#",
+  "type": "QuickStart",
+  "itemDisplayName": "Creating Weblogic Cluster Domain on Oracle Linux VM with pre-installed Weblogic Server",
+  "icon": "oracle-linux",
+  "description": "This template allows you to create Weblogic Cluster Domain on Oracle Linux VM with pre-installed Weblogic Server. This will deploy a A3 size VM in the resource group location and return the FQDN of the VM.",
+  "summary": "This template takes a minimum amount of parameters and creates Weblogic Cluster Domain, using the latest patched version.",
+  "githubUsername": "wls-eng",
+  "dateUpdated": "2019-08-01"
+}

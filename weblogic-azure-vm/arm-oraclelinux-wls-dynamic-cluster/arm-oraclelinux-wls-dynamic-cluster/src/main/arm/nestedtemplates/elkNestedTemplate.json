@@ -1,0 +1,270 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationELKTemplate": {
+            "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
+            "type": "string",
+            "metadata": {
+                "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "defaultValue": "",
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
+        },
+        "adminVMName": {
+            "type": "string",
+            "defaultValue": "adminVM",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "elasticsearchEndpoint": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Endpoint of the Elasticsearch instance."
+            }
+        },
+        "elasticsearchPassword": {
+            "type": "securestring",
+            "defaultValue": "[newGuid()]",
+            "metadata": {
+                "description": "The credentials to distibute message with REST API to Elasticsearch instance."
+            }
+        },
+        "elasticsearchUserName": {
+            "type": "string",
+            "defaultValue": "elastic",
+            "metadata": {
+                "description": "The credentials to distibute message with REST API to Elasticsearch instance."
+            }
+        },
+        "guidValue": {
+            "type": "string",
+            "defaultValue": "[newGuid()]"
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "logsToIntegrate": {
+            "type": "array",
+            "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
+            "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
+            "metadata": {
+                "description": "Specify the expeted logs to integrate, you must input at least one log."
+            }
+        },
+        "managedServerPrefix": {
+            "type": "string",
+            "defaultValue": "msp",
+            "metadata": {
+                "description": "Provide managed server prefix name"
+            }
+        },
+        "maxDynamicClusterSize": {
+            "defaultValue": 10,
+            "type": "int",
+            "metadata": {
+                "description": "Maximum Number of Managed Servers allowed to be configured in the Dynamic Cluster"
+            }
+        },
+        "numberOfManagedCacheInstances": {
+            "type": "int",
+            "defaultValue": 0,
+            "minValue": 0,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of VMs that have been deployed to host managed cache server, please set the value if your cluster is Coherence cluster."
+            }
+        },
+        "numberOfManagedApplicationInstances": {
+            "type": "int",
+            "defaultValue": 2,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of VMs that have been deployed to host managed application server."
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "defaultValue": "wlsd",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        }
+    },
+    "variables": {
+        "const_adminServerName": "admin",
+        "const_logIndex": "[concat('azure-weblogic-dynamic-cluster-', parameters('guidValue'))]",
+        "const_managedCacheVMPrefix": "[concat(parameters('managedServerPrefix'),'StorageVM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_wlsAdminPort": "7005",
+        "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
+        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+        "name_scriptELKConfiguration": "elkIntegrationForDynamicCluster.sh"
+    },
+    "functions": [
+        {
+            "namespace": "array",
+            "members": {
+                "join": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[replace(replace(replace(string(parameters('items')), '[\"', ''), '\"]', ''), '\",\"', ',')]"
+                    }
+                }
+            }
+        }
+    ],
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${dynamic.elk.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationELKTemplate'), concat('../scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptELKConfiguration'),' ', variables('const_wlsHome'), ' ', concat(parameters('adminVMName'), ':', variables('const_wlsAdminPort')), ' ' ,parameters('managedServerPrefix'), ' ', parameters('wlsUserName'), ' ', parameters('wlsPassword'), ' ', variables('const_adminServerName'), ' ', parameters('elasticsearchEndpoint'),' ', parameters('elasticsearchUserName'),' ', parameters('elasticsearchPassword'), ' ', parameters('wlsDomainName'),' ', variables('const_wlsDomainPath'),' ', array.join(parameters('logsToIntegrate')), ' ',0, ' ', variables('const_logIndex'), ' ', parameters('maxDynamicClusterSize'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "appVirtualMachineExtensionLoop",
+                "count": "[parameters('numberOfManagedApplicationInstances')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationELKTemplate'), concat('../scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptELKConfiguration'),' ', variables('const_wlsHome'), ' ', concat(parameters('adminVMName'), ':', variables('const_wlsAdminPort')), ' ' ,parameters('managedServerPrefix'), ' ', parameters('wlsUserName'), ' ', parameters('wlsPassword'), ' ', variables('const_adminServerName'), ' ', parameters('elasticsearchEndpoint'),' ', parameters('elasticsearchUserName'),' ', parameters('elasticsearchPassword'), ' ', parameters('wlsDomainName'),' ', variables('const_wlsDomainPath'),' ', array.join(parameters('logsToIntegrate')), ' ',copyIndex(1), ' ', variables('const_logIndex'), ' ', parameters('maxDynamicClusterSize'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(variables('const_managedCacheVMPrefix'), copyIndex(1),'/newuserscript')]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "cacheVirtualMachineExtensionLoop",
+                "count": "[parameters('numberOfManagedCacheInstances')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationELKTemplate'), concat('../scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptELKConfiguration'),' ', variables('const_wlsHome'), ' ', concat(parameters('adminVMName'), ':', variables('const_wlsAdminPort')), ' ' ,concat(parameters('managedServerPrefix'), 'Storage'), ' ', parameters('wlsUserName'), ' ', parameters('wlsPassword'), ' ', variables('const_adminServerName'), ' ', parameters('elasticsearchEndpoint'),' ', parameters('elasticsearchUserName'),' ', parameters('elasticsearchPassword'), ' ', parameters('wlsDomainName'),' ', variables('const_wlsDomainPath'),' ', array.join(parameters('logsToIntegrate')), ' ',copyIndex(1), ' ', variables('const_logIndex'), ' ', parameters('maxDynamicClusterSize'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${dynamic.elk.end}",
+            "dependsOn": [
+                "appVirtualMachineExtensionLoop",
+                "cacheVirtualMachineExtensionLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "artifactsLocationPassedIn": {
+            "type": "string",
+            "value": "[parameters('_artifactsLocation')]"
+        },
+        "logIndex": {
+            "type": "string",
+            "value": "[variables('const_logIndex')]"
+        }
+    }
+}

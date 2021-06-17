@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Copyright (c) 2021, Oracle and/or its affiliates.
+     Licensed under the Universal Permissive License v 1.0 as shown at
+     https://oss.oracle.com/licenses/upl.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.oracle.weblogic.azure</groupId>
+    <artifactId>arm-oraclelinux-wls-dynamic-cluster-addnode-coherence</artifactId>
+    <version>1.0.0</version>
+    
+    <parent>
+        <groupId>com.microsoft.azure.iaas</groupId>
+        <artifactId>azure-javaee-iaas-parent</artifactId>
+        <version>1.0.7</version>
+        <relativePath></relativePath>
+    </parent>
+    
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <properties>
+        <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <test.parameters>-TestParameter '@{&quot;SampleName&quot;=&quot;addnode-coherence/src/main&quot;;&quot;RawRepoPath&quot;=&quot;${artifactsLocationBase}/arm-oraclelinux-wls-dynamic-cluster/${git.tag}/&quot;}'</test.parameters>
+        <template.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/develop/src/main/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/develop/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+    </properties>
+
+    <description>
+        
+    </description>
+
+</project>

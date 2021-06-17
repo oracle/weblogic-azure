@@ -1,0 +1,103 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"denyPublicTrafficForAdminServer": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"denyPublicTrafficForManagedServer": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"enableOHS": {
+			"type": "bool",
+			"defaultValue": false
+		},
+		"networkSecurityGroupName": {
+			"type": "string",
+			"metadata": {
+				"description": "Network Security Group name"
+			}
+		}
+	},
+	"variables": {
+		"const_subnetPrefix": "10.0.0.0/24"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogicAdminPortsAllowed')]",
+			"condition": "[not(parameters('denyPublicTrafficForAdminServer'))]",
+			"apiVersion": "${azure.apiVersion}",
+			"properties": {
+				"protocol": "TCP",
+				"sourcePortRange": "*",
+				"destinationAddressPrefix": "*",
+				"access": "Allow",
+				"priority": 210,
+				"direction": "Inbound",
+				"destinationPortRanges": [
+					"7001",
+					"7002"
+				],
+				"sourceAddressPrefix": "[variables('const_subnetPrefix')]"
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogicAdminPortsDenied')]",
+			"condition": "[parameters('denyPublicTrafficForAdminServer')]",
+			"apiVersion": "${azure.apiVersion}",
+			"properties": {
+				"protocol": "*",
+				"sourcePortRange": "*",
+				"destinationAddressPrefix": "*",
+				"access": "Deny",
+				"priority": 211,
+				"direction": "Inbound",
+				"destinationPortRanges": [
+					"7001",
+					"7002"
+				],
+				"sourceAddressPrefix": "Internet"
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogiManagedPortsAllowed')]",
+			"condition": "[and(not(parameters('denyPublicTrafficForManagedServer')), parameters('enableOHS'))]",
+			"apiVersion": "${azure.apiVersion}",
+			"properties": {
+				"protocol": "*",
+				"sourcePortRange": "*",
+				"destinationAddressPrefix": "*",
+				"access": "Deny",
+				"priority": 220,
+				"direction": "Inbound",
+				"destinationPortRanges": [
+					"8002-8999"
+				],
+				"sourceAddressPrefix": "[variables('const_subnetPrefix')]"
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogiManagedPortsDenied')]",
+			"condition": "[and(parameters('denyPublicTrafficForManagedServer'), parameters('enableOHS'))]",
+			"apiVersion": "${azure.apiVersion}",
+			"properties": {
+				"protocol": "*",
+				"sourcePortRange": "*",
+				"destinationAddressPrefix": "*",
+				"access": "Deny",
+				"priority": 221,
+				"direction": "Inbound",
+				"destinationPortRanges": [
+					"8002-8999"
+				],
+				"sourceAddressPrefix": "Internet"
+			}
+		}
+	]
+}

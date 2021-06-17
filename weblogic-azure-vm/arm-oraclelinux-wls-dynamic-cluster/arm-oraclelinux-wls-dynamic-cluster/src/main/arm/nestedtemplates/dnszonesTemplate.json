@@ -1,0 +1,225 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "defaultValue": "",
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
+        },
+        "dnszonesARecordSetNames": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "An array of A record names. Used to create A records."
+            }
+        },
+        "dnszonesCNAMEAlias": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of CNAME record alias. Used to create CNAME records."
+            },
+            "defaultValue": []
+        },
+        "dnszonesCNAMERecordSetNames": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of CNAME record names. Used to create CNAME record set."
+            },
+            "defaultValue": []
+        },
+        "dnszoneName": {
+            "defaultValue": "contoso.xyz",
+            "type": "string",
+            "metadata": {
+                "description": "Azure DNS Zone name."
+            }
+        },
+        "dnszoneLocation": {
+            "defaultValue": "global",
+            "type": "string",
+            "metadata": {
+                "description": "Location used to create Azure DNS Zone."
+            }
+        },
+        "hasDNSZones": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "If true, update A records in the existing DNS Zone, otherwise, create a new DNS Zone and ."
+            }
+        },
+        "identity": {
+            "type": "Object",
+            "metadata": {
+                "description": "Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "resourceGroup": {
+            "type": "string",
+            "defaultValue": "[resourceGroup()]",
+            "metadata": {
+                "description": "Name of the resource group that has an Azure DNS Zone deployed."
+            }
+        },
+        "targetResources": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "References to Azure resources from where the DNS resource value is taken. Each item is corresponding to values of dnszonesARecordSetNames."
+            }
+        },
+        "ttl": {
+            "type": "int",
+            "defaultValue": 3600,
+            "metadata": {
+                "description": "The TTL (time-to-live) of the records in the record sets."
+            }
+        },
+        "utcValue": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "Current deployment time. Used as a tag in deployment script."
+            }
+        }
+    },
+    "variables": {
+        "name_createDNSZoneLinkedTemplateName": "_createDNSZonesTemplate.json",
+        "name_dnszoneTempaltesFolder": "_dnszones",
+        "name_updateDNSZoneLinkedTemplateName": "_updateDNSZonesTemplate.json"
+    },
+    "resources": [
+        {
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.dns.start}",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "${azure.apiVersion}",
+            "type": "Microsoft.Resources/deployments",
+            "name": "createDNSZone",
+            "condition": "[not(parameters('hasDNSZones'))]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/',variables('name_dnszoneTempaltesFolder'),'/', variables('name_createDNSZoneLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnszonesARecordSetNames": {
+                        "value": "[parameters('dnszonesARecordSetNames')]"
+                    },
+                    "dnszonesCNAMEAlias": {
+                        "value": "[parameters('dnszonesCNAMEAlias')]"
+                    },
+                    "dnszonesCNAMERecordSetNames": {
+                        "value": "[parameters('dnszonesCNAMERecordSetNames')]"
+                    },
+                    "dnszoneName": {
+                        "value": "[parameters('dnszoneName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('dnszoneLocation')]"
+                    },
+                    "targetResources": {
+                        "value": "[parameters('targetResources')]"
+                    },
+                    "ttl": {
+                        "value": "[parameters('ttl')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "${azure.apiVersion}",
+            "type": "Microsoft.Resources/deployments",
+            "name": "updateDNSZone",
+            "condition": "[parameters('hasDNSZones')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/',variables('name_dnszoneTempaltesFolder'),'/', variables('name_updateDNSZoneLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "dnszonesARecordSetNames": {
+                        "value": "[parameters('dnszonesARecordSetNames')]"
+                    },
+                    "dnszonesCNAMEAlias": {
+                        "value": "[parameters('dnszonesCNAMEAlias')]"
+                    },
+                    "dnszonesCNAMERecordSetNames": {
+                        "value": "[parameters('dnszonesCNAMERecordSetNames')]"
+                    },
+                    "dnszoneName": {
+                        "value": "[parameters('dnszoneName')]"
+                    },
+                    "identity": {
+                        "value": "[parameters('identity')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "resourceGroup": {
+                        "value": "[parameters('resourceGroup')]"
+                    },
+                    "targetResources": {
+                        "value": "[parameters('targetResources')]"
+                    },
+                    "ttl": {
+                        "value": "[parameters('ttl')]"
+                    },
+                    "utcValue": {
+                        "value": "[parameters('utcValue')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.dns.end}",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

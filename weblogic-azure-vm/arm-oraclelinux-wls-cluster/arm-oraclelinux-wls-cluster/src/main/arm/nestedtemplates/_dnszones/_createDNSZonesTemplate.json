@@ -1,0 +1,116 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dnszonesARecordSetNames": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of A record names. Used to create A record set."
+            }
+        },
+        "dnszonesCNAMEAlias": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of CNAME record alias. Used to create CNAME records."
+            }
+        },
+        "dnszonesCNAMERecordSetNames": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of CNAME record names. Used to create CNAME record set."
+            }
+        },
+        "dnszoneName": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure DNS Zone name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "targetResources": {
+            "type": "array",
+            "metadata": {
+                "description": "References to Azure resources from where the DNS resource value is taken. Each item is corresponding to values of dnszonesARecordSetNames."
+            }
+        },
+        "ttl": {
+            "type": "int",
+            "defaultValue": 3600,
+            "metadata": {
+                "description": "The TTL (time-to-live) of the records in the record sets."
+            }
+        }
+    },
+    "variables": {
+        // Tempalte validation fails on record name expression 'parameters('arrayValue')[copyIndex]' if the array is empty, though the deployment will be skipped.
+        // Concat a sample array if an array is empty, and do not deploy the sample record. 
+        "const_dnszonesARecordSetNames": "[concat(parameters('dnszonesARecordSetNames'), variables('const_sampleValuetoPassValidation'))]",
+        "const_dnszonesCNAMERecordSetNames": "[concat(parameters('dnszonesCNAMERecordSetNames'),variables('const_sampleValuetoPassValidation'))]",
+        "const_hasARecords": "[greater(length(parameters('dnszonesARecordSetNames')),0)]",
+        "const_hasCNAMERecords": "[greater(length(parameters('dnszonesCNAMERecordSetNames')), 0)]",
+        "const_sampleValuetoPassValidation": [
+            "test"
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/dnszones",
+            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "name": "[parameters('dnszoneName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "zoneType": "Public"
+            }
+        },
+        {
+            "type": "Microsoft.Network/dnszones/A",
+            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "condition": "[variables('const_hasARecords')]",
+            "name": "[concat(parameters('dnszoneName'), '/', variables('const_dnszonesARecordSetNames')[copyIndex()])]",
+            "copy": {
+                "name": "dnszonesALoop",
+                "count": "[length(parameters('dnszonesARecordSetNames'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/dnszones', parameters('dnszoneName'))]"
+            ],
+            "properties": {
+                "TTL": "[parameters('ttl')]",
+                "targetResource": {
+                    "id": "[parameters('targetResources')[copyIndex()]]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/dnszones/CNAME",
+            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "condition": "[variables('const_hasCNAMERecords')]",
+            "name": "[concat(parameters('dnszoneName'),'/', variables('const_dnszonesCNAMERecordSetNames')[copyIndex()])]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "dnszonesCNAMELoop",
+                "count": "[length(parameters('dnszonesCNAMERecordSetNames'))]"
+            },
+            "dependsOn": [
+                "dnszonesALoop"
+            ],
+            "properties": {
+                "TTL": "[parameters('ttl')]",
+                "CNAMERecord": {
+                    "cname": "[parameters('dnszonesCNAMEAlias')[copyIndex()]]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "dnszonesName": {
+            "type": "string",
+            "value": "[parameters('dnszoneName')]"
+        }
+    }
+}

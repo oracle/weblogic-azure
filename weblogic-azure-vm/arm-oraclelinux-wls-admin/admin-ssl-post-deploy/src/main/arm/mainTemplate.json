@@ -1,0 +1,150 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "_artifactsLocation": {
+         "type": "string",
+         "metadata": {
+            "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+         },
+         "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-admin/${git.tag}/admin-ssl-post-deploy/src/main/"
+      },
+      "_artifactsLocationSasToken": {
+         "type": "securestring",
+         "metadata": {
+            "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+         },
+         "defaultValue": ""
+      },
+      "adminVMName": {
+         "type": "string",
+         "defaultValue": "adminVM",
+         "metadata": {
+            "description": "Admin Server hosting VM name."
+         }
+      },
+      "aadsSettings": {
+         "type": "object",
+         "defaultValue": {
+            "enable": false,
+            "certificateBase64String": "null"
+         },
+         "metadata": {
+            "description": "If enable is true, must specify the certificateBase64String, which is the based64 string of LADP client certificate that will be imported to trust store of WebLogic Server to enable SSL connection of AD provider."
+         }
+      },
+      "location": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().location]",
+         "metadata": {
+            "description": "Location for all resources."
+         }
+      },
+      "wlsDomainName": {
+         "type": "string",
+         "defaultValue": "wlsd",
+         "metadata": {
+            "description": "Provide existing running Weblogic domain name"
+         }
+      },
+      "wlsUserName": {
+         "type": "string",
+         "metadata": {
+            "description": "Username for your Weblogic domain name"
+         }
+      },
+      "wlsPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Password for your Weblogic domain name"
+         }
+      },
+      "customSSLSettings": {
+         "type": "object",
+         "defaultValue": {
+            "enable": false,
+            "customIdentityKeyStoreBase64String": "null",
+            "customIdentityKeyStorePassPhrase": "null",
+            "customIdentityKeyStoreType": "null",
+            "customTrustKeyStoreBase64String": "null",
+            "customTrustKeyStorePassPhrase": "null",
+            "customTrustKeyStoreType": "null",
+            "privateKeyAlias":"null",
+            "privateKeyPassPhrase":"null"
+         },
+         "metadata": {
+            "description": "If enable is true, must specify all customSSLSettings. customIdentityKeyStoreBase64String and customTrustKeyStoreBase64String are the custom identity and trust keystore data repectively, i.e., contents of identity.jks, trust.jks keystore files in base64 encoding. Similarly, all other custom ssl settings are also required to configure SSL settings"
+         }
+      },
+      "deploy_timestamp": {
+          "type": "string",
+          "defaultValue": "[utcNow('yyMMddHHmm')]",
+          "metadata": {
+              "description": "Timestamp required for uniquely identifying and executing custom extension script multiple times"
+         }
+      }
+   },
+   "variables": {
+      "const_hyphen": "-",
+      "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+      "const_wlsDomainPath": "/u01/domains",
+      "name_scriptFile": "configureCustomAdminSSL.sh"
+   },
+   "resources": [
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${post.deploy.ssl.config.start}",
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Compute/virtualMachines/extensions",
+         "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
+         "apiVersion": "${azure.apiVersion}",
+         "location": "[parameters('location')]",
+         "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.1",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+               "timestamp": "[int(parameters('deploy_timestamp'))]",
+               "fileUris": [
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
+               ]
+            },
+            "protectedSettings": {
+				"commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('adminVMName'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('aadsSettings').enable,' ',if(parameters('aadsSettings').enable, parameters('aadsSettings').certificateBase64String, 'null'),' ', parameters('customSSLSettings').enable,' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyAlias, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyPassPhrase, 'null'))]"            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${post.deploy.ssl.config.end}",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
+            }
+         }
+      }
+   ],
+   "outputs": {
+      "wlsDomainLocation": {
+         "type": "string",
+         "value": "[concat('/u01/domains/', parameters('wlsDomainName'))]"
+      }
+   }
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "GEN-UNIQUE"
+    },
+    "adminPasswordOrKey": {
+      "value": "GEN-SSH-PUB-KEY"
+    },
+    "dnsLabelPrefix": {
+      "value": "GEN-UNIQUE"
+    },
+    "acceptOTNLicenseAgreement": {
+      "value": "GEN-UNIQUE"
+    },
+    "otnAccountUsername": {
+      "value": "GEN-UNIQUE"
+    },
+    "otnAccountPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsDomainName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsUserName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "managedServerPrefix":{
+      "value": "GEN-UNIQUE"
+    },
+    "vmSizeSelect":{
+      "value": "GEN-UNIQUE"
+    },
+    "numberOfInstances": {
+      "value": "GEN-UNIQUE"    
+    },
+    "adminVMName": {
+      "value": "GEN-UNIQUE"        
+    },
+    "denyPublicTrafficForAdminServer": {
+      "value": false
+    },
+    "enableCustomSSL": {
+      "value": false
+    }
+  }
+}

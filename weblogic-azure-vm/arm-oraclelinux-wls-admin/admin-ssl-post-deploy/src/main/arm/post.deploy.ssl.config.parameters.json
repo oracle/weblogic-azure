@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "value":"GEN-UNIQUE"
+    },
+    "aadsSettings": {
+      "value": {
+        "enable": false,
+        "certificateBase64String": "GEN-UNIQUE"
+      }
+    },
+    "location": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsDomainName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsUserName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "customSSLSettings": {
+        "value": {
+            "enable": false,
+            "customIdentityKeyStoreBase64String": "GEN-UNIQUE",
+            "customIdentityKeyStorePassPhrase": "GEN-UNIQUE",
+            "customIdentityKeyStoreType": "GEN-UNIQUE",
+            "customTrustKeyStoreBase64String": "GEN-UNIQUE",
+            "customTrustKeyStorePassPhrase": "GEN-UNIQUE",
+            "customTrustKeyStoreType": "GEN-UNIQUE",
+            "privateKeyAlias": "GEN-UNIQUE",
+            "privateKeyPassPhrase": "GEN-UNIQUE"
+        }
+    }
+  }
+}

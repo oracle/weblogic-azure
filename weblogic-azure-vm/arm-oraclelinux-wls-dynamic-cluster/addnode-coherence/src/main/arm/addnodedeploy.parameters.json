@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminPasswordOrKey": {
+      "value": "GEN-SSH-PUB-KEY"
+    },
+    "adminUsername": {
+      "value": "GEN-UNIQUE"
+    },
+    "adminVMName": {
+      "value": "GEN-UNIQUE"
+    },
+    "dnsLabelPrefix": {
+      "value": "GEN-UNIQUE"
+    },
+    "numberOfExistingCacheNodes": {
+      "value": 1
+    },
+    "numberOfNewCacheNodes": {
+      "value": 1
+    },
+    "skuUrnVersion": {
+      "value": "GEN-UNIQUE"
+    },
+    "storageAccountName": {
+      "value": "GEN-UNIQUE"
+    },
+    "usePreviewImage": {
+      "value": "GEN-UNIQUE"
+    },
+    "vmSizeSelectForCoherence": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsDomainName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsUserName": {
+      "value": "GEN-UNIQUE"
+    }
+  }
+}

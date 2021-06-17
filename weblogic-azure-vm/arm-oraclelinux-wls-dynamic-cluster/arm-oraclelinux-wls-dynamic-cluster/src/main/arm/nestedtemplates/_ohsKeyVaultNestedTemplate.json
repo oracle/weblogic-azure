@@ -1,0 +1,104 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "uploadedKeyStoreData": {
+            "type": "string",
+            "metadata": {
+                "description": "Custom Identity KeyStore Data"
+            }
+        },
+        "uploadedKeyStorePassword": {
+            "type": "string",
+            "metadata": {
+                "description": "Custom Identity KeyStore Passphrase"
+            }
+        },
+        "enabledForTemplateDeployment": {
+            "type": "bool",
+            "metadata": {
+                "description": "Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
+            },
+            "defaultValue": true
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The supported Azure location where the key vault should be created."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "metadata": {
+                "description": "Price tier for Key Vault."
+            },
+            "defaultValue": "Standard"
+        },
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Key Vault"
+            },
+            "defaultValue": "GEN_UNIQUE"
+        }
+    },
+    "variables": {
+        "name_keyStoreDataSecretName": "ohsSSLKeyStoreData",
+        "name_keyStorePwdSecretName": "ohsSSLKeyStorePassword"
+    },
+    "resources": [
+        {
+            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "properties": {
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+                "sku": {
+                    "name": "[parameters('sku')]",
+                    "family": "A"
+                },
+                "accessPolicies": [],
+                "tenantId": "[subscription().tenantId]"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_keyStoreDataSecretName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('uploadedKeyStoreData')]"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('name_keyStorePwdSecretName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('uploadedKeyStorePassword')]"
+            }
+        }
+    ],
+    "outputs": {
+        "keyVaultName": {
+            "type": "string",
+            "value": "[parameters('keyVaultName')]"
+        },
+        "keyStoreDataSecretName": {
+            "type": "string",
+            "value": "[variables('name_keyStoreDataSecretName')]"
+        },
+        "keyStorePwdSecretName": {
+            "type": "string",
+            "value": "[variables('name_keyStorePwdSecretName')]"
+        }
+    }
+}

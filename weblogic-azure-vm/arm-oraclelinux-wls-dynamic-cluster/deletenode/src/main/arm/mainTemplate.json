@@ -1,0 +1,161 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            },
+            "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-dynamic-cluster/${git.tag}/deletenode/src/main/"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        },
+        "adminVMName": {
+            "type": "string",
+            "defaultValue": "adminVM",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "deletingCacheServerNames": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "Names of cache servers to be deleted, comma delimited. Please ignore this parameter if you are not deleting cache servers."
+            }
+        },
+        "deletingManagedServerMachineNames": {
+            "type": "array",
+            "metadata": {
+                "description": "Vitual Machine names of managed servers to be deleted, comma delimited."
+            }
+        },
+        "managedServerPrefix": {
+            "type": "string",
+            "defaultValue": "msp",
+            "metadata": {
+                "description": "Provide managed server prefix name"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
+        "wlsForceShutDown": {
+            "type": "string",
+            "defaultValue": "true",
+            "allowedValues": [
+                "true",
+                "false"
+            ],
+            "metadata": {
+                "description": "Will force to shut down managed server if the tag set to true."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        }
+    },
+    "variables": {
+        "const_wlsAdminPort": "7001",
+        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+        "const_outputCliCommands": "[concat('export resourceGroup=', resourceGroup().name,';', 'export deleteingIDs=\"\";export managedServerMachineNames=$(echo ',array.join(parameters('deletingManagedServerMachineNames')),' | tr \",\" \"\\n\");','az extension add --name resource-graph;','for machine in $managedServerMachineNames;do vmId=$(az graph query -q \"Resources | where type =~ ','\\','\"microsoft.compute/virtualmachines\\\" | where name=~ \\\"${machine}\\\" | where resourceGroup =~ \\\"${resourceGroup}\\\" | project vmid = id\" -o tsv); nicId=$(az graph query -q \"Resources | where type =~ \\\"microsoft.compute/virtualmachines\\\" | where name=~ \\\"${machine}\\\" | where resourceGroup =~ \\\"${resourceGroup}\\\" | extend nics=array_length(properties.networkProfile.networkInterfaces) | mv-expand nic=properties.networkProfile.networkInterfaces | where nics == 1 or nic.properties.primary =~ \\\"true\\\" or isempty(nic) | project nicId = tostring(nic.id)\" -o tsv);ipId=$(az graph query -q \"Resources | where type =~ \\\"microsoft.network/networkinterfaces\\\" | where id=~ \\\"${nicId}\\\" | extend ipConfigsCount=array_length(properties.ipConfigurations) | mv-expand ipconfig=properties.ipConfigurations | where ipConfigsCount == 1 or ipconfig.properties.primary =~ \\\"true\\\" | project  publicIpId = tostring(ipconfig.properties.publicIPAddress.id)\" -o tsv);osDiskId=$(az graph query -q \"Resources | where type =~ \\\"microsoft.compute/virtualmachines\\\" | where name=~ \\\"${machine}\\\" | where resourceGroup =~ \\\"${resourceGroup}\\\" | project osDiskId = tostring(properties.storageProfile.osDisk.managedDisk.id)\" -o tsv);dataDiskIds=$(az graph query -q \"Resources | where type =~ \\\"microsoft.compute/virtualmachines\\\" | where name=~ \\\"${machine}\\\" | where resourceGroup =~ \\\"${resourceGroup}\\\" | mv-expand datadisk=properties.storageProfile.dataDisks | project datadisk.managedDisk.id\" -o tsv);deleteingIDs=$(echo $deleteingIDs ${vmId} ${nicId} ${ipId} ${osDiskId} ${dataDiskIds});done;echo \"List resource Ids to be deleted: \";echo ${deleteingIDs} | tr \" \" \"\\n\";echo -n \"Are you sure to delete these resources (y/n)?\";read answer;if [[ \"$answer\" != \"${answer#[Yy]}\" && -n \"${deleteingIDs}\" ]]; then echo \"Deleting managed resources...Please do not stop.\";az resource delete --verbose --ids ${deleteingIDs};fi')]",
+        "name_scriptDeleteNode": "deletenode.sh"
+    },
+    "functions": [
+        {
+            "namespace": "array",
+            "members": {
+                "join": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[replace(replace(replace(string(parameters('items')), '[\"', ''), '\"]', ''), '\",\"', ',')]"
+                    }
+                }
+            }
+        }
+    ],
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${dynamic.deletenode.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('name_scriptDeleteNode'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ', variables('name_scriptDeleteNode'), ' ', parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', array.join(parameters('deletingManagedServerMachineNames')),' ', parameters('wlsForceShutDown'), ' ', parameters('adminVMName'), ' ',variables('const_wlsAdminPort'),' ',variables('const_wlsHome'), ' ', parameters('managedServerPrefix'), ' ', array.join(parameters('deletingCacheServerNames')))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${dynamic.deletenode.end}",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "commandsToDeleteAzureResource": {
+            "type": "string",
+            "value": "[variables('const_outputCliCommands')]"
+        }
+    }
+}

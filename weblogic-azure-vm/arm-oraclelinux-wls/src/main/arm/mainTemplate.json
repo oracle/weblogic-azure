@@ -1,0 +1,425 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "adminPasswordOrKey": {
+         "type": "securestring",
+         "metadata": {
+            "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+         }
+      },
+      "adminUsername": {
+         "type": "string",
+         "metadata": {
+            "description": "User name for the Virtual Machine."
+         }
+      },
+      "authenticationType": {
+         "type": "string",
+         "defaultValue": "password",
+         "allowedValues": [
+            "sshPublicKey",
+            "password"
+         ],
+         "metadata": {
+            "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+         }
+      },
+      "dnsLabelPrefix": {
+         "defaultValue": "wls",
+         "type": "string",
+         "metadata": {
+            "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+         }
+      },
+      "guidValue": {
+         "type": "string",
+         "defaultValue": "[newGuid()]"
+      },
+      "location": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().location]",
+         "metadata": {
+            "description": "Location for all resources."
+         }
+      },
+      "portsToExpose": {
+         "type": "string",
+         "defaultValue": "80,443,7001-9000",
+         "metadata": {
+            "description": "Ports and port ranges to expose"
+         }
+      },
+      "skuUrnVersion": {
+         "type": "string",
+         "defaultValue": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+         "allowedValues": [
+            "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
+            "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
+            "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
+            "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
+            "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
+         ],
+         "metadata": {
+            "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
+         }
+      },
+      "usePreviewImage": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
+         }
+      },
+      "useSystemAssignedManagedIdentity": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
+            }
+        },
+      "vmName": {
+         "type": "string",
+         "defaultValue": "WeblogicServerVM",
+         "metadata": {
+            "description": "VM name."
+         }
+      },
+      "vmSizeSelect": {
+         "type": "string",
+         "defaultValue": "Standard_A3",
+         "metadata": {
+            "description": "Select appropriate VM Size as per requirement"
+         }
+      }
+   },
+   "variables": {
+      "const_addressPrefix": "10.0.0.0/16",
+      "const_hyphen": "-",
+      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
+      "const_imagePublisher": "oracle",
+      "const_linuxConfiguration": {
+         "disablePasswordAuthentication": true,
+         "ssh": {
+            "publicKeys": [
+               {
+                  "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                  "keyData": "[parameters('adminPasswordOrKey')]"
+               }
+            ]
+         }
+      },
+      "const_publicIPAddressType": "Dynamic",
+      "const_requiredPortrange": ",65200-65535,5556",
+      "const_storageAccountType": "Standard_LRS",
+      "const_subnetPrefix": "10.0.0.0/24",
+      "const_vmSize": "[parameters('vmSizeSelect')]",
+      "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
+      "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
+      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
+      "name_nic": "olvm_NIC",
+      "name_publicIPAddress": "olvm_PublicIP",
+      "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
+      "name_subnet": "Subnet",
+      "name_virtualNetwork": "olvm_VNET",
+      "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
+      "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
+   },
+   "resources": [
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${start}",
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Network/networkSecurityGroups",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[variables('name_networkSecurityGroup')]",
+         "location": "[parameters('location')]",
+         "properties": {
+            "securityRules": [
+               {
+                  "name": "WebLogicPorts",
+                  "properties": {
+                     "protocol": "TCP",
+                     "sourcePortRange": "*",
+                     "sourceAddressPrefix": "*",
+                     "destinationAddressPrefix": "*",
+                     "access": "Allow",
+                     "priority": 320,
+                     "direction": "Inbound",
+                     "destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('const_requiredPortrange')), ',')]"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Storage/storageAccounts",
+         "apiVersion": "${azure.apiVersion2}",
+         "name": "[variables('name_storageAccount')]",
+         "location": "[parameters('location')]",
+         "sku": {
+            "name": "[variables('const_storageAccountType')]"
+         },
+         "kind": "Storage",
+         "properties": {}
+      },
+      {
+         "type": "Microsoft.Network/publicIPAddresses",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[variables('name_publicIPAddress')]",
+         "location": "[parameters('location')]",
+         "properties": {
+            "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
+            "dnsSettings": {
+               "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',take(replace(parameters('guidValue'),'-',''),10))]"
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Network/virtualNetworks",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[variables('name_virtualNetwork')]",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[variables('ref_networkSecurityGroup')]"
+         ],
+         "properties": {
+            "addressSpace": {
+               "addressPrefixes": [
+                  "[variables('const_addressPrefix')]"
+               ]
+            },
+            "subnets": [
+               {
+                  "name": "[variables('name_subnet')]",
+                  "properties": {
+                     "addressPrefix": "[variables('const_subnetPrefix')]",
+                     "networkSecurityGroup": {
+                        "id": "[variables('ref_networkSecurityGroup')]"
+                     }
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Network/networkInterfaces",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[variables('name_nic')]",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses/', variables('name_publicIPAddress'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/', variables('name_virtualNetwork'))]"
+         ],
+         "properties": {
+            "ipConfigurations": [
+               {
+                  "name": "ipconfig1",
+                  "properties": {
+                     "privateIPAllocationMethod": "Dynamic",
+                     "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('name_publicIPAddress'))]"
+                     },
+                     "subnet": {
+                        "id": "[variables('ref_subnet')]"
+                     }
+                  }
+               }
+            ],
+            "dnsSettings": {
+               "internalDnsNameLabel": "[parameters('vmName')]"
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Compute/virtualMachines",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[parameters('vmName')]",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount'))]",
+            "[resourceId('Microsoft.Network/networkInterfaces/', variables('name_nic'))]"
+         ],
+         "identity": "[if(parameters('useSystemAssignedManagedIdentity'), json('{\"type\":\"SystemAssigned\"}'), null())]",
+         "properties": {
+            "hardwareProfile": {
+               "vmSize": "[variables('const_vmSize')]"
+            },
+            "osProfile": {
+               "computerName": "[parameters('vmName')]",
+               "adminUsername": "[parameters('adminUsername')]",
+               "adminPassword": "[parameters('adminPasswordOrKey')]",
+               "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
+            },
+            "storageProfile": {
+               "imageReference": {
+                  "publisher": "[variables('const_imagePublisher')]",
+                  "offer": "[variables('const_imageOffer')]",
+                  "sku": "[variables('name_linuxImageOfferSKU')]",
+                  "version": "[variables('name_linuxImageVersion')]"
+               },
+               "osDisk": {
+                  "createOption": "FromImage",
+                  "managedDisk": {
+                     "storageAccountType": "[variables('const_storageAccountType')]"
+                  }
+               },
+               "dataDisks": [
+                  {
+                     "lun": 0,
+                     "createOption": "FromImage",
+                     "diskSizeGB": 900,
+                     "managedDisk": {
+                        "storageAccountType": "[variables('const_storageAccountType')]"
+                     }
+                  }
+               ]
+            },
+            "networkProfile": {
+               "networkInterfaces": [
+                  {
+                     "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('name_nic'))]"
+                  }
+               ]
+            },
+            "diagnosticsProfile": {
+               "bootDiagnostics": {
+                  "enabled": true,
+                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+               }
+            }
+         },
+         "plan": {
+            "name": "[variables('name_linuxImageOfferSKU')]",
+            "publisher": "[variables('const_imagePublisher')]",
+            "product": "[variables('const_imageOffer')]"
+         }
+      },
+      {
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${end}",
+         "type": "Microsoft.Resources/deployments",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
+            }
+         }
+      },
+      {
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-122130-jdk8-ol74}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122130-jdk8-ol74'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-122130-jdk8-ol73}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122130-jdk8-ol73'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-122140-jdk8-ol76}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-jdk8-ol76'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-141100-jdk8-ol76}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol76'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-141100-jdk11-ol76}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol76'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      }
+   ],
+   "outputs": {
+      "hostname": {
+         "type": "string",
+         "value": "[reference(variables('name_publicIPAddress')).dnsSettings.fqdn]"
+      },
+      "sshCommand": {
+         "type": "string",
+         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('name_publicIPAddress')).dnsSettings.fqdn)]"
+      }
+   }
+}

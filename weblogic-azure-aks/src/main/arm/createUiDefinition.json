@@ -1,0 +1,543 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "basicsRequired",
+                "type": "Microsoft.Common.Section",
+                "label": "Credentials for WebLogic",
+                "elements": [
+                    {
+                        "name": "wlsUserName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for WebLogic Administrator",
+                        "defaultValue": "weblogic",
+                        "toolTip": "Use only letters and numbers",
+                        "constraints": {
+                            "required": true,
+                            "validations": [
+                                {
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "message": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                {
+                                    "isValid": "[greaterOrEquals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                                    "message": "Please select at least one user assigned managed identity from User assigned managed identity control below."
+                                }
+                            ]
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "wlsPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for WebLogic Administrator",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "Password for WebLogic Administrator",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "wdtRuntimePassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for WebLogic Deploy Tooling runtime encrytion",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "The model WebLogic Deploy Tooling runtime encrytion secret.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "ocrSSOInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "Info",
+                            "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Click the link to create Oracle SSO account.",
+                            "uri": "https://profile.oracle.com/myprofile/account/create-account.jspx"
+                        }
+                    },
+                    {
+                        "name": "ocrSSOUserName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for Oracle Single Sign-On authentication",
+                        "defaultValue": "example@foo.com",
+                        "toolTip": "Username for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                            "validationMessage": "The value must be an email address."
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "ocrSSOPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for Oracle Single Sign-On authentication",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "Password for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d\\$\\&\\+\\,:;\\=\\?@#|'.\\^\\*!\\-_~/'\\[\\]\\{\\}\"]{8,}$",
+                            "validationMessage": "The password must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "errInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": "[less(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                        "options": {
+                            "icon": "Error",
+                            "text": "Please select at least one user assigned managed identity.",
+                            "uri": "https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal"
+                        }
+                    },
+                    {
+                        "name": "identity",
+                        "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                        "label": "Managed Identity Configuration",
+                        "toolTip": {
+                            "userAssignedIdentity": "Add user assigned identities to enable the WebLogic domain deployment."
+                        },
+                        "defaultValue": {
+                            "systemAssignedIdentity": "Off"
+                        },
+                        "options": {
+                            "hideSystemAssignedIdentity": true,
+                            "hideUserAssignedIdentity": false
+                        }
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "basicsOptional",
+                "type": "Microsoft.Common.Section",
+                "label": "Optional Basic Configuration",
+                "elements": [
+                    {
+                        "name": "basicsOptionalAcceptDefaults",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Accept defaults for optional configuration?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'No' to edit optional basic configuration.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "false"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "true"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "managedServerPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Name prefix for Managed Server",
+                        "toolTip": "The string to prepend to the name of the managed server.",
+                        "defaultValue": "managed-server",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
+                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and -."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsDomainName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "WebLogic Domain Name",
+                        "toolTip": "The name of the WebLogic Domain to create.",
+                        "defaultValue": "domain1",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,20}$",
+                            "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsDomainUID",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "WebLogic Domain UID",
+                        "toolTip": "The UID of the WebLogic Domain to create.",
+                        "defaultValue": "sample-domain1",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
+                            "validationMessage": "The Domain UID must be between 3 and 20 characters long and contain letters, numbers and -."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsClusterSize",
+                        "type": "Microsoft.Common.Slider",
+                        "min": 5,
+                        "max": 1000,
+                        "label": "Cluster size",
+                        "defaultValue": 5,
+                        "showStepMarkers": false,
+                        "toolTip": "The maximum size of the WebLogic cluster.",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "howToReportIssues",
+                "type": "Microsoft.Common.Section",
+                "label": "Report issues, get help, and share feedback",
+                "elements": [
+                    {
+                        "name": "howToReportIssueText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
+                            "link": {
+                                "label": "Issue tracker",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues"
+                            }
+                        }
+                    },
+                    {
+                        "name": "howToJoinSlack",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you want to interact directly with the Oracle WebLogic community, join the public Slack channel named 'oracle-weblogic'.",
+                            "link": {
+                                "label": "Join Slack",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-slack"
+                            }
+                        }
+                    },
+                    {
+                        "name": "survey",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "To get free help with Azure migration from the development team, fill out this survey.",
+                            "link": {
+                                "label": "Take survey",
+                                "uri": "https://aka.ms/wls-on-azure-survey"
+                            }
+                        }
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "About",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "None",
+                    "text": "Template version ${project.version}"
+                },
+                "visible": "[bool('${template.version.visible}')]"
+            }
+        ],
+        "steps": [
+            {
+                "name": "section_aks",
+                "label": "Configure AKS cluster",
+                "subLabel": {
+                    "preValidation": "Provide required info for AKS cluster configuration",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Configure AKS cluster",
+                "elements": [
+                    {
+                        "name": "clusterInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Azure Kubernetes Service",
+                        "elements": [
+                            {
+                                "name": "createAKSCluster",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create a new AKS cluster?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to create a new AKS cluster, or select 'No' to provide an existing AKS cluster.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "aksClusterSelector",
+                                "type": "Microsoft.Solutions.ResourceSelector",
+                                "label": "Select AKS cluster",
+                                "toolTip": "Select the existing AKS cluster.",
+                                "resourceType": "Microsoft.ContainerService/managedClusters",
+                                "options": {
+                                    "filter": {
+                                        "subscription": "onBasics",
+                                        "location": "onBasics"
+                                    }
+                                },
+                                "visible": "[not(bool(steps('section_aks').clusterInfo.createAKSCluster))]"
+                            },
+                            {
+                                "name": "aksNodeCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 1,
+                                "max": 1000,
+                                "label": "Node count",
+                                "defaultValue": 2,
+                                "showStepMarkers": false,
+                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "nodeVMSizeSelector",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "Size",
+                                "toolTip": "",
+                                "recommendedSizes": [
+                                    "Standard_DS2_v2"
+                                ],
+                                "constraints": {
+                                    "allowedSizes": [],
+                                    "excludedSizes": [],
+                                    "numAvailabilityZonesRequired": 3,
+                                    "zone": "3"
+                                },
+                                "options": {
+                                    "hideDiskTypeFilter": false
+                                },
+                                "osPlatform": "Linux",
+                                "count": 2,
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "enableAzureMonitoring",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Azure Monitoring",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "enableAzureFileShare",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Create Persistent Volume using Azure File share service",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "acrInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Azure Container Registry",
+                        "elements": [
+                            {
+                                "name": "createACR",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create a new ACR instance?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to create a new ACR instance, or select 'No' to provide an existing ACR instance.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "acrInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[not(bool(steps('section_aks').acrInfo.createACR))]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Make sure the Azure Container Registry has enabled admin user.",
+                                    "uri": "https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account"
+                                }
+                            },
+                            {
+                                "name": "acrSelector",
+                                "type": "Microsoft.Solutions.ResourceSelector",
+                                "label": "Select ACR instance",
+                                "toolTip": "Select the existing ACR instance.",
+                                "resourceType": "Microsoft.ContainerRegistry/registries",
+                                "options": {
+                                    "filter": {
+                                        "subscription": "onBasics",
+                                        "location": "onBasics"
+                                    }
+                                },
+                                "visible": "[not(bool(steps('section_aks').acrInfo.createACR))]"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "imageInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Oracle WebLogic Image",
+                        "elements": [
+                            {
+                                "name": "fromImageText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
+                                    "link": {
+                                        "label": "Must be a valid tag value from Oracle Container Registry",
+                                        "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "fromImage",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "WebLogic Docker tag",
+                                "defaultValue": "12.2.1.4-ol8",
+                                "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromImage option to 'imagetool'.",
+                                "multiLine": false,
+                                "constraints": {
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^[a-z0-9\\-\\.]+$",
+                                            "message": "Must be a valid Docker tag for WebLogic on Oracle Container Registry"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "jeeAppInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Java EE Application",
+                        "elements": [
+                            {
+                                "name": "uploadAppPackage",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Deploy your application package?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to deploy your application, or select 'No' to deploy a default 'hello world' open liberty application.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "appPackageUrl",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Application package (.war,.ear)",
+                                "toolTip": "The application war package to deploy.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "options": {
+                                    "multiple": true,
+                                    "uploadMode": "url",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
+                            },
+                            {
+                                "name": "appReplicas",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Number of application replicas",
+                                "defaultValue": "2",
+                                "toolTip": "The number of application replicas to deploy.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(1|2|3|4|5)$",
+                                    "validationMessage": "Number of application replicas to deploy, limit 1-5."
+                                }
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "acrName": "[last(split(steps('section_aks').acrInfo.acrSelector.id, '/'))]",
+            "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
+            "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
+            "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
+            "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
+            "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
+            "createACR": "[bool(steps('section_aks').acrInfo.createACR)]",
+            "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+            "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
+            "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
+            "identity": "[basics('basicsRequired').identity]",
+            "location": "[location()]",
+            "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
+            "ocrSSOPSW": "[basics('basicsRequired').ocrSSOPassword]",
+            "ocrSSOUser": "[basics('basicsRequired').ocrSSOUserName]",
+            "uploadAppPackage": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]",
+            "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
+            "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
+            "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
+            "wlsDomainUID": "[basics('basicsOptional').wlsDomainUID]",
+            "wlsImageTag": "[steps('section_aks').imageInfo.fromImage]",
+            "wlsPassword": "[basics('basicsRequired').wlsPassword]",
+            "wlsUserName": "[basics('basicsRequired').wlsUserName]"
+        }
+    }
+}

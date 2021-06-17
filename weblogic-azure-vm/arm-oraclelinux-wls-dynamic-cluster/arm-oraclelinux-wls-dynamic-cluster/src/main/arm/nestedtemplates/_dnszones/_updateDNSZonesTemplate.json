@@ -1,0 +1,129 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationDNSZonesTemplate": {
+            "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), concat(parameters('_artifactsLocation'),'nestedtemplates/'), deployment().properties.templateLink.uri)]",
+            "type": "string",
+            "metadata": {
+                "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "defaultValue": "",
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
+        },
+        "dnszonesARecordSetNames": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of A record names. Used to create A records."
+            }
+        },
+        "dnszonesCNAMEAlias": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of CNAME record alias. Used to create CNAME records."
+            }
+        },
+        "dnszonesCNAMERecordSetNames": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of CNAME record names. Used to create CNAME record set."
+            }
+        },
+        "dnszoneName": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure DNS Zone name."
+            }
+        },
+        "identity": {
+            "type": "Object",
+            "metadata": {
+                "description": "Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "resourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource group that has an Azure DNS Zone deployed."
+            }
+        },
+        "targetResources": {
+            "type": "array",
+            "metadata": {
+                "description": "References to Azure resources from where the DNS resource value is taken. Each item is corresponding to values of dnszonesARecordSetNames."
+            }
+        },
+        "ttl": {
+            "type": "int",
+            "defaultValue": 3600,
+            "metadata": {
+                "description": "The TTL (time-to-live) of the records in the record sets."
+            }
+        },
+        "utcValue": {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata": {
+                "description": "Current deployment time. Used as a tag in deployment script."
+            }
+        }
+    },
+    "functions": [
+        {
+            "namespace": "array",
+            "members": {
+                "join": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[replace(replace(replace(string(parameters('items')), '[\"', ''), '\"]', ''), '\",\"', ',')]"
+                    }
+                }
+            }
+        }
+    ],
+    "variables": {
+        "name_scriptDNSConfiguration": "updateDNSZones.sh"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "name": "script-createDNSRecords",
+            "location": "[parameters('location')]",
+            "identity": "[parameters('identity')]",
+            "kind": "AzureCLI",
+            "properties": {
+                "forceUpdateTag": "[parameters('utcValue')]",
+                "AzCliVersion": "2.15.0",
+                "timeout": "PT30M",
+                "arguments": "[format('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}', parameters('resourceGroup'), parameters('dnszoneName'), array.join(parameters('dnszonesARecordSetNames')),array.join(parameters('targetResources')), length(parameters('dnszonesARecordSetNames')), length(parameters('targetResources')), parameters('ttl'), array.join(parameters('dnszonesCNAMERecordSetNames')),array.join(parameters('dnszonesCNAMEAlias')),length(parameters('dnszonesCNAMERecordSetNames')), length(parameters('dnszonesCNAMEAlias')))]",
+                "primaryScriptUri": "[uri(parameters('_artifactsLocationDNSZonesTemplate'), concat('../../scripts/', variables('name_scriptDNSConfiguration'), parameters('_artifactsLocationSasToken')))]",
+                "cleanupPreference": "OnSuccess",
+                "retentionInterval": "P1D"
+            }
+        }
+    ]
+}

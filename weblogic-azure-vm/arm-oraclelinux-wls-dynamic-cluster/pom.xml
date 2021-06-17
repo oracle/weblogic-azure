@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Copyright (c) 2021, Oracle and/or its affiliates.
+     Licensed under the Universal Permissive License v 1.0 as shown at
+     https://oss.oracle.com/licenses/upl.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.oracle.weblogic.azure</groupId>
+    <artifactId>arm-oraclelinux-wls-dynamic-cluster-root</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.8</version>
+    <name>${project.artifactId}</name>
+    <description>
+        
+    </description>
+    <url>https://github.com/wls-eng/arm-oraclelinux-wls-dynamic-cluster</url>
+
+    <scm>
+        <connection>scm:git:git@github.com:wls-eng/arm-oraclelinux-wls-dynamic-cluster.git</connection>
+        <developerConnection>scm:git:git@github.com:wls-eng/arm-oraclelinux-wls-dynamic-cluster.git</developerConnection>
+        <url>https://github.com/wls-eng/arm-oraclelinux-wls-dynamic-cluster</url>
+        <tag>HEAD</tag>
+    </scm>
+    
+    <licenses>
+        <license>
+            <name>Universal Permissive License Version 1.0</name>
+            <url>http://oss.oracle.com/licenses/upl</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <modules>
+      <module>addnode</module>
+      <module>addnode-coherence</module>
+      <module>deletenode</module>
+      <module>arm-oraclelinux-wls-dynamic-cluster</module>
+    </modules>
+
+</project>

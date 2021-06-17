@@ -1,0 +1,75 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "value":"GEN-UNIQUE"
+    },
+    "aadsSettings": {
+      "value": {
+        "enable": true,
+        "publicIP": "GEN-UNIQUE",
+        "serverHost": "GEN-UNIQUE",
+        "certificateBase64String": "GEN-UNIQUE"
+      }
+    },
+    "adminPasswordOrKey": {
+      "value": "GEN-SSH-PUB-KEY"
+    },
+    "adminURL": {
+      "value": "GEN-UNIQUE"
+    },
+    "adminUsername": {
+      "value": "GEN-UNIQUE"
+    },
+    "dnsLabelPrefix": {
+      "value": "GEN-UNIQUE"
+    },
+    "location": {
+      "value": "GEN-UNIQUE"
+    },
+    "managedServerPrefix": {
+      "value": "GEN-UNIQUE"
+    },
+    "numberOfExistingNodes": {
+      "value": "GEN-UNIQUE"
+    },
+    "numberOfNewNodes": {
+      "value": "GEN-UNIQUE"
+    },
+    "skuUrnVersion": {
+      "value": "GEN-UNIQUE"
+    },
+    "storageAccountName": {
+      "value": "GEN-UNIQUE"
+    },
+    "usePreviewImage": {
+      "value": "GEN-UNIQUE"
+    },
+    "vmSizeSelect": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsDomainName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsUserName": {
+      "value": "GEN-UNIQUE"
+    },
+    "wlsPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "customSSLSettings": {
+        "value": {
+            "enable": false,
+            "customIdentityKeyStoreBase64String": "GEN-UNIQUE",
+            "customIdentityKeyStorePassPhrase": "GEN-UNIQUE",
+            "customIdentityKeyStoreType": "GEN-UNIQUE",
+            "customTrustKeyStoreBase64String": "GEN-UNIQUE",
+            "customTrustKeyStorePassPhrase": "GEN-UNIQUE",
+            "customTrustKeyStoreType": "GEN-UNIQUE",
+            "privateKeyAlias": "GEN-UNIQUE",
+            "privateKeyPassPhrase": "GEN-UNIQUE"
+        }
+    }
+  }
+}

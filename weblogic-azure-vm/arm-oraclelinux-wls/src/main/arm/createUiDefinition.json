@@ -1,0 +1,253 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "skuUrnVersion",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Oracle WebLogic Image",
+                "defaultValue": "WebLogic Server 14.1.1.0.0 and JDK11 on Oracle Linux 7.6",
+                "toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
+                "constraints": {
+                    "allowedValues": [
+                        {
+                            "label": "WebLogic Server 12.2.1.3.0 and JDK8 on Oracle Linux 7.4",
+                            "value": "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest"
+                        },
+                        {
+                            "label": "WebLogic Server 12.2.1.3.0 and JDK8 on Oracle Linux 7.3",
+                            "value": "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest"
+                        },
+                        {
+                            "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Oracle Linux 7.6",
+                            "value": "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest"
+                        },
+                        {
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Oracle Linux 7.6",
+                            "value": "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest"
+                        },
+                        {
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Oracle Linux 7.6",
+                            "value": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
+                        }
+                    ],
+                    "required": true
+                },
+                "visible": true
+            },
+            {
+                "name": "vmSizeSelect",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Virtual machine size",
+                "toolTip": "The size of virtual machine to provision.",
+                "recommendedSizes": [
+                    "Standard_A1",
+                    "Standard_A2",
+                    "Standard_A3",
+                    "Standard_A4",
+                    "Standard_B1ms"
+                ],
+                "constraints": {
+                    "excludedSizes": [
+                        "Standard_B1ls",
+                        "Standard_A0",
+                        "Basic_A0",
+                        "Standard_B1s"
+                    ]
+                },
+                "osPlatform": "Linux",
+                "count": "1",
+                "visible": true
+            },
+            {
+                "name": "basicsRequired",
+                "type": "Microsoft.Common.Section",
+                "label": "Credentials for Virtual Machines and WebLogic",
+                "elements": [
+                    {
+                        "name": "adminUsername",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for admin account of VMs",
+                        "defaultValue": "weblogic",
+                        "toolTip": "Use only letters and numbers",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "adminPasswordOrKey",
+                        "type": "Microsoft.Compute.CredentialsCombo",
+                        "label": {
+                            "authenticationType": "Authentication type",
+                            "password": "Password",
+                            "confirmPassword": "Confirm password",
+                            "sshPublicKey": "SSH public key"
+                        },
+                        "toolTip": {
+                            "authenticationType": "Use username and password or SSH public key for authentication to the VM",
+                            "password": "Password for admin account of VMs",
+                            "sshPublicKey": "SSH key for admin account of VMs"
+                        },
+                        "constraints": {
+                            "required": true,
+                            "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+                            "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
+                        },
+                        "options": {
+                            "hideConfirmation": false,
+                            "hidePassword": false
+                        },
+                        "osPlatform": "Linux",
+                        "visible": true
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "basicsOptional",
+                "type": "Microsoft.Common.Section",
+                "label": "Optional Basic Configuration",
+                "elements": [
+                    {
+                        "name": "basicsOptionalAcceptDefaults",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Accept defaults for optional configuration?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'No' to edit optional basic configuration.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "false"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "true"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "dnsLabelPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "DNS Label Prefix",
+                        "toolTip": "The string to prepend to the DNS label.",
+                        "defaultValue": "wls",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,10}$",
+                            "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "portsToExpose",
+                        "label": "Ports and port ranges to expose (N or N-N, comma separated)",
+                        "type": "Microsoft.Common.TextBox",
+                        "toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
+                        "defaultValue": "80,443,7001-9000",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]$",
+                            "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "useSystemAssignedManagedIdentity",
+                        "label": "Cause a system assigned managed identity to be created for the VM(s).",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "toolTip": "System assigned managed identities enable credential-free secure access to many Azure resources from this VM.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": true
+                        },
+                        "defaultValue": "Yes",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    }, 
+                    {
+                        "name": "About",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "None",
+                            "text": "Template version ${project.version}"
+                        },
+                        "visible": "[bool('${template.version.visible}')]"
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "howToReportIssues",
+                "type": "Microsoft.Common.Section",
+                "label": "Report issues, get help, and share feedback",
+                "elements": [
+                    {
+                        "name": "howToReportIssueText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
+                            "link": {
+                                "label": "Issue tracker",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues"
+                            }
+                        }   
+                    },
+                    {
+                        "name": "howToJoinSlack",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you want to interact directly with the Oracle WebLogic community, join the public Slack channel named 'oracle-weblogic'.",
+                            "link": {
+                                "label": "Join Slack",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-slack"
+                            }
+                        }
+                    },
+                    {
+                        "name": "survey",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "To get free help with Azure migration from the development team, fill out this survey.",
+                            "link": {
+                                "label": "Take survey",
+                                "uri": "https://aka.ms/wls-on-azure-survey"
+                            }
+                        }
+                    }                    
+                ],
+                "visible": true
+            }            
+        ],
+		"steps":[],
+        "outputs": {
+            "adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
+            "adminUsername": "[basics('basicsRequired').adminUsername]",
+            "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
+            "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
+            "portsToExpose": "[basics('basicsOptional').portsToExpose]",
+            "skuUrnVersion": "[basics('skuUrnVersion')]",
+            "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
+            "vmSizeSelect": "[basics('vmSizeSelect')]",
+            "Location": "[location()]"
+        }
+    }
+}

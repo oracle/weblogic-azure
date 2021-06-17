@@ -1,0 +1,378 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationOHSTemplate": {
+            "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
+            "type": "string",
+            "metadata": {
+                "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "defaultValue": "",
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
+        },
+        "adminPasswordOrKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+            }
+        },
+        "adminRestMgmtURL": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide admin REST management URL"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "User name for the Virtual Machine."
+            }
+        },
+        "authenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+            }
+        },
+        "dnsLabelPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
+        },
+        "guidValue": {
+            "type": "string",
+            "defaultValue": "[newGuid()]"
+        },
+        "keyType": {
+            "type": "string",
+            "defaultValue": "PKCS12",
+            "allowedValues": [
+                "JKS",
+                "PKCS12"
+            ],
+            "metadata": {
+                "description": "Provide Key type is JKS or PKCS12 signed certificates"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "ohsComponentName": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide OHS component name"
+            }
+        },
+        "ohsDomainName": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide OHS domain name"
+            }
+        },
+        "ohsNMPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for OHS NodeManager"
+            }
+        },
+        "ohsNMUser": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide OHS NodeManager user name"
+            }
+        },
+        "ohsSSLKeystoreData": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the secret in the specified KeyVault whose value is the SSL Certificate Data"
+            }
+        },
+        "ohsSSLKeystorePassword": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate"
+            }
+        },
+        "ohsSkuUrnVersion": {
+            "type": "string",
+            "defaultValue": "ohs-122140-jdk8-ol76;ohs-122140-jdk8-ol76;latest",
+            "allowedValues": [
+                "ohs-122140-jdk8-ol76;ohs-122140-jdk8-ol76;latest",
+                "ohs-122140-jdk8-ol74;ohs-122140-jdk8-ol74;latest",
+                "ohs-122140-jdk8-ol73;ohs-122140-jdk8-ol73;latest"
+            ],
+            "metadata": {
+                "description": "The Oracle Linux image with OHS and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
+            }
+        },
+        "ohsVMName": {
+            "type": "string",
+            "metadata": {
+                "description": "User name for the Virtual Machine."
+            }
+        },
+        "ohshttpPort": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide OHS HTTP port"
+            }
+        },
+        "ohshttpsPort": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide OHS HTTPS port"
+            }
+        },
+        "oracleVaultPswd": {
+            "type": "string",
+            "metadata": {
+                "description": "Password for Oracle Vault required for OHS SSL setup"
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of storage account. One storage account can store 20 vitual machines with 2 VHDs of 500 IOPS."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "virtual network name."
+            }
+        },
+        "vmSizeSelect": {
+            "type": "string",
+            "defaultValue": "Standard_A3",
+            "metadata": {
+                "description": "Select appropriate VM Size as per requirement"
+            }
+        },
+        "wlsPassword": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide WebLogic password"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide WebLogic username"
+            }
+        }
+    },
+    "variables": {
+        "const_imageOffer": "[variables('name_ohsSkuUrnVersion')[0]]",
+        "const_imagePublisher": "oracle",
+        "const_linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('adminPasswordOrKey')]"
+                    }
+                ]
+            }
+        },
+        "const_publicIPAddressType": "Dynamic",
+        "const_vmSize": "[parameters('vmSizeSelect')]",
+        "name_linuxImageOfferSKU": "[variables('name_ohsSkuUrnVersion')[1]]",
+        "name_linuxImageVersion": "[variables('name_ohsSkuUrnVersion')[2]]",
+        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
+        "name_nic": "_NIC",
+        "name_ohsSkuUrnVersion": "[split(parameters('ohsSkuUrnVersion'), ';')]",
+        "name_outputOHSHost": "[concat(parameters('ohsVMName'),variables('name_publicIPAddress'))]",
+        "name_publicIPAddress": "_PublicIP",
+        "name_scriptFile": "setupOHS.sh",
+        "name_subnet": "Subnet",
+        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('name_subnet'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "name": "[concat( variables('name_networkSecurityGroup'),'/','OHSPorts')]",
+            "apiVersion": "${azure.apiVersion}",
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 300,
+                "direction": "Inbound",
+                "destinationPortRanges": "[split(concat(parameters('ohshttpPort'),',',parameters('ohshttpsPort')), ',')]",
+                "sourceAddressPrefix": "*"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(parameters('ohsVMName'),variables('name_publicIPAddress'))]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',take(replace(parameters('guidValue'), '-', ''), 10),'-',toLower(parameters('ohsDomainName')))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(parameters('virtualNetworkName'), '/', variables('name_subnet'))]",
+            "condition": "[and(empty(parameters('virtualNetworkName')), empty(variables('name_subnet')))]"
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[concat(parameters('ohsVMName'), variables('name_nic'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses/', concat(parameters('ohsVMName'),variables('name_publicIPAddress')))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('ohsVMName'),variables('name_publicIPAddress')))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('ref_subnet')]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[parameters('ohsVMName')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[parameters('ohsVMName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('ohsVMName'), variables('name_nic')))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('const_vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('ohsVMName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPasswordOrKey')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('const_imagePublisher')]",
+                        "offer": "[variables('const_imageOffer')]",
+                        "sku": "[variables('name_linuxImageOfferSKU')]",
+                        "version": "[variables('name_linuxImageVersion')]"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "createOption": "FromImage",
+                            "diskSizeGB": 900,
+                            "managedDisk": {
+                                "storageAccountType": "StandardSSD_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('ohsVMName'), variables('name_nic')))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                    }
+                }
+            },
+            "plan": {
+                "name": "[variables('name_linuxImageOfferSKU')]",
+                "publisher": "[variables('const_imagePublisher')]",
+                "product": "[variables('const_imageOffer')]"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('ohsVMName'),'/newuserscript')]",
+            "apiVersion": "${azure.apiVersion}",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/', parameters('ohsVMName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationOHSTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh setupOHS.sh',' ',parameters('ohsDomainName'),' ',parameters('ohsComponentName'),' ',parameters('ohsNMUser'),' ',parameters('ohsNMPassword'),' ',parameters('ohshttpPort'),' ',parameters('ohshttpsPort'),' ',parameters('adminRestMgmtURL'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',base64(parameters('ohsSSLKeystoreData')),' ',base64(parameters('ohsSSLKeystorePassword')),' ',parameters('oracleVaultPswd'),' ',parameters('keyType'))]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "_ohsPublicIP": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('ohsVMName'),variables('name_publicIPAddress')))]"
+        },
+        "ohsHostName": {
+            "type": "string",
+            "value": "[reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn]"
+        },
+        "ohsAccessURL": {
+            "type": "string",
+            "value": "[concat('http://',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,':',parameters('ohshttpPort'))]"
+        },
+        "ohsSecureAccessURL": {
+            "type": "string",
+            "value": "[concat('https://',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,':',parameters('ohshttpsPort'))]"
+        }
+    }
+}

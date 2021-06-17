@@ -1,0 +1,436 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"_artifactsLocation": {
+			"type": "string",
+			"metadata": {
+				"description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+			}
+		},
+		"_artifactsLocationAGWTemplate": {
+			"defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
+			"type": "string",
+			"metadata": {
+				"description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+			}
+		},
+		"_artifactsLocationSasToken": {
+			"defaultValue": "",
+			"type": "securestring",
+			"metadata": {
+				"description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+			}
+		},
+		"adminVMName": {
+			"defaultValue": "adminVM",
+			"type": "string",
+			"metadata": {
+				"description": "Admin Server hosting VM name."
+			}
+		},
+		"appGatewaySSLCertificateData": {
+			"type": "string"
+		},
+		"appGatewaySSLCertificatePassword": {
+			"type": "string"
+		},
+		"customDomainName": {
+			"defaultValue": "application.contoso.xyz",
+			"type": "string",
+			"metadata": {
+				"description": "Custom DNS Zone domain name for the Application Gateway"
+			}
+		},
+		"dnsNameforApplicationGateway": {
+			"defaultValue": "[take(format('{0}{1}-{2}-{3}', 'wlsgw',take(replace(parameters('guidValue'),'-',''),6), toLower(resourceGroup().name),toLower(parameters('wlsDomainName'))),63)]",
+			"type": "string",
+			"metadata": {
+				"description": "DNS for ApplicationGateway"
+			}
+		},
+		"gatewayPublicIPAddressName": {
+			"defaultValue": "gwip",
+			"type": "string",
+			"metadata": {
+				"description": "Public IP Name for the Application Gateway"
+			}
+		},
+		"guidValue": {
+			"type": "string",
+			"defaultValue": "[newGuid()]"
+		},
+		"location": {
+			"type": "string",
+			"metadata": {
+				"description": "Location for all resources."
+			}
+		},
+		"managedServerPrefix": {
+			"defaultValue": "msp",
+			"type": "string",
+			"metadata": {
+				"description": "Provide managed server prefix names"
+			}
+		},
+		"numberOfInstances": {
+			"defaultValue": 2,
+			"type": "int",
+			"minValue": 2,
+			"maxValue": 5,
+			"metadata": {
+				"description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
+			}
+		},
+		"overrideHostName": {
+			"defaultValue": false,
+			"type": "bool",
+			"metadata": {
+				"description": "If true, will override the host name with dnszoneSubDomain."
+			}
+		},
+		"wlsDomainName": {
+			"defaultValue": "wlsd",
+			"type": "string",
+			"metadata": {
+				"description": "Provide Weblogic domain name"
+			}
+		},
+		"wlsPassword": {
+			"type": "securestring",
+			"metadata": {
+				"description": "Password for your Weblogic domain name"
+			}
+		},
+		"wlsUserName": {
+			"defaultValue": "weblogic",
+			"type": "string",
+			"metadata": {
+				"description": "Username for your Weblogic domain name"
+			}
+		}
+	},
+	"variables": {
+		"const_adminServerName": "admin",
+		"const_appGatewayFrontEndHTTPPort": 80,
+		"const_appGatewayFrontEndHTTPSPort": 443,
+		"const_backendPort": 8001,
+		"const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+		"const_wlsAdminPort": "7005",
+		"const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+		"name_appGateway": "myAppGateway",
+		"name_appGatewayCertificate": "appGwSslCertificate",
+		"name_appGatewaySubnet": "appGatewaySubnet",
+		"name_backendAddressPool": "myGatewayBackendPool",
+		"name_frontEndIPConfig": "appGwPublicFrontendIp",
+		"name_httpListener": "HTTPListener",
+		"name_httpPort": "http_port",
+		"name_httpSetting": "myHTTPSetting",
+		"name_httpsListener": "HTTPSListener",
+		"name_httpsPort": "https_port",
+		"name_probe": "HTTPhealthProbe",
+		"name_scriptAGWConfiguration": "setupApplicationGateway.sh",
+		"name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+		"obj_HTTPSettingsDefault": {
+			"provisioningState": "Succeeded",
+			"port": "[int(variables('const_backendPort'))]",
+			"protocol": "Http",
+			"cookieBasedAffinity": "Enabled",
+			"pickHostNameFromBackendAddress": true,
+			"affinityCookieName": "ApplicationGatewayAffinity",
+			"requestTimeout": 20,
+			"probe": {
+				"id": "[variables('ref_backendProbe')]"
+			}
+		},
+		"obj_HTTPSettingsCustomDNS": {
+			"provisioningState": "Succeeded",
+			"port": "[int(variables('const_backendPort'))]",
+			"protocol": "Http",
+			"cookieBasedAffinity": "Enabled",
+			"hostName": "[parameters('customDomainName')]",
+			"pickHostNameFromBackendAddress": false,
+			"affinityCookieName": "ApplicationGatewayAffinity",
+			"requestTimeout": 20,
+			"probe": {
+				"id": "[variables('ref_backendProbe')]"
+			}
+		},
+		"ref_appGatewayPublicIP": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('gatewayPublicIPAddressName'))]",
+		"ref_appGatewaySubnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_appGatewaySubnet'))]",
+		"ref_backendAddressPool": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('name_appGateway'),variables('name_backendAddressPool'))]",
+		"ref_backendHttpSettings": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('name_appGateway'),variables('name_httpSetting'))]",
+		"ref_backendProbe": "[resourceId('Microsoft.Network/applicationGateways/probes', variables('name_appGateway'),variables('name_probe'))]",
+		"ref_frontendHTTPPort": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('name_appGateway'),variables('name_httpPort'))]",
+		"ref_frontendHTTPSPort": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('name_appGateway'),variables('name_httpsPort'))]",
+		"ref_frontendIPConfiguration": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', variables('name_appGateway'),variables('name_frontEndIPConfig'))]",
+		"ref_httpListener": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('name_appGateway'),variables('name_httpListener'))]",
+		"ref_httpsListener": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('name_appGateway'),variables('name_httpsListener'))]",
+		"ref_sslCertificate": "[resourceId('Microsoft.Network/applicationGateways/sslCertificates', variables('name_appGateway'),variables('name_appGatewayCertificate'))]"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "${azure.apiVersion}",
+			"name": "${cluster.appgateway.start}",
+			"properties": {
+				"mode": "Incremental",
+				"template": {
+					"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+					"contentVersion": "1.0.0.0",
+					"resources": [
+					]
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Network/publicIPAddresses",
+			"apiVersion": "${azure.apiVersion}",
+			"name": "[parameters('gatewayPublicIPAddressName')]",
+			"sku": {
+				"name": "Standard"
+			},
+			"location": "[parameters('location')]",
+			"properties": {
+				"publicIPAllocationMethod": "Static",
+				"dnsSettings": {
+					"domainNameLabel": "[parameters('dnsNameforApplicationGateway')]"
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Network/applicationGateways",
+			"apiVersion": "${azure.apiVersion}",
+			"name": "[variables('name_appGateway')]",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewayPublicIPAddressName'))]"
+			],
+			"properties": {
+				"sku": {
+					"name": "WAF_v2",
+					"tier": "WAF_v2"
+				},
+				"gatewayIPConfigurations": [
+					{
+						"name": "appGatewayIpConfig",
+						"properties": {
+							"subnet": {
+								"id": "[variables('ref_appGatewaySubnet')]"
+							}
+						},
+						"type": "Microsoft.Network/applicationGateways/gatewayIPConfigurations"
+					}
+				],
+				"frontendIPConfigurations": [
+					{
+						"name": "appGwPublicFrontendIp",
+						"type": "Microsoft.Network/applicationGateways/frontendIPConfigurations",
+						"properties": {
+							"publicIPAddress": {
+								"id": "[variables('ref_appGatewayPublicIP')]"
+							}
+						}
+					}
+				],
+				"frontendPorts": [
+					{
+						"name": "http_port",
+						"properties": {
+							"port": "[int(variables('const_appGatewayFrontEndHTTPPort'))]"
+						},
+						"type": "Microsoft.Network/applicationGateways/frontendPorts"
+					},
+					{
+						"name": "https_port",
+						"properties": {
+							"port": "[int(variables('const_appGatewayFrontEndHTTPSPort'))]"
+						},
+						"type": "Microsoft.Network/applicationGateways/frontendPorts"
+					}
+				],
+				"sslCertificates": [
+					{
+						"name": "appGwSslCertificate",
+						"properties": {
+							"data": "[parameters('appGatewaySSLCertificateData')]",
+							"password": "[parameters('appGatewaySSLCertificatePassword')]"
+						}
+					}
+				],
+				"backendAddressPools": [
+					{
+						"name": "myGatewayBackendPool",
+						"properties": {
+							"copy": [
+								{
+									"name": "BackendAddresses",
+									"count": "[sub(int(parameters('numberOfInstances')),1)]",
+									"input": {
+										"fqdn": "[concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1))]"
+									}
+								}
+							]
+						},
+						"type": "Microsoft.Network/applicationGateways/backendAddressPools"
+					}
+				],
+				"backendHttpSettingsCollection": [
+					{
+						"name": "myHTTPSetting",
+						// Solve the URL redirection issue
+						"properties": "[if(parameters('overrideHostName'), variables('obj_HTTPSettingsCustomDNS'),variables('obj_HTTPSettingsDefault'))]",
+						"type": "Microsoft.Network/applicationGateways/backendHttpSettingsCollection"
+					}
+				],
+				"httpListeners": [
+					{
+						"name": "HTTPListener",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[variables('ref_frontendIPConfiguration')]"
+							},
+							"frontendPort": {
+								"id": "[variables('ref_frontendHTTPPort')]"
+							},
+							"protocol": "Http",
+							"requireServerNameIndication": false
+						},
+						"type": "Microsoft.Network/applicationGateways/httpListeners"
+					},
+					{
+						"name": "HTTPSListener",
+						"properties": {
+							"frontendIPConfiguration": {
+								"id": "[variables('ref_frontendIPConfiguration')]"
+							},
+							"frontendPort": {
+								"id": "[variables('ref_frontendHTTPSPort')]"
+							},
+							"protocol": "Https",
+							"requireServerNameIndication": false,
+							"SslCertificate": {
+								"id": "[variables('ref_sslCertificate')]"
+							}
+						},
+						"type": "Microsoft.Network/applicationGateways/httpListeners"
+					}
+
+				],
+				"requestRoutingRules": [
+					{
+						"name": "HTTPRoutingRule",
+						"properties": {
+							"ruleType": "Basic",
+							"httpListener": {
+								"id": "[variables('ref_httpListener')]"
+							},
+							"backendAddressPool": {
+								"id": "[variables('ref_backendAddressPool')]"
+							},
+							"backendHttpSettings": {
+								"id": "[variables('ref_backendHttpSettings')]"
+							}
+						},
+						"type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+					},
+					{
+						"name": "HTTPSRoutingRule",
+						"properties": {
+							"ruleType": "Basic",
+							"httpListener": {
+								"id": "[variables('ref_httpsListener')]"
+							},
+							"backendAddressPool": {
+								"id": "[variables('ref_backendAddressPool')]"
+							},
+							"backendHttpSettings": {
+								"id": "[variables('ref_backendHttpSettings')]"
+							}
+						},
+						"type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+					}
+				],
+				"probes": [
+					{
+						"name": "HTTPhealthProbe",
+						"properties": {
+							"protocol": "Http",
+							"path": "/weblogic/ready",
+							"interval": 30,
+							"timeout": 30,
+							"unhealthyThreshold": 3,
+							"pickHostNameFromBackendHttpSettings": true,
+							"minServers": 0,
+							"match": {
+								"statusCodes": [
+									"200-399"
+								]
+							}
+						},
+						"type": "Microsoft.Network/applicationGateways/probes"
+					}
+				],
+				"enableHttp2": false,
+				"autoscaleConfiguration": {
+					"minCapacity": 2,
+					"maxCapacity": 3
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"apiVersion": "${azure.apiVersion}",
+			"name": "[concat(parameters('adminVMName'),'/newuserscript')]",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Network/applicationGateways', variables('name_appGateway'))]"
+			],
+			"properties": {
+				"publisher": "Microsoft.Azure.Extensions",
+				"type": "CustomScript",
+				"typeHandlerVersion": "2.0",
+				"autoUpgradeMinorVersion": true,
+				"settings": {
+					"fileUris": [
+						"[uri(parameters('_artifactsLocationAGWTemplate'), concat('../scripts/', variables('name_scriptAGWConfiguration'), parameters('_artifactsLocationSasToken')))]"
+					]
+				},
+				"protectedSettings": {
+					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),' ', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn), ' ',variables('const_wlsHome'))]"
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "${azure.apiVersion}",
+			"name": "${cluster.appgateway.end}",
+			"dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+			"properties": {
+				"mode": "Incremental",
+				"template": {
+					"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+					"contentVersion": "1.0.0.0",
+					"resources": [
+					]
+				}
+			}
+		}
+	],
+	"outputs": {
+		"appGatewayAlias": {
+			"type": "string",
+			"value": "[reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn]"
+		},
+		"appGatewayURL": {
+			"type": "string",
+			"value": "[concat('http://',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn)]"
+		},
+		"appGatewaySecuredURL": {
+			"type": "string",
+			"value": "[concat('https://',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn)]"
+		}
+	}
+}

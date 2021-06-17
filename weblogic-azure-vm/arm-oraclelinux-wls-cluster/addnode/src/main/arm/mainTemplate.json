@@ -1,0 +1,665 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "_artifactsLocation": {
+         "type": "string",
+         "metadata": {
+            "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+         },
+         "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-cluster/${git.tag}/addnode/src/main/"
+      },
+      "_artifactsLocationSasToken": {
+         "type": "securestring",
+         "metadata": {
+            "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+         },
+         "defaultValue": ""
+      },
+      "aadsSettings": {
+         "type": "object",
+         "defaultValue": {
+            "enable": false,
+            "publicIP": "null",
+            "serverHost": "null",
+            "certificateBase64String": "null"
+         },
+         "metadata": {
+            "description": "If enable is true, must specify all aadSettings. publicIP is the Azure Active Directory LDAP server public IP address. serverHost is the LDAP server host. certificateBase64String is based64 string of LADP client certificate that will be imported to trust store of WebLogic Server to enable SSL connection of AD provider."
+         }
+      },
+      "adminPasswordOrKey": {
+         "type": "securestring",
+         "metadata": {
+            "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+         }
+      },
+      "adminURL": {
+         "type": "string",
+         "metadata": {
+            "description": "Provide admin URL with vm0_public_ip:7001"
+         }
+      },
+      "adminUsername": {
+         "type": "string",
+         "defaultValue": "weblogic",
+         "metadata": {
+            "description": "User name for the Virtual Machine."
+         }
+      },
+      "appGatewaySettings": {
+         "type": "object",
+         "defaultValue": {
+            "enable": false,
+            "publicIPName": "null",
+            "certificateBase64String": "null",
+            "certificatePassword": "null"
+         },
+         "metadata": {
+            "description": "If enable is true, must specify all appGatewaySettings. name is resource name of application gateway, used to re-deploy existing application gateway.  publicIPName is public IP name of application gateway, used to set public address to new managed servers, certificateBase64String is base64 string of the application gateway ssl server certificate, certificatePassword is password of the certificate."
+         }
+      },
+      "authenticationType": {
+         "type": "string",
+         "defaultValue": "password",
+         "allowedValues": [
+            "sshPublicKey",
+            "password"
+         ],
+         "metadata": {
+            "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+         }
+      },
+      "dnsLabelPrefix": {
+         "type": "string",
+         "defaultValue": "wls",
+         "metadata": {
+            "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+         }
+      },
+      "elkSettings": {
+         "type": "object",
+         "defaultValue": {
+            "enable": false,
+            "elasticsearchEndpoint": "null",
+            "elasticsearchPassword": "null",
+            "elasticsearchUserName": "null",
+            "logIndex": "null",
+            "logsToIntegrate": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ]
+         },
+         "metadata": {
+            "description": "If enable is true, must specify all the properties of elkSettings. logsToIntegrate must be value of an array."
+         }
+      },
+      "enableCoherence": {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "If true, create Coherence Cluster with data tier for caches."
+            }
+        },
+      "guidValue": {
+         "type": "string",
+         "defaultValue": "[newGuid()]"
+      },
+      "location": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().location]",
+         "metadata": {
+            "description": "Location for all resources."
+         }
+      },
+      "managedServerPrefix": {
+         "type": "string",
+         "defaultValue": "msp",
+         "metadata": {
+            "description": "Provide managed server prefix"
+         }
+      },
+      "numberOfExistingNodes": {
+         "type": "int",
+         "minValue": 1,
+         "maxValue": 20,
+         "metadata": {
+            "description": "The number of existing application managed servers, used to generate new virtual machine name."
+         }
+      },
+      "numberOfNewNodes": {
+         "type": "int",
+         "defaultValue": 1,
+         "minValue": 1,
+         "maxValue": 20,
+         "metadata": {
+            "description": "The number of managed server to add."
+         }
+      },
+      "skuUrnVersion": {
+           "type": "string",
+           "defaultValue": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+           "allowedValues": [
+              "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
+              "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
+              "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
+              "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
+              "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
+           ],
+           "metadata": {
+              "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
+           }
+        },
+      "storageAccountName": {
+         "type": "string",
+         "metadata": {
+            "description": "Name of storage account. One storage account can store 20 vitual machines with 2 VHDs of 500 IOPS."
+         }
+      },
+      "usePreviewImage": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
+         }
+      },
+      "vmSizeSelect": {
+         "type": "string",
+         "defaultValue": "Standard_A3",
+         "metadata": {
+            "description": "Select appropriate VM Size as per requirement"
+         }
+      },
+      "wlsDomainName": {
+         "type": "string",
+         "defaultValue": "wlsd",
+         "metadata": {
+            "description": "Provide existing running Weblogic domain name"
+         }
+      },
+      "wlsUserName": {
+         "type": "string",
+         "metadata": {
+            "description": "Username for your Weblogic domain name"
+         }
+      },
+      "wlsPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Password for your Weblogic domain name"
+         }
+      },
+      "customSSLSettings": {
+         "type": "object",
+         "defaultValue": {
+            "enable": false,
+            "customIdentityKeyStoreBase64String": "null",
+            "customIdentityKeyStorePassPhrase": "null",
+            "customIdentityKeyStoreType": "null",
+            "customTrustKeyStoreBase64String": "null",
+            "customTrustKeyStorePassPhrase": "null",
+            "customTrustKeyStoreType": "null",
+            "privateKeyAlias":"null",
+            "privateKeyPassPhrase":"null"
+         },
+         "metadata": {
+            "description": "If enable is true, must specify all customSSLSettings. customIdentityKeyStoreBase64String & customTrustKeyStoreBase64String are the custom identity & trust keystore data repectively, i.e., contents of identity.jks, trust.jks keystore files in base64 encoding. Similarly, all other custom ssl settings are also required to configure SSL settings"
+         }
+      }
+   },
+   "variables": {
+      "const_appNodeMachineOffset": "[add(parameters('numberOfExistingNodes'), 1)]",
+      "const_appGatewayFrontEndHTTPPort": 80,
+      "const_appGatewayFrontEndHTTPSPort": 443,
+      "const_backendPort": 8001,
+      "const_hyphen": "-",
+      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
+      "const_imagePublisher": "oracle",
+      "const_linuxConfiguration": {
+         "disablePasswordAuthentication": true,
+         "ssh": {
+            "publicKeys": [
+               {
+                  "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                  "keyData": "[parameters('adminPasswordOrKey')]"
+               }
+            ]
+         }
+      },
+      "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
+      "const_publicIPAddressType": "Dynamic",
+      "const_vmSize": "[parameters('vmSizeSelect')]",
+      "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+      "const_wlsDomainPath": "/u01/domains",
+      "name_appGateway": "myAppGateway",
+      "name_appGatewayCertificate": "appGwSslCertificate",
+      "name_appGatewaySubnet": "appGatewaySubnet",
+      "name_availabilitySet": "WLSCluster-AvailabilitySet",
+      "name_backendAddressPool": "myGatewayBackendPool",
+      "name_frontEndIPConfig": "appGwPublicFrontendIp",
+      "name_httpListener": "HTTPListener",
+      "name_httpPort": "http_port",
+      "name_httpsListener": "HTTPSListener",
+      "name_httpsPort": "https_port",
+      "name_httpSetting": "myHTTPSetting",
+      "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
+      "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
+      "name_nic": "_NIC",
+      "name_probe": "HTTPhealthProbe",
+      "name_publicIPAddress": "_PublicIP",
+      "name_scriptELKConfiguration": "elkIntegration.sh",
+      "name_scriptFile": "addnode.sh",
+      "name_share": "wlsshare",
+      "name_subnet": "Subnet",
+      "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+      "name_vmMachine": "[concat(parameters('managedServerPrefix'),'VM')]",
+      "ref_backendAddressPool": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('name_appGateway'),variables('name_backendAddressPool'))]",
+      "ref_backendHttpSettings": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('name_appGateway'),variables('name_httpSetting'))]",
+      "ref_backendProbe": "[resourceId('Microsoft.Network/applicationGateways/probes', variables('name_appGateway'),variables('name_probe'))]",
+      "ref_frontendHTTPPort": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('name_appGateway'),variables('name_httpPort'))]",
+      "ref_frontendHTTPSPort": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('name_appGateway'),variables('name_httpsPort'))]",
+      "ref_frontendIPConfiguration": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', variables('name_appGateway'),variables('name_frontEndIPConfig'))]",
+      "ref_httpListener": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('name_appGateway'),variables('name_httpListener'))]",
+      "ref_httpsListener": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('name_appGateway'),variables('name_httpsListener'))]",
+      "ref_sslCertificate": "[resourceId('Microsoft.Network/applicationGateways/sslCertificates', variables('name_appGateway'),variables('name_appGatewayCertificate'))]",
+      "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
+   },
+   "functions": [
+      {
+         "namespace": "array",
+         "members": {
+            "join": {
+               "parameters": [
+                  {
+                     "name": "items",
+                     "type": "array"
+                  }
+               ],
+               "output": {
+                  "type": "string",
+                  "value": "[replace(replace(replace(string(parameters('items')), '[\"', ''), '\"]', ''), '\",\"', ',')]"
+               }
+            }
+         }
+      }
+   ],
+   "resources": [
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${cluster.addnode.start}",
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Network/publicIPAddresses",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[concat(variables('name_vmMachine'),copyIndex(variables('const_appNodeMachineOffset')),variables('name_publicIPAddress'))]",
+         "location": "[parameters('location')]",
+         "copy": {
+            "name": "publicIPLoop",
+            "count": "[parameters('numberOfNewNodes')]"
+         },
+         "properties": {
+            "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
+            "dnsSettings": {
+               "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Network/virtualNetworks/subnets",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[concat(variables('name_virtualNetwork'), '/', variables('name_subnet'))]",
+         "condition": "[and(empty(variables('name_virtualNetwork')), empty(variables('name_subnet')))]"
+      },
+      {
+         "type": "Microsoft.Network/networkInterfaces",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[concat(variables('name_vmMachine'),copyIndex(variables('const_appNodeMachineOffset')), variables('name_nic'))]",
+         "location": "[parameters('location')]",
+         "copy": {
+            "name": "nicLoop",
+            "count": "[parameters('numberOfNewNodes')]"
+         },
+         "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('name_vmMachine'),copyIndex(variables('const_appNodeMachineOffset')),variables('name_publicIPAddress')))]"
+         ],
+         "properties": {
+            "ipConfigurations": [
+               {
+                  "name": "ipconfig1",
+                  "properties": {
+                     "privateIPAllocationMethod": "Dynamic",
+                     "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('name_vmMachine'),copyIndex(variables('const_appNodeMachineOffset')),variables('name_publicIPAddress')))]"
+                     },
+                     "subnet": {
+                        "id": "[variables('ref_subnet')]"
+                     }
+                  }
+               }
+            ],
+            "dnsSettings": {
+               "internalDnsNameLabel": "[concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')))]"
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Compute/virtualMachines",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')))]",
+         "location": "[parameters('location')]",
+         "copy": {
+            "name": "virtualMachineLoop",
+            "count": "[parameters('numberOfNewNodes')]"
+         },
+         "dependsOn": [
+            "nicLoop"
+         ],
+         "properties": {
+            "availabilitySet": {
+               "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('name_availabilitySet'))]"
+            },
+            "hardwareProfile": {
+               "vmSize": "[variables('const_vmSize')]"
+            },
+            "osProfile": {
+               "computerName": "[concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')))]",
+               "adminUsername": "[parameters('adminUsername')]",
+               "adminPassword": "[parameters('adminPasswordOrKey')]",
+               "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
+            },
+            "storageProfile": {
+               "imageReference": {
+                  "publisher": "[variables('const_imagePublisher')]",
+                  "offer": "[variables('const_imageOffer')]",
+                  "sku": "[variables('name_linuxImageOfferSKU')]",
+                  "version": "[variables('name_linuxImageVersion')]"
+               },
+               "osDisk": {
+                  "createOption": "FromImage",
+                  "managedDisk": {
+                     "storageAccountType": "Standard_LRS"
+                  }
+               },
+               "dataDisks": [
+                  {
+                     "lun": 0,
+                     "createOption": "FromImage",
+                     "diskSizeGB": 900,
+                     "managedDisk": {
+                        "storageAccountType": "Standard_LRS"
+                     }
+                  }
+               ]
+            },
+            "networkProfile": {
+               "networkInterfaces": [
+                  {
+                     "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')), variables('name_nic')))]"
+                  }
+               ]
+            },
+            "diagnosticsProfile": {
+               "bootDiagnostics": {
+                  "enabled": true,
+                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+               }
+            }
+         },
+         "plan": {
+            "name": "[variables('name_linuxImageOfferSKU')]",
+            "publisher": "[variables('const_imagePublisher')]",
+            "product": "[variables('const_imageOffer')]"
+         }
+      },
+      {
+         "type": "Microsoft.Network/applicationGateways",
+         "apiVersion": "${azure.apiVersion}",
+         "condition": "[parameters('appGatewaySettings').enable]",
+         "name": "[variables('name_appGateway')]",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "virtualMachineLoop"
+         ],
+         "properties": {
+            "sku": {
+               "name": "WAF_v2",
+               "tier": "WAF_v2"
+            },
+            "gatewayIPConfigurations": [
+               {
+                  "name": "appGatewayIpConfig",
+                  "properties": {
+                     "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('name_virtualNetwork'),variables('name_appGatewaySubnet'))]"
+                     }
+                  },
+                  "type": "Microsoft.Network/applicationGateways/gatewayIPConfigurations"
+               }
+            ],
+            "frontendIPConfigurations": [
+               {
+                  "name": "appGwPublicFrontendIp",
+                  "type": "Microsoft.Network/applicationGateways/frontendIPConfigurations",
+                  "properties": {
+                     "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('appGatewaySettings').publicIPName)]"
+                     }
+                  }
+               }
+            ],
+            "frontendPorts": [
+               {
+                  "name": "http_port",
+                  "properties": {
+                     "port": "[int(variables('const_appGatewayFrontEndHTTPPort'))]"
+                  },
+                  "type": "Microsoft.Network/applicationGateways/frontendPorts"
+               },
+               {
+                  "name": "https_port",
+                  "properties": {
+                     "port": "[int(variables('const_appGatewayFrontEndHTTPSPort'))]"
+                  },
+                  "type": "Microsoft.Network/applicationGateways/frontendPorts"
+               }
+            ],
+            "sslCertificates": [
+               {
+                  "name": "appGwSslCertificate",
+                  "properties": {
+                     "data": "[parameters('appGatewaySettings').certificateBase64String]",
+                     "password": "[parameters('appGatewaySettings').certificatePassword]"
+                  }
+               }
+            ],
+            "backendAddressPools": [
+               {
+                  "name": "myGatewayBackendPool",
+                  "properties": {
+                     "copy": [
+                        {
+                           "name": "BackendAddresses",
+                           "count": "[add(add(int(parameters('numberOfNewNodes')),int(variables('const_appNodeMachineOffset'))), -1)]",
+                           "input": {
+                              "fqdn": "[concat(variables('name_vmMachine'), copyIndex('BackendAddresses',1))]"
+                           }
+                        }
+                     ]
+                  },
+                  "type": "Microsoft.Network/applicationGateways/backendAddressPools"
+               }
+            ],
+            "backendHttpSettingsCollection": [
+               {
+                  "name": "myHTTPSetting",
+                  "properties": {
+                     "provisioningState": "Succeeded",
+                     "port": "[int(variables('const_backendPort'))]",
+                     "protocol": "Http",
+                     "cookieBasedAffinity": "Enabled",
+                     "pickHostNameFromBackendAddress": true,
+                     "affinityCookieName": "ApplicationGatewayAffinity",
+                     "requestTimeout": 20,
+                     "probe": {
+                        "id": "[variables('ref_backendProbe')]"
+                     }
+                  },
+                  "type": "Microsoft.Network/applicationGateways/backendHttpSettingsCollection"
+               }
+            ],
+            "httpListeners": [
+               {
+                  "name": "HTTPListener",
+                  "properties": {
+                     "frontendIPConfiguration": {
+                        "id": "[variables('ref_frontendIPConfiguration')]"
+                     },
+                     "frontendPort": {
+                        "id": "[variables('ref_frontendHTTPPort')]"
+                     },
+                     "protocol": "Http",
+                     "requireServerNameIndication": false
+                  },
+                  "type": "Microsoft.Network/applicationGateways/httpListeners"
+               },
+               {
+                  "name": "HTTPSListener",
+                  "properties": {
+                     "frontendIPConfiguration": {
+                        "id": "[variables('ref_frontendIPConfiguration')]"
+                     },
+                     "frontendPort": {
+                        "id": "[variables('ref_frontendHTTPSPort')]"
+                     },
+                     "protocol": "Https",
+                     "requireServerNameIndication": false,
+                     "SslCertificate": {
+                        "id": "[variables('ref_sslCertificate')]"
+                     }
+                  },
+                  "type": "Microsoft.Network/applicationGateways/httpListeners"
+               }
+
+            ],
+            "requestRoutingRules": [
+               {
+                  "name": "HTTPRoutingRule",
+                  "properties": {
+                     "ruleType": "Basic",
+                     "httpListener": {
+                        "id": "[variables('ref_httpListener')]"
+                     },
+                     "backendAddressPool": {
+                        "id": "[variables('ref_backendAddressPool')]"
+                     },
+                     "backendHttpSettings": {
+                        "id": "[variables('ref_backendHttpSettings')]"
+                     }
+                  },
+                  "type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+               },
+               {
+                  "name": "HTTPSRoutingRule",
+                  "properties": {
+                     "ruleType": "Basic",
+                     "httpListener": {
+                        "id": "[variables('ref_httpsListener')]"
+                     },
+                     "backendAddressPool": {
+                        "id": "[variables('ref_backendAddressPool')]"
+                     },
+                     "backendHttpSettings": {
+                        "id": "[variables('ref_backendHttpSettings')]"
+                     }
+                  },
+                  "type": "Microsoft.Network/applicationGateways/requestRoutingRules"
+               }
+            ],
+            "probes": [
+               {
+                  "name": "HTTPhealthProbe",
+                  "properties": {
+                     "protocol": "Http",
+                     "path": "/weblogic/ready",
+                     "interval": 30,
+                     "timeout": 30,
+                     "unhealthyThreshold": 3,
+                     "pickHostNameFromBackendHttpSettings": true,
+                     "minServers": 0,
+                     "match": {
+                        "statusCodes": [
+                           "200-399"
+                        ]
+                     }
+                  },
+                  "type": "Microsoft.Network/applicationGateways/probes"
+               }
+            ],
+            "enableHttp2": false,
+            "autoscaleConfiguration": {
+               "minCapacity": 2,
+               "maxCapacity": 3
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Compute/virtualMachines/extensions",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')), '/newuserscript')]",
+         "location": "[parameters('location')]",
+         "copy": {
+            "name": "virtualMachineExtensionLoop",
+            "count": "[parameters('numberOfNewNodes')]"
+         },
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset'))))]"
+         ],
+         "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+               "fileUris": [
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocation'), concat('../../../arm-oraclelinux-wls-cluster/src/main/scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]"
+               ]
+            },
+            "protectedSettings": {
+				"commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ', copyIndex(variables('const_appNodeMachineOffset')),' ', parameters('adminURL'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ',parameters('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersion2}').keys[0].value,' ', variables('const_mountPointPath'),' ', if(parameters('aadsSettings').enable, parameters('aadsSettings').certificateBase64String, 'null'),' ',if(parameters('aadsSettings').enable, parameters('aadsSettings').publicIP, 'null'),' ', if(parameters('aadsSettings').enable, parameters('aadsSettings').serverHost, 'null'),' ',if(parameters('appGatewaySettings').enable, reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('appGatewaySettings').publicIPName),'${azure.apiVersion}').dnsSettings.fqdn, 'null'), ' ',parameters('elkSettings').enable, ' ',parameters('elkSettings').elasticsearchEndpoint,' ', parameters('elkSettings').elasticsearchUserName,' ', parameters('elkSettings').elasticsearchPassword, ' ', array.join(parameters('elkSettings').logsToIntegrate), ' ',parameters('elkSettings').logIndex, ' ', parameters('enableCoherence'),' ',parameters('customSSLSettings').enable,' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyAlias, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyPassPhrase, 'null'))]"            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${cluster.addnode.end}",
+         "dependsOn": [
+            "virtualMachineExtensionLoop"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
+            }
+         }
+      }
+   ],
+   "outputs": {
+      "wlsDomainLocation": {
+         "type": "string",
+         "value": "[concat('/u01/domains/', parameters('wlsDomainName'))]"
+      },
+      "logIndex": {
+         "type": "string",
+         "value": "[if(parameters('elkSettings').enable, parameters('elkSettings').logIndex, '')]"
+      }
+   }
+}
