@@ -16,13 +16,13 @@
             }
         },
         "certificateDataValue": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Certificate data to store in the secret"
             }
         },
         "certificatePasswordValue": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Certificate password to store in the secret"
             }

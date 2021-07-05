@@ -48,6 +48,9 @@ cat <<EOF > ${parametersPath}
         "numberOfInstances": {
             "value": 4
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsLDAPGroupBaseDN": {
             "value": "GEN-UNIQUE"
         },

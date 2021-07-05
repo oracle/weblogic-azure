@@ -55,6 +55,9 @@ cat <<EOF > ${parametersPath}
         "numberOfInstances": {
             "value": 4
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsPassword": {
             "value": "GEN-UNIQUE"
         },

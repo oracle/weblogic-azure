@@ -62,7 +62,7 @@ function validateInput()
         echo_stderr "serverIndex is required. "
     fi
 
-    export wlsServerName=${managedServerPrefix}${serverIndex}
+    wlsServerName=${managedServerPrefix}${serverIndex}
 
     if [ -z "$wlsAdminURL" ];
     then
@@ -350,7 +350,7 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 echo "Waiting for admin server to start"
 while [[ "$status" != "200" ]]
@@ -602,7 +602,7 @@ function parseLDAPCertificate()
     done
 
     openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
-    export addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
+    addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
 }
 
 function importAADCertificate()
@@ -688,7 +688,7 @@ function parseAndSaveCustomSSLKeyStoreData()
 
     echo "$customIdentityKeyStoreBase64String" > ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt
     cat ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt | base64 -d > ${KEYSTORE_PATH}/identity.keystore
-    export customSSLIdentityKeyStoreFile=${KEYSTORE_PATH}/identity.keystore
+    customSSLIdentityKeyStoreFile=${KEYSTORE_PATH}/identity.keystore
 
     rm -rf ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt
 
@@ -697,7 +697,7 @@ function parseAndSaveCustomSSLKeyStoreData()
 
     echo "$customTrustKeyStoreBase64String" > ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt
     cat ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt | base64 -d > ${KEYSTORE_PATH}/trust.keystore
-    export customSSLTrustKeyStoreFile=${KEYSTORE_PATH}/trust.keystore
+    customSSLTrustKeyStoreFile=${KEYSTORE_PATH}/trust.keystore
 
     rm -rf ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt
 
@@ -707,7 +707,7 @@ function parseAndSaveCustomSSLKeyStoreData()
 
 #main script starts here
 
-export SCRIPT_PWD=`pwd`
+SCRIPT_PWD=`pwd`
 
 # store arguments in a special array 
 args=("$@") 
@@ -716,9 +716,9 @@ ELEMENTS=${#args[@]}
  
 # echo each element in array  
 # for loop 
-for (( i=0;i<$ELEMENTS;i++)); do 
-    echo "ARG[${args[${i}]}]"
-done
+#for (( i=0;i<$ELEMENTS;i++)); do 
+#    echo "ARG[${args[${i}]}]"
+#done
 
 if [ $# -lt 23 ]
 then
@@ -726,62 +726,62 @@ then
     exit 1
 fi
 
-export wlsDomainName=$1
-export wlsUserName=$2
-export wlsPassword=$3
-export managedServerPrefix=$4
-export serverIndex=$5
-export wlsAdminURL=$6
-export oracleHome=$7
-export wlsDomainPath=$8
-export storageAccountName=$9
-export storageAccountKey=${10}
-export mountpointPath=${11}
-export wlsADSSLCer="${12}"
-export wlsLDAPPublicIP="${13}"
-export adServerHost="${14}"
-export appGWHostName=${15}
-export enableELK=${16}
-export elasticURI=${17}
-export elasticUserName=${18}
-export elasticPassword=${19}
-export logsToIntegrate=${20}
-export logIndex=${21}
-export enableCoherence=${22}
+wlsDomainName=$1
+wlsUserName=$2
+wlsPassword=$3
+managedServerPrefix=$4
+serverIndex=$5
+wlsAdminURL=$6
+oracleHome=$7
+wlsDomainPath=$8
+storageAccountName=$9
+storageAccountKey=${10}
+mountpointPath=${11}
+wlsADSSLCer="${12}"
+wlsLDAPPublicIP="${13}"
+adServerHost="${14}"
+appGWHostName=${15}
+enableELK=${16}
+elasticURI=${17}
+elasticUserName=${18}
+elasticPassword=${19}
+logsToIntegrate=${20}
+logIndex=${21}
+enableCoherence=${22}
 
-export isCustomSSLEnabled="${23}"
+isCustomSSLEnabled="${23}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 if [ "${isCustomSSLEnabled,,}" == "true" ];
 then
-    export customIdentityKeyStoreBase64String="${24}"
-    export customIdentityKeyStorePassPhrase="${25}"
-    export customIdentityKeyStoreType="${26}"
-    export customTrustKeyStoreBase64String="${27}"
-    export customTrustKeyStorePassPhrase="${28}"
-    export customTrustKeyStoreType="${29}"
-    export privateKeyAlias="${30}"
-    export privateKeyPassPhrase="${31}"
+    customIdentityKeyStoreBase64String="${24}"
+    customIdentityKeyStorePassPhrase="${25}"
+    customIdentityKeyStoreType="${26}"
+    customTrustKeyStoreBase64String="${27}"
+    customTrustKeyStorePassPhrase="${28}"
+    customTrustKeyStoreType="${29}"
+    privateKeyAlias="${30}"
+    privateKeyPassPhrase="${31}"
 fi
 
-export coherenceListenPort=7574
-export coherenceLocalport=42000
-export coherenceLocalportAdjust=42200
-export enableAAD="false"
-export wlsAdminPort=7001
-export wlsAdminChannelPort=7005
-export wlsManagedPort=8001
-export wlsClusterName="cluster1"
-export nmHost=`hostname`
-export nmPort=5556
-export channelPort=8501
-export AppGWHttpPort=80
-export AppGWHttpsPort=443
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
-export username="oracle"
-export groupname="oracle"
+coherenceListenPort=7574
+coherenceLocalport=42000
+coherenceLocalportAdjust=42200
+enableAAD="false"
+wlsAdminPort=7001
+wlsAdminChannelPort=7005
+wlsManagedPort=8001
+wlsClusterName="cluster1"
+nmHost=`hostname`
+nmPort=5556
+channelPort=8501
+AppGWHttpPort=80
+AppGWHttpsPort=443
+WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
+username="oracle"
+groupname="oracle"
 
-export KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
 
 chmod ugo+x ${SCRIPT_PWD}/elkIntegration.sh
 
