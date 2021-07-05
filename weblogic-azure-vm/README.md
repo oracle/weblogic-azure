@@ -33,6 +33,13 @@ The following are the corresponding directories:
 
 - [https://github.com/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster](https://github.com/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster)
 
+## ARM Template based deployment of Weblogic Offers 
+
+For each WebLogic offer, the sample parameters.json file is located under the "src/main/arm" directory, corresponding to that offer.
+
+**Note**: Oracle recommends that the parameters.json file be deleted or secured after the WebLogic offer deployment is completed, 
+so that sensitive information such as user name and password are not inadvertently exposed.
+
 ## Documentation
 
 Please refer to the documentation [Oracle WebLogic Server Azure Applications](https://docs.oracle.com/en/middleware/standalone/weblogic-server/wlazu/get-started-oracle-weblogic-server-microsoft-azure-iaas.html#GUID-E0B24A45-F496-4509-858E-103F5EBF67A7)
