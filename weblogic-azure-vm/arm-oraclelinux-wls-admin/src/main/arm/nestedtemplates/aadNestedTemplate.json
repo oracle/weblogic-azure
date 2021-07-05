@@ -67,7 +67,7 @@
             }
         },
         "wlsLDAPPrincipal": {
-            "type": "string",
+            "type": "securestring",
             "defaultValue": "",
             "metadata": {
                 "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
@@ -88,14 +88,14 @@
             }
         },
         "wlsLDAPSSLCertificate": {
-            "type": "string",
+            "type": "securestring",
             "defaultValue": "",
             "metadata": {
                 "description": "Client certificate that will be imported to trust store of SSL."
             }
         },
         "wlsLDAPUserBaseDN": {
-            "type": "string",
+            "type": "securestring",
             "defaultValue": "",
             "metadata": {
                 "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
@@ -121,8 +121,8 @@
            }
         },
         "keyVaultCustomTrustKeyStorePassPhrase": {
-           "type": "string",
-           "defaultValue": "null",
+           "type": "securestring",
+           "defaultValue": "",
            "metadata": {
               "description": "Weblogic Custom Trust Store Passphrase"
            }

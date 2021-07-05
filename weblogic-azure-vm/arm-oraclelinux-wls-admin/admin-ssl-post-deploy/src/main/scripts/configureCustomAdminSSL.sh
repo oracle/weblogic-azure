@@ -154,7 +154,7 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 echo "Waiting for admin server to start"
 while [[ "$status" != "200" ]]
@@ -193,7 +193,7 @@ function parseLDAPCertificate()
     done
 
     openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
-    export addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
+    addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
 }
 
 function importAADCertificateIntoWLSCustomTrustKeyStore()
@@ -254,7 +254,7 @@ function parseAndSaveCustomSSLKeyStoreData()
 
     echo "$customIdentityKeyStoreBase64String" > ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt
     cat ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt | base64 -d > ${KEYSTORE_PATH}/identity.keystore
-    export customSSLIdentityKeyStoreFile=${KEYSTORE_PATH}/identity.keystore
+    customSSLIdentityKeyStoreFile=${KEYSTORE_PATH}/identity.keystore
 
     rm -rf ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt
 
@@ -263,7 +263,7 @@ function parseAndSaveCustomSSLKeyStoreData()
 
     echo "$customTrustKeyStoreBase64String" > ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt
     cat ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt | base64 -d > ${KEYSTORE_PATH}/trust.keystore
-    export customSSLTrustKeyStoreFile=${KEYSTORE_PATH}/trust.keystore
+    customSSLTrustKeyStoreFile=${KEYSTORE_PATH}/trust.keystore
 
     rm -rf ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt
 
@@ -279,7 +279,7 @@ function restartAdminServerService()
 
 #main script starts here
 
-export SCRIPT_PWD=`pwd`
+SCRIPT_PWD=`pwd`
 
 # store arguments in a special array 
 args=("$@") 
@@ -288,9 +288,9 @@ ELEMENTS=${#args[@]}
  
 # echo each element in array  
 # for loop 
-for (( i=0;i<$ELEMENTS;i++)); do 
-    echo "ARG[${args[${i}]}]"
-done
+#for (( i=0;i<$ELEMENTS;i++)); do 
+#    echo "ARG[${args[${i}]}]"
+#done
 
 if [ $# -lt 9 ]
 then
@@ -298,41 +298,41 @@ then
     exit 1
 fi
 
-export adminVMName=$1
-export wlsDomainName=$2
-export wlsUserName=$3
-export wlsPassword=$4
-export oracleHome=$5
-export wlsDomainPath=$6
+adminVMName=$1
+wlsDomainName=$2
+wlsUserName=$3
+wlsPassword=$4
+oracleHome=$5
+wlsDomainPath=$6
 
-export enableAAD="${7}"
+enableAAD="${7}"
 enableAAD="${enableAAD,,}"
 
-export wlsADSSLCer="${8}"
+wlsADSSLCer="${8}"
 
-export isCustomSSLEnabled="${9}"
+isCustomSSLEnabled="${9}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 if [ "${isCustomSSLEnabled,,}" == "true" ];
 then
-    export customIdentityKeyStoreBase64String="${10}"
-    export customIdentityKeyStorePassPhrase="${11}"
-    export customIdentityKeyStoreType="${12}"
-    export customTrustKeyStoreBase64String="${13}"
-    export customTrustKeyStorePassPhrase="${14}"
-    export customTrustKeyStoreType="${15}"
-    export privateKeyAlias="${16}"
-    export privateKeyPassPhrase="${17}"
+    customIdentityKeyStoreBase64String="${10}"
+    customIdentityKeyStorePassPhrase="${11}"
+    customIdentityKeyStoreType="${12}"
+    customTrustKeyStoreBase64String="${13}"
+    customTrustKeyStorePassPhrase="${14}"
+    customTrustKeyStoreType="${15}"
+    privateKeyAlias="${16}"
+    privateKeyPassPhrase="${17}"
 fi
 
-export wlsAdminPort=7001
-export wlsAdminChannelPort=7005
-export wlsAdminURL="$adminVMName:$wlsAdminChannelPort"
-export wlsServerName="admin"
-export username="oracle"
-export groupname="oracle"
+wlsAdminPort=7001
+wlsAdminChannelPort=7005
+wlsAdminURL="$adminVMName:$wlsAdminChannelPort"
+wlsServerName="admin"
+username="oracle"
+groupname="oracle"
 
-export KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
 
 validateInput
 cleanup

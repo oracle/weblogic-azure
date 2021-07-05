@@ -107,7 +107,7 @@ function queryAdminIPId() {
     exit 1
   fi
 
-  export adminIPId=$(az graph query -q "Resources 
+  adminIPId=$(az graph query -q "Resources 
     | where type =~ 'microsoft.network/networkinterfaces' 
     | where id=~ '${nicId}' 
     | extend ipConfigsCount=array_length(properties.ipConfigurations) 
@@ -122,7 +122,7 @@ function queryAdminIPId() {
 }
 
 function generateParameterFile() {
-  export parametersPath=parameters.json
+  parametersPath=parameters.json
   cat <<EOF >${scriptDir}/${parametersPath}
 {
     "\$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
@@ -230,8 +230,8 @@ Custom DNS alias:
 
 # main script start from here
 # default value
-export hasDNSZone=false
-export identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
+hasDNSZone=false
+identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
 
 # Transform long options to short ones
 for arg in "$@"; do
