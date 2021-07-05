@@ -55,7 +55,7 @@
             }
         },
         "elkSettings": {
-            "type": "object",
+            "type": "secureObject",
             "defaultValue": {
                 "enable": false,
                 "elasticsearchEndpoint": "null",
@@ -165,7 +165,7 @@
             }
         },
         "customSSLSettings": {
-             "type": "object",
+             "type": "secureObject",
              "defaultValue": {
                 "enable": false,
                 "customIdentityKeyStoreBase64String": "null",

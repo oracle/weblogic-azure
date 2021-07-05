@@ -150,11 +150,11 @@ wlsAdminHost=$4
 wlsAdminPort=$5
 AppGWHostName=$6
 oracleHome=$7
-export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
-export channelPort=8501
-export AppGWHttpPort=80
-export AppGWHttpsPort=443
+channelPort=8501
+AppGWHttpPort=80
+AppGWHttpsPort=443
 
 validateInput
 

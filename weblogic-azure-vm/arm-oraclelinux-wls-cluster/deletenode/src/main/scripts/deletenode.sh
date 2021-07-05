@@ -141,7 +141,7 @@ function wait_for_admin()
 {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
     echo "Check admin server status"
     while [[ "$status" != "200" ]]
@@ -186,7 +186,7 @@ function delete_managed_server()
 
 function createTempFolder()
 {
-    export scriptPath="/u01/tmp"
+    scriptPath="/u01/tmp"
     sudo rm -f -r ${scriptPath}
     sudo mkdir ${scriptPath}
     sudo rm -rf $scriptPath/*
@@ -200,16 +200,16 @@ then
 	exit 1
 fi
 
-export wlsUserName=$1
-export wlsPassword=$2
-export managedServerNames=$3
-export managedVMNames=$4
-export wlsForceShutDown=$5
-export wlsAdminHost=$6
-export wlsAdminPort=$7
-export oracleHome=$8
-export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-export hostName=`hostname`
+wlsUserName=$1
+wlsPassword=$2
+managedServerNames=$3
+managedVMNames=$4
+wlsForceShutDown=$5
+wlsAdminHost=$6
+wlsAdminPort=$7
+oracleHome=$8
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+hostName=`hostname`
 
 createTempFolder
 

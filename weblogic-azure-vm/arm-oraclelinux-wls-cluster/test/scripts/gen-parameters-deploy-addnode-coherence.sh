@@ -49,6 +49,9 @@ cat <<EOF > ${parametersPath}
       "wlsDomainName": {
         "value": "${wlsDomainName}"
       },
+      "vmSizeSelectForCoherence": {
+        "value": "Standard_D2as_v4"
+      },
       "wlsPassword": {
         "value": "${wlsPassword}"
       },

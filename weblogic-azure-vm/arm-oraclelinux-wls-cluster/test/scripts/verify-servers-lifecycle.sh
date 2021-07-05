@@ -4,7 +4,7 @@
 # This script is to test WebLogic cluster domain managed servers lifecycle. 
 
 
-export managedServers="#managedServers#"
+managedServers="#managedServers#"
 # Shutdown the server and verify whether it is in SHUTDOWN state
 # Restart the managed server
 for managedServer in $managedServers

@@ -77,7 +77,7 @@
         },
         "appGatewaySSLCertData": {
             "defaultValue": "",
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "The one-line, base64 string of the SSL certificate data."
             }

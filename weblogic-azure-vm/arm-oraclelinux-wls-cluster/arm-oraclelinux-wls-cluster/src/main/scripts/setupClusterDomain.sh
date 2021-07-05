@@ -112,8 +112,6 @@ function cleanup()
 
     rm -rf $DOMAIN_PATH/admin-domain.yaml
     rm -rf $DOMAIN_PATH/managed-domain.yaml
-    rm -rf $DOMAIN_PATH/weblogic-deploy.zip
-    rm -rf $DOMAIN_PATH/weblogic-deploy
     rm -rf $DOMAIN_PATH/deploy-app.yaml
     rm -rf $DOMAIN_PATH/shoppingcart.zip
     rm -rf $DOMAIN_PATH/*.py
@@ -328,18 +326,18 @@ function create_adminSetup()
 {
     echo "Creating Admin Setup"
     echo "Creating domain path $DOMAIN_PATH"
-    echo "Downloading weblogic-deploy-tool"
  
     sudo mkdir -p $DOMAIN_PATH 
-    sudo rm -rf $DOMAIN_PATH/*
 
     cd $DOMAIN_PATH
-    wget -q $WEBLOGIC_DEPLOY_TOOL
-    if [[ $? != 0 ]]; then
-       echo "Error : Downloading weblogic-deploy-tool failed"
-       exit 1
+
+	# WebLogic base images are already having weblogic-deploy, hence no need to download
+    if [ ! -d "$DOMAIN_PATH/weblogic-deploy" ];
+    then
+        echo "weblogic-deploy tool not found in path $DOMAIN_PATH"
+        exit 1
     fi
-    sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
+
     storeCustomSSLCerts
     create_admin_model
     sudo chown -R $username:$groupname $DOMAIN_PATH
@@ -369,7 +367,7 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 echo "Waiting for admin server to start"
 while [[ "$status" != "200" ]]
@@ -497,22 +495,21 @@ fi
 # Create managed server setup
 function create_managedSetup(){
     echo "Creating Managed Server Setup"
-    echo "Downloading weblogic-deploy-tool"
 
     DOMAIN_PATH="/u01/domains" 
     sudo mkdir -p $DOMAIN_PATH 
-    sudo rm -rf $DOMAIN_PATH/*
 
     cd $DOMAIN_PATH
-    wget -q $WEBLOGIC_DEPLOY_TOOL
-    if [[ $? != 0 ]]; then
-       echo "Error : Downloading weblogic-deploy-tool failed"
-       exit 1
+   
+	# WebLogic base images are already having weblogic-deploy, hence no need to download
+    if [ ! -d "$DOMAIN_PATH/weblogic-deploy" ];
+    then
+        echo "weblogic-deploy tool not found in path $DOMAIN_PATH"
+        exit 1
     fi
 
     storeCustomSSLCerts
 
-    sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
     echo "Creating managed server model files"
     create_managed_model
     create_machine_model
@@ -668,8 +665,8 @@ function storeCustomSSLCerts()
         mkdir -p $KEYSTORE_PATH
 
         echo "Custom SSL is enabled. Storing CertInfo as files..."
-        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
-        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
+        customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
+        customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
 
         customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
         customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
@@ -729,7 +726,7 @@ function createStopWebLogicScript()
 cat <<EOF >${stopWebLogicScript}
 #!/bin/sh
 # This is custom script for stopping weblogic server using ADMIN_URL supplied
-export ADMIN_URL="t3://${wlsAdminURL}"
+ADMIN_URL="t3://${wlsAdminURL}"
 ${DOMAIN_PATH}/${wlsDomainName}/bin/stopWebLogic.sh
 EOF
 
@@ -741,7 +738,7 @@ sudo chmod -R 750 ${stopWebLogicScript}
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BASE_DIR="$(readlink -f ${CURR_DIR})"
+BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 # store arguments in a special array 
 args=("$@") 
@@ -750,9 +747,9 @@ ELEMENTS=${#args[@]}
  
 # echo each element in array  
 # for loop 
-for (( i=0;i<$ELEMENTS;i++)); do 
-    echo "ARG[${args[${i}]}]"
-done
+#for (( i=0;i<$ELEMENTS;i++)); do 
+#    echo "ARG[${args[${i}]}]"
+#done
 
 if [ $# -le 8 ]
 then
@@ -760,73 +757,72 @@ then
     exit 1
 fi
 
-export wlsDomainName=${1}
-export wlsUserName=${2}
-export wlsPassword=${3}
-export wlsServerName=${4}
-export wlsAdminHost=${5}
-export oracleHome=${6}
-export storageAccountName=${7}
-export storageAccountKey=${8}
-export mountpointPath=${9}
+wlsDomainName=${1}
+wlsUserName=${2}
+wlsPassword=${3}
+wlsServerName=${4}
+wlsAdminHost=${5}
+oracleHome=${6}
+storageAccountName=${7}
+storageAccountKey=${8}
+mountpointPath=${9}
 
-export isHTTPAdminListenPortEnabled="${10}"
+isHTTPAdminListenPortEnabled="${10}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 
-export isCustomSSLEnabled="${11}"
+isCustomSSLEnabled="${11}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 #case insensitive check
 if [ "${isCustomSSLEnabled}" == "true" ];
 then
     echo "custom ssl enabled. Reading keystore information"
-    export customIdentityKeyStoreData="${12}"
-    export customIdentityKeyStorePassPhrase="${13}"
-    export customIdentityKeyStoreType="${14}"
-    export customTrustKeyStoreData="${15}"
-    export customTrustKeyStorePassPhrase="${16}"
-    export customTrustKeyStoreType="${17}"
-    export serverPrivateKeyAlias="${18}"
-    export serverPrivateKeyPassPhrase="${19}"
+    customIdentityKeyStoreData="${12}"
+    customIdentityKeyStorePassPhrase="${13}"
+    customIdentityKeyStoreType="${14}"
+    customTrustKeyStoreData="${15}"
+    customTrustKeyStorePassPhrase="${16}"
+    customTrustKeyStoreType="${17}"
+    serverPrivateKeyAlias="${18}"
+    serverPrivateKeyPassPhrase="${19}"
 else
     isCustomSSLEnabled="false"
 fi
 
 validateInput
 
-export coherenceListenPort=7574
-export coherenceLocalport=42000
-export coherenceLocalportAdjust=42200
-export wlsAdminPort=7001
-export wlsSSLAdminPort=7002
-export wlsAdminT3ChannelPort=7005
-export wlsManagedPort=8001
+coherenceListenPort=7574
+coherenceLocalport=42000
+coherenceLocalportAdjust=42200
+wlsAdminPort=7001
+wlsSSLAdminPort=7002
+wlsAdminT3ChannelPort=7005
+wlsManagedPort=8001
 
-export DOMAIN_PATH="/u01/domains"
-export startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
-export stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
+DOMAIN_PATH="/u01/domains"
+startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
+stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
 
-export wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
-export SERVER_START_URL="http://$wlsAdminURL"
+wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
+SERVER_START_URL="http://$wlsAdminURL"
 
-export KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
+KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
 
 if [ "${isCustomSSLEnabled}" == "true" ];
 then
    SERVER_START_URL="https://$wlsAdminHost:$wlsSSLAdminPort"
 fi
 
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
-export adminWlstURL="t3://$wlsAdminURL"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+adminWlstURL="t3://$wlsAdminURL"
 
-export wlsClusterName="cluster1"
-export nmHost=`hostname`
-export nmPort=5556
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
+wlsClusterName="cluster1"
+nmHost=`hostname`
+nmPort=5556
 
-export SCRIPT_PWD=`pwd`
-export username="oracle"
-export groupname="oracle"
+SCRIPT_PWD=`pwd`
+username="oracle"
+groupname="oracle"
 
 cleanup
 

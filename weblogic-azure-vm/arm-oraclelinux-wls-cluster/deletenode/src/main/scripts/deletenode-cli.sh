@@ -142,7 +142,7 @@ EOF
 
 
 
-export deploymentName="deletenode-$(date +"%s")"
+deploymentName="deletenode-$(date +"%s")"
 
 initialize
 removeManagedNodes
