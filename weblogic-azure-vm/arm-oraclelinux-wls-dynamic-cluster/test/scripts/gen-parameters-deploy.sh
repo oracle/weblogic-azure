@@ -54,7 +54,7 @@ cat <<EOF >${parametersPath}
       "value": "$adminvmname"
     },
     "vmSizeSelect": {
-      "value": "Standard_A3"
+      "value": "Standard_D2as_v4"
     },
     "location": {
       "value": "$location"

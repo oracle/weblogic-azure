@@ -47,6 +47,9 @@ cat <<EOF > ${parametersPath}
       "storageAccountName": {
         "value": "${storageAccountName}"
       },
+      "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+      },
       "wlsDomainName": {
         "value": "${wlsDomainName}"
       },

@@ -797,7 +797,7 @@ EOF
 function wait_for_admin() {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
     echo "Check admin server status"
     while [[ "$status" != "200" ]]; do
@@ -821,7 +821,7 @@ function wait_for_admin() {
 function shutdown_admin() {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
     echo "Check admin server status"
     while [[ "$status" == "200" ]]; do
@@ -850,7 +850,7 @@ function cleanup() {
 
 function create_temp_folder()
 {
-    export SCRIPT_PATH="/u01/tmp"
+    SCRIPT_PATH="/u01/tmp"
     sudo rm -f -r ${SCRIPT_PATH}
     sudo mkdir ${SCRIPT_PATH}
     sudo rm -rf $SCRIPT_PATH/*
@@ -893,34 +893,34 @@ function validate_elastic_server()
 
 #main script starts here
 
-export SCRIPT_PWD=$(pwd)
+SCRIPT_PWD=$(pwd)
 
 if [ $# -ne 15 ]; then
     usage
     exit 1
 fi
 
-export oracleHome=$1
-export wlsAdminURL=$2
-export managedServerPrefix=$3
-export wlsUserName=$4
-export wlsPassword=$5
-export wlsAdminServerName=$6
-export elasticURI=$7
-export elasticUserName=$8
-export elasticPassword=$9
-export wlsDomainName=${10}
-export wlsDomainPath=${11}
-export logsToIntegrate=${12}
-export index=${13}
-export logIndex=${14}
-export maxDynamicClusterSize=${15}
+oracleHome=$1
+wlsAdminURL=$2
+managedServerPrefix=$3
+wlsUserName=$4
+wlsPassword=$5
+wlsAdminServerName=$6
+elasticURI=$7
+elasticUserName=$8
+elasticPassword=$9
+wlsDomainName=${10}
+wlsDomainPath=${11}
+logsToIntegrate=${12}
+index=${13}
+logIndex=${14}
+maxDynamicClusterSize=${15}
 
-export hostName=$(hostname)
-export userOracle="oracle"
-export groupOracle="oracle"
-export clusterName="cluster1"
-export serverTemplate="myServerTemplate"
+hostName=$(hostname)
+userOracle="oracle"
+groupOracle="oracle"
+clusterName="cluster1"
+serverTemplate="myServerTemplate"
 
 create_temp_folder
 validate_input
