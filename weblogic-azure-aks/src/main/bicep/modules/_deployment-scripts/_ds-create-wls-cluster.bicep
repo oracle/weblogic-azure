@@ -18,7 +18,8 @@ param ocrSSOPSW string
 param ocrSSOUser string
 param storageAccountName string = 'null'
 param utcValue string = utcNow()
-param wdtRuntimePassword string = 'welcome1'
+@secure()
+param wdtRuntimePassword string
 param wlsClusterSize int = 5
 param wlsCPU string = '200m'
 param wlsDomainName string = 'domain1'
