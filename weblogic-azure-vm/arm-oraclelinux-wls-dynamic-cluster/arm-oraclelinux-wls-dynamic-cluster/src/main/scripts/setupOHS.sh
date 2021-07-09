@@ -154,7 +154,7 @@ function createOHSTemplates()
     sudo cp $BASE_DIR/$OHS_FILE_NAME $OHS_PATH/$OHS_FILE_NAME
     echo "unzipping $OHS_FILE_NAME"
     sudo unzip -o $OHS_PATH/$OHS_FILE_NAME -d $OHS_PATH
-    export SILENT_FILES_DIR=$OHS_PATH/silent-template
+    SILENT_FILES_DIR=$OHS_PATH/silent-template
     sudo mkdir -p $SILENT_FILES_DIR
     sudo rm -rf $OHS_PATH/silent-template/*
     mkdir -p $INSTALL_PATH
@@ -309,8 +309,6 @@ function enableAndStartOHSServerService()
 function getWLSClusterAddress()
 {
     restArgs=" -v --user ${WLS_USER}:${WLS_PASSWORD} -H X-Requested-By:MyClient -H Accept:application/json -H Content-Type:application/json"
-    echo $restArgs
-    echo curl $restArgs -X GET ${WLS_REST_URL}/domainRuntime/serverRuntimes?fields=defaultURL > out
     curl $restArgs -X GET ${WLS_REST_URL}/domainRuntime/serverRuntimes?fields=defaultURL > out
     if [[ $? != 0 ]];
     then
@@ -322,7 +320,7 @@ function getWLSClusterAddress()
     # Exclude coherence server listen port 7501
     msString=` cat out | grep defaultURL | grep -v "7001\|7005\|7501" | cut -f3 -d"/" `
     wlsClusterAddress=`echo $msString | sed 's/\" /,/g'`
-    export WLS_CLUSTER_ADDRESS=${wlsClusterAddress::-1}
+    WLS_CLUSTER_ADDRESS=${wlsClusterAddress::-1}
   
     # Test whether servers are reachable
     testClusterServers=$(echo ${WLS_CLUSTER_ADDRESS} | tr "," "\n")
@@ -472,32 +470,32 @@ function verifyService()
 # Execution starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BASE_DIR="$(readlink -f ${CURR_DIR})"
+BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-export OHS_DOMAIN_NAME=$1
-export OHS_COMPONENT_NAME=$2
-export OHS_NM_USER=$3
-export OHS_NM_PSWD=$4
-export OHS_HTTP_PORT=$5
-export OHS_HTTPS_PORT=$6
-export WLS_REST_URL=$7
-export WLS_USER=$8
-export WLS_PASSWORD=$9
-export OHS_KEY_STORE_DATA=${10}
-export OHS_KEY_STORE_PASSPHRASE=${11} 
-export ORACLE_VAULT_PASSWORD=${12}
-export OHS_KEY_TYPE=${13}
-export JDK_PATH="/u01/app/jdk"
-export JDK_VERSION="jdk1.8.0_271"
-export JAVA_HOME=$JDK_PATH/$JDK_VERSION
-export PATH=$JAVA_HOME/bin:$PATH
-export OHS_PATH="/u01/app/ohs"
-export DOMAIN_PATH="/u01/domains"
-export INSTALL_PATH="$OHS_PATH/install"
-export OHS_DOMAIN_PATH=${DOMAIN_PATH}/${OHS_DOMAIN_NAME}
-export OHS_VAULT_PATH="${DOMAIN_PATH}/ohsvault"
-export  groupname="oracle"
-export  username="oracle"
+OHS_DOMAIN_NAME=$1
+OHS_COMPONENT_NAME=$2
+OHS_NM_USER=$3
+OHS_NM_PSWD=$4
+OHS_HTTP_PORT=$5
+OHS_HTTPS_PORT=$6
+WLS_REST_URL=$7
+WLS_USER=$8
+WLS_PASSWORD=$9
+OHS_KEY_STORE_DATA=${10}
+OHS_KEY_STORE_PASSPHRASE=${11} 
+ORACLE_VAULT_PASSWORD=${12}
+OHS_KEY_TYPE=${13}
+JDK_PATH="/u01/app/jdk"
+JDK_VERSION="jdk1.8.0_271"
+JAVA_HOME=$JDK_PATH/$JDK_VERSION
+PATH=$JAVA_HOME/bin:$PATH
+OHS_PATH="/u01/app/ohs"
+DOMAIN_PATH="/u01/domains"
+INSTALL_PATH="$OHS_PATH/install"
+OHS_DOMAIN_PATH=${DOMAIN_PATH}/${OHS_DOMAIN_NAME}
+OHS_VAULT_PATH="${DOMAIN_PATH}/ohsvault"
+groupname="oracle"
+username="oracle"
 
 
 

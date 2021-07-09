@@ -256,7 +256,7 @@ function parseLDAPCertificate()
     done
 
     openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
-    export addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
+    addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
 }
 
 function importAADCertificate()
@@ -351,7 +351,7 @@ function wait_for_admin()
 {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
     echo "Check admin server status"
     while [[ "$status" != "200" ]]
@@ -428,22 +428,22 @@ EOF
 
 function createTempFolder()
 {
-    export SCRIPT_PATH="/u01/tmp"
+    SCRIPT_PATH="/u01/tmp"
     sudo rm -f -r ${SCRIPT_PATH}
     sudo mkdir ${SCRIPT_PATH}
     sudo rm -rf $SCRIPT_PATH/*
 }
 
-export LDAP_USER_NAME='sAMAccountName'
-export LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
-export JAVA_OPTIONS_TLS_V12="-Djdk.tls.client.protocols=TLSv1.2"
-export STRING_ENABLE_TLSV12="Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8"
-export WLS_CLUSTER_NAME="cluster1"
-export WLS_DYNAMIC_SERVER_TEMPLATE="myServerTemplate"
-export SCRIPT_PWD=`pwd`
-export USER_ORACLE="oracle"
-export GROUP_ORACLE="oracle"
-export DOMAIN_PATH="/u01/domains"
+LDAP_USER_NAME='sAMAccountName'
+LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
+JAVA_OPTIONS_TLS_V12="-Djdk.tls.client.protocols=TLSv1.2"
+STRING_ENABLE_TLSV12="Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8"
+WLS_CLUSTER_NAME="cluster1"
+WLS_DYNAMIC_SERVER_TEMPLATE="myServerTemplate"
+SCRIPT_PWD=`pwd`
+USER_ORACLE="oracle"
+GROUP_ORACLE="oracle"
+DOMAIN_PATH="/u01/domains"
 
 if [ $# -ne 21 ]
 then
@@ -451,29 +451,29 @@ then
 	exit 1
 fi
 
-export wlsUserName=$1
-export wlsPassword=$2
-export wlsDomainName=$3
-export adProviderName=$4
-export adServerHost=$5
-export adServerPort=$6
-export adPrincipal=$7
-export adPassword=$8
-export adGroupBaseDN=$9
-export adUserBaseDN=${10}
-export oracleHome=${11}
-export wlsAdminHost=${12}
-export wlsAdminPort=${13}
-export wlsADSSLCer="${14}"
-export wlsLDAPPublicIP="${15}"
-export wlsAdminServerName=${16}
-export wlsDomainPath=${17}
-export isCustomSSLEnabled=${18}
-export customTrustKeyStorePassPhrase="${19}"
-export customTrustKeyStoreType="${20}"
-export vmIndex=${21}
+wlsUserName=$1
+wlsPassword=$2
+wlsDomainName=$3
+adProviderName=$4
+adServerHost=$5
+adServerPort=$6
+adPrincipal=$7
+adPassword=$8
+adGroupBaseDN=$9
+adUserBaseDN=${10}
+oracleHome=${11}
+wlsAdminHost=${12}
+wlsAdminPort=${13}
+wlsADSSLCer="${14}"
+wlsLDAPPublicIP="${15}"
+wlsAdminServerName=${16}
+wlsDomainPath=${17}
+isCustomSSLEnabled=${18}
+customTrustKeyStorePassPhrase="${19}"
+customTrustKeyStoreType="${20}"
+vmIndex=${21}
 
-export isCustomSSLEnabled="${isCustomSSLEnabled,,}"
+isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 if [ "${isCustomSSLEnabled,,}" == "true" ];
 then
@@ -481,7 +481,7 @@ then
     customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
 fi
 
-export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
 if [ $vmIndex -eq 0 ];
 then

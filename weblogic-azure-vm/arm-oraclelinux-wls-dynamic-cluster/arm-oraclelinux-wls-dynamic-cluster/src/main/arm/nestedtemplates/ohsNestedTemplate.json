@@ -103,13 +103,13 @@
             }
         },
         "ohsSSLKeystoreData": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "The name of the secret in the specified KeyVault whose value is the SSL Certificate Data"
             }
         },
         "ohsSSLKeystorePassword": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate"
             }
@@ -145,7 +145,7 @@
             }
         },
         "oracleVaultPswd": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Password for Oracle Vault required for OHS SSL setup"
             }
@@ -170,7 +170,7 @@
             }
         },
         "wlsPassword": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Provide WebLogic password"
             }

@@ -198,15 +198,15 @@
             }
         },
         "keyVaultCustomIdentityKeyStoreData": {
-            "type": "string",
-            "defaultValue":"null",
+            "type": "securestring",
+            "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Data"
             }
         },
         "keyVaultCustomIdentityKeyStorePassPhrase": {
-            "type": "string",
-            "defaultValue":"null",
+            "type": "securestring",
+            "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Passphrase"
             }
@@ -219,15 +219,15 @@
             "defaultValue": "JKS"
         },
         "keyVaultCustomTrustKeyStoreData": {
-            "type": "string",
-            "defaultValue":"null",
+            "type": "securestring",
+            "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Data"
             }
         },
         "keyVaultCustomTrustKeyStorePassPhrase": {
-            "type": "string",
-            "defaultValue":"null",
+            "type": "securestring",
+            "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Passphrase"
             }
@@ -247,8 +247,8 @@
             }
         },
         "keyVaultPrivateKeyPassPhrase": {
-            "type": "string",
-            "defaultValue":"null",
+            "type": "securestring",
+            "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Server Private Key Pass Phrase"
             }

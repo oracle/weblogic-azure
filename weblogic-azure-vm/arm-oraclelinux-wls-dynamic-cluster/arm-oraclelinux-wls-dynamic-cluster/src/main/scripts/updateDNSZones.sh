@@ -3,17 +3,17 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 
-export resourceGroup=$1
-export zoneName=$2
-export recordSetNames=$3
-export targetResources=$4
-export lenRecordset=$5
-export lenTargets=$6
-export ttl=${7}
-export cnameRecordSetNames=${8}
-export cnameAlias=${9}
-export lenCnameRecordSetNames=${10}
-export lenCnameAlias=${11}
+resourceGroup=$1
+zoneName=$2
+recordSetNames=$3
+targetResources=$4
+lenRecordset=$5
+lenTargets=$6
+ttl=${7}
+cnameRecordSetNames=${8}
+cnameAlias=${9}
+lenCnameRecordSetNames=${10}
+lenCnameAlias=${11}
 
 if [[ ${lenRecordset} != ${lenTargets} ]]; then
     echo "Error: number of A record set names is not equal to that of target resources."
