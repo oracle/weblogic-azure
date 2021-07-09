@@ -36,6 +36,9 @@ cat <<EOF >${parametersPath}
         "storageAccountName": {
             "value": "GEN-UNIQUE"
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsPassword": {
             "value": "GEN-UNIQUE"
         },

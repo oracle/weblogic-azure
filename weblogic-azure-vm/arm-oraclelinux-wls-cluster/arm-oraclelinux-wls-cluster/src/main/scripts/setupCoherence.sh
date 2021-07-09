@@ -314,7 +314,7 @@ EOF
 function wait_for_admin() {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
     echo "Check admin server status"
     while [[ "$status" != "200" ]]; do
@@ -612,8 +612,8 @@ function storeCustomSSLCerts()
         mkdir -p $KEYSTORE_PATH
 
         echo "Custom SSL is enabled. Storing CertInfo as files..."
-        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
-        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
+        customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
+        customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
 
         customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
         customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
@@ -639,7 +639,7 @@ function storeCustomSSLCerts()
 
 # main script starts from here
 
-export SCRIPT_PWD=$(pwd)
+SCRIPT_PWD=$(pwd)
 
 # store arguments in a special array
 args=("$@")
@@ -648,70 +648,70 @@ ELEMENTS=${#args[@]}
 
 # echo each element in array
 # for loop
-for ((i = 0; i < $ELEMENTS; i++)); do
-    echo "ARG[${args[${i}]}]"
-done
+#for ((i = 0; i < $ELEMENTS; i++)); do
+#    echo "ARG[${args[${i}]}]"
+#done
 
 if [ $# -lt 19 ]; then
     usage
     exit 1
 fi
 
-export wlsDomainName=$1
-export wlsUserName=$2
-export wlsPassword=$3
-export adminVMName=$4
-export oracleHome=$5
-export wlsDomainPath=$6
-export storageAccountName=$7
-export storageAccountKey=$8
-export mountpointPath=$9
-export enableWebLocalStorage=${10}
-export enableELK=${11}
-export elasticURI=${12}
-export elasticUserName=${13}
-export elasticPassword=${14}
-export logsToIntegrate=${15}
-export logIndex=${16}
-export managedServerPrefix=${17}
-export serverIndex=${18}
+wlsDomainName=$1
+wlsUserName=$2
+wlsPassword=$3
+adminVMName=$4
+oracleHome=$5
+wlsDomainPath=$6
+storageAccountName=$7
+storageAccountKey=$8
+mountpointPath=$9
+enableWebLocalStorage=${10}
+enableELK=${11}
+elasticURI=${12}
+elasticUserName=${13}
+elasticPassword=${14}
+logsToIntegrate=${15}
+logIndex=${16}
+managedServerPrefix=${17}
+serverIndex=${18}
 
-export isCustomSSLEnabled="${19}"
+isCustomSSLEnabled="${19}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 #case insensitive check
 if [ "${isCustomSSLEnabled}" == "true" ];
 then
     echo "custom ssl enabled. Reading keystore information"
-    export customIdentityKeyStoreData="${20}"
-    export customIdentityKeyStorePassPhrase="${21}"
-    export customIdentityKeyStoreType="${22}"
-    export customTrustKeyStoreData="${23}"
-    export customTrustKeyStorePassPhrase="${24}"
-    export customTrustKeyStoreType="${25}"
-    export serverPrivateKeyAlias="${26}"
-    export serverPrivateKeyPassPhrase="${27}"
+    customIdentityKeyStoreData="${20}"
+    customIdentityKeyStorePassPhrase="${21}"
+    customIdentityKeyStoreType="${22}"
+    customTrustKeyStoreData="${23}"
+    customTrustKeyStorePassPhrase="${24}"
+    customTrustKeyStoreType="${25}"
+    serverPrivateKeyAlias="${26}"
+    serverPrivateKeyPassPhrase="${27}"
 else
     isCustomSSLEnabled="false"
 fi
 
-export wlsAdminT3ChannelPort=7005
-export wlsAdminURL="${adminVMName}:${wlsAdminT3ChannelPort}"
-export coherenceClusterName="myCoherence"
-export coherenceListenPort=7574
-export coherenceLocalport=42000
-export coherenceLocalportAdjust=42200
-export clientClusterName="cluster1"
-export groupname="oracle"
-export nmHost=$(hostname)
-export nmPort=5556
-export storageClusterName="storage1"
-export storageListenPort=7501
-export weblogicDeployTool=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
-export username="oracle"
-export wlsAdminServerName="admin"
-export wlsCoherenceArgs="-Dcoherence.localport=$coherenceLocalport -Dcoherence.localport.adjust=$coherenceLocalportAdjust"
-export KEYSTORE_PATH="${wlsDomainPath}/${wlsDomainName}/keystores"
+wlsAdminT3ChannelPort=7005
+wlsAdminURL="${adminVMName}:${wlsAdminT3ChannelPort}"
+coherenceClusterName="myCoherence"
+coherenceListenPort=7574
+coherenceLocalport=42000
+coherenceLocalportAdjust=42200
+clientClusterName="cluster1"
+groupname="oracle"
+nmHost=$(hostname)
+nmPort=5556
+storageClusterName="storage1"
+storageListenPort=7501
+weblogicDeployTool=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
+username="oracle"
+wlsAdminServerName="admin"
+wlsCoherenceArgs="-Dcoherence.localport=$coherenceLocalport -Dcoherence.localport.adjust=$coherenceLocalportAdjust"
+KEYSTORE_PATH="${wlsDomainPath}/${wlsDomainName}/keystores"
 
 if [ ${serverIndex} -eq 0 ]; then
     wlsServerName="admin"

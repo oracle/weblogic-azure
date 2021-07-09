@@ -30,10 +30,10 @@
 			}
 		},
 		"appGatewaySSLCertificateData": {
-			"type": "string"
+			"type": "securestring"
 		},
 		"appGatewaySSLCertificatePassword": {
-			"type": "string"
+			"type": "securestring"
 		},
 		"customDomainName": {
 			"defaultValue": "application.contoso.xyz",

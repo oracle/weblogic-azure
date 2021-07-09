@@ -33,7 +33,7 @@ function verifyServiceActive()
 # For admin server    : rngd wls_admin wls_nodemanager
 # For managed server  : rngd wls_nodemanager
 
-export servicesList=$*
+servicesList=$*
 
 for service in $servicesList
 do
