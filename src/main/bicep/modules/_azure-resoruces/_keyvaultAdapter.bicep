@@ -1,5 +1,6 @@
 // Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+// Deploy Application Gateway certificate secrets.
 
 @description('Certificate data to store in the secret')
 param certificateDataValue string
@@ -32,9 +33,6 @@ param useExistingAppGatewaySSLCertificate bool = false
 @description('Current deployment time. Used as a tag in deployment script.')
 param keyVaultName string = 'GEN_UNIQUE'
 
-var name_kvWithExistingCertTemplateName = '_keyvaultWithExistingCertTemplate.json'
-var name_kvWithNewCertTemplateName = '_keyvaultWithNewCertTemplate.json'
-var name_kvTempaltesFolder = '_keyvault'
 var name_sslCertSecretName = 'myAppGatewaySSLCert'
 var name_sslCertPasswordSecretName = 'myAppGatewaySSLCertPassword'
 
@@ -57,11 +55,11 @@ module keyVaultwithExistingAppGatewaySSLCert '_keyvault/_keyvaultWithExistingCer
     certificatePasswordName: name_sslCertPasswordSecretName
     certificatePasswordValue: certificatePasswordValue
     enabledForTemplateDeployment: enabledForTemplateDeployment
-    name: keyVaultName
+    keyVaultName: keyVaultName
     sku: sku
   }
 }
 
-output keyVaultName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithSelfSignedAppGatewaySSLCert.outputs.keyVaultName : keyVaultwithSelfSignedAppGatewaySSLCert.outputs.keyVaultName)
+output keyVaultName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.keyVaultName : keyVaultwithSelfSignedAppGatewaySSLCert.outputs.keyVaultName)
 output sslCertDataSecretName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.sslCertDataSecretName : keyVaultwithSelfSignedAppGatewaySSLCert.outputs.secretName)
 output sslCertPwdSecretName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.sslCertPwdSecretName: '')

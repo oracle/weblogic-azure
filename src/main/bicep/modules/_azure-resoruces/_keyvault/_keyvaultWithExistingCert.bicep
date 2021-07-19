@@ -17,13 +17,13 @@ param certificatePasswordValue string
 param enabledForTemplateDeployment bool = true
 
 @description('Name of the vault')
-param name string
+param keyVaultName string
 
 @description('Price tier for Key Vault.')
 param sku string
 
 resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
-  name: name
+  name: keyVaultName
   location: resourceGroup().location
   properties: {
     enabledForTemplateDeployment: enabledForTemplateDeployment
@@ -37,7 +37,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 }
 
 resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
-  name: '${name}/${certificateDataName}'
+  name: '${keyVaultName}/${certificateDataName}'
   properties: {
     value: certificateDataValue
   }
@@ -47,7 +47,7 @@ resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
 }
 
 resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
-  name: '${name}/${certificatePasswordName}'
+  name: '${keyVaultName}/${certificatePasswordName}'
   properties: {
     value: certificatePasswordValue
   }
@@ -56,6 +56,6 @@ resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = 
   ]
 }
 
-output keyVaultName string = name
+output keyVaultName string = keyVaultName
 output sslCertDataSecretName string = certificateDataName
 output sslCertPwdSecretName string = certificatePasswordName

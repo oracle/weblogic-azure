@@ -10,7 +10,7 @@ function echo_stderr() {
 
 #Function to display usage message
 function usage() {
-    echo_stdout "./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <azureACRPassword> <imageTag> <appPackageUrls> <ocrSSOUser> <ocrSSOPSW> <wlsClusterSize>"
+    echo_stdout "./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <azureACRPassword> <imageTag> <appPackageUrls> <ocrSSOUser> <ocrSSOPSW> <wlsClusterSize> <enableSSL>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -70,6 +70,11 @@ function validate_inputs() {
         echo_stderr "wlsClusterSize is required. "
         usage 1
     fi
+
+    if [ -z "$enableSSL" ]; then
+        echo_stderr "enableSSL is required. "
+        usage 1
+    fi
 }
 
 function initialize() {
@@ -84,6 +89,7 @@ function initialize() {
     mkdir wlsdeploy
     mkdir wlsdeploy/config
     mkdir wlsdeploy/applications
+    mkdir wlsdeploy/domainLibraries
 }
 
 # Install docker, zip, unzip and java
@@ -92,7 +98,7 @@ function install_utilities() {
     # Install docker
     sudo apt-get -q update
     sudo apt-get -y -q install apt-transport-https
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    curl -m ${curlMaxTime} -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo \
         "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
     $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
@@ -130,11 +136,17 @@ function install_utilities() {
     validate_status "Check status of unzip."
 
     # Download weblogic tools
-    curl -m 120 -fL ${wdtDownloadURL} -o weblogic-deploy.zip
+    curl -m ${curlMaxTime} -fL ${wdtDownloadURL} -o weblogic-deploy.zip
     validate_status "Check status of weblogic-deploy.zip."
 
-    curl -m 120 -fL ${witDownloadURL} -o imagetool.zip
+    curl -m ${curlMaxTime} -fL ${witDownloadURL} -o imagetool.zip
     validate_status "Check status of imagetool.zip."
+
+    curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/postgresql-42.2.8.jar
+    validate_status "Install postgresql driver."
+
+    curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/mssql-jdbc-7.4.1.jre8.jar
+    validate_status "Install mssql driver."
 }
 
 # Login in OCR
@@ -155,35 +167,15 @@ function prepare_wls_models() {
 CLUSTER_SIZE=${wlsClusterSize}
 EOF
 
-    # Generate application deployment model in model.yaml
-    # Known issue: no support for package name that has comma.
-    # remove []
-    if [ "${appPackageUrls}" == "[]" ]; then
-        return
-    fi
+    echo "Starting generating image model file..."
+    modelFilePath="$scriptDir/model.yaml"
 
-    cat <<EOF >>${scriptDir}/model.yaml
-appDeployments:
-  Application:
-EOF
-    appPackageUrls=$(echo "${appPackageUrls:1:${#appPackageUrls}-2}")
-    appUrlArray=$(echo $appPackageUrls | tr "," "\n")
-
-    index=1
-    for item in $appUrlArray; do
-        # e.g. https://wlsaksapp.blob.core.windows.net/japps/testwebapp.war?sp=r&se=2021-04-29T15:12:38Z&sv=2020-02-10&sr=b&sig=7grL4qP%2BcJ%2BLfDJgHXiDeQ2ZvlWosRLRQ1ciLk0Kl7M%3D
-        fileNamewithQueryString="${item##*/}"
-        fileName="${fileNamewithQueryString%\?*}"
-        fileExtension="${fileName##*.}"
-        curl -m 120 -fL "$item" -o wlsdeploy/applications/${fileName}
-        cat <<EOF >>${scriptDir}/model.yaml
-    app${index}:
-      SourcePath: 'wlsdeploy/applications/${fileName}'
-      ModuleType: ${fileExtension}
-      Target: 'cluster-1'
-EOF
-        index=$((index + 1))
-    done
+    chmod ugo+x $scriptDir/genImageModel.sh
+    bash $scriptDir/genImageModel.sh \
+        ${modelFilePath} \
+        ${appPackageUrls} \
+        ${enableSSL}
+    validate_status "Generate image model file."
 }
 
 # Build weblogic image
@@ -210,6 +202,7 @@ function build_wls_image() {
         --wdtModelOnly \
         --wdtDomainType WLS \
         --chown oracle:root
+    # --additionalBuildCommands ${scriptDir}/nodemanager.dockerfile
 
     validate_status "Check status of building WLS domain image."
 
@@ -228,6 +221,8 @@ function build_wls_image() {
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
+source ${scriptDir}/common.sh
+
 export wlsImagePath=$1
 export azureACRServer=$2
 export azureACRUserName=$3
@@ -237,11 +232,14 @@ export appPackageUrls=$6
 export ocrSSOUser=$7
 export ocrSSOPSW=$8
 export wlsClusterSize=$9
+export enableSSL=${10}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export ocrLoginServer="container-registry.oracle.com"
-export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.7/weblogic-deploy.zip"
-export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.11/imagetool.zip"
+export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.14/weblogic-deploy.zip"
+export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.12/imagetool.zip"
+export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.2.8.jar"
+export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar"
 
 validate_inputs
 

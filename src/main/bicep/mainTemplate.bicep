@@ -83,6 +83,9 @@ param enableAppGWIngress bool = false
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
 param enableAzureFileShare bool = false
+@description('true to enable cookie based affinity.')
+param enableCookieBasedAffinity bool = false
+param enableCustomSSL bool = false
 param enableDNSConfiguration bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
@@ -92,9 +95,9 @@ param keyVaultName string = 'kv-contoso'
 param keyVaultResourceGroup string = 'kv-contoso-rg'
 @description('Price tier for Key Vault.')
 param keyVaultSku string = 'Standard'
-@description('The name of the secret in the specified KeyVault whose value is the SSL Certificate Data')
+@description('The name of the secret in the specified KeyVault whose value is the SSL Certificate Data for Appliation Gateway frontend TLS/SSL.')
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
-@description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate')
+@description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate of Appliation Gateway frontend TLS/SSL')
 param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
 param location string = 'eastus'
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
@@ -109,8 +112,70 @@ param ocrSSOUser string
 @secure()
 @description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth | base64 -w0')
 param servicePrincipal string = newGuid()
+@allowed([
+  'uploadConfig'
+  'keyVaultStoredConfig'
+])
+@description('Two scenarios to refer to WebLogic Server TLS/SSL certificates.')
+param sslConfigurationAccessOption string = 'uploadConfig'
+@description('Secret name in KeyVault containing Weblogic Custom Identity Keystore Data')
+param sslKeyVaultCustomIdentityKeyStoreDataSecretName string = 'kv-wls-identity-data'
+@description('Secret name in KeyVault containing Weblogic Custom Identity Keystore Passphrase')
+param sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName string = 'kv-wls-identity-psw'
+@description('Weblogic Custom Identity Keystore type')
+@allowed([
+  'JKS'
+  'PKCS12'
+])
+param sslKeyVaultCustomIdentityKeyStoreType string = 'PKCS12'
+@description('Secret name in KeyVault containing Weblogic Custom Trust Store Data')
+param sslKeyVaultCustomTrustKeyStoreDataSecretName string = 'kv-wls-trust-data'
+@description('Secret name in KeyVault containing Weblogic Custom Trust Store Passphrase')
+param sslKeyVaultCustomTrustKeyStorePassPhraseSecretName string = 'kv-wls-trust-psw'
+@description('WWeblogic Custom Trust Store type')
+@allowed([
+  'JKS'
+  'PKCS12'
+])
+param sslKeyVaultCustomTrustKeyStoreType string = 'PKCS12'
+@description('Resource group containing Weblogic SSL certificates')
+param sslKeyVaultName string = 'kv-wls-ssl-name'
+@description('Secret name in KeyVault containing Weblogic Server private key alias')
+param sslKeyVaultPrivateKeyAliasSecretName string = 'contoso'
+@description('Secret name in KeyVault containing Weblogic Server private key passphrase')
+param sslKeyVaultPrivateKeyPassPhraseSecretName string = 'kv-wls-ssl-alias'
+@description('Keyvault name containing Weblogic SSL certificates')
+param sslKeyVaultResourceGroup string = 'rg-kv-wls-ssl-name'
+@description('Custom Identity Store Data')
+param sslUploadedCustomIdentityKeyStoreData string = 'null'
+@secure()
+@description('Custom Identity Store passphrase')
+param sslUploadedCustomIdentityKeyStorePassphrase string = newGuid()
+@description('Weblogic Custom Identity Store Type')
+@allowed([
+  'JKS'
+  'PKCS12'
+])
+param sslUploadedCustomIdentityKeyStoreType string = 'PKCS12'
+@description('Custom Trust Store data')
+param sslUploadedCustomTrustKeyStoreData string = 'null'
+@secure()
+@description('Custom Trust Store passphrase')
+param sslUploadedCustomTrustKeyStorePassPhrase string = newGuid()
+@description('Weblogic Custom Trust Store Type')
+@allowed([
+  'JKS'
+  'PKCS12'
+])
+param sslUploadedCustomTrustKeyStoreType string = 'PKCS12'
+@description('Alias of the private key')
+param sslUploadedPrivateKeyAlias string = 'contoso'
+@secure()
+@description('Password of the private key')
+param sslUploadedPrivateKeyPassPhrase string = newGuid()
+@description('True to set up internal load balancer service.')
+param useInternalLB bool = false
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
-param uploadAppPackage bool = false
 param utcValue string = utcNow()
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
@@ -134,11 +199,25 @@ param wlsUserName string = 'weblogic'
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_azureSubjectName = '${format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, '.cloudapp.azure.com')}'
+var const_azureSubjectName = '${format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')}'
+var const_defaultKeystoreType = 'PKCS12'
+var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
+var const_enablePV = enableCustomSSL || enableAzureFileShare
+var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
+var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
+var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_defaultPidDeployment = 'pid'
 var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
 var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(resourceGroup().name), '-', toLower(wlsDomainName)), 63)}'
+var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData${uniqueString(utcValue)}'
+var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw${uniqueString(utcValue)}'
 var name_keyVaultName = '${take(concat('wls-kv', uniqueString(utcValue)), 24)}'
+var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias${uniqueString(utcValue)}'
+var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw${uniqueString(utcValue)}'
+var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
+var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData${uniqueString(utcValue)}'
+var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw${uniqueString(utcValue)}'
+var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (enableCustomSSL)? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
 /*
 * Beginning of the offer deployment
 */
@@ -146,7 +225,36 @@ module pids './modules/_pids/_pid.bicep' = {
   name: 'initialization'
 }
 
-module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = {
+module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvaultForWLSSSLCert.bicep' = if (enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) {
+  name: 'upload-wls-ssl-cert-to-keyvault'
+  params: {
+    keyVaultName: name_keyVaultName
+    sku: keyVaultSku
+    wlsIdentityKeyStoreData: sslUploadedCustomIdentityKeyStoreData
+    wlsIdentityKeyStoreDataSecretName: name_identityKeyStoreDataSecret
+    wlsIdentityKeyStorePassphrase: sslUploadedCustomIdentityKeyStorePassphrase
+    wlsIdentityKeyStorePassphraseSecretName: name_identityKeyStorePswSecret
+    wlsPrivateKeyAlias: sslUploadedPrivateKeyAlias
+    wlsPrivateKeyAliasSecretName: name_privateKeyAliasSecret
+    wlsPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
+    wlsPrivateKeyPassPhraseSecretName: name_privateKeyPswSecret
+    wlsTrustKeyStoreData: sslUploadedCustomTrustKeyStoreData
+    wlsTrustKeyStoreDataSecretName: name_trustKeyStoreDataSecret
+    wlsTrustKeyStorePassPhrase: sslUploadedCustomTrustKeyStorePassPhrase
+    wlsTrustKeyStorePassPhraseSecretName: name_trustKeyStorePswSecret
+  }
+  dependsOn: [
+    pids
+  ]
+}
+
+// get key vault object in a resource group
+resource sslKeyvault 'Microsoft.KeyVault/vaults@2019-09-01' existing = if (enableCustomSSL) {
+  name: (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultName : name_keyVaultName
+  scope: resourceGroup(name_rgKeyvaultForWLSSSL)
+}
+
+module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCustomSSL) {
   name: 'setup-wls-cluster'
   params: {
     _artifactsLocation: _artifactsLocation
@@ -164,32 +272,100 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = {
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     aksVersion: aksVersion
+    appgwAlias: const_azureSubjectName
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     createACR: createACR
     createAKSCluster: createAKSCluster
     enableAzureMonitoring: enableAzureMonitoring
-    enableAzureFileShare: enableAzureFileShare
+    enableAzureFileShare: const_enablePV
+    enableCustomSSL: enableCustomSSL
+    enablePV: const_enablePV
     identity: identity
     location: location
     managedServerPrefix: managedServerPrefix
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
-    uploadAppPackage: uploadAppPackage
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
+    wlsIdentityKeyStoreData: sslUploadedCustomIdentityKeyStoreData
+    wlsIdentityKeyStorePassphrase: sslUploadedCustomIdentityKeyStorePassphrase
+    wlsIdentityKeyStoreType: const_defaultKeystoreType
     wlsImageTag: wlsImageTag
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
+    wlsPrivateKeyAlias: sslUploadedPrivateKeyAlias
+    wlsPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
+    wlsTrustKeyStoreData: sslUploadedCustomTrustKeyStoreData
+    wlsTrustKeyStorePassPhrase: sslUploadedCustomTrustKeyStorePassPhrase
+    wlsTrustKeyStoreType: const_defaultKeystoreType
     wlsUserName: wlsUserName
   }
+  dependsOn: [
+    pids
+  ]
 }
 
-module keyvaultDeployment 'modules/_azure-resoruces/_keyvaultAdapter.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
-  name: 'keyvault-deployment'
+module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = if (enableCustomSSL) {
+  name: 'setup-wls-cluster-with-custom-ssl-enabled'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    _pidEnd: pids.outputs.wlsAKSEnd == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSEnd
+    _pidStart: pids.outputs.wlsAKSStart == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSStart
+    aciResourcePermissions: aciResourcePermissions
+    aciRetentionInDays: aciRetentionInDays
+    aciWorkspaceSku: aciWorkspaceSku
+    acrName: acrName
+    aksAgentPoolName: aksAgentPoolName
+    aksAgentPoolNodeCount: aksAgentPoolNodeCount
+    aksAgentPoolVMSize: aksAgentPoolVMSize
+    aksClusterNamePrefix: aksClusterNamePrefix
+    aksClusterRGName: aksClusterRGName
+    aksClusterName: aksClusterName
+    aksVersion: aksVersion
+    appgwAlias: const_azureSubjectName
+    appPackageUrls: appPackageUrls
+    appReplicas: appReplicas
+    createACR: createACR
+    createAKSCluster: createAKSCluster
+    enableAzureMonitoring: enableAzureMonitoring
+    enableAzureFileShare: const_enablePV
+    enableCustomSSL: enableCustomSSL
+    enablePV: const_enablePV
+    identity: identity
+    location: location
+    managedServerPrefix: managedServerPrefix
+    ocrSSOPSW: ocrSSOPSW
+    ocrSSOUser: ocrSSOUser
+    wdtRuntimePassword: wdtRuntimePassword
+    wlsClusterSize: wlsClusterSize
+    wlsCPU: wlsCPU
+    wlsDomainName: wlsDomainName
+    wlsDomainUID: wlsDomainUID
+    wlsIdentityKeyStoreData: sslKeyvault.getSecret(name_identityKeyStoreDataSecret)
+    wlsIdentityKeyStorePassphrase: sslKeyvault.getSecret(name_identityKeyStorePswSecret)
+    wlsIdentityKeyStoreType: const_identityKeyStoreType
+    wlsImageTag: wlsImageTag
+    wlsMemory: wlsMemory
+    wlsPassword: wlsPassword
+    wlsPrivateKeyAlias: sslKeyvault.getSecret(name_privateKeyAliasSecret)
+    wlsPrivateKeyPassPhrase: sslKeyvault.getSecret(name_privateKeyPswSecret)
+    wlsTrustKeyStoreData: sslKeyvault.getSecret(name_trustKeyStoreDataSecret)
+    wlsTrustKeyStorePassPhrase: sslKeyvault.getSecret(name_trustKeyStorePswSecret)
+    wlsTrustKeyStoreType: const_trustKeyStoreType
+    wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    wlsSSLCertSecretsDeployment
+  ]
+}
+
+module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultAdapter.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+  name: 'appgateway-certificates-secrets-deployment'
   params: {
     certificateDataValue: appGatewaySSLCertData
     certificatePasswordValue: appGatewaySSLCertPassword
@@ -201,10 +377,11 @@ module keyvaultDeployment 'modules/_azure-resoruces/_keyvaultAdapter.bicep' = if
   }
   dependsOn: [
     wlsDomainDeployment
+    wlsDomainWithCustomSSLDeployment
   ]
 }
 
-module networkingDeployment 'modules/networking.bicep' = {
+module networkingDeployment 'modules/networking.bicep' = if (const_enableNetworking) {
   name: 'networking-deployment'
   params: {
     _artifactsLocation: _artifactsLocation
@@ -213,36 +390,42 @@ module networkingDeployment 'modules/networking.bicep' = {
     _pidNetworkingStart: pids.outputs.networkingStart == '' ? name_defaultPidDeployment : pids.outputs.networkingStart
     _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
     _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
-    aksClusterRGName: wlsDomainDeployment.outputs.aksClusterRGName
-    aksClusterName: wlsDomainDeployment.outputs.aksClusterName
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
     appgwForAdminServer: appgwForAdminServer
     createDNSZone: createDNSZone
-    dnsNameforApplicationGateway: dnsNameforApplicationGateway
+    dnsNameforApplicationGateway: name_domainLabelforApplicationGateway
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
     dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
     dnszoneName: dnszoneName
     dnszoneRGName: dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
+    enableCookieBasedAffinity: enableCookieBasedAffinity
+    enableCustomSSL: enableCustomSSL
     enableDNSConfiguration: enableDNSConfiguration
     identity: identity
-    keyVaultName: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultName : keyvaultDeployment.outputs.keyVaultName
-    keyVaultResourceGroup: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultResourceGroup : resourceGroup().name
-    keyVaultSSLCertDataSecretName: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : keyvaultDeployment.outputs.sslCertDataSecretName
-    keyVaultSSLCertPasswordSecretName: (! enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : keyvaultDeployment.outputs.sslCertPwdSecretName
+    keyVaultName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultName : appgwSecretDeployment.outputs.keyVaultName
+    keyVaultResourceGroup: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultResourceGroup : resourceGroup().name
+    keyVaultSSLCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
+    keyVaultSSLCertPasswordSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
     location: location
     lbSvcValues: lbSvcValues
     servicePrincipal: servicePrincipal
+    useInternalLB: useInternalLB
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
+  dependsOn:[
+    appgwSecretDeployment
+  ]
 }
 
-output aksClusterName string = wlsDomainDeployment.outputs.aksClusterName
-output adminConsoleInternalUrl string = wlsDomainDeployment.outputs.adminServerUrl
-output adminConsoleExternalUrl string = networkingDeployment.outputs.adminConsoleExternalUrl
-output adminConsoleExternalSecuredUrl string = networkingDeployment.outputs.adminConsoleExternalSecuredUrl
-output clusterInternalUrl string = wlsDomainDeployment.outputs.clusterSVCUrl
-output clusterExternalUrl string = networkingDeployment.outputs.clusterExternalUrl
-output clusterExternalSecuredURL string = networkingDeployment.outputs.clusterExternalSecuredURL
+output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.value
+output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerUrl.value
+output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
+output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalSecuredUrl : ''
+output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value
+output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalUrl : ''
+output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredUrl : ''

@@ -35,6 +35,8 @@ param dnszoneAppGatewayLabel string = 'www'
 param dnszoneRGName string = 'dns-contoso-rg'
 @description('true to set up Application Gateway ingress.')
 param enableAppGWIngress bool = false
+param enableCookieBasedAffinity bool = false
+param enableCustomSSL bool = false
 param enableDNSConfiguration bool = false
 param identity object
 @description('Existing Key Vault Name')
@@ -50,7 +52,8 @@ param location string = 'eastus'
 param lbSvcValues array = []
 @secure()
 param servicePrincipal string = newGuid()
-param utcValue string = utcNow()
+@description('True to set up internal load balancer service.')
+param useInternalLB bool = false
 @description('Name of WebLogic domain to create.')
 param wlsDomainName string = 'domain1'
 @description('UID of WebLogic domain, used in WebLogic Operator.')
@@ -58,8 +61,7 @@ param wlsDomainUID string = 'sample-domain1'
 
 var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneAppGatewayLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
-var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
-var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(resourceGroup().name), '-', toLower(wlsDomainName)), 63)}'
+var const_appgwSSLCertOptionGenerateCert = 'generateCert'
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
   name: 'pid-networking-start-deployment'
@@ -75,21 +77,21 @@ module pidAppgwStart './_pids/_pid.bicep' = if (enableAppGWIngress) {
   }
 }
 
-module appgwDeployment '_azure-resoruces/_keyvaultAppGatewayConnector.bicep' = if (enableAppGWIngress) {
+module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIngress) {
   name: 'app-gateway-deployment'
   params: {
-    appGatewayCertificateOption: appGatewayCertificateOption
-    customDomainNameforApplicationGateway: format('{0}.{1}', dnszoneAppGatewayLabel, dnszoneName)
-    domainLabelforApplicationGateway: name_domainLabelforApplicationGateway
+    dnsNameforApplicationGateway: dnsNameforApplicationGateway
     gatewayPublicIPAddressName: appGatewayPublicIPAddressName
-    keyVaultName: keyVaultName
-    keyVaultResourceGroup: keyVaultResourceGroup
-    keyVaultSSLCertDataSecretName: keyVaultSSLCertDataSecretName
-    keyVaultSSLCertPasswordSecretName: keyVaultSSLCertPasswordSecretName
   }
   dependsOn: [
     pidAppgwStart
   ]
+}
+
+// get key vault object in a resource group
+resource existingKeyvault 'Microsoft.KeyVault/vaults@2019-09-01' existing = if (enableAppGWIngress) {
+  name: keyVaultName
+  scope: resourceGroup(keyVaultResourceGroup)
 }
 
 module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfiguration && createDNSZone) {
@@ -103,14 +105,17 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
   ]
 }
 
-module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = {
+module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = if (enableAppGWIngress && appGatewayCertificateOption != const_appgwSSLCertOptionGenerateCert) {
   name: 'ds-networking-deployment'
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
     appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
     appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
+    appgwFrontendSSLCertData: existingKeyvault.getSecret(keyVaultSSLCertDataSecretName)
+    appgwFrontendSSLCertPsw: existingKeyvault.getSecret(keyVaultSSLCertPasswordSecretName)
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
@@ -118,11 +123,87 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
+    enableCookieBasedAffinity: enableCookieBasedAffinity
+    enableCustomSSL: enableCustomSSL
     enableDNSConfiguration: enableDNSConfiguration
     identity: identity
     lbSvcValues: lbSvcValues
     location: location
     servicePrincipal: servicePrincipal
+    useInternalLB: useInternalLB
+    vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
+    wlsDomainName: wlsDomainName
+    wlsDomainUID: wlsDomainUID
+  }
+  dependsOn: [
+    appgwDeployment
+    dnsZoneDeployment
+  ]
+}
+
+// Wrokaround for "Error BCP180: Function "getSecret" is not valid at this location. It can only be used when directly assigning to a module parameter with a secure decorator."
+module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' = if (enableAppGWIngress && appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert) {
+  name: 'ds-networking-deployment-1'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
+    appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwCertificateOption: appGatewayCertificateOption
+    appgwForAdminServer: appgwForAdminServer
+    appgwFrontendSSLCertData: existingKeyvault.getSecret(keyVaultSSLCertDataSecretName)
+    appgwFrontendSSLCertPsw: 'null'
+    aksClusterRGName: aksClusterRGName
+    aksClusterName: aksClusterName
+    dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
+    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneName: dnszoneName
+    dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
+    enableAppGWIngress: enableAppGWIngress
+    enableCustomSSL: enableCustomSSL
+    enableCookieBasedAffinity: enableCookieBasedAffinity
+    enableDNSConfiguration: enableDNSConfiguration
+    identity: identity
+    lbSvcValues: lbSvcValues
+    location: location
+    servicePrincipal: servicePrincipal
+    useInternalLB: useInternalLB
+    vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
+    wlsDomainName: wlsDomainName
+    wlsDomainUID: wlsDomainUID
+  }
+  dependsOn: [
+    appgwDeployment
+    dnsZoneDeployment
+  ]
+}
+
+module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' = if (!enableAppGWIngress) {
+  name: 'ds-networking-deployment-2'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
+    appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwCertificateOption: appGatewayCertificateOption
+    appgwForAdminServer: appgwForAdminServer
+    appgwFrontendSSLCertData: 'null'
+    appgwFrontendSSLCertPsw: 'null'
+    aksClusterRGName: aksClusterRGName
+    aksClusterName: aksClusterName
+    dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
+    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneName: dnszoneName
+    dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
+    enableAppGWIngress: enableAppGWIngress
+    enableCookieBasedAffinity: enableCookieBasedAffinity
+    enableCustomSSL: enableCustomSSL
+    enableDNSConfiguration: enableDNSConfiguration
+    identity: identity
+    lbSvcValues: lbSvcValues
+    location: location
+    servicePrincipal: servicePrincipal
+    useInternalLB: useInternalLB
     vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
@@ -153,7 +234,7 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
   ]
 }
 
-output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment.outputs.adminConsoleLBUrl
-output adminConsoleExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : format('https://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : ''
-output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : networkingDeployment.outputs.clusterLBUrl
-output clusterExternalSecuredURL string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ''
+output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
+output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL ? (enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : format('https://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : ''
+output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : networkingDeployment3.outputs.clusterLBUrl
+output clusterExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ''

@@ -1,0 +1,1 @@
+export curlMaxTime=120 # seconds

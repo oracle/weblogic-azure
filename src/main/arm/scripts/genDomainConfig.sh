@@ -1,3 +1,22 @@
+# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
+export script="${BASH_SOURCE[0]}"
+export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
+
+export filePath=$1
+export replicas=$2
+export wlsCPU=$3
+export wlsDomainUID=$4
+export wlsDomainName=$5
+export wlsImagePath=$6
+export wlsMemory=$7
+export wlsManagedPrefix=$8
+export enableSSL=${9}
+export enablePV=${10}
+export javaOptions=${11}
+
+cat <<EOF >$filePath
 # Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
@@ -8,10 +27,10 @@
 apiVersion: "weblogic.oracle/v8"
 kind: Domain
 metadata:
-  name: "@WLS_DOMAIN_UID@"
-  namespace: "@WLS_DOMAIN_UID@-ns"
+  name: "${wlsDomainUID}"
+  namespace: "${wlsDomainUID}-ns"
   labels:
-    weblogic.domainUID: "@WLS_DOMAIN_UID@"
+    weblogic.domainUID: "${wlsDomainUID}"
 
 spec:
   # Set to 'FromModel' to indicate 'Model in Image'.
@@ -19,10 +38,10 @@ spec:
 
   # The WebLogic Domain Home, this must be a location within
   # the image for 'Model in Image' domains.
-  domainHome: /u01/domains/@WLS_DOMAIN_UID@
+  domainHome: /u01/domains/${wlsDomainUID}
 
   # The WebLogic Server Docker image that the Operator uses to start the domain
-  image: "@WLS_IMAGE_PATH_ACR@"
+  image: "${wlsImagePath}"
 
   # Defaults to "Always" if image tag (version) is ':latest'
   imagePullPolicy: "IfNotPresent"
@@ -34,7 +53,7 @@ spec:
   # Identify which Secret contains the WebLogic Admin credentials,
   # the secret must contain 'username' and 'password' fields.
   webLogicCredentialsSecret: 
-    name: "@WLS_DOMAIN_UID@-weblogic-credentials"
+    name: "${wlsDomainUID}-weblogic-credentials"
 
   # Whether to include the WebLogic Server stdout in the pod's stdout, default is true
   includeServerOutInPodLog: true
@@ -44,7 +63,7 @@ spec:
   
   # The location for domain log, server logs, server out, introspector out, and Node Manager log files
   # see also 'logHomeEnabled', 'volumes', and 'volumeMounts'.
-  #logHome: /shared/logs/@WLS_DOMAIN_UID@
+  #logHome: /shared/logs/${wlsDomainUID}
   
   # Set which WebLogic Servers the Operator will start
   # - "NEVER" will not start any server in the domain
@@ -59,27 +78,81 @@ spec:
     #   to set the Weblogic domain name
     env:
     - name: CUSTOM_DOMAIN_NAME
-      value: "@DOMAIN_NAME@"
+      value: "${wlsDomainName}"
     - name: JAVA_OPTIONS
-      value: "-Dweblogic.StdoutDebugEnabled=false"
+      value: "-Dweblogic.StdoutDebugEnabled=false ${javaOptions}"
     - name: USER_MEM_ARGS
-      value: "-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m "
+      value: "-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 "
     - name: MANAGED_SERVER_PREFIX
-      value: "@MANAGED_SERVER_PREFIX@"
+      value: "${wlsManagedPrefix}"
+EOF
+    if [[ "${enableSSL,,}" == "true" ]]; then
+        cat <<EOF >>$filePath
+    - name: SSL_IDENTITY_PRIVATE_KEY_ALIAS
+      valueFrom:
+        secretKeyRef:
+          key: sslidentitykeyalias
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_IDENTITY_PRIVATE_KEY_PSW
+      valueFrom:
+        secretKeyRef:
+          key: sslidentitykeypassword
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_IDENTITY_PRIVATE_KEYSTORE_PATH
+      valueFrom:
+        secretKeyRef:
+          key: sslidentitystorepath
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_IDENTITY_PRIVATE_KEYSTORE_TYPE
+      valueFrom:
+        secretKeyRef:
+          key: sslidentitystoretype
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_IDENTITY_PRIVATE_KEYSTORE_PSW
+      valueFrom:
+        secretKeyRef:
+          key: sslidentitystorepassword
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_TRUST_KEYSTORE_PATH
+      valueFrom:
+        secretKeyRef:
+          key: ssltruststorepath
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_TRUST_KEYSTORE_TYPE
+      valueFrom:
+        secretKeyRef:
+          key: ssltruststoretype
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+    - name: SSL_TRUST_KEYSTORE_PSW
+      valueFrom:
+        secretKeyRef:
+          key: ssltruststorepassword
+          name: ${wlsDomainUID}-weblogic-ssl-credentials
+EOF
+    fi
+
+    # Resources
+    cat <<EOF >>$filePath
     resources:
       requests:
-        cpu: "@RESOURCE_CPU@"
-        memory: "@RESOURCE_MEMORY@"
+        cpu: "${wlsCPU}"
+        memory: "${wlsMemory}"
+EOF
 
+    if [[ "${enablePV,,}" == "true" ]]; then
+      cat <<EOF >>$filePath
     # Optional volumes and mounts for the domain's pods. See also 'logHome'.
-    #volumes:
-    #- name: weblogic-domain-storage-volume
-    #  persistentVolumeClaim:
-    #    claimName: model-azurefile
-    #volumeMounts:
-    #- mountPath: /shared
-    #  name: weblogic-domain-storage-volume
+    volumes:
+    - name: ${wlsDomainUID}-pv-azurefile
+      persistentVolumeClaim:
+        claimName: ${wlsDomainUID}-pvc-azurefile
+    volumeMounts:
+    - mountPath: /shared
+      name: ${wlsDomainUID}-pv-azurefile
+EOF
+    fi
 
+    cat <<EOF >>$filePath
   # The desired behavior for starting the domain's administration server.
   adminServer:
     # The serverStartState legal values are "RUNNING" or "ADMIN"
@@ -112,10 +185,10 @@ spec:
                     - key: "weblogic.clusterName"
                       operator: In
                       values:
-                        - $(CLUSTER_NAME)
+                        - \$(CLUSTER_NAME)
                 topologyKey: "kubernetes.io/hostname"
     # The number of managed servers to start for unlisted clusters
-    replicas: @WLS_CLUSTER_REPLICAS@
+    replicas: ${replicas}
 
   # Change the restartVersion to force the introspector job to rerun
   # and apply any new model configuration, to also force a subsequent
@@ -130,12 +203,13 @@ spec:
       domainType: "WLS"
 
       # Optional configmap for additional models and variable files
-      #configMap: @WLS_DOMAIN_UID@-wdt-config-map
+      #configMap: ${wlsDomainUID}-wdt-config-map
 
       # All 'FromModel' domains require a runtimeEncryptionSecret with a 'password' field
-      runtimeEncryptionSecret: "@WLS_DOMAIN_UID@-runtime-encryption-secret"
+      runtimeEncryptionSecret: "${wlsDomainUID}-runtime-encryption-secret"
 
     # Secrets that are referenced by model yaml macros
     # (the model yaml in the optional configMap or in the image)
     #secrets:
-    #- @WLS_DOMAIN_UID@-datasource-secret
+    #- ${wlsDomainUID}-datasource-secret
+EOF
