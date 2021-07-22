@@ -53,6 +53,7 @@ param wlsTrustKeyStoreType string = 'PKCS12'
 param wlsUserName string = 'weblogic'
 
 var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${appgwAlias} ${enablePV} '
+var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
 var const_pvTempalte = 'pv.yaml.template'
 var const_pvcTempalte = 'pvc.yaml.template'
@@ -76,6 +77,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       uri(const_scriptLocation, '${const_pvTempalte}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_pvcTempalte}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
+      uri(const_scriptLocation, '${const_buildDockerImageScript}${_artifactsLocationSasToken}')
     ]
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'

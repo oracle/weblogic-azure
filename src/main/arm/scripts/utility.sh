@@ -12,3 +12,14 @@ function install_jdk() {
     fi
     # JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 }
+
+function install_kubectl() {
+    # Install kubectl
+    az aks install-cli
+    echo "validate kubectl"
+    kubectl --help
+    if [ $? -eq 1 ]; then
+        echo "Failed to install kubectl."
+        exit 1
+    fi
+}

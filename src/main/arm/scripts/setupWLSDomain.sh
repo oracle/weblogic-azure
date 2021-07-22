@@ -250,43 +250,21 @@ function query_acr_credentials() {
 #    * build a docker image with domain model, applications based on specified WebLogic Standard image
 #    * push the image to ACR
 function build_docker_image() {
-    # Create vm to build docker image
-    vmName="VM-UBUNTU-WLS-AKS-$(date +%s)"
-
-    # MICROSOFT_INTERNAL
-    # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
-    # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which cause vm-redeployed issue
-    az vm create \
-        --resource-group ${currentResourceGroup} \
-        --name ${vmName} \
-        --image "Canonical:UbuntuServer:18.04-LTS:latest" \
-        --admin-username azureuser \
-        --generate-ssh-keys \
-        --nsg-rule NONE \
-        --enable-agent true \
-        --enable-auto-update false \
-        --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
-
-    validate_status "Check status of VM machine to build docker image."
-
-    wlsImagePath="${ocrLoginServer}/middleware/weblogic:${wlsImageTag}"
-    az vm extension set --name CustomScript \
-        --extension-instance-name wls-image-script \
-        --resource-group ${currentResourceGroup} \
-        --vm-name ${vmName} \
-        --publisher Microsoft.Azure.Extensions \
-        --version 2.0 \
-        --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-        --protected-settings "{\"commandToExecute\":\"bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRPassword} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${ocrSSOPSW} ${wlsClusterSize} ${enableCustomSSL} \"}"
-
-    # If error fires, keep vm resource and exit.
-    validate_status "Check status of buiding WLS domain image."
-
-    #Validate image from ACR
-    az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
-    validate_status "Check if new image aks-wls-images:${newImageTag} has been pushed to acr."
-
-    cleanup_vm
+    echo "build a new image including the new applications"
+    chmod ugo+x $scriptDir/createVMAndBuildImage.sh
+    bash $scriptDir/createVMAndBuildImage.sh \
+        $currentResourceGroup \
+        $wlsImageTag \
+        $azureACRServer \
+        $azureACRUserName \
+        $azureACRPassword \
+        $newImageTag \
+        "$appPackageUrls" \
+        $ocrSSOUser \
+        $ocrSSOPSW \
+        $wlsClusterSize \
+        $enableCustomSSL \
+        "$scriptURL"
 }
 
 function mount_fileshare() {
@@ -560,62 +538,6 @@ function wait_for_domain_completed() {
         echo WARNING: WebLogic domain is not ready. It takes too long to create domain, please refer to http://oracle.github.io/weblogic-kubernetes-operator/samples/simple/azure-kubernetes-service/#troubleshooting
         exitCode=1
     fi
-}
-
-function cleanup_vm() {
-    #Remove VM resources
-    az extension add --name resource-graph
-    # query vm id
-    vmId=$(az graph query -q "Resources \
-| where type =~ 'microsoft.compute/virtualmachines' \
-| where name=~ '${vmName}' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
-| project vmid = id" -o tsv)
-
-    # query nic id
-    nicId=$(az graph query -q "Resources \
-| where type =~ 'microsoft.compute/virtualmachines' \
-| where name=~ '${vmName}' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
-| extend nics=array_length(properties.networkProfile.networkInterfaces) \
-| mv-expand nic=properties.networkProfile.networkInterfaces \
-| where nics == 1 or nic.properties.primary =~ 'true' or isempty(nic) \
-| project nicId = tostring(nic.id)" -o tsv)
-
-    # query ip id
-    ipId=$(az graph query -q "Resources \
-| where type =~ 'microsoft.network/networkinterfaces' \
-| where id=~ '${nicId}' \
-| extend ipConfigsCount=array_length(properties.ipConfigurations) \
-| mv-expand ipconfig=properties.ipConfigurations \
-| where ipConfigsCount == 1 or ipconfig.properties.primary =~ 'true' \
-| project  publicIpId = tostring(ipconfig.properties.publicIPAddress.id)" -o tsv)
-
-    # query os disk id
-    osDiskId=$(az graph query -q "Resources \
-| where type =~ 'microsoft.compute/virtualmachines' \
-| where name=~ '${vmName}' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
-| project osDiskId = tostring(properties.storageProfile.osDisk.managedDisk.id)" -o tsv)
-
-    # query vnet id
-    vnetId=$(az graph query -q "Resources \
-| where type =~ 'Microsoft.Network/virtualNetworks' \
-| where name=~ '${vmName}VNET' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
-| project vNetId = id" -o tsv)
-
-    # query nsg id
-    nsgId=$(az graph query -q "Resources \
-| where type =~ 'Microsoft.Network/networkSecurityGroups' \
-| where name=~ '${vmName}NSG' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
-| project nsgId = id" -o tsv)
-
-    # Delete VM NIC IP VNET NSG resoruces
-    vmResourceIdS=$(echo ${vmId} ${nicId} ${ipId} ${osDiskId} ${vnetId} ${nsgId})
-    echo ${vmResourceIdS}
-    az resource delete --verbose --ids ${vmResourceIdS}
 }
 
 # Main script
