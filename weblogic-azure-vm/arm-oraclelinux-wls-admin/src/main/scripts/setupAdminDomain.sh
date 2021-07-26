@@ -255,7 +255,7 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 while [[ "$status" != "200" ]]
 do
@@ -428,8 +428,8 @@ function storeCustomSSLCerts()
         setupKeyStoreDir
 
         echo "Custom SSL is enabled. Storing CertInfo as files..."
-        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
-        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
+        customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
+        customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
 
         customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
         customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
@@ -486,7 +486,7 @@ function mountFileShare()
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BASE_DIR="$(readlink -f ${CURR_DIR})"
+BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 if [ $# -lt 10 ]
 then
@@ -494,37 +494,37 @@ then
 	exit 1
 fi
 
-export wlsDomainName="$1"
-export wlsUserName="$2"
-export wlsPassword="$3"
-export wlsAdminHost="$4"
-export oracleHome="$5"
-export storageAccountName="${6}"
-export storageAccountKey="${7}"
-export mountpointPath="${8}"
-export isHTTPAdminListenPortEnabled="${9}"
-export adminPublicHostName="${10}"
+wlsDomainName="$1"
+wlsUserName="$2"
+wlsPassword="$3"
+wlsAdminHost="$4"
+oracleHome="$5"
+storageAccountName="${6}"
+storageAccountKey="${7}"
+mountpointPath="${8}"
+isHTTPAdminListenPortEnabled="${9}"
+adminPublicHostName="${10}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
 
-export isCustomSSLEnabled="${11}"
+isCustomSSLEnabled="${11}"
 
 #case insensitive check
 if [ "${isCustomSSLEnabled,,}" == "true" ];
 then
     echo "custom ssl enabled. Reading keystore information"
-    export customIdentityKeyStoreData="${12}"
-    export customIdentityKeyStorePassPhrase="${13}"
-    export customIdentityKeyStoreType="${14}"
-    export customTrustKeyStoreData="${15}"
-    export customTrustKeyStorePassPhrase="${16}"
-    export customTrustKeyStoreType="${17}"
-    export serverPrivateKeyAlias="${18}"
-    export serverPrivateKeyPassPhrase="${19}"
+    customIdentityKeyStoreData="${12}"
+    customIdentityKeyStorePassPhrase="${13}"
+    customIdentityKeyStoreType="${14}"
+    customTrustKeyStoreData="${15}"
+    customTrustKeyStorePassPhrase="${16}"
+    customTrustKeyStoreType="${17}"
+    serverPrivateKeyAlias="${18}"
+    serverPrivateKeyPassPhrase="${19}"
 fi
 
-export DOMAIN_PATH="/u01/domains"
-export startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
-export stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
+DOMAIN_PATH="/u01/domains"
+startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
+stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
 
 validateInput
 
@@ -532,24 +532,24 @@ installUtilities
 
 mountFileShare
 
-export KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
-export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
-export wlsAdminPort=7001
-export wlsSSLAdminPort=7002
-export wlsAdminT3ChannelPort=7005
+KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
+WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
+samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
+wlsAdminPort=7001
+wlsSSLAdminPort=7002
+wlsAdminT3ChannelPort=7005
 
 if [ "${isHTTPAdminListenPortEnabled,,}" == "true" ];
 then
-    export wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
+    wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
 else
-    export wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
+    wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
 fi
 
-export username="oracle"
-export groupname="oracle"
+username="oracle"
+groupname="oracle"
 
-export SCRIPT_PWD=`pwd`
+SCRIPT_PWD=`pwd`
 
 create_adminDomain
 
