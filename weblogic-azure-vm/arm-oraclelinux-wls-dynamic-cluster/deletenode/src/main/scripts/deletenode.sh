@@ -140,7 +140,7 @@ function wait_for_admin()
 {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
     echo "Check admin server status"
     while [[ "$status" != "200" ]]
@@ -249,21 +249,21 @@ then
 	exit 1
 fi
 
-export wlsUserName=$1
-export wlsPassword=$2
-export managedVMNames=$3
-export wlsForceShutDown=$4
-export wlsAdminHost=$5
-export wlsAdminPort=$6
-export oracleHome=$7
-export managedServerPrefix=$8
-export deletingCacheServerNames=$9
-export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-export hostName=`hostname`
-export wlsClusterName="cluster1"
-export username="oracle"
-export groupname="oracle"
-export wlsDomainsPath="/u01/domains"
+wlsUserName=$1
+wlsPassword=$2
+managedVMNames=$3
+wlsForceShutDown=$4
+wlsAdminHost=$5
+wlsAdminPort=$6
+oracleHome=$7
+managedServerPrefix=$8
+deletingCacheServerNames=$9
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+hostName=`hostname`
+wlsClusterName="cluster1"
+username="oracle"
+groupname="oracle"
+wlsDomainsPath="/u01/domains"
 
 validateInput
 

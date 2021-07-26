@@ -5,18 +5,18 @@
 # Description
 #  This script configures datasource on WebLogic Server Domain for Oracle database.
 
-export oracleHome=$1
-export wlsAdminHost=$2
-export wlsAdminPort=$3
-export wlsUserName=$4
-export wlsPassword=$5
-export jdbcDataSourceName=$6
-export dsConnectionURL=$7
-export dsUser=$8
-export dsPassword=$9
-export wlsClusterName=${10-cluster1}
-export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-export hostName=`hostname`
+oracleHome=$1
+wlsAdminHost=$2
+wlsAdminPort=$3
+wlsUserName=$4
+wlsPassword=$5
+jdbcDataSourceName=$6
+dsConnectionURL=$7
+dsUser=$8
+dsPassword=$9
+wlsClusterName=${10-cluster1}
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+hostName=`hostname`
 
 #Function to output message to StdErr
 function echo_stderr ()
@@ -142,7 +142,7 @@ EOF
 
 function createTempFolder()
 {
-    export scriptPath="/u01/tmp"
+    scriptPath="/u01/tmp"
     sudo rm -f -r ${scriptPath}
     sudo mkdir ${scriptPath}
     sudo rm -rf $scriptPath/*

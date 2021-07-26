@@ -120,7 +120,7 @@ function queryPublicIPId() {
     exit 1
   fi
 
-  export ipId=$(az graph query -q "Resources 
+  ipId=$(az graph query -q "Resources 
     | where type =~ 'microsoft.network/networkinterfaces' 
     | where id=~ '${nicId}' 
     | extend ipConfigsCount=array_length(properties.ipConfigurations) 
@@ -153,7 +153,7 @@ function queryLBPublicIP() {
 }
 
 function generateParameterFile() {
-  export parametersPath=parameters.json
+  parametersPath=parameters.json
   cat <<EOF >${scriptDir}/${parametersPath}
 {
     "\$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
@@ -292,9 +292,9 @@ Custom DNS alias:
 
 # main script start from here
 # default value
-export enableLB=false
-export hasDNSZone=false
-export identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
+enableLB=false
+hasDNSZone=false
+identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
 
 # Transform long options to short ones
 for arg in "$@"; do
