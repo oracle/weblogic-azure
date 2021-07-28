@@ -36,6 +36,7 @@ function get_app_sas_url() {
     args=("$@")
     appNumber=$#
     index=0
+    appSASUrlString=""
     while [ $index -lt $appNumber ]; do
         appName=${args[${index}]}
         echo "app package file name: ${appName}"
@@ -43,13 +44,23 @@ function get_app_sas_url() {
             appSaSUrl=$(az storage blob url --container-name ${appContainerName} \
                 --name ${appName} \
                 --account-name ${appStorageAccountName} \
-                --sas-token ${sasToken})
+                --sas-token ${sasToken} -o tsv)
             echo ${appSaSUrl}
-            appPackageUrls=$(echo "${appPackageUrls}" | jq ". |= [${appSaSUrl}] + .") # append url
+            appSASUrlString="${appSASUrlString},${appSaSUrl}"
         fi
 
         index=$((index+1))
     done
+
+    # append urls
+    if [ "${appPackageUrls}" == "[]" ]; then
+        appPackageUrls="[${appSASUrlString:1:${#appSASUrlString}-1}]" # remove the beginning comma
+    else
+        appPackageUrls=$(echo "${appPackageUrls:1:${#appPackageUrls}-2}") # remove []
+        appPackageUrls="[${appPackageUrls}${appSASUrlString}]"
+    fi
+
+    echo $appPackageUrls
 }
 
 function query_app_urls() {
@@ -71,12 +82,13 @@ function query_app_urls() {
         return
     fi
 
-    sasTokenEnd=`date -u -d "${sasTokenValidTime} minutes" '+%Y-%m-%dT%H:%MZ'`
+    expiryData=$(( `date +%s`+${sasTokenValidTime}))
+    sasTokenEnd=`date -d@"$expiryData" -u '+%Y-%m-%dT%H:%MZ'`
     sasToken=$(az storage account generate-sas \
         --permissions r \
         --account-name ${appStorageAccountName} \
         --services b \
-        --resource-types c \
+        --resource-types sco \
         --expiry $sasTokenEnd -o tsv)
     
     get_app_sas_url ${appList}
@@ -98,6 +110,12 @@ function build_docker_image() {
         $wlsClusterSize \
         $enableCustomSSL \
         "$scriptURL"
+
+    az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
+    if [ $? -ne 0 ]; then
+        echo "Failed to create image ${azureACRServer}/aks-wls-images:${newImageTag}"
+        exit 1
+    fi
 }
 
 function apply_new_image() {
@@ -208,7 +226,8 @@ export appStorageAccountName=${12}
 export appContainerName=${13}
 
 export newImageTag=$(date +%s)
-export sasTokenValidTime=40 #min
+# seconds
+export sasTokenValidTime=3600
 export sslIdentityEnvName="SSL_IDENTITY_PRIVATE_KEY_ALIAS"
 export wlsClusterName="cluster-1"
 export wlsDomainNS="${wlsDomainUID}-ns"

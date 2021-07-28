@@ -265,6 +265,12 @@ function build_docker_image() {
         $wlsClusterSize \
         $enableCustomSSL \
         "$scriptURL"
+    
+    az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
+    if [ $? -ne 0 ]; then
+        echo "Failed to create image ${azureACRServer}/aks-wls-images:${newImageTag}"
+        exit 1
+    fi
 }
 
 function mount_fileshare() {

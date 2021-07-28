@@ -5,6 +5,8 @@
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
+source ${scriptDir}/common.sh
+
 export filePath=$1
 export appPackageUrls=$2
 export enableCustomSSL=$3
@@ -121,11 +123,18 @@ EOF
 
     index=1
     for item in $appUrlArray; do
+        echo ${item}
         # e.g. https://wlsaksapp.blob.core.windows.net/japps/testwebapp.war?sp=r&se=2021-04-29T15:12:38Z&sv=2020-02-10&sr=b&sig=7grL4qP%2BcJ%2BLfDJgHXiDeQ2ZvlWosRLRQ1ciLk0Kl7M%3D
-        fileNamewithQueryString="${item##*/}"
-        fileName="${fileNamewithQueryString%\?*}"
+        urlWithoutQueryString="${item%\?*}"
+        echo $urlWithoutQueryString
+        fileName="${urlWithoutQueryString##*/}"
+        echo $fileName
         fileExtension="${fileName##*.}"
-        curl -m 120 -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/applications/${fileName}
+        curl -m ${curlMaxTime} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/applications/${fileName}
+        if [ $? -ne 0 ];then
+          echo "Failed to download $item"
+          exit 1
+        fi
         cat <<EOF >>${filePath}
     app${index}:
       SourcePath: 'wlsdeploy/applications/${fileName}'

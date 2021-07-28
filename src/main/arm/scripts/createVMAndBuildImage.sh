@@ -91,9 +91,6 @@ function build_docker_image() {
     --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
     --protected-settings "{\"commandToExecute\":\"bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRPassword} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${ocrSSOPSW} ${wlsClusterSize} ${enableCustomSSL} \"}"
 
-    #Validate image from ACR
-    az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
-
     cleanup_vm
 }
 
