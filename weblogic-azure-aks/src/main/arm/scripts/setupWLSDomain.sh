@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script starts"
@@ -14,9 +14,14 @@ function echo_stdout() {
     echo "$@" >>stdout
 }
 
+# PENDING(edburns): load <wlsPassword> <wdtRuntimePassword> from filesystem, from a file that is guaranteed to be secured as required
+function load_parameters_from_file() {
+}
+
+
 #Function to display usage message
 function usage() {
-    echo_stdout "./setupWLSDomain.sh <ocrSSOUser> <ocrSSOPSW> <aksClusterRGName> <aksClusterName> <wlsImageTag> <acrName> <wlsDomainName> <wlsDomainUID> <wlsUserName> <wlsPassword> <wdtRuntimePassword> <wlsCPU> <wlsMemory> <managedServerPrefix> <appReplicas> <appPackageUrls> <currentResourceGroup> <scriptURL> <storageAccountName> <wlsClusterSize>"
+    echo_stdout "./setupWLSDomain.sh <ocrSSOUser> <ocrSSOPSW> <aksClusterRGName> <aksClusterName> <wlsImageTag> <acrName> <wlsDomainName> <wlsDomainUID> <wlsUserName> <wlsCPU> <wlsMemory> <managedServerPrefix> <appReplicas> <appPackageUrls> <currentResourceGroup> <scriptURL> <storageAccountName> <wlsClusterSize>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -245,7 +250,7 @@ function build_docker_image() {
     --publisher Microsoft.Azure.Extensions \
     --version 2.0 \
     --settings "{ \"fileUris\": [\"${scriptURL}model.yaml\",\"${scriptURL}model.properties\",\"${scriptURL}buildWLSDockerImage.sh\"]}" \
-    --protected-settings "{\"commandToExecute\":\"bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRPassword} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${ocrSSOPSW} ${wlsClusterSize}\"}"
+    --protected-settings "{\"commandToExecute\":\"bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize}\"}"
 
     # If error fires, keep vm resource and exit.
     validate_status "Check status of buiding WLS domain image."
@@ -450,17 +455,15 @@ export acrName=$6
 export wlsDomainName=$7
 export wlsDomainUID=$8
 export wlsUserName=$9
-export wlsPassword=${10}
-export wdtRuntimePassword=${11}
-export wlsCPU=${12}
-export wlsMemory=${13}
-export managedServerPrefix=${14}
-export appReplicas=${15}
-export appPackageUrls=${16}
-export currentResourceGroup=${17}
-export scriptURL=${18}
-export storageAccountName=${19}
-export wlsClusterSize=${20}
+export wlsCPU=${10}
+export wlsMemory=${11}
+export managedServerPrefix=${12}
+export appReplicas=${13}
+export appPackageUrls=${14}
+export currentResourceGroup=${15}
+export scriptURL=${16}
+export storageAccountName=${17}
+export wlsClusterSize=${18}
 
 export adminServerName="admin-server"
 export exitCode=0
@@ -474,6 +477,8 @@ export wlsOptHelmChart="https://oracle.github.io/weblogic-kubernetes-operator/ch
 export wlsOptNameSpace="weblogic-operator-ns"
 export wlsOptRelease="weblogic-operator"
 export wlsOptSA="weblogic-operator-sa"
+
+load_parameters_from_file
 
 validate_input
 
