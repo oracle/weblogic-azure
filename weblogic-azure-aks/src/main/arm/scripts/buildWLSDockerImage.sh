@@ -6,9 +6,13 @@ function echo_stderr() {
     echo "$@" >&2
 }
 
+# PENDING(edburns): load <azureACRPassword> and <ocrSSOPSW> from filesystem, from a file that is guaranteed to be secured as required
+function load_parameters_from_file() {
+}
+
 #Function to display usage message
 function usage() {
-    echo_stdout "./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <azureACRPassword> <imageTag> <appPackageUrls> <ocrSSOUser> <ocrSSOPSW> <wlsClusterSize>"
+    echo_stdout "./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -34,13 +38,13 @@ function validate_inputs() {
         usage 1
     fi
 
-    if [ -z "$azureACRUserName" ]; then
-        echo_stderr "azureACRUserName is required. "
+    if [ -z "$azureACRPassword" ]; then
+        echo_stderr "azureACRPassword is required. "
         usage 1
     fi
 
-    if [ -z "$azureACRPassword" ]; then
-        echo_stderr "azureACRPassword is required. "
+    if [ -z "$azureACRUserName" ]; then
+        echo_stderr "azureACRUserName is required. "
         usage 1
     fi
 
@@ -229,17 +233,17 @@ export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 export wlsImagePath=$1
 export azureACRServer=$2
 export azureACRUserName=$3
-export azureACRPassword=$4
-export imageTag=$5
-export appPackageUrls=$6
-export ocrSSOUser=$7
-export ocrSSOPSW=$8
-export wlsClusterSize=$9
+export imageTag=$4
+export appPackageUrls=$5
+export ocrSSOUser=$6
+export wlsClusterSize=$7
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export ocrLoginServer="container-registry.oracle.com"
 export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.7/weblogic-deploy.zip"
 export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.11/imagetool.zip"
+
+load_parameters_from_file
 
 validate_inputs
 
