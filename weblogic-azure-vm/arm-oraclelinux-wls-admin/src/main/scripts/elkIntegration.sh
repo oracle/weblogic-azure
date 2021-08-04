@@ -5,24 +5,24 @@
 # Description
 #  This script configures ELK (Elasticsearch, Logstash and Kibana) Stack on WebLogic Server Domain.
 
-export oracleHome=$1
-export wlsAdminHost=$2
-export wlsAdminPort=$3
-export wlsUserName=$4
-export wlsPassword=$5
-export wlsAdminServerName=$6
-export elasticURI=$7
-export elasticUserName=$8
-export elasticPassword=$9
-export wlsDomainName=${10}
-export wlsDomainPath=${11}
-export logsToIntegrate=${12}
-export logIndex=${13}
+oracleHome=$1
+wlsAdminHost=$2
+wlsAdminPort=$3
+wlsUserName=$4
+wlsPassword=$5
+wlsAdminServerName=$6
+elasticURI=$7
+elasticUserName=$8
+elasticPassword=$9
+wlsDomainName=${10}
+wlsDomainPath=${11}
+logsToIntegrate=${12}
+logIndex=${13}
 
-export hostName=`hostname`
-export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-export userOracle="oracle"
-export groupOracle="oracle"
+hostName=`hostname`
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+userOracle="oracle"
+groupOracle="oracle"
 
 #Function to output message to StdErr
 function echo_stderr ()
@@ -567,7 +567,7 @@ function wait_for_admin()
 {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
     echo "Check admin server status"
     while [[ "$status" != "200" ]]
@@ -594,7 +594,7 @@ function wait_for_admin()
 function shutdown_admin() {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
     echo "Check admin server status"
     while [[ "$status" == "200" ]]; do
@@ -624,7 +624,7 @@ function cleanup()
 
 function create_temp_folder()
 {
-    export SCRIPT_PATH="/u01/tmp"
+    SCRIPT_PATH="/u01/tmp"
     sudo rm -f -r ${SCRIPT_PATH}
     sudo mkdir ${SCRIPT_PATH}
     sudo rm -rf $SCRIPT_PATH/*
@@ -665,7 +665,7 @@ function validate_elastic_server()
     done
 }
 
-export SCRIPT_PWD=`pwd`
+SCRIPT_PWD=`pwd`
 
 if [ $# -ne 13 ]
 then

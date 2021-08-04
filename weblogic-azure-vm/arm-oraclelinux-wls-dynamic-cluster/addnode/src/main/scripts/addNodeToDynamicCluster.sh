@@ -262,7 +262,7 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 while [[ "$status" != "200" ]]
 do
@@ -513,7 +513,7 @@ function parseLDAPCertificate()
     done
 
     openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
-    export addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
+    addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
 }
 
 function importAADCertificate()
@@ -599,7 +599,7 @@ function parseAndSaveCustomSSLKeyStoreData()
 
     echo "$customIdentityKeyStoreBase64String" > ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt
     cat ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt | base64 -d > ${KEYSTORE_PATH}/identity.keystore
-    export customSSLIdentityKeyStoreFile=${KEYSTORE_PATH}/identity.keystore
+    customSSLIdentityKeyStoreFile=${KEYSTORE_PATH}/identity.keystore
 
     rm -rf ${KEYSTORE_PATH}/identityKeyStoreCerBase64String.txt
 
@@ -608,14 +608,14 @@ function parseAndSaveCustomSSLKeyStoreData()
 
     echo "$customTrustKeyStoreBase64String" > ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt
     cat ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt | base64 -d > ${KEYSTORE_PATH}/trust.keystore
-    export customSSLTrustKeyStoreFile=${KEYSTORE_PATH}/trust.keystore
+    customSSLTrustKeyStoreFile=${KEYSTORE_PATH}/trust.keystore
 
     rm -rf ${KEYSTORE_PATH}/trustKeyStoreCerBase64String.txt
 }
 
 #main script starts here
 
-export SCRIPT_PWD=`pwd`
+SCRIPT_PWD=`pwd`
 
 # store arguments in a special array 
 args=("$@") 
@@ -634,62 +634,62 @@ then
     exit 1
 fi
 
-export wlsDomainName=$1
-export wlsUserName=$2
-export wlsPassword=$3
-export managedServerPrefix=$4
-export serverIndex=$5
-export wlsAdminURL=$6
-export oracleHome=${7}
-export wlsDomainPath=${8}
-export dynamicClusterSize=${9}
-export vmNamePrefix=${10}
-export storageAccountName=${11}
-export storageAccountKey=${12}
-export mountpointPath=${13}
-export wlsADSSLCer="${14}"
-export wlsLDAPPublicIP="${15}"
-export adServerHost="${16}"
-export enableELK=${17}
-export elasticURI=${18}
-export elasticUserName=${19}
-export elasticPassword=${20}
-export logsToIntegrate=${21}
-export logIndex=${22}
-export maxDynamicClusterSize=${23}
+wlsDomainName=$1
+wlsUserName=$2
+wlsPassword=$3
+managedServerPrefix=$4
+serverIndex=$5
+wlsAdminURL=$6
+oracleHome=${7}
+wlsDomainPath=${8}
+dynamicClusterSize=${9}
+vmNamePrefix=${10}
+storageAccountName=${11}
+storageAccountKey=${12}
+mountpointPath=${13}
+wlsADSSLCer="${14}"
+wlsLDAPPublicIP="${15}"
+adServerHost="${16}"
+enableELK=${17}
+elasticURI=${18}
+elasticUserName=${19}
+elasticPassword=${20}
+logsToIntegrate=${21}
+logIndex=${22}
+maxDynamicClusterSize=${23}
 
-export isCustomSSLEnabled="${24}"
+isCustomSSLEnabled="${24}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 if [ "${isCustomSSLEnabled,,}" == "true" ];
 then
-    export customIdentityKeyStoreBase64String="${25}"
-    export customIdentityKeyStorePassPhrase="${26}"
-    export customIdentityKeyStoreType="${27}"
-    export customTrustKeyStoreBase64String="${28}"
-    export customTrustKeyStorePassPhrase="${29}"
-    export customTrustKeyStoreType="${30}"
-    export privateKeyAlias="${31}"
-    export privateKeyPassPhrase="${32}"
+    customIdentityKeyStoreBase64String="${25}"
+    customIdentityKeyStorePassPhrase="${26}"
+    customIdentityKeyStoreType="${27}"
+    customTrustKeyStoreBase64String="${28}"
+    customTrustKeyStorePassPhrase="${29}"
+    customTrustKeyStoreType="${30}"
+    privateKeyAlias="${31}"
+    privateKeyPassPhrase="${32}"
 fi
 
-export enableAAD="false"
+enableAAD="false"
 
 validateInput
 
-export nmHost=`hostname`
-export nmPort=5556
-export wlsAdminPort=7001
-export wlsSSLAdminPort=7002
-export wlsManagedPort=8001
-export wlsClusterName="cluster1"
-export dynamicServerTemplate="myServerTemplate"
-export machineNamePrefix="machine"
-export machineName="$machineNamePrefix-$nmHost"
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
-export username="oracle"
-export groupname="oracle"
-export KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+nmHost=`hostname`
+nmPort=5556
+wlsAdminPort=7001
+wlsSSLAdminPort=7002
+wlsManagedPort=8001
+wlsClusterName="cluster1"
+dynamicServerTemplate="myServerTemplate"
+machineNamePrefix="machine"
+machineName="$machineNamePrefix-$nmHost"
+WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
+username="oracle"
+groupname="oracle"
+KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
 
 cleanup
 installUtilities

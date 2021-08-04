@@ -623,7 +623,7 @@ EOF
 function wait_for_admin() {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
     echo "Check admin server status"
     while [[ "$status" != "200" ]]; do
@@ -647,7 +647,7 @@ function wait_for_admin() {
 function shutdown_admin() {
     #check admin server status
     count=1
-    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    CHECK_URL="http://$wlsAdminURL/weblogic/ready"
     status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
     echo "Check admin server status"
     while [[ "$status" == "200" ]]; do
@@ -676,7 +676,7 @@ function cleanup() {
 
 function create_temp_folder()
 {
-    export SCRIPT_PATH="/u01/tmp"
+    SCRIPT_PATH="/u01/tmp"
     sudo rm -f -r ${SCRIPT_PATH}
     sudo mkdir ${SCRIPT_PATH}
     sudo rm -rf $SCRIPT_PATH/*
@@ -719,7 +719,7 @@ function validate_elastic_server()
 
 # main script starts from here
 
-export SCRIPT_PWD=$(pwd)
+SCRIPT_PWD=$(pwd)
 
 # store arguments in a special array
 args=("$@")
@@ -732,24 +732,24 @@ for ((i = 0; i < $ELEMENTS; i++)); do
     echo "ARG[${args[${i}]}]"
 done
 
-export oracleHome=$1
-export wlsAdminURL=$2
-export wlsUserName=$3
-export wlsPassword=$4
-export wlsAdminServerName=$5
-export elasticURI=$6
-export elasticUserName=$7
-export elasticPassword=$8
-export wlsDomainName=$9
-export wlsDomainPath=${10}
-export logsToIntegrate=${11}
-export index=${12}
-export logIndex=${13}
-export managedServerPrefix=${14}
+oracleHome=$1
+wlsAdminURL=$2
+wlsUserName=$3
+wlsPassword=$4
+wlsAdminServerName=$5
+elasticURI=$6
+elasticUserName=$7
+elasticPassword=$8
+wlsDomainName=$9
+wlsDomainPath=${10}
+logsToIntegrate=${11}
+index=${12}
+logIndex=${13}
+managedServerPrefix=${14}
 
-export hostName=$(hostname)
-export userOracle="oracle"
-export groupOracle="oracle"
+hostName=$(hostname)
+userOracle="oracle"
+groupOracle="oracle"
 
 if [ $# -ne 14 ]; then
     usage

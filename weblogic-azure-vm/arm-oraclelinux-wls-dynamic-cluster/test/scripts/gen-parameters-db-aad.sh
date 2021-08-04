@@ -61,6 +61,9 @@ cat <<EOF > ${parametersPath}
         "dynamicClusterSize": {
             "value": 2
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsLDAPGroupBaseDN": {
             "value": "GEN-UNIQUE"
         },

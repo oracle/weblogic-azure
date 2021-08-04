@@ -420,7 +420,7 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 while [[ "$status" != "200" ]]
 do
@@ -776,8 +776,8 @@ function storeCustomSSLCerts()
         mkdir -p $KEYSTORE_PATH
 
         echo "Custom SSL is enabled. Storing CertInfo as files..."
-        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
-        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
+        customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
+        customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
 
         customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
         customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
@@ -805,7 +805,7 @@ function storeCustomSSLCerts()
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BASE_DIR="$(readlink -f ${CURR_DIR})"
+BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 # store arguments in a special array 
 args=("$@") 
@@ -814,9 +814,9 @@ ELEMENTS=${#args[@]}
  
 # echo each element in array  
 # for loop 
-for (( i=0;i<$ELEMENTS;i++)); do 
-    echo "ARG[${args[${i}]}]"
-done
+#for (( i=0;i<$ELEMENTS;i++)); do 
+#    echo "ARG[${args[${i}]}]"
+#done
 
 if [ $# -lt 15 ]
 then
@@ -824,88 +824,88 @@ then
     exit 1
 fi
 
-export wlsDomainName=${1}
-export wlsUserName=${2}
-export wlsPassword=${3}
-export managedServerPrefix=${4}
-export indexValue=${5}
-export vmNamePrefix=${6}
-export maxDynamicClusterSize=${7}
-export dynamicClusterSize=${8}
-export adminVMName=${9}
-export oracleHome=${10}
-export storageAccountName=${11}
-export storageAccountKey=${12}
-export mountpointPath=${13}
+wlsDomainName=${1}
+wlsUserName=${2}
+wlsPassword=${3}
+managedServerPrefix=${4}
+indexValue=${5}
+vmNamePrefix=${6}
+maxDynamicClusterSize=${7}
+dynamicClusterSize=${8}
+adminVMName=${9}
+oracleHome=${10}
+storageAccountName=${11}
+storageAccountKey=${12}
+mountpointPath=${13}
 
-export DOMAIN_PATH="/u01/domains"
-export startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
-export stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
+DOMAIN_PATH="/u01/domains"
+startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
+stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
 
-export isHTTPAdminListenPortEnabled="${14}"
+isHTTPAdminListenPortEnabled="${14}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 
-export isCustomSSLEnabled="${15}"
+isCustomSSLEnabled="${15}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 #case insensitive check
 if [ "${isCustomSSLEnabled}" == "true" ];
 then
     echo "custom ssl enabled. Reading keystore information"
-    export customIdentityKeyStoreData="${16}"
-    export customIdentityKeyStorePassPhrase="${17}"
-    export customIdentityKeyStoreType="${18}"
-    export customTrustKeyStoreData="${19}"
-    export customTrustKeyStorePassPhrase="${20}"
-    export customTrustKeyStoreType="${21}"
-    export serverPrivateKeyAlias="${22}"
-    export serverPrivateKeyPassPhrase="${23}"
+    customIdentityKeyStoreData="${16}"
+    customIdentityKeyStorePassPhrase="${17}"
+    customIdentityKeyStoreType="${18}"
+    customTrustKeyStoreData="${19}"
+    customTrustKeyStorePassPhrase="${20}"
+    customTrustKeyStoreType="${21}"
+    serverPrivateKeyAlias="${22}"
+    serverPrivateKeyPassPhrase="${23}"
 else
     isCustomSSLEnabled="false"
 fi
 
 # Always index 0 is set as admin server
-export coherenceListenPort=7574
-export coherenceLocalport=42000
-export coherenceLocalportAdjust=42200
-export wlsAdminPort=7001
-export wlsSSLAdminPort=7002
-export wlsAdminT3ChannelPort=7005
-export wlsManagedPort=8001
+coherenceListenPort=7574
+coherenceLocalport=42000
+coherenceLocalportAdjust=42200
+wlsAdminPort=7001
+wlsSSLAdminPort=7002
+wlsAdminT3ChannelPort=7005
+wlsManagedPort=8001
 
-export wlsAdminURL="$adminVMName:$wlsAdminT3ChannelPort"
-export SERVER_START_URL="http://$wlsAdminURL"
-export KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
+wlsAdminURL="$adminVMName:$wlsAdminT3ChannelPort"
+SERVER_START_URL="http://$wlsAdminURL"
+KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
 
 if [ "${isCustomSSLEnabled}" == "true" ];
 then
    SERVER_START_URL="https://$adminVMName:$wlsSSLAdminPort"
 fi
 
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
-export adminWlstURL="t3://$wlsAdminURL"
+CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+adminWlstURL="t3://$wlsAdminURL"
 
-export wlsClusterName="cluster1"
-export dynamicServerTemplate="myServerTemplate"
-export nmHost=`hostname`
-export nmPort=5556
-export machineNamePrefix="machine"
-export machineName="$machineNamePrefix-$nmHost"
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
-export username="oracle"
-export groupname="oracle"
+wlsClusterName="cluster1"
+dynamicServerTemplate="myServerTemplate"
+nmHost=`hostname`
+nmPort=5556
+machineNamePrefix="machine"
+machineName="$machineNamePrefix-$nmHost"
+WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
+username="oracle"
+groupname="oracle"
 
 validateInput
 
 if [ $indexValue == 0 ];
 then
-   export wlsServerName="admin"
+   wlsServerName="admin"
 else
    serverIndex=$indexValue
-   export wlsServerName="$managedServerPrefix$serverIndex"
+   wlsServerName="$managedServerPrefix$serverIndex"
 fi
 
-export SCRIPT_PWD=`pwd`
+SCRIPT_PWD=`pwd`
 cleanup
 
 installUtilities

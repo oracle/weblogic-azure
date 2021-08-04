@@ -31,6 +31,9 @@ cat <<EOF >${parametersPath}
         "enableCoherence": {
             "value": true
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsPassword": {
             "value": "GEN-UNIQUE"
         },

@@ -18,8 +18,7 @@ param ocrSSOPSW string
 param ocrSSOUser string
 param storageAccountName string = 'null'
 param utcValue string = utcNow()
-@secure()
-param wdtRuntimePassword string
+param wdtRuntimePassword string = 'welcome1'
 param wlsClusterSize int = 5
 param wlsCPU string = '200m'
 param wlsDomainName string = 'domain1'
@@ -35,6 +34,7 @@ var const_domainTemplate = 'domain.yaml.template'
 var const_pvTempalte = 'pv.yaml.template'
 var const_pvcTempalte = 'pvc.yaml.template'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
+var const_invokeSetUpDomainScript = 'invokeSetupWLSDomain.sh'
 var const_setUpDomainScript = 'setupWLSDomain.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -45,8 +45,9 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azCliVersion: '2.15.0'
     arguments: const_arguments
-    primaryScriptUri: uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetUpDomainScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
+      uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_domainTemplate}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_pvTempalte}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_pvcTempalte}${_artifactsLocationSasToken}')

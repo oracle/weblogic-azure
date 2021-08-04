@@ -303,11 +303,11 @@
          "defaultValue": "ServerPrivateKeyPassPhraseSecret"
       },
       "uploadedCustomIdentityKeyStoreData": {
-         "type": "string",
+         "type": "securestring",
          "metadata": {
             "description": "Custom Identity KeyStore Data"
          },
-         "defaultValue": "customIdentityKeyStoreData"
+         "defaultValue": ""
       },
       "uploadedCustomIdentityKeyStorePassphrase": {
          "type": "securestring",
@@ -324,11 +324,11 @@
          "defaultValue": "JKS"
       },
       "uploadedCustomTrustKeyStoreData": {
-         "type": "string",
+         "type": "securestring",
          "metadata": {
             "description": "Custom Trust KeyStore Data"
          },
-         "defaultValue": "customTrustKeyStoreData"
+         "defaultValue": ""
       },
       "uploadedCustomTrustKeyStorePassPhrase": {
          "type": "securestring",
