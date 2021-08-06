@@ -14,7 +14,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome> <storageAccountName> <storageAccountKey> <mountpointPath> <isHTTPAdminListenPortEnabled> <adminPublicHostName> [<isCustomSSLEnabled>] [<customIdentityKeyStoreData>] [<customIdentityKeyStorePassPhrase>] [<customIdentityKeyStoreType>] [<customTrustKeyStoreData>] [<customTrustKeyStorePassPhrase>] [<customTrustKeyStoreType>] [<serverPrivateKeyAlias>] [<serverPrivateKeyPassPhrase>]"
+  echo_stderr "./setupAdminDomain.sh <<< \"<wlsDomainSetupArgsFromStdIn>\""
 }
 
 function setupKeyStoreDir()
@@ -488,39 +488,8 @@ function mountFileShare()
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -lt 10 ]
-then
-    usage
-	exit 1
-fi
-
-wlsDomainName="$1"
-wlsUserName="$2"
-wlsPassword="$3"
-wlsAdminHost="$4"
-oracleHome="$5"
-storageAccountName="${6}"
-storageAccountKey="${7}"
-mountpointPath="${8}"
-isHTTPAdminListenPortEnabled="${9}"
-adminPublicHostName="${10}"
-isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
-
-isCustomSSLEnabled="${11}"
-
-#case insensitive check
-if [ "${isCustomSSLEnabled,,}" == "true" ];
-then
-    echo "custom ssl enabled. Reading keystore information"
-    customIdentityKeyStoreData="${12}"
-    customIdentityKeyStorePassPhrase="${13}"
-    customIdentityKeyStoreType="${14}"
-    customTrustKeyStoreData="${15}"
-    customTrustKeyStorePassPhrase="${16}"
-    customTrustKeyStoreType="${17}"
-    serverPrivateKeyAlias="${18}"
-    serverPrivateKeyPassPhrase="${19}"
-fi
+#read arguments from stdin
+read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 DOMAIN_PATH="/u01/domains"
 startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"

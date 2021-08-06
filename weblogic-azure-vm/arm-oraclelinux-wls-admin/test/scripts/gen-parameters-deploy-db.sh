@@ -4,15 +4,8 @@
 
 #Generate parameters with value for deploying db template independently
 
-parametersPath=$1
-adminVMName=$2
-dbPassword=$3
-dbName=$4
-location=$5
-wlsusername=$6
-wlspassword=$7
-gitUserName=$8
-testbranchName=$9
+#read arguments from stdin
+read parametersPath adminVMName dbPassword dbName location wlsusername wlspassword gitUserName testbranchName
 
 cat <<EOF > ${parametersPath}/parameters-deploy-db.json
 {

@@ -174,7 +174,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'))]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' <<< \"', variables('const_aadParameters'),'\"')]"
                 }
             }
         },

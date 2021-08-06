@@ -14,7 +14,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./deletenode.sh <wlsUserName> <wlsPassword> <managedServerNames> <managedVMNames> <forceShutDown> <wlsAdminHost> <wlsAdminPort> <oracleHome>"  
+  echo_stderr "./deletenode.sh <<< \"<deleteNodeConfigArgumentsFromStdIn>\""
 }
 
 function validateInput()
@@ -194,20 +194,9 @@ function createTempFolder()
 
 #main script starts here
 
-if [ $# -ne 8 ]
-then
-    usage
-	exit 1
-fi
+#read arguments from stdin
+read wlsUserName wlsPassword managedServerNames managedVMNames wlsForceShutDown wlsAdminHost wlsAdminPort oracleHome
 
-wlsUserName=$1
-wlsPassword=$2
-managedServerNames=$3
-managedVMNames=$4
-wlsForceShutDown=$5
-wlsAdminHost=$6
-wlsAdminPort=$7
-oracleHome=$8
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 hostName=`hostname`
 

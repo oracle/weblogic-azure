@@ -227,7 +227,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptELKConfiguration'),' ', variables('const_wlsHome'), ' ', concat(parameters('adminVMName'), ':', variables('const_wlsAdminPort')), ' ', parameters('wlsUserName'), ' ', parameters('wlsPassword'), ' ', variables('const_adminServerName'), ' ', parameters('elasticsearchEndpoint'),' ', parameters('elasticsearchUserName'),' ', parameters('elasticsearchPassword'), ' ', parameters('wlsDomainName'),' ', variables('const_wlsDomainPath'),' ', array.join(parameters('logsToIntegrate')), ' ',copyIndex(1), ' ', variables('const_logIndex'), ' ', concat(parameters('managedServerPrefix'), 'Storage'))]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptELKConfiguration'),' <<< \"', variables('const_wlsHome'), ' ', concat(parameters('adminVMName'), ':', variables('const_wlsAdminPort')), ' ', parameters('wlsUserName'), ' ', parameters('wlsPassword'), ' ', variables('const_adminServerName'), ' ', parameters('elasticsearchEndpoint'),' ', parameters('elasticsearchUserName'),' ', parameters('elasticsearchPassword'), ' ', parameters('wlsDomainName'),' ', variables('const_wlsDomainPath'),' ', array.join(parameters('logsToIntegrate')), ' ',copyIndex(1), ' ', variables('const_logIndex'), ' ', concat(parameters('managedServerPrefix'), 'Storage'),'\"')]"
                 }
             }
         },

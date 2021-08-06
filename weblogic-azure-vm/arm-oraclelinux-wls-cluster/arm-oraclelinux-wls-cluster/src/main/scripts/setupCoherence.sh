@@ -13,7 +13,7 @@ function echo_stderr() {
 
 #Function to display usage message
 function usage() {
-    echo_stderr "./setupCoherence.sh <wlsDomainName> <wlsUserName> <wlsPassword> <adminVMName> <oracleHome> <wlsDomainPath> <storageAccountName> <storageAccountKey> <mountpointPath> <enableWebLocalStorage> <enableELK> <elasticURI> <elasticUserName> <elasticPassword> <logsToIntegrate> <logIndex> <managedServerPrefix> <serverIndex> <isCustomSSLEnabled> [<customIdentityKeyStoreData> <customIdentityKeyStorePassPhrase> <customIdentityKeyStoreType> <customTrustKeyStoreData> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <serverPrivateKeyAlias <serverPrivateKeyPassPhrase>]"
+    echo_stderr "./setupCoherence.sh <<< \"<coherenceConfigArgumentsFromStdIn>\""
 }
 
 function installUtilities() {
@@ -641,57 +641,12 @@ function storeCustomSSLCerts()
 
 SCRIPT_PWD=$(pwd)
 
-# store arguments in a special array
-args=("$@")
-# get number of elements
-ELEMENTS=${#args[@]}
+read wlsDomainName wlsUserName wlsPassword adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex managedServerPrefix serverIndex isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
-# echo each element in array
-# for loop
-#for ((i = 0; i < $ELEMENTS; i++)); do
-#    echo "ARG[${args[${i}]}]"
-#done
-
-if [ $# -lt 19 ]; then
-    usage
-    exit 1
-fi
-
-wlsDomainName=$1
-wlsUserName=$2
-wlsPassword=$3
-adminVMName=$4
-oracleHome=$5
-wlsDomainPath=$6
-storageAccountName=$7
-storageAccountKey=$8
-mountpointPath=$9
-enableWebLocalStorage=${10}
-enableELK=${11}
-elasticURI=${12}
-elasticUserName=${13}
-elasticPassword=${14}
-logsToIntegrate=${15}
-logIndex=${16}
-managedServerPrefix=${17}
-serverIndex=${18}
-
-isCustomSSLEnabled="${19}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
-#case insensitive check
-if [ "${isCustomSSLEnabled}" == "true" ];
+if [ "${isCustomSSLEnabled}" != "true" ];
 then
-    echo "custom ssl enabled. Reading keystore information"
-    customIdentityKeyStoreData="${20}"
-    customIdentityKeyStorePassPhrase="${21}"
-    customIdentityKeyStoreType="${22}"
-    customTrustKeyStoreData="${23}"
-    customTrustKeyStorePassPhrase="${24}"
-    customTrustKeyStoreType="${25}"
-    serverPrivateKeyAlias="${26}"
-    serverPrivateKeyPassPhrase="${27}"
-else
     isCustomSSLEnabled="false"
 fi
 

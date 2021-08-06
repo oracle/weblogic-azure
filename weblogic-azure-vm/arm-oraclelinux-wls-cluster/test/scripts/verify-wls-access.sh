@@ -6,11 +6,9 @@
 # This script is to test WebLogic admin, console and managed servers access.
 
 # Verifying admin server is accessible
-adminPublicIP="$1"
-adminPort=$2
-wlsUserName=$3
-wlspassword=$4
-managedServers=$5
+
+#read arguments from stdin
+read adminPublicIP adminPort wlsUserName wlspassword managedServers
 
 isSuccess=false
 maxAttempt=5

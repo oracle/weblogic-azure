@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./configureCustomAdminSSL.sh <adminVMName> <wlsDomainName> <wlsUserName> <wlsPassword> <oracleHome> <wlsDomainPath> <enableAAD> <wlsADSSLCer> <isCustomSSLenabled> <customIdentityKeyStoreBase64String> <customIdentityKeyStorePassPhrase> <customIdentityKeyStoreType> <customTrustKeyStoreBase64String> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <privateKeyAlias> <privateKeyPassPhrase>"
+  echo_stderr "./configureCustomAdminSSL.sh <<< \"<customSSLConfigArgsFromStdIn>\""
 }
 
 function installUtilities()
@@ -285,45 +285,13 @@ SCRIPT_PWD=`pwd`
 args=("$@") 
 # get number of elements 
 ELEMENTS=${#args[@]} 
- 
-# echo each element in array  
-# for loop 
-#for (( i=0;i<$ELEMENTS;i++)); do 
-#    echo "ARG[${args[${i}]}]"
-#done
 
-if [ $# -lt 9 ]
-then
-    usage
-    exit 1
-fi
+#read arguments from stdin
+read adminVMName wlsDomainName wlsUserName wlsPassword oracleHome wlsDomainPath enableAAD wlsADSSLCer isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
 
-adminVMName=$1
-wlsDomainName=$2
-wlsUserName=$3
-wlsPassword=$4
-oracleHome=$5
-wlsDomainPath=$6
 
-enableAAD="${7}"
 enableAAD="${enableAAD,,}"
-
-wlsADSSLCer="${8}"
-
-isCustomSSLEnabled="${9}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
-
-if [ "${isCustomSSLEnabled,,}" == "true" ];
-then
-    customIdentityKeyStoreBase64String="${10}"
-    customIdentityKeyStorePassPhrase="${11}"
-    customIdentityKeyStoreType="${12}"
-    customTrustKeyStoreBase64String="${13}"
-    customTrustKeyStorePassPhrase="${14}"
-    customTrustKeyStoreType="${15}"
-    privateKeyAlias="${16}"
-    privateKeyPassPhrase="${17}"
-fi
 
 wlsAdminPort=7001
 wlsAdminChannelPort=7005
@@ -337,16 +305,16 @@ KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
 validateInput
 cleanup
 
-    parseAndSaveCustomSSLKeyStoreData
+parseAndSaveCustomSSLKeyStoreData
 
-    if [ "$enableAAD" == "true" ];then
-        parseLDAPCertificate
-        importAADCertificateIntoWLSCustomTrustKeyStore
-    fi
-    
-    wait_for_admin
-    configureSSL
-    restartAdminServerService
-    wait_for_admin
+if [ "$enableAAD" == "true" ];then
+    parseLDAPCertificate
+    importAADCertificateIntoWLSCustomTrustKeyStore
+fi
+
+wait_for_admin
+configureSSL
+restartAdminServerService
+wait_for_admin
 
 cleanup

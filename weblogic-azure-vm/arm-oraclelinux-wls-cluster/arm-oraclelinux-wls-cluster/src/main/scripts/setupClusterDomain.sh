@@ -15,7 +15,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupClusterDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsServerName> <wlsAdminHost> <storageAccountName> <storageAccountKey> <mountpointPath> <enableHTTPAdminListenPort> <isCustomSSLEnabled> [<customIdentityKeyStoreData> <customIdentityKeyStorePassPhrase> <customIdentityKeyStoreType> <customTrustKeyStoreData> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <serverPrivateKeyAlias <serverPrivateKeyPassPhrase>]"
+  echo_stderr "./setupClusterDomain.sh <<< \"<clusterDomainSetupArgumentsFromStdIn>\""
 }
 
 function installUtilities()
@@ -740,52 +740,13 @@ sudo chmod -R 750 ${stopWebLogicScript}
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-# store arguments in a special array 
-args=("$@") 
-# get number of elements 
-ELEMENTS=${#args[@]} 
- 
-# echo each element in array  
-# for loop 
-#for (( i=0;i<$ELEMENTS;i++)); do 
-#    echo "ARG[${args[${i}]}]"
-#done
+#read arguments from stdin
+read wlsDomainName wlsUserName wlsPassword wlsServerName wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
-if [ $# -le 8 ]
-then
-    usage
-    exit 1
-fi
-
-wlsDomainName=${1}
-wlsUserName=${2}
-wlsPassword=${3}
-wlsServerName=${4}
-wlsAdminHost=${5}
-oracleHome=${6}
-storageAccountName=${7}
-storageAccountKey=${8}
-mountpointPath=${9}
-
-isHTTPAdminListenPortEnabled="${10}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
-
-isCustomSSLEnabled="${11}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
-#case insensitive check
-if [ "${isCustomSSLEnabled}" == "true" ];
-then
-    echo "custom ssl enabled. Reading keystore information"
-    customIdentityKeyStoreData="${12}"
-    customIdentityKeyStorePassPhrase="${13}"
-    customIdentityKeyStoreType="${14}"
-    customTrustKeyStoreData="${15}"
-    customTrustKeyStorePassPhrase="${16}"
-    customTrustKeyStoreType="${17}"
-    serverPrivateKeyAlias="${18}"
-    serverPrivateKeyPassPhrase="${19}"
-else
+if [ "${isCustomSSLEnabled}" != "true" ];
     isCustomSSLEnabled="false"
 fi
 

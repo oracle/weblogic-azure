@@ -12,7 +12,7 @@ function echo_stderr()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupApplicationGateway.sh <wlsAdminServerName> <wlsUserName> <wlsPassword> <wlsAdminHost> <wlsAdminPort> <AppGWHostName> <oracleHome>"
+  echo_stderr "./setupApplicationGateway.sh <<< \"<appGatewaySettingsFromStdIn>\""
 }
 
 #Function to validate input
@@ -135,21 +135,13 @@ EOF
     fi
 }
 
+#main
+
 SCRIPT_PWD=`pwd`
 
-if [ $# -ne 7 ]
-then
-    usage
-	exit 1
-fi
+#read arguments from stdin
+read wlsAdminServerName wlsUserName wlsPassword wlsAdminHost wlsAdminPort AppGWHostName oracleHome
 
-wlsAdminServerName=$1
-wlsUserName=$2
-wlsPassword=$3
-wlsAdminHost=$4
-wlsAdminPort=$5
-AppGWHostName=$6
-oracleHome=$7
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
 channelPort=8501

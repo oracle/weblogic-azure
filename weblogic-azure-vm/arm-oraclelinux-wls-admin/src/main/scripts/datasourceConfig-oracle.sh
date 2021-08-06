@@ -5,19 +5,6 @@
 # Description
 #  This script configures datasource on WebLogic Server Domain for Oracle database.
 
-oracleHome=$1
-wlsAdminHost=$2
-wlsAdminPort=$3
-wlsUserName=$4
-wlsPassword=$5
-jdbcDataSourceName=$6
-dsConnectionURL=$7
-dsUser=$8
-dsPassword=$9
-wlsClusterName=${10-cluster1}
-wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-hostName=`hostname`
-
 #Function to output message to StdErr
 function echo_stderr ()
 {
@@ -27,7 +14,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./configDatasource.sh <oracleHome> <wlsAdminHost> <wlsAdminPort> <wlsUserName> <wlsPassword> <jdbcDataSourceName> <dsConnectionURL> <dsUser> <dsPassword> <wlsClusterName> "  
+  echo_stderr "./configDatasource.sh <<< \"<wlsDataSourceSetupArgsFromStdIn>\""
 }
 
 function validateInput()
@@ -148,10 +135,17 @@ function createTempFolder()
     sudo rm -rf $scriptPath/*
 }
 
-if [ $# -lt 9 ]
+#main
+
+#read arguments from stdin
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword wlsClusterName
+
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+hostName=`hostname`
+
+if [ -z "$wlsClusterName" ];
 then
-    usage
-    exit 1
+   wlsClusterName="cluster1"
 fi
 
 createTempFolder
