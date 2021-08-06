@@ -4,22 +4,7 @@
 #
 #Generate parameters with value for deploying addnode template
 
-parametersPath=$1
-adminPasswordOrKey=$2
-adminURL=$3
-adminUsername=$4
-numberOfExistingNodes=$5
-skuUrnVersion=$6
-storageAccountName=${7}
-wlsDomainName=${8}
-location=${9}
-wlsusername=${10}
-wlspassword=${11}
-gitUserName=${12}
-testbranchName=${13}
-managedServerPrefix=${14}
-dynamicClusterSize=${15}
-maxDynamicClusterSize=${16}
+read parametersPath adminPasswordOrKey adminURL adminUsername numberOfExistingNodes skuUrnVersion storageAccountName wlsDomainName location wlsusername wlspassword gitUserName testbranchName managedServerPrefix dynamicClusterSize maxDynamicClusterSize
 
 cat <<EOF > ${parametersPath}
 {

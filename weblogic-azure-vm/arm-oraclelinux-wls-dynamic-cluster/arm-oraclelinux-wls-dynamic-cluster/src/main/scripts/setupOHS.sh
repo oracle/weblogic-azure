@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-    echo_stderr "./setupOHS.sh <ohs domain name> <ohs component name> <ohs nodemanager user> <ohs nodemanager password> <ohs http port> <ohs https port> <adminRestMgmtURL> <wlsUsername> <wlsPassword> <ohsSSLKeystoreData> <ohsSSLKeystorePassword> <oracle vault password> <keyType>"
+    echo_stderr "./setupOHS.sh"
 }
 
 # Create user "oracle", used for instalation and setup
@@ -472,19 +472,8 @@ function verifyService()
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-OHS_DOMAIN_NAME=$1
-OHS_COMPONENT_NAME=$2
-OHS_NM_USER=$3
-OHS_NM_PSWD=$4
-OHS_HTTP_PORT=$5
-OHS_HTTPS_PORT=$6
-WLS_REST_URL=$7
-WLS_USER=$8
-WLS_PASSWORD=$9
-OHS_KEY_STORE_DATA=${10}
-OHS_KEY_STORE_PASSPHRASE=${11} 
-ORACLE_VAULT_PASSWORD=${12}
-OHS_KEY_TYPE=${13}
+read OHS_DOMAIN_NAME OHS_COMPONENT_NAME OHS_NM_USER OHS_NM_PSWD OHS_HTTP_PORT OHS_HTTPS_PORT WLS_REST_URL WLS_USER WLS_PASSWORD OHS_KEY_STORE_DATA OHS_KEY_STORE_PASSPHRASE ORACLE_VAULT_PASSWORD OHS_KEY_TYPE
+
 JDK_PATH="/u01/app/jdk"
 JDK_VERSION="jdk1.8.0_271"
 JAVA_HOME=$JDK_PATH/$JDK_VERSION
@@ -496,8 +485,6 @@ OHS_DOMAIN_PATH=${DOMAIN_PATH}/${OHS_DOMAIN_NAME}
 OHS_VAULT_PATH="${DOMAIN_PATH}/ohsvault"
 groupname="oracle"
 username="oracle"
-
-
 
 validateInput
 setupDomainPath

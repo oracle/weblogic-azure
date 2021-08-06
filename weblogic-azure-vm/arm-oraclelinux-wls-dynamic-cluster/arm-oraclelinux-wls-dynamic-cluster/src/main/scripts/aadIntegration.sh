@@ -11,7 +11,7 @@ function echo_stderr()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <wlsAdminServerName> <wlsDomainPath> <isCustomSSLEnabled> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <vmIndex>"
+  echo_stderr "./aadIntegration.sh"
 }
 
 function validateInput()
@@ -445,33 +445,7 @@ USER_ORACLE="oracle"
 GROUP_ORACLE="oracle"
 DOMAIN_PATH="/u01/domains"
 
-if [ $# -ne 21 ]
-then
-    usage
-	exit 1
-fi
-
-wlsUserName=$1
-wlsPassword=$2
-wlsDomainName=$3
-adProviderName=$4
-adServerHost=$5
-adServerPort=$6
-adPrincipal=$7
-adPassword=$8
-adGroupBaseDN=$9
-adUserBaseDN=${10}
-oracleHome=${11}
-wlsAdminHost=${12}
-wlsAdminPort=${13}
-wlsADSSLCer="${14}"
-wlsLDAPPublicIP="${15}"
-wlsAdminServerName=${16}
-wlsDomainPath=${17}
-isCustomSSLEnabled=${18}
-customTrustKeyStorePassPhrase="${19}"
-customTrustKeyStoreType="${20}"
-vmIndex=${21}
+read wlsUserName wlsPassword wlsDomainName adProviderName adServerHost adServerPort adPrincipal adPassword adGroupBaseDN adUserBaseDN oracleHome wlsAdminHost wlsAdminPort wlsADSSLCer wlsLDAPPublicIP wlsAdminServerName wlsDomainPath isCustomSSLEnabled customTrustKeyStorePassPhrase customTrustKeyStoreType vmIndex
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 

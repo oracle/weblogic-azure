@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./addnode.sh <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerPrefix> <serverIndex> <wlsAdminURL> <oracleHome> <wlsDomainPath> <dynamicClusterSize> <vmNamePrefix> <storageAccountName> <storageAccountKey> <mountpointPath> <wlsADSSLCer> <wlsLDAPPublicIP> <adServerHost> <enableELK> <elasticURI> <elasticUserName> <elasticPassword> <logsToIntegrate> <logIndex> <maxDynamicClusterSize>  <isCustomSSLenabled> <customIdentityKeyStoreBase64String> <customIdentityKeyStorePassPhrase> <customIdentityKeyStoreType> <customTrustKeyStoreBase64String> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <privateKeyAlias> <privateKeyPassPhrase>"
+  echo_stderr "./addnode.sh"
 }
 
 function installUtilities()
@@ -618,60 +618,13 @@ function parseAndSaveCustomSSLKeyStoreData()
 SCRIPT_PWD=`pwd`
 
 # store arguments in a special array 
-args=("$@") 
+#args=("$@") 
 # get number of elements 
-ELEMENTS=${#args[@]} 
+#ELEMENTS=${#args[@]} 
 
-# echo each element in array  
-# for loop 
-for (( i=0;i<$ELEMENTS;i++)); do 
-    echo "ARG[${args[${i}]}]"
-done
+read wlsDomainName wlsUserName wlsPassword managedServerPrefix serverIndex wlsAdminURL oracleHome wlsDomainPath dynamicClusterSize vmNamePrefix storageAccountName storageAccountKey mountpointPath wlsADSSLCer wlsLDAPPublicIP adServerHost enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex maxDynamicClusterSize isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
 
-if [ $# -lt 24 ]
-then
-    usage
-    exit 1
-fi
-
-wlsDomainName=$1
-wlsUserName=$2
-wlsPassword=$3
-managedServerPrefix=$4
-serverIndex=$5
-wlsAdminURL=$6
-oracleHome=${7}
-wlsDomainPath=${8}
-dynamicClusterSize=${9}
-vmNamePrefix=${10}
-storageAccountName=${11}
-storageAccountKey=${12}
-mountpointPath=${13}
-wlsADSSLCer="${14}"
-wlsLDAPPublicIP="${15}"
-adServerHost="${16}"
-enableELK=${17}
-elasticURI=${18}
-elasticUserName=${19}
-elasticPassword=${20}
-logsToIntegrate=${21}
-logIndex=${22}
-maxDynamicClusterSize=${23}
-
-isCustomSSLEnabled="${24}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
-
-if [ "${isCustomSSLEnabled,,}" == "true" ];
-then
-    customIdentityKeyStoreBase64String="${25}"
-    customIdentityKeyStorePassPhrase="${26}"
-    customIdentityKeyStoreType="${27}"
-    customTrustKeyStoreBase64String="${28}"
-    customTrustKeyStorePassPhrase="${29}"
-    customTrustKeyStoreType="${30}"
-    privateKeyAlias="${31}"
-    privateKeyPassPhrase="${32}"
-fi
 
 enableAAD="false"
 

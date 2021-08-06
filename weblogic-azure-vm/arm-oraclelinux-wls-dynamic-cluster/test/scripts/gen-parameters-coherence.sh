@@ -3,10 +3,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 
-
-parametersPath=$1
-githubUserName=$2
-testbranchName=$3
+read parametersPath githubUserName testbranchName
 
 cat <<EOF >${parametersPath}
 {

@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./deletenode.sh <wlsUserName> <wlsPassword> <managedVMNames> <forceShutDown> <wlsAdminHost> <wlsAdminPort> <oracleHome> <managedServerPrefix> <deletingCacheServerNames>"
+  echo_stderr "./deletenode.sh"
 }
 
 function validateInput()
@@ -233,31 +233,18 @@ function delete_managed_machine()
 
 #main script starts here
 # store arguments in a special array
-args=("$@")
+#args=("$@")
 # get number of elements
-ELEMENTS=${#args[@]}
+#ELEMENTS=${#args[@]}
 
 # echo each element in array
 # for loop
-for ((i = 0; i < $ELEMENTS; i++)); do
-    echo "ARG[${args[${i}]}]"
-done
+#for ((i = 0; i < $ELEMENTS; i++)); do
+#    echo "ARG[${args[${i}]}]"
+#done
 
-if [ $# -ne 9 ]
-then
-    usage
-	exit 1
-fi
+read wlsUserName wlsPassword managedVMNames wlsForceShutDown wlsAdminHost wlsAdminPort oracleHome managedServerPrefix deletingCacheServerNames
 
-wlsUserName=$1
-wlsPassword=$2
-managedVMNames=$3
-wlsForceShutDown=$4
-wlsAdminHost=$5
-wlsAdminPort=$6
-oracleHome=$7
-managedServerPrefix=$8
-deletingCacheServerNames=$9
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 hostName=`hostname`
 wlsClusterName="cluster1"

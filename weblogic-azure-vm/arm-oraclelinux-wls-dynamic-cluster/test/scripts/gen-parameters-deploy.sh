@@ -3,19 +3,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 #Generate parameters with value for deployment
-parametersPath=$1
-location=$2
-adminPasswordOrKey=$3
-wlsdomainname=$4
-wlsusername=$5
-wlspassword=$6
-managedserverprefix=$7
-maxDynamicClusterSize=$8
-dynamicClusterSize=$9
-adminvmname=${10}
-skuUrnVersion=${11}
-testbranchName=${12}
-gitUserName=${13}
+read parametersPath location adminPasswordOrKey wlsdomainname wlsusername wlspassword managedserverprefix maxDynamicClusterSize dynamicClusterSize adminvmname skuUrnVersion testbranchName gitUserName 
 
 cat <<EOF >${parametersPath}
 {

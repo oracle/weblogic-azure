@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setDynamicClusterDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerPrefix> <index value> <vmNamePrefix> <maxDynamicClusterSize> <adminVMName> <oracleHome> <storageAccountName> <storageAccountKey> <mountpointPath> <enableHTTPAdminListenPort> <isCustomSSLEnabled> [<customIdentityKeyStoreData> <customIdentityKeyStorePassPhrase> <customIdentityKeyStoreType> <customTrustKeyStoreData> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <serverPrivateKeyAlias <serverPrivateKeyPassPhrase>]"
+  echo_stderr "./setDynamicClusterDomain.sh"
 }
 
 function installUtilities()
@@ -808,9 +808,9 @@ CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 # store arguments in a special array 
-args=("$@") 
+#args=("$@") 
 # get number of elements 
-ELEMENTS=${#args[@]} 
+#ELEMENTS=${#args[@]} 
  
 # echo each element in array  
 # for loop 
@@ -818,51 +818,15 @@ ELEMENTS=${#args[@]}
 #    echo "ARG[${args[${i}]}]"
 #done
 
-if [ $# -lt 15 ]
-then
-    usage
-    exit 1
-fi
-
-wlsDomainName=${1}
-wlsUserName=${2}
-wlsPassword=${3}
-managedServerPrefix=${4}
-indexValue=${5}
-vmNamePrefix=${6}
-maxDynamicClusterSize=${7}
-dynamicClusterSize=${8}
-adminVMName=${9}
-oracleHome=${10}
-storageAccountName=${11}
-storageAccountKey=${12}
-mountpointPath=${13}
+read wlsDomainName wlsUserName wlsPassword managedServerPrefix indexValue vmNamePrefix maxDynamicClusterSize dynamicClusterSize adminVMName oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 DOMAIN_PATH="/u01/domains"
 startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
 
-isHTTPAdminListenPortEnabled="${14}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 
-isCustomSSLEnabled="${15}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
-
-#case insensitive check
-if [ "${isCustomSSLEnabled}" == "true" ];
-then
-    echo "custom ssl enabled. Reading keystore information"
-    customIdentityKeyStoreData="${16}"
-    customIdentityKeyStorePassPhrase="${17}"
-    customIdentityKeyStoreType="${18}"
-    customTrustKeyStoreData="${19}"
-    customTrustKeyStorePassPhrase="${20}"
-    customTrustKeyStoreType="${21}"
-    serverPrivateKeyAlias="${22}"
-    serverPrivateKeyPassPhrase="${23}"
-else
-    isCustomSSLEnabled="false"
-fi
 
 # Always index 0 is set as admin server
 coherenceListenPort=7574

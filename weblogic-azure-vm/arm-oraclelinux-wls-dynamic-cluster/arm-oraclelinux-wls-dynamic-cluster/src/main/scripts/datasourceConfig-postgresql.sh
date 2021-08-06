@@ -2,16 +2,12 @@
 # Copyright (c) 2021, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
-oracleHome=$1
-wlsAdminHost=$2
-wlsAdminPort=$3
-wlsUserName=$4
-wlsPassword=$5
-jdbcDataSourceName=$6
-dsConnectionURL=$7
-dsUser=$8
-dsPassword=$9
-wlsClusterName=${10-cluster1}
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword wlsClusterName
+
+if [ -z ${wlsClusterName} ]; then
+	wlsClusterName='cluster1'
+fi
+
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 hostName=`hostname`
 
@@ -24,7 +20,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./configDatasource.sh <oracleHome> <wlsAdminHost> <wlsAdminPort> <wlsUserName> <wlsPassword> <jdbcDataSourceName> <dsConnectionURL> <dsUser> <dsPassword> <wlsClusterName> "  
+  echo_stderr "./configDatasource.sh"  
 }
 
 function validateInput()
@@ -153,16 +149,9 @@ ELEMENTS=${#args[@]}
  
 # echo each element in array  
 # for loop 
-for (( i=0;i <$ELEMENTS;i++)); do 
-    echo "ARG[${args[${i}]}]"
-done
-
-
-if [ $# -lt 9 ]
-then
-    usage
-    exit 1
-fi
+#for (( i=0;i <$ELEMENTS;i++)); do 
+#    echo "ARG[${args[${i}]}]"
+#done
 
 createTempFolder
 validateInput
