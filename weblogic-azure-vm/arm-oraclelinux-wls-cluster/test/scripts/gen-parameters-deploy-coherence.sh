@@ -5,19 +5,8 @@
 # Description
 # This script is to generate parameters with value for deploying coherence template independently.
 
-
-parametersPath=$1
-adminVMName=$2
-adminPasswordOrKey=$3
-skuUrnVersion=$4
-location=$5
-storageAccountName=$6
-wlsDomainName=$7
-wlsusername=$8
-wlspassword=$9
-gitUserName=${10}
-testbranchName=${11}
-managedServerPrefix=${12}
+#read arguments from stdin
+read parametersPath adminVMName adminPasswordOrKey skuUrnVersion location storageAccountName wlsDomainName wlsusername wlspassword gitUserName testbranchName managedServerPrefix
 
 cat <<EOF > ${parametersPath}
 {

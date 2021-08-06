@@ -5,13 +5,8 @@
 # Description
 # This script is to generate test parameters for database datasource and Appgateway testing.
 
-parametersPath=$1
-githubUserName=$2
-testbranchName=$3
-keyVaultName=$4
-keyVaultResourceGroup=$5
-keyVaultSSLCertDataSecretName=$6
-keyVaultSSLCertPasswordSecretName=$7
+#read arguments from stdin
+read parametersPath githubUserName testbranchName keyVaultName keyVaultResourceGroup keyVaultSSLCertDataSecretName keyVaultSSLCertPasswordSecretName 
 
 cat <<EOF > ${parametersPath}
 {
