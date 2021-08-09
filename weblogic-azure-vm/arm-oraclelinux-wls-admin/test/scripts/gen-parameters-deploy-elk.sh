@@ -4,18 +4,8 @@
 
 #Generate parameters with value for deploying elk template independently
 
-parametersPath=$1
-adminVMName=$2
-elasticsearchPassword=$3
-elasticsearchURI=$4
-elasticsearchUserName=$5
-location=$6
-wlsDomainName=$7
-wlsusername=$8
-wlspassword=$9
-gitUserName=${10}
-testbranchName=${11}
-guidValue=${12}
+#read arguments from stdin
+read parametersPath adminVMName elasticsearchPassword elasticsearchURI elasticsearchUserName location wlsDomainName wlsusername wlspassword gitUserName testbranchName guidValue
 
 cat <<EOF > ${parametersPath}
 {

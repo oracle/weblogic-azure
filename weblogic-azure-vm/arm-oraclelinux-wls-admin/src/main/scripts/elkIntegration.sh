@@ -5,25 +5,6 @@
 # Description
 #  This script configures ELK (Elasticsearch, Logstash and Kibana) Stack on WebLogic Server Domain.
 
-oracleHome=$1
-wlsAdminHost=$2
-wlsAdminPort=$3
-wlsUserName=$4
-wlsPassword=$5
-wlsAdminServerName=$6
-elasticURI=$7
-elasticUserName=$8
-elasticPassword=$9
-wlsDomainName=${10}
-wlsDomainPath=${11}
-logsToIntegrate=${12}
-logIndex=${13}
-
-hostName=`hostname`
-wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-userOracle="oracle"
-groupOracle="oracle"
-
 #Function to output message to StdErr
 function echo_stderr ()
 {
@@ -33,7 +14,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <oracleHome> <wlsAdminHost> <wlsAdminPort> <wlsUserName> <wlsPassword> <wlsAdminServerName> <elasticURI> <elasticUserName> <elasticPassword> <wlsDomainName> <wlsDomainPath> <logsToIntegrate> <logIndex>"  
+  echo_stderr "./elkIntegration.sh <<< \"<elkIntegrationSetupArgsFromStdIn>\""
 }
 
 function validate_input()
@@ -665,13 +646,18 @@ function validate_elastic_server()
     done
 }
 
+
+#main
 SCRIPT_PWD=`pwd`
 
-if [ $# -ne 13 ]
-then
-    usage
-	exit 1
-fi
+#read arguments from stdin
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword wlsAdminServerName elasticURI elasticUserName elasticPassword wlsDomainName wlsDomainPath logsToIntegrate logIndex
+
+hostName=`hostname`
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+userOracle="oracle"
+groupOracle="oracle"
+
 
 create_temp_folder
 validate_input

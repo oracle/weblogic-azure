@@ -14,7 +14,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./addnode.sh <wlsDomainName> <wlsUserName> <wlsPassword> <managedServerPrefix> <serverIndex> <wlsAdminURL> <oracleHome> <wlsDomainPath> <storageAccountName> <storageAccountKey> <mountpointPath> <wlsADSSLCer> <wlsLDAPPublicIP> <adServerHost> <appGWHostName> <enableELK> <elasticURI> <elasticUserName> <elasticPassword> <logsToIntegrate> <logIndex> <enableCoherence> <isCustomSSLenabled> <customIdentityKeyStoreBase64String> <customIdentityKeyStorePassPhrase> <customIdentityKeyStoreType> <customTrustKeyStoreBase64String> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType> <privateKeyAlias> <privateKeyPassPhrase>"
+  echo_stderr "./addnode.sh <<< \"<addNodeSetupArgumentsFromStdIn>\""
 }
 
 function installUtilities()
@@ -709,60 +709,10 @@ function parseAndSaveCustomSSLKeyStoreData()
 
 SCRIPT_PWD=`pwd`
 
-# store arguments in a special array 
-args=("$@") 
-# get number of elements 
-ELEMENTS=${#args[@]} 
- 
-# echo each element in array  
-# for loop 
-#for (( i=0;i<$ELEMENTS;i++)); do 
-#    echo "ARG[${args[${i}]}]"
-#done
+#read arguments from stdin
+read wlsDomainName wlsUserName wlsPassword managedServerPrefix serverIndex wlsAdminURL oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath wlsADSSLCer wlsLDAPPublicIP adServerHost appGWHostName enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex enableCoherence isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
 
-if [ $# -lt 23 ]
-then
-    usage
-    exit 1
-fi
-
-wlsDomainName=$1
-wlsUserName=$2
-wlsPassword=$3
-managedServerPrefix=$4
-serverIndex=$5
-wlsAdminURL=$6
-oracleHome=$7
-wlsDomainPath=$8
-storageAccountName=$9
-storageAccountKey=${10}
-mountpointPath=${11}
-wlsADSSLCer="${12}"
-wlsLDAPPublicIP="${13}"
-adServerHost="${14}"
-appGWHostName=${15}
-enableELK=${16}
-elasticURI=${17}
-elasticUserName=${18}
-elasticPassword=${19}
-logsToIntegrate=${20}
-logIndex=${21}
-enableCoherence=${22}
-
-isCustomSSLEnabled="${23}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
-
-if [ "${isCustomSSLEnabled,,}" == "true" ];
-then
-    customIdentityKeyStoreBase64String="${24}"
-    customIdentityKeyStorePassPhrase="${25}"
-    customIdentityKeyStoreType="${26}"
-    customTrustKeyStoreBase64String="${27}"
-    customTrustKeyStorePassPhrase="${28}"
-    customTrustKeyStoreType="${29}"
-    privateKeyAlias="${30}"
-    privateKeyPassPhrase="${31}"
-fi
 
 coherenceListenPort=7574
 coherenceLocalport=42000

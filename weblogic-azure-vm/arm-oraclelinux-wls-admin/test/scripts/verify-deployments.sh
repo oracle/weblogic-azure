@@ -2,12 +2,8 @@
 # Copyright (c) 2021, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-prefix="$1"
-location="$2"
-template="$3"
-githubUserName="$4"
-testbranchName="$5"
-scriptsDir="$6"
+#read arguments from stdin
+read prefix location template githubUserName testbranchName scriptsDir
 
 groupName=${prefix}-preflight
 

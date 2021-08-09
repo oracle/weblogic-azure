@@ -5,10 +5,8 @@
 # Description
 # This script is to generate test parameters for coherence testing.
 
-
-parametersPath=$1
-githubUserName=$2
-testbranchName=$3
+#read arguments from stdin
+read parametersPath githubUserName testbranchName
 
 cat <<EOF >${parametersPath}
 {

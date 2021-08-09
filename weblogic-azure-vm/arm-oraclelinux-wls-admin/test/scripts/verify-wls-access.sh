@@ -3,8 +3,9 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 # Verifying admin server is accessible
-adminPublicIP="$1"
-adminPort=$2
+
+#read arguments from stdin
+read adminPublicIP adminPort
 
 isSuccess=false
 maxAttempt=5

@@ -5,14 +5,8 @@
 # Description
 # Generate parameters with value for deploying delete-node template.
 
-parametersPath=$1
-adminVMName=$2
-location=${3}
-wlsusername=${4}
-wlspassword=${5}
-gitUserName=${6}
-testbranchName=${7}
-managedServerPrefix=${8}
+#read arguments from stdin
+read parametersPath adminVMName location wlsusername wlspassword gitUserName testbranchName managedServerPrefix
 
 cat <<EOF > ${parametersPath}
 {

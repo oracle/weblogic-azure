@@ -5,18 +5,8 @@
 # Description
 # This script is to generate test parameters for Appgateway testing.
 
-parametersPath=$1
-githubUserName=$2
-testbranchName=$3
-adminVMName=$4
-appGatewaySSLCertificateData=$5
-appGatewaySSLCertificatePassword=$6
-numberOfInstances=$7
-location=$8
-wlsPassword=$9
-wlsUserName=${10}
-wlsDomainName=${11}
-managedServerPrefix=${12}
+#read arguments from stdin
+read parametersPath githubUserName testbranchName adminVMName appGatewaySSLCertificateData appGatewaySSLCertificatePassword numberOfInstances location wlsPassword wlsUserName wlsDomainName managedServerPrefix
 
 cat <<EOF > ${parametersPath}
 {

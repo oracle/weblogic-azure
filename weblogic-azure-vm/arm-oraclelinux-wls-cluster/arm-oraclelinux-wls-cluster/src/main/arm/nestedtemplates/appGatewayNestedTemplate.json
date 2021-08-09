@@ -397,7 +397,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),' ', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn), ' ',variables('const_wlsHome'))]"
+					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
 				}
 			}
 		},

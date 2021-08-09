@@ -125,7 +125,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh ',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',variables('const_singleQuote'),parameters('wlsPassword'),variables('const_singleQuote'),' ',parameters('jdbcDataSourceName'),' ',variables('const_singleQuote'),parameters('dsConnectionURL'),variables('const_singleQuote'),' ',parameters('dbUser'),' ',variables('const_singleQuote'),parameters('dbPassword'),variables('const_singleQuote'))]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh <<< \"',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',variables('const_singleQuote'),parameters('wlsPassword'),variables('const_singleQuote'),' ',parameters('jdbcDataSourceName'),' ',variables('const_singleQuote'),parameters('dsConnectionURL'),variables('const_singleQuote'),' ',parameters('dbUser'),' ',variables('const_singleQuote'),parameters('dbPassword'),variables('const_singleQuote'),'\"')]"
                 }
             }
         },

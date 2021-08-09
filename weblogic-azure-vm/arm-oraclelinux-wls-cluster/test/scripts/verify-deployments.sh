@@ -5,12 +5,8 @@
 # Description
 # This scipt is to deploy the Azure deployments based on test parameters created.
 
-prefix="$1"
-location="$2"
-template="$3"
-githubUserName="$4"
-testbranchName="$5"
-scriptsDir="$6"
+#read arguments from stdin
+read prefix location template githubUserName testbranchName scriptsDir
 
 groupName=${prefix}-preflight
 keyVaultName=keyvault${prefix}

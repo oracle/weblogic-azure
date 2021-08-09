@@ -5,21 +5,8 @@
 # Description
 # This script is to generate test parameters with value for deploying addnode template
 
-
-parametersPath=$1
-adminPasswordOrKey=$2
-adminURL=$3
-adminUsername=$4
-numberOfExistingNodes=$5
-skuUrnVersion=$6
-storageAccountName=${7}
-wlsDomainName=${8}
-location=${9}
-wlsusername=${10}
-wlspassword=${11}
-gitUserName=${12}
-testbranchName=${13}
-managedServerPrefix=${14}
+#read arguments from stdin
+read parametersPath adminPasswordOrKey adminURL adminUsername numberOfExistingNodes skuUrnVersion storageAccountName wlsDomainName location wlsusername wlspassword gitUserName testbranchName managedServerPrefix
 
 # do not include admin node.
 numberOfExistingNodes=$((numberOfExistingNodes - 1))
