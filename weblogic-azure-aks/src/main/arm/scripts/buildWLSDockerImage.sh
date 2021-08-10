@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 #Function to output message to StdErr
@@ -6,13 +6,14 @@ function echo_stderr() {
     echo "$@" >&2
 }
 
-# PENDING(edburns): load <azureACRPassword> and <ocrSSOPSW> from filesystem, from a file that is guaranteed to be secured as required
-function load_parameters_from_file() {
+# read <azureACRPassword> and <ocrSSOPSW> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read azureACRPassword ocrSSOPSW
 }
 
 #Function to display usage message
 function usage() {
-    echo_stdout "./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize>"
+    echo_stdout "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -243,7 +244,7 @@ export ocrLoginServer="container-registry.oracle.com"
 export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.7/weblogic-deploy.zip"
 export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.11/imagetool.zip"
 
-load_parameters_from_file
+read_sensitive_parameters_from_stdin
 
 validate_inputs
 
