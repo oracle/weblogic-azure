@@ -13,7 +13,7 @@ ttl=${7}
 cnameRecordSetNames=${8}
 cnameAlias=${9}
 lenCnameRecordSetNames=${10}
-lenCnameAlias=${11}
+lenCnameAlias=${11} 
 
 if [[ ${lenRecordset} != ${lenTargets} ]]; then
     echo "Error: number of A record set names is not equal to that of target resources."

@@ -130,7 +130,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ', variables('name_scriptDeleteNode'), ' ', parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', array.join(parameters('deletingManagedServerMachineNames')),' ', parameters('wlsForceShutDown'), ' ', parameters('adminVMName'), ' ',variables('const_wlsAdminPort'),' ',variables('const_wlsHome'), ' ', parameters('managedServerPrefix'), ' ', array.join(parameters('deletingCacheServerNames')))]"
+                    "commandToExecute": "[concat('sh',' ', variables('name_scriptDeleteNode'), ' <<< \"', parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', array.join(parameters('deletingManagedServerMachineNames')),' ', parameters('wlsForceShutDown'), ' ', parameters('adminVMName'), ' ',variables('const_wlsAdminPort'),' ',variables('const_wlsHome'), ' ', parameters('managedServerPrefix'), ' ', array.join(parameters('deletingCacheServerNames')),'\"')]"
                 }
             }
         },

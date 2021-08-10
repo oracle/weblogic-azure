@@ -197,7 +197,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'),' ', add(copyIndex(),1))]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' <<< \"', variables('const_aadParameters'),' ', add(copyIndex(),1),'\"')]"
                 }
             }
         },
@@ -220,7 +220,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'),' ', 0)]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' <<< \"', variables('const_aadParameters'),' ', 0,'\"')]"
                 }
             }
         },

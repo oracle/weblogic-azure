@@ -3,11 +3,8 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 # Verifying admin server is accessible
-adminPublicIP="$1"
-adminPort=$2
-wlsUserName=$3
-wlspassword=$4
-managedServers=$5
+
+read adminPublicIP adminPort wlsUserName wlspassword managedServers
 
 
 isSuccess=false

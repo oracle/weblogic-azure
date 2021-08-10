@@ -9,7 +9,7 @@ function echo_stderr() {
 
 #Function to display usage message
 function usage() {
-    echo_stderr "./elkIntegrationForConfiguredCluster.sh <oracleHome> <wlsAdminURL> <wlsUserName> <wlsPassword> <wlsAdminServerName> <elasticURI> <elasticUserName> <elasticPassword> <wlsDomainName> <wlsDomainPath> <logsToIntegrate> <index> <logIndex> <managedServerPrefix>"
+    echo_stderr "./elkIntegrationForConfiguredCluster.sh"
 }
 
 function validate_input() {
@@ -722,39 +722,21 @@ function validate_elastic_server()
 SCRIPT_PWD=$(pwd)
 
 # store arguments in a special array
-args=("$@")
+#args=("$@")
 # get number of elements
-ELEMENTS=${#args[@]}
+#ELEMENTS=${#args[@]}
 
 # echo each element in array
 # for loop
-for ((i = 0; i < $ELEMENTS; i++)); do
-    echo "ARG[${args[${i}]}]"
-done
+#for ((i = 0; i < $ELEMENTS; i++)); do
+#    echo "ARG[${args[${i}]}]"
+#done
 
-oracleHome=$1
-wlsAdminURL=$2
-wlsUserName=$3
-wlsPassword=$4
-wlsAdminServerName=$5
-elasticURI=$6
-elasticUserName=$7
-elasticPassword=$8
-wlsDomainName=$9
-wlsDomainPath=${10}
-logsToIntegrate=${11}
-index=${12}
-logIndex=${13}
-managedServerPrefix=${14}
+read oracleHome wlsAdminURL wlsUserName wlsPassword wlsAdminServerName elasticURI elasticUserName elasticPassword wlsDomainName wlsDomainPath logsToIntegrate index logIndex managedServerPrefix
 
 hostName=$(hostname)
 userOracle="oracle"
 groupOracle="oracle"
-
-if [ $# -ne 14 ]; then
-    usage
-    exit 1
-fi
 
 create_temp_folder
 validate_input

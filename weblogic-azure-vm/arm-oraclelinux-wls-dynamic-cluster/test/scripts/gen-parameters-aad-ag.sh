@@ -3,13 +3,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 
-parametersPath=$1
-githubUserName=$2
-testbranchName=$3
-keyVaultName=$4
-keyVaultResourceGroup=$5
-keyVaultSSLCertDataSecretName=$6
-keyVaultSSLCertPasswordSecretName=$7
+read parametersPath githubUserName testbranchName keyVaultName keyVaultResourceGroup keyVaultSSLCertDataSecretName keyVaultSSLCertPasswordSecretName
 
 cat <<EOF > ${parametersPath}
 {
