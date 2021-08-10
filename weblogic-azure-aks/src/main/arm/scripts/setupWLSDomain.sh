@@ -1,4 +1,4 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script starts"
@@ -22,10 +22,7 @@ function read_sensitive_parameters_from_stdin() {
 
 #Function to display usage message
 function usage() {
-    echo_stdout "<ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> ./setupWLSDomain.sh <ocrSSOUser> <aksClusterRGName> <aksClusterName> <wlsImageTag> <acrName> <wlsDomainName> <wlsDomainUID> <wlsUserName> <wlsCPU> <wlsMemory> <managedServerPrefix> <appReplicas> <appPackageUrls> <currentResourceGroup> <scriptURL> <storageAccountName> <wlsClusterSize>"
-    if [ $1 -eq 1 ]; then
-        exit 1
-    fi
+    echo "Configure WLS Domain"
 }
 
 #Function to validate input
