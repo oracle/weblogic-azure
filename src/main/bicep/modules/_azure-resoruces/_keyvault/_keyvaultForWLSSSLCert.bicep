@@ -7,6 +7,7 @@ param enabledForTemplateDeployment bool = true
 param keyVaultName string
 @description('Price tier for Key Vault.')
 param sku string
+param utcValue string = utcNow()
 param wlsIdentityKeyStoreData string
 param wlsIdentityKeyStoreDataSecretName string
 @secure()
@@ -34,6 +35,9 @@ resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
     }
     accessPolicies: []
     tenantId: subscription().tenantId
+  }
+  tags:{
+    'managed-by-azure-weblogic': utcValue
   }
 }
 

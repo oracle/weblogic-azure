@@ -51,6 +51,9 @@ resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
     enabledForTemplateDeployment: true
     enableSoftDelete: true
   }
+  tags:{
+    'managed-by-azure-weblogic': utcValue
+  }
 }
 
 resource createAddCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01' = {

@@ -12,6 +12,7 @@
 *   $ az deployment group create -f mainTemplate.json -g <rg-name>
 *
 * Build marketplace offer for test:
+*   Replace the partner center pid in .\modules\_pids\_pid-dev.bicep, then run the following command to generate the ARM package, and upload it to partner center.
 *   $ mvn -Pbicep -Ddev -Passembly clean install
 */
 
@@ -200,29 +201,47 @@ param wlsUserName string = 'weblogic'
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
 var const_azureSubjectName = '${format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')}'
+var const_hasTags = contains(resourceGroup(), 'tags')
+// If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
+// * upload custom TLS/SSL certificates for WLS trust and identity.
+// * upload custom certificate for gateway frontend TLS/SSL.
+// * generate selfsigned certificate for gateway frontend TLS/SSL.
+var const_bCreateNewKeyVault = (!const_hasTags || !contains(resourceGroup().tags, name_tagNameForKeyVault) || empty(resourceGroup().tags.wlsKeyVault)) && ((enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) || (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)))
+var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
 var const_enablePV = enableCustomSSL || enableAzureFileShare
+var const_hasStorageAccount = !createAKSCluster && reference('query-existing-storage-account').outputs.storageAccount.value != 'null'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
+var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
 var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
 var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_defaultPidDeployment = 'pid'
 var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
 var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(resourceGroup().name), '-', toLower(wlsDomainName)), 63)}'
-var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData${uniqueString(utcValue)}'
-var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw${uniqueString(utcValue)}'
-var name_keyVaultName = '${take(concat('wls-kv', uniqueString(utcValue)), 24)}'
-var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias${uniqueString(utcValue)}'
-var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw${uniqueString(utcValue)}'
+var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData'
+var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw'
+var name_keyVaultName = empty(const_keyvaultNameFromTag) ? '${take(concat('wls-kv', uniqueString(utcValue)), 24)}' : resourceGroup().tags.wlsKeyVault
+var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias'
+var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
 var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
-var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData${uniqueString(utcValue)}'
-var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw${uniqueString(utcValue)}'
-var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (enableCustomSSL)? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
+var name_storageAccountName = const_hasStorageAccount ? reference('query-existing-storage-account').outputs.storageAccount.value : 'wls${uniqueString(utcValue)}'
+var name_tagNameForKeyVault = 'wlsKeyVault'
+var name_tagNameForStorageAccount = 'wlsStorageAccount'
+var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData'
+var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw'
+var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (enableCustomSSL) ? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
 /*
 * Beginning of the offer deployment
 */
 module pids './modules/_pids/_pid.bicep' = {
   name: 'initialization'
+}
+
+// Have to hard code the pid here
+// For test, replace the pid with testing one, and build the package.
+module partnerCenterPid './modules/_pids/_empty.bicep' = {
+  name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
 }
 
 module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvaultForWLSSSLCert.bicep' = if (enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) {
@@ -254,6 +273,18 @@ resource sslKeyvault 'Microsoft.KeyVault/vaults@2019-09-01' existing = if (enabl
   scope: resourceGroup(name_rgKeyvaultForWLSSSL)
 }
 
+// If updating an existing aks cluster, query the storage account that is being used.
+// Return "null" is no storage account is applied.
+module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-account.bicep' = if (!createAKSCluster) {
+  name: 'query-existing-storage-account'
+  params: {
+    aksClusterName: aksClusterName
+    aksClusterRGName: aksClusterRGName
+    identity: identity
+    wlsDomainUID: wlsDomainUID
+  }
+}
+
 module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCustomSSL) {
   name: 'setup-wls-cluster'
   params: {
@@ -272,13 +303,12 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     aksVersion: aksVersion
-    appgwAlias: const_azureSubjectName
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     createACR: createACR
     createAKSCluster: createAKSCluster
+    createStorageAccount: const_bCreateStorageAccount
     enableAzureMonitoring: enableAzureMonitoring
-    enableAzureFileShare: const_enablePV
     enableCustomSSL: enableCustomSSL
     enablePV: const_enablePV
     identity: identity
@@ -286,6 +316,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     managedServerPrefix: managedServerPrefix
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
+    storageAccountName: name_storageAccountName
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
@@ -306,6 +337,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
   }
   dependsOn: [
     pids
+    queryStorageAccount
   ]
 }
 
@@ -327,13 +359,12 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     aksVersion: aksVersion
-    appgwAlias: const_azureSubjectName
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     createACR: createACR
     createAKSCluster: createAKSCluster
+    createStorageAccount: const_bCreateStorageAccount
     enableAzureMonitoring: enableAzureMonitoring
-    enableAzureFileShare: const_enablePV
     enableCustomSSL: enableCustomSSL
     enablePV: const_enablePV
     identity: identity
@@ -341,6 +372,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     managedServerPrefix: managedServerPrefix
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
+    storageAccountName: name_storageAccountName
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
@@ -361,6 +393,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   }
   dependsOn: [
     wlsSSLCertSecretsDeployment
+    queryStorageAccount
   ]
 }
 
@@ -378,6 +411,22 @@ module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultAdapter.bicep' =
   dependsOn: [
     wlsDomainDeployment
     wlsDomainWithCustomSSLDeployment
+  ]
+}
+
+/*
+ * Update tags to save key vault name and storage account name that are used for current configuration
+*/
+resource applyTags 'Microsoft.Resources/tags@2021-04-01' = {
+  name: 'default'
+  properties: {
+    tags: {
+      '${name_tagNameForKeyVault}': const_bCreateNewKeyVault ? name_keyVaultName : const_keyvaultNameFromTag
+      '${name_tagNameForStorageAccount}': (const_bCreateStorageAccount || const_hasStorageAccount) ? name_storageAccountName : ''
+    }
+  }
+  dependsOn: [
+    appgwSecretDeployment
   ]
 }
 
@@ -417,7 +466,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
-  dependsOn:[
+  dependsOn: [
     appgwSecretDeployment
   ]
 }

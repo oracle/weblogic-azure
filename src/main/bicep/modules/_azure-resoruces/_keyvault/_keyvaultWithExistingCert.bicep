@@ -22,6 +22,8 @@ param keyVaultName string
 @description('Price tier for Key Vault.')
 param sku string
 
+param utcValue string = utcNow()
+
 resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: keyVaultName
   location: resourceGroup().location
@@ -33,6 +35,9 @@ resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
     }
     accessPolicies: []
     tenantId: subscription().tenantId
+  }
+  tags:{
+    'managed-by-azure-weblogic': utcValue
   }
 }
 

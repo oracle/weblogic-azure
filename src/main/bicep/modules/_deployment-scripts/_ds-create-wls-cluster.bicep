@@ -8,7 +8,6 @@ param _artifactsLocationSasToken string = ''
 param aksClusterRGName string = ''
 param aksClusterName string = ''
 param acrName string = ''
-param appgwAlias string = 'contoso'
 param appPackageUrls array = []
 param appReplicas int = 2
 param enableCustomSSL bool = false
@@ -52,7 +51,7 @@ param wlsTrustKeyStorePassPhrase string = newGuid()
 param wlsTrustKeyStoreType string = 'PKCS12'
 param wlsUserName string = 'weblogic'
 
-var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${appgwAlias} ${enablePV} '
+var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} '
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
 var const_pvTempalte = 'pv.yaml.template'
@@ -60,6 +59,7 @@ var const_pvcTempalte = 'pvc.yaml.template'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_genDomainConfigScript= 'genDomainConfig.sh'
 var const_setUpDomainScript = 'setupWLSDomain.sh'
+var const_updateDomainConfigScript= 'updateDomainConfig.sh'
 var const_utilityScript= 'utility.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -78,6 +78,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       uri(const_scriptLocation, '${const_pvcTempalte}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_buildDockerImageScript}${_artifactsLocationSasToken}')
+      uri(const_scriptLocation, '${const_updateDomainConfigScript}${_artifactsLocationSasToken}')
     ]
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'

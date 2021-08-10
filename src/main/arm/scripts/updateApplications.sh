@@ -133,30 +133,11 @@ function wait_for_pod_completed() {
     replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
         | jq '. | .spec.clusters[] | .replicas')
 
-    echo "Waiting for $((replicas+1)) pods are running."
-
-    readyPodNum=0
-    attempt=0
-    while [[ ${readyPodNum} -le  ${replicas} && $attempt -le ${checkPodStatusMaxAttemps} ]];do        
-        ret=$(kubectl get pods -n ${wlsDomainNS} -o json \
-            | jq '.items[] | .status.phase' \
-            | grep "Running")
-        if [ -z "${ret}" ];then
-            readyPodNum=0
-        else
-            readyPodNum=$(kubectl get pods -n ${wlsDomainNS} -o json \
-                | jq '.items[] | .status.phase' \
-                | grep -c "Running")
-        fi
-        echo "Number of new running pod: ${readyPodNum}"
-        attempt=$((attempt+1))
-        sleep ${checkPodStatusInterval}
-    done
-
-    if [ ${attempt} -gt ${checkPodStatusMaxAttemps} ];then
-        echo "It takes too long to wait for all the pods are running, please refer to http://oracle.github.io/weblogic-kubernetes-operator/samples/simple/azure-kubernetes-service/#troubleshooting"
-        exit 1
-    fi
+    utility_wait_for_pod_completed \
+        ${replicas} \
+        "${wlsDomainNS}" \
+        ${checkPodStatusMaxAttemps} \
+        ${checkPodStatusInterval}
 }
 
 function wait_for_image_update_completed() {
@@ -164,33 +145,13 @@ function wait_for_image_update_completed() {
     # Assumption: we have only one cluster currently.
     replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
         | jq '. | .spec.clusters[] | .replicas')
-    echo "Waiting for $((replicas+1)) new pods created with image ${acrImagePath}"
     
-    updatedPodNum=0
-    attempt=0
-    while [ ${updatedPodNum} -le  ${replicas} ] && [ $attempt -le ${checkPodStatusMaxAttemps} ];do
-        echo "attempts ${attempt}"
-        ret=$(kubectl get pods -n ${wlsDomainNS} -o json \
-            | jq '.items[] | .spec | .containers[] | select(.name == "weblogic-server") | .image' \
-            | grep "${acrImagePath}")
-    
-        if [ -z "${ret}" ];then
-            updatedPodNum=0
-        else
-            updatedPodNum=$(kubectl get pods -n ${wlsDomainNS} -o json \
-                | jq '.items[] | .spec | .containers[] | select(.name == "weblogic-server") | .image' \
-                | grep -c "${acrImagePath}")
-        fi
-        echo "Number of new pod: ${updatedPodNum}"
-
-        attempt=$((attempt+1))
-        sleep ${checkPodStatusInterval}
-    done
-
-    if [ ${attempt} -gt ${checkPodStatusMaxAttemps} ];then
-        echo "Failed to update with image ${acrImagePath} to all weblogic server pods. "
-        exit 1
-    fi
+    utility_wait_for_image_update_completed \
+        "${acrImagePath}" \
+        ${replicas} \
+        "${wlsDomainNS}" \
+        ${checkPodStatusMaxAttemps} \
+        ${checkPodStatusInterval}
 }
 
 #Output value to deployment scripts

@@ -9,6 +9,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: @PVC_NAME@
   namespace: @NAMESPACE@
+  labels:
+    storageAccount: @STORAGE_ACCOUNT@
 spec:
   accessModes:
     - ReadWriteMany

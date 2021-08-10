@@ -44,7 +44,6 @@ param aksClusterRGName string = ''
 param aksClusterName string = ''
 @description('The AKS version.')
 param aksVersion string = 'default'
-param appgwAlias string = 'contoso'
 @description('Urls of Java EE application packages.')
 param appPackageUrls array = []
 @description('The number of managed server to start.')
@@ -53,10 +52,10 @@ param appReplicas int = 2
 param createACR bool = false
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
+param createStorageAccount bool = false
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
-param enableAzureFileShare bool = false
 param enableCustomSSL bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
@@ -69,6 +68,7 @@ param managedServerPrefix string = 'managed-server'
 param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
+param storageAccountName string
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -156,10 +156,11 @@ module acrDeployment './_azure-resoruces/_acr.bicep' = if (createACR) {
 }
 
 // enableAppGWIngress: if true, will create storage for certificates.
-module storageDeployment './_azure-resoruces/_storage.bicep' = if (enablePV) {
+module storageDeployment './_azure-resoruces/_storage.bicep' = if (createStorageAccount) {
   name: 'storage-deployment'
   params: {
     location: location
+    storageAccountName: storageAccountName
   }
   dependsOn: [
     pidStart
@@ -177,7 +178,6 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
     aksClusterName: createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
     acrName: createACR ? acrDeployment.outputs.acrName : acrName
-    appgwAlias: appgwAlias
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     enableCustomSSL: enableCustomSSL
@@ -185,7 +185,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     identity: identity
     location: location
     managedServerPrefix: managedServerPrefix
-    storageAccountName: enableAzureFileShare ? storageDeployment.outputs.storageAccountName : 'null'
+    storageAccountName: storageAccountName
     ocrSSOUser: ocrSSOUser
     ocrSSOPSW: ocrSSOPSW
     wdtRuntimePassword: wdtRuntimePassword
