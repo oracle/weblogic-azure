@@ -1,5 +1,5 @@
-export checkPodStatusInterval=1m # interval to check pod status.
-export checkPodStatusMaxAttemps=10 # interval to check pod status.
+export checkPodStatusInterval=20 # interval to check pod status.
+export checkPodStatusMaxAttemps=30 # interval to check pod status.
 
 export constFalse="false"
 export constTrue="true"

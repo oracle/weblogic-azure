@@ -1,7 +1,7 @@
-// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
-// Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
-
 /* 
+* Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+* Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+*
 * Terms:
 * aci is short for Azure Container Insight
 * aks is short for Azure Kubernetes Service
@@ -12,7 +12,7 @@
 *   $ az deployment group create -f mainTemplate.json -g <rg-name>
 *
 * Build marketplace offer for test:
-*   Replace the partner center pid in .\modules\_pids\_pid-dev.bicep, then run the following command to generate the ARM package, and upload it to partner center.
+*   Replace the partner center pid in mainTemplate.bicep, then run the following command to generate the ARM package, and upload it to partner center.
 *   $ mvn -Pbicep -Ddev -Passembly clean install
 */
 
@@ -70,6 +70,23 @@ param createACR bool = false
 param createAKSCluster bool = true
 @description('If true, the template will update records to the existing DNS Zone. If false, the template will create a new DNS Zone.')
 param createDNSZone bool = false
+@allowed([
+  'oracle'
+  'postgresql'
+  'sqlserver'
+])
+@description('One of the supported database types')
+param databaseType string = 'oracle'
+@allowed([
+  'createOrUpdate'
+  'delete'
+])
+@description('createOrUpdate: create a new data source connection, or update an existing data source connection. delete: delete an existing data source connection')
+param dbConfigurationType string = 'createOrUpdate'
+@description('Password for Database')
+param dbPassword string = newGuid()
+@description('User id of Database')
+param dbUser string = 'contosoDbUser'
 @description('DNS prefix for ApplicationGateway')
 param dnsNameforApplicationGateway string = 'wlsgw'
 @description('Azure DNS Zone name.')
@@ -78,6 +95,8 @@ param dnszoneAdminConsoleLabel string = 'admin'
 param dnszoneAppGatewayLabel string = 'www'
 param dnszoneName string = 'contoso.xyz'
 param dnszoneRGName string = 'dns-contoso-rg'
+@description('JDBC Connection String')
+param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 @description('true to set up Application Gateway ingress.')
 param enableAppGWIngress bool = false
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
@@ -87,9 +106,12 @@ param enableAzureFileShare bool = false
 @description('true to enable cookie based affinity.')
 param enableCookieBasedAffinity bool = false
 param enableCustomSSL bool = false
+param enableDB bool = false
 param enableDNSConfiguration bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
+@description('JNDI Name for JDBC Datasource')
+param jdbcDataSourceName string = 'jdbc/contoso'
 @description('Existing Key Vault Name')
 param keyVaultName string = 'kv-contoso'
 @description('Resource group name in current subscription containing the KeyVault')
@@ -238,7 +260,7 @@ module pids './modules/_pids/_pid.bicep' = {
   name: 'initialization'
 }
 
-// Have to hard code the pid here
+// Due to lack of preprocessor solution for the way we use bicep, must hard-code the pid here.
 // For test, replace the pid with testing one, and build the package.
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
   name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
@@ -468,6 +490,31 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
   }
   dependsOn: [
     appgwSecretDeployment
+  ]
+}
+
+module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
+  name: 'datasource-deployment'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    _pidEnd: pids.outputs.dbEnd
+    _pidStart: pids.outputs.dbStart
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    databaseType: databaseType
+    dbConfigurationType: dbConfigurationType
+    dbPassword: dbPassword
+    dbUser: dbUser
+    dsConnectionURL: dsConnectionURL
+    identity: identity
+    jdbcDataSourceName: jdbcDataSourceName
+    wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    networkingDeployment
   ]
 }
 

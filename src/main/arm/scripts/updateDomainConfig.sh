@@ -19,17 +19,17 @@ export javaOptions=${11}
 export wlsDomainNS="${wlsDomainUID}-ns"
 
 # output the existing domain configuration
-export currentConfig=${scriptDir}/currentDomain.json
-kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json >${currentConfig}
+export previousConfig=${scriptDir}/previousDomain.json
+kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json >${previousConfig}
 
 # query logHomeEnabled
-logHomeEnabled=$(cat ${currentConfig} | jq '. | .spec.logHomeEnabled')
-logHome=$(cat ${currentConfig} | jq '. | .spec.logHome')
-envList=$(cat ${currentConfig} | jq '. | .spec.serverPod.env')
-envLength=$(cat ${currentConfig} | jq '. | .spec.serverPod.env | length')
-restartVersion=$(cat ${currentConfig} | jq '. | .spec.restartVersion' | tr -d "\"")
-configMap=$(cat ${currentConfig} | jq '. | .spec.configuration.model.configMap')
-secretList=$(cat ${currentConfig} | jq '. | .spec.configuration.secrets')
+logHomeEnabled=$(cat ${previousConfig} | jq '. | .spec.logHomeEnabled')
+logHome=$(cat ${previousConfig} | jq '. | .spec.logHome')
+envList=$(cat ${previousConfig} | jq '. | .spec.serverPod.env')
+envLength=$(cat ${previousConfig} | jq '. | .spec.serverPod.env | length')
+restartVersion=$(cat ${previousConfig} | jq '. | .spec.restartVersion' | tr -d "\"")
+configMap=$(cat ${previousConfig} | jq '. | .spec.configuration.model.configMap')
+secretList=$(cat ${previousConfig} | jq '. | .spec.configuration.secrets')
 restartVersion=$((restartVersion+1))
 
 cat <<EOF >$filePath
@@ -152,8 +152,8 @@ fi
 
 index=0
 while [ $index -lt ${envLength} ]; do
-    envItemName=$(cat ${currentConfig} | jq ". | .spec.serverPod.env[$index] | .name" | tr -d "\"")
-    envItemValue=$(cat ${currentConfig} | jq ". | .spec.serverPod.env[$index] | .value")
+    envItemName=$(cat ${previousConfig} | jq ". | .spec.serverPod.env[$index] | .name" | tr -d "\"")
+    envItemValue=$(cat ${previousConfig} | jq ". | .spec.serverPod.env[$index] | .value")
     index=$((index+1))
 
     if [[ "${envItemName}" == "JAVA_OPTIONS" ]];then
@@ -254,13 +254,13 @@ fi
 
 echo "set secrets"
 if [[ "${secretList}" != "null" ]];then
-  secretLength=$(cat ${currentConfig} | jq '. | .spec.configuration.secrets | length')
+  secretLength=$(cat ${previousConfig} | jq '. | .spec.configuration.secrets | length')
   cat <<EOF >>$filePath
     secrets:
 EOF
   index=0
   while [ $index -lt ${secretLength} ]; do
-    secretItemValue=$(cat ${currentConfig} | jq ". | .spec.configuration.secrets[$index]")
+    secretItemValue=$(cat ${previousConfig} | jq ". | .spec.configuration.secrets[$index]")
     cat <<EOF >>$filePath
     - ${secretItemValue}
 EOF

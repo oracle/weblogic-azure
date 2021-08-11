@@ -1,5 +1,6 @@
 # Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+# This script runs on Alpine Linux
 
 function install_jdk() {
     # Install Microsoft OpenJDK
@@ -22,6 +23,17 @@ function install_kubectl() {
         echo "Failed to install kubectl."
         exit 1
     fi
+}
+
+#Function to output message to stdout
+function echo_stderr() {
+    echo "$@" >&2
+    echo "$@" >>stdout
+}
+
+function echo_stdout() {
+    echo "$@"
+    echo "$@" >>stdout
 }
 
 # Call this function to make sure pods of a domain are running. 
@@ -110,6 +122,54 @@ function utility_wait_for_image_update_completed() {
 
     if [ ${attempt} -gt ${checkPodStatusMaxAttemps} ];then
         echo "Failed to update image ${acrImagePath} to all weblogic server pods. "
+        exit 1
+    fi
+}
+
+# Call this function to make sure pods of a domain are restarted.
+# Assuming there is only one cluster in the domain
+# Parameters:
+#   * baseTime: time stamp that should be earlier then pod restarts
+#   * appReplicas: replicas of the managed server
+#   * wlsDomainNS: name space
+#   * checkPodStatusMaxAttemps: max attempts to query the pods status if they are not all running.
+#   * checkPodStatusInterval: interval of query the pods status
+function utility_wait_for_pod_restarted() {
+    baseTime=$1
+    appReplicas=$2
+    wlsDomainUID=$3
+    checkPodStatusMaxAttemps=$4
+    checkPodStatusInterval=$5
+
+    wlsDomainNS=${wlsDomainUID}-ns
+
+    updatedPodNum=0
+    attempt=0
+    while [ ${updatedPodNum} -le  ${appReplicas} ] && [ $attempt -le ${checkPodStatusMaxAttemps} ];do
+        echo "attempts ${attempt}"
+        ret=$(kubectl get pods -n ${wlsDomainNS} -l weblogic.domainUID=${wlsDomainUID} -o json \
+            | jq '.items[] | .metadata.creationTimestamp' | tr -d "\"")
+        
+        counter=0
+        for item in $ret; do
+            # conver the time format from YYYY-MM-DDThh:mm:ssZ to YYYY.MM.DD-hh:mm:ss
+            alpineItem=$(echo "${item}" | sed -e "s/-/./g;s/T/-/g;s/Z//g")
+            podCreateTimeStamp=$(date -u -d "${alpineItem}" +"%s")
+            echo "pod create time: $podCreateTimeStamp, base time: ${baseTime}"
+            if [ ${podCreateTimeStamp} -gt ${baseTime} ]; then
+                counter=$((counter+1))
+            fi
+        done
+
+        updatedPodNum=$counter
+        echo "Number of new pod: ${updatedPodNum}"
+
+        attempt=$((attempt+1))
+        sleep ${checkPodStatusInterval}
+    done
+
+    if [ ${attempt} -gt ${checkPodStatusMaxAttemps} ];then
+        echo "Failed to restart all weblogic server pods. "
         exit 1
     fi
 }
