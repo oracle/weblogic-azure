@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setDynamicClusterDomain.sh"
+  echo_stderr "./setDynamicClusterDomain.sh <<< \"<dynamicClusterDomainSetupArgumentsFromStdIn>\""
 }
 
 function installUtilities()

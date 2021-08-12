@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <wlsAdminServerName> <wlsDomainPath> <isCustomSSLEnabled> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType>"
+  echo_stderr "./aadIntegration.sh <<< \"<aadIntegrationArgumentsFromStdIn>\""
 }
 
 function validateInput()

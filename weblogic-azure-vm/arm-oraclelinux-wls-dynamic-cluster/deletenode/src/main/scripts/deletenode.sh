@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./deletenode.sh"
+  echo_stderr "./deletenode.sh <<< \"<deleteNodeConfigArgumentsFromStdIn>\""
 }
 
 function validateInput()

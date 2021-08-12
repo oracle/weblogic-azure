@@ -9,7 +9,7 @@ function echo_stderr() {
 
 #Function to display usage message
 function usage() {
-    echo_stderr "./setupCoherence.sh"
+    echo_stderr "./setupCoherence.sh <<< \"<coherenceConfigArgumentsFromStdIn>\""
 }
 
 function installUtilities() {
