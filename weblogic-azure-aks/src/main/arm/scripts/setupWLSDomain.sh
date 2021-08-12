@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script starts"
@@ -14,17 +14,15 @@ function echo_stdout() {
     echo "$@" >>stdout
 }
 
-# PENDING(edburns): load <wlsPassword> <wdtRuntimePassword> from filesystem, from a file that is guaranteed to be secured as required
-function load_parameters_from_file() {
+# read <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read ocrSSOPSW wlsPassword wdtRuntimePassword
 }
 
 
 #Function to display usage message
 function usage() {
-    echo_stdout "./setupWLSDomain.sh <ocrSSOUser> <ocrSSOPSW> <aksClusterRGName> <aksClusterName> <wlsImageTag> <acrName> <wlsDomainName> <wlsDomainUID> <wlsUserName> <wlsCPU> <wlsMemory> <managedServerPrefix> <appReplicas> <appPackageUrls> <currentResourceGroup> <scriptURL> <storageAccountName> <wlsClusterSize>"
-    if [ $1 -eq 1 ]; then
-        exit 1
-    fi
+    echo "Configure WLS Domain"
 }
 
 #Function to validate input
@@ -250,7 +248,7 @@ function build_docker_image() {
     --publisher Microsoft.Azure.Extensions \
     --version 2.0 \
     --settings "{ \"fileUris\": [\"${scriptURL}model.yaml\",\"${scriptURL}model.properties\",\"${scriptURL}buildWLSDockerImage.sh\"]}" \
-    --protected-settings "{\"commandToExecute\":\"bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize}\"}"
+    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash ./buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${ocrSSOPSW} \"}"
 
     # If error fires, keep vm resource and exit.
     validate_status "Check status of buiding WLS domain image."
@@ -312,7 +310,7 @@ function setup_wls_domain() {
 # * Create PV using Azure file share
 # * Create PVC
 function create_pv() {
-    export storageAccountKey=$(az storage account keys list --resource-group $currentResourceGroup --account-name $storageAccountName --query "[0].value" -o tsv)
+    storageAccountKey=$(az storage account keys list --resource-group $currentResourceGroup --account-name $storageAccountName --query "[0].value" -o tsv)
     export azureSecretName="azure-secret"
     kubectl -n ${wlsDomainNS} create secret generic ${azureSecretName} \
     --from-literal=azurestorageaccountname=${storageAccountName} \
@@ -446,30 +444,29 @@ function cleanup_vm() {
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
-export ocrSSOUser=$1
-export ocrSSOPSW=$2
-export aksClusterRGName=$3
-export aksClusterName=$4
-export wlsImageTag=$5
-export acrName=$6
-export wlsDomainName=$7
-export wlsDomainUID=$8
-export wlsUserName=$9
-export wlsCPU=${10}
-export wlsMemory=${11}
-export managedServerPrefix=${12}
-export appReplicas=${13}
-export appPackageUrls=${14}
-export currentResourceGroup=${15}
-export scriptURL=${16}
-export storageAccountName=${17}
-export wlsClusterSize=${18}
+export ocrSSOUser=${1}
+export aksClusterRGName=${2}
+export aksClusterName=${3}
+export wlsImageTag=${4}
+export acrName=${5}
+export wlsDomainName=${6}
+export wlsDomainUID=${7}
+export wlsUserName=${8}
+export wlsCPU=${9}
+export wlsMemory=${10}
+export managedServerPrefix=${11}
+export appReplicas=${12}
+export appPackageUrls=${13}
+export currentResourceGroup=${14}
+export scriptURL=${15}
+export storageAccountName=${16}
+export wlsClusterSize=${17}
 
 export adminServerName="admin-server"
 export exitCode=0
 export ocrLoginServer="container-registry.oracle.com"
 export kubectlSecretForACR="regsecret"
-export kubectlWLSCredentials="${wlsDomainUID}-weblogic-credentials"
+kubectlWLSCredentials="${wlsDomainUID}-weblogic-credentials"
 export newImageTag=$(date +%s)
 export storageFileShareName="weblogic"
 export wlsDomainNS="${wlsDomainUID}-ns"
@@ -478,7 +475,7 @@ export wlsOptNameSpace="weblogic-operator-ns"
 export wlsOptRelease="weblogic-operator"
 export wlsOptSA="weblogic-operator-sa"
 
-load_parameters_from_file
+read_sensitive_parameters_from_stdin
 
 validate_input
 
