@@ -9,7 +9,7 @@ function echo_stderr() {
 
 #Function to display usage message
 function usage() {
-    echo_stderr "./elkIntegrationForDynamicCluster.sh"
+    echo_stderr "./elkIntegrationForDynamicCluster.sh <<< \"<elkIntegrationSettingsFromStdIn>\""
 }
 
 function validate_input() {

@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./addnode.sh"
+  echo_stderr "./addnode.sh <<< \"<addNodeSetupArgumentsFromStdIn>\""
 }
 
 function installUtilities()

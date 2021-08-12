@@ -11,7 +11,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-    echo_stderr "./setupOHS.sh"
+    echo_stderr "./setupOHS.sh <<< \"<ohsSetupArgumentsFromStdIn>\""
 }
 
 # Create user "oracle", used for instalation and setup

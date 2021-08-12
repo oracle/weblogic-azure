@@ -20,7 +20,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./configDatasource.sh"  
+  echo_stderr "./configDatasource.sh <<< \"<dataSourceConfigArgumentsFromStdIn>\""
 }
 
 function validateInput()

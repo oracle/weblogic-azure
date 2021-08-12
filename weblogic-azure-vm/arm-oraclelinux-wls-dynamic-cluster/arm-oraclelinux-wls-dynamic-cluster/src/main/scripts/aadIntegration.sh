@@ -11,7 +11,7 @@ function echo_stderr()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh"
+  echo_stderr "./aadIntegration.sh <<< \"<aadIntegrationArgumentsFromStdIn>\""
 }
 
 function validateInput()
