@@ -9,7 +9,7 @@ function generate_ds_model() {
     if [[ "${databaseType}" == "${dbTypePostgre}" ]]; then
         databaseDriver=${driverPostgre}
         databaseTestTableName=${testTablePostgre}
-    elif [[ "${databaseType}" == "${dbTypePostgre}" ]]; then
+    elif [[ "${databaseType}" == "${dbTypeSQLServer}" ]]; then
         databaseDriver=${driverSQLServer}
         databaseTestTableName=${testTableSQLServer}
     fi
