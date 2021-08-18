@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param _artifactsLocation string = deployment().properties.templateLink.uri
@@ -23,6 +23,8 @@ param appGatewayCertificateOption string = 'haveCert'
 param appGatewayPublicIPAddressName string = 'gwip'
 @description('Create Application Gateway ingress for admin console.')
 param appgwForAdminServer bool = true
+@description('Create Application Gateway ingress for remote console.')
+param appgwForRemoteConsole bool = true
 @description('If true, the template will update records to the existing DNS Zone. If false, the template will create a new DNS Zone.')
 param createDNSZone bool = false
 @description('DNS prefix for ApplicationGateway')
@@ -114,6 +116,7 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
+    appgwForRemoteConsole: appgwForRemoteConsole
     appgwFrontendSSLCertData: existingKeyvault.getSecret(keyVaultSSLCertDataSecretName)
     appgwFrontendSSLCertPsw: existingKeyvault.getSecret(keyVaultSSLCertPasswordSecretName)
     aksClusterRGName: aksClusterRGName
@@ -151,6 +154,7 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
     appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
+    appgwForRemoteConsole: appgwForRemoteConsole
     appgwFrontendSSLCertData: existingKeyvault.getSecret(keyVaultSSLCertDataSecretName)
     appgwFrontendSSLCertPsw: 'null'
     aksClusterRGName: aksClusterRGName
@@ -187,6 +191,7 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
+    appgwForRemoteConsole: appgwForRemoteConsole
     appgwFrontendSSLCertData: 'null'
     appgwFrontendSSLCertPsw: 'null'
     aksClusterRGName: aksClusterRGName
@@ -235,6 +240,8 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
 }
 
 output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
-output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL ? (enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : format('https://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : ''
+output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ''
+output adminRemoteConsoleUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
+output adminRemoteConsoleSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ''
 output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : networkingDeployment3.outputs.clusterLBUrl
 output clusterExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ''

@@ -1,5 +1,5 @@
 /* 
-* Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+* Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 *
 * Terms:
@@ -60,6 +60,8 @@ param appGatewaySSLCertData string = 'appgw-ssl-data'
 param appGatewaySSLCertPassword string = newGuid()
 @description('Create Application Gateway ingress for admin console.')
 param appgwForAdminServer bool = true
+@description('Create Application Gateway ingress for remote console.')
+param appgwForRemoteConsole bool = true
 @description('Urls of Java EE application packages.')
 param appPackageUrls array = []
 @description('The number of managed server to start.')
@@ -466,6 +468,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
     appgwForAdminServer: appgwForAdminServer
+    appgwForRemoteConsole: appgwForRemoteConsole
     createDNSZone: createDNSZone
     dnsNameforApplicationGateway: name_domainLabelforApplicationGateway
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
@@ -522,6 +525,9 @@ output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.va
 output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerUrl.value
 output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
 output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalSecuredUrl : ''
+// If TLS/SSL enabled, only secured url is working, will not output HTTP url.
+output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl: ''
+output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl: ''
 output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value
 output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalUrl : ''
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredUrl : ''

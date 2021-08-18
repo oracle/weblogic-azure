@@ -1,26 +1,33 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script ${0} starts"
 
+# read <dbPassword> <wlsPassword> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read dbPassword wlsPassword
+}
+
 #Function to display usage message
 function usage() {
-    cat<<EOF
+    usage=$(cat <<-END
 Usage:
-./setupDBConnections.sh \
-    <aksClusterRGName> \
-    <aksClusterName> \
-    <databaseType> \
-    <dbPassword> \
-    <dbUser> \
-    <dsConnectionURL> \
-    <jdbcDataSourceName> \
-    <wlsDomainUID> \
-    <wlsDomainUID> \
-    <wlsUser> \
-    <wlsPassword>
-EOF
+echo <dbPassword> <wlsPassword> |
+    ./setupDBConnections.sh
+    <aksClusterRGName>
+    <aksClusterName>
+    <databaseType>
+    <dbUser>
+    <dsConnectionURL>
+    <jdbcDataSourceName>
+    <wlsDomainUID>
+    <wlsUser>
+    <dbOptType>
+END
+)
+    echo_stdout "${usage}"
     if [ $1 -eq 1 ]; then
+        echo_stderr "${usage}"
         exit 1
     fi
 }
@@ -86,9 +93,9 @@ function create_datasource_model_configmap_and_secret() {
 
     echo "Data source secret name: ${dbSecretName}"
     chmod ugo+x $scriptDir/dbUtility.sh
-    bash $scriptDir/dbUtility.sh \
+    echo "${dbPassword}" | \
+        bash $scriptDir/dbUtility.sh \
         ${databaseType} \
-        "${dbPassword}" \
         "${dbUser}" \
         "${dsConnectionURL}" \
         "${jdbcDataSourceName}" \
@@ -213,9 +220,9 @@ function delete_datasource() {
     # remove secret
     # remove model
     chmod ugo+x $scriptDir/dbUtility.sh
-    bash $scriptDir/dbUtility.sh \
+     echo "${dbPassword}" | \
+        bash $scriptDir/dbUtility.sh \
         ${databaseType} \
-        "${dbPassword}" \
         "${dbUser}" \
         "${dsConnectionURL}" \
         "${jdbcDataSourceName}" \
@@ -242,7 +249,8 @@ function validate_datasource() {
         | jq '.items[0] | .metadata.name' \
         | tr -d "\"")
 
-    clusterTargetPort=$(kubectl describe service ${wlsClusterSvcName} -n ${wlsDomainNS} | grep 'default' | tr -d -c 0-9)
+    # get non-ssl port
+    clusterTargetPort=$(kubectl get svc ${wlsClusterSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
     t3ConnectionString="t3://${wlsClusterSvcName}.${wlsDomainNS}.svc.cluster.local:${clusterTargetPort}"
     cat <<EOF >${testDatasourceScript}
 connect('${wlsUser}', '${wlsPassword}', '${t3ConnectionString}')
@@ -279,14 +287,12 @@ source ${scriptDir}/utility.sh
 export aksClusterRGName=$1
 export aksClusterName=$2
 export databaseType=$3
-export dbPassword=$4
-export dbUser=$5
-export dsConnectionURL=$6
-export jdbcDataSourceName=$7
-export wlsDomainUID=$8
-export wlsUser=$9
-export wlsPassword=${10}
-export dbOptType=${11}
+export dbUser=$4
+export dsConnectionURL=$5
+export jdbcDataSourceName=$6
+export wlsDomainUID=$7
+export wlsUser=$8
+export dbOptType=$9
 
 export datetime=$(date +%s)
 export optTypeDelete='delete'
@@ -295,6 +301,8 @@ export wlsClusterName="cluster-1"
 export wlsClusterSvcName="${wlsDomainUID}-cluster-${wlsClusterName}"
 export wlsConfigmapName="${wlsDomainUID}-wdt-config-map"
 export wlsDomainNS="${wlsDomainUID}-ns"
+
+read_sensitive_parameters_from_stdin
 
 validate_input
 

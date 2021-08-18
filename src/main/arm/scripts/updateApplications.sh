@@ -1,7 +1,96 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script ${0} starts"
+
+# read <ocrSSOPSW> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read ocrSSOPSW
+}
+
+function usage() {
+    usage=$(cat <<-END
+Usage: 
+echo <ocrSSOPSW> | 
+    ./updateApplications.sh
+    <ocrSSOUser>
+    <aksClusterRGName>
+    <aksClusterName>
+    <wlsImageTag>
+    <acrName>
+    <wlsDomainName>
+    <wlsDomainUID>
+    <currentResourceGroup>
+    <appPackageUrls>
+    <scriptURL>
+    <appStorageAccountName>
+    <appContainerName>
+END
+)
+    echo_stdout "${usage}"
+    if [ $1 -eq 1 ]; then
+        echo_stderr "${usage}"
+        exit 1
+    fi
+}
+
+#Function to validate input
+function validate_input() {
+    if [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
+        echo_stderr "Oracle SSO account is required. "
+        usage 1
+    fi
+
+    if [[ -z "$aksClusterRGName" || -z "${aksClusterName}" ]]; then
+        echo_stderr "AKS cluster name and resource group name are required. "
+        usage 1
+    fi
+
+    if [ -z "$wlsImageTag" ]; then
+        echo_stderr "wlsImageTag is required. "
+        usage 1
+    fi
+
+    if [ -z "$acrName" ]; then
+        echo_stderr "acrName is required. "
+        usage 1
+    fi
+
+    if [ -z "$wlsDomainName" ]; then
+        echo_stderr "wlsDomainName is required. "
+        usage 1
+    fi
+
+    if [ -z "$wlsDomainUID" ]; then
+        echo_stderr "wlsDomainUID is required. "
+        usage 1
+    fi
+
+    if [ -z "$currentResourceGroup" ]; then
+        echo_stderr "currentResourceGroup is required. "
+        usage 1
+    fi
+
+    if [ -z "$appPackageUrls" ]; then
+        echo_stderr "appPackageUrls is required. "
+        usage 1
+    fi
+
+    if [ -z "$scriptURL" ]; then
+        echo_stderr "scriptURL is required. "
+        usage 1
+    fi
+
+    if [ -z "$appStorageAccountName" ]; then
+        echo_stderr "appStorageAccountName is required. "
+        usage 1
+    fi
+
+    if [ -z "$appContainerName" ]; then
+        echo_stderr "appContainerName is required. "
+        usage 1
+    fi
+}
 
 # Connect to AKS cluster
 function connect_aks_cluster() {
@@ -97,16 +186,15 @@ function query_app_urls() {
 function build_docker_image() {
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    bash $scriptDir/createVMAndBuildImage.sh \
+    echo $azureACRPassword $ocrSSOPSW | \
+        bash $scriptDir/createVMAndBuildImage.sh \
         $currentResourceGroup \
         $wlsImageTag \
         $azureACRServer \
         $azureACRUserName \
-        $azureACRPassword \
         $newImageTag \
         "$appPackageUrls" \
         $ocrSSOUser \
-        $ocrSSOPSW \
         $wlsClusterSize \
         $enableCustomSSL \
         "$scriptURL"
@@ -173,18 +261,17 @@ source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
 export ocrSSOUser=$1
-export ocrSSOPSW=$2
-export aksClusterRGName=$3
-export aksClusterName=$4
-export wlsImageTag=$5
-export acrName=$6
-export wlsDomainName=$7
-export wlsDomainUID=$8
-export currentResourceGroup=$9
-export appPackageUrls=${10}
-export scriptURL=${11}
-export appStorageAccountName=${12}
-export appContainerName=${13}
+export aksClusterRGName=$2
+export aksClusterName=$3
+export wlsImageTag=$4
+export acrName=$5
+export wlsDomainName=$6
+export wlsDomainUID=$7
+export currentResourceGroup=$8
+export appPackageUrls=$9
+export scriptURL=${10}
+export appStorageAccountName=${11}
+export appContainerName=${12}
 
 export newImageTag=$(date +%s)
 # seconds
@@ -192,6 +279,10 @@ export sasTokenValidTime=3600
 export sslIdentityEnvName="SSL_IDENTITY_PRIVATE_KEY_ALIAS"
 export wlsClusterName="cluster-1"
 export wlsDomainNS="${wlsDomainUID}-ns"
+
+read_sensitive_parameters_from_stdin
+
+validate_input
 
 install_kubectl
 

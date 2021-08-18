@@ -1,6 +1,6 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
-# This script runs on Alpine Linux
+# This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
 function install_jdk() {
     # Install Microsoft OpenJDK
@@ -25,15 +25,18 @@ function install_kubectl() {
     fi
 }
 
-#Function to output message to stdout
 function echo_stderr() {
-    echo "$@" >&2
-    echo "$@" >>stdout
+    >&2 echo "$@"
+    # The function is used for scripts running within Azure Deployment Script
+    # The value of AZ_SCRIPTS_OUTPUT_PATH is /mnt/azscripts/azscriptoutput
+    echo -e "$@" >>${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/errors.log
 }
 
 function echo_stdout() {
-    echo "$@"
-    echo "$@" >>stdout
+    echo "$@" 
+    # The function is used for scripts running within Azure Deployment Script
+    # The value of AZ_SCRIPTS_OUTPUT_PATH is /mnt/azscripts/azscriptoutput
+    echo -e "$@" >>${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/debug.log
 }
 
 # Call this function to make sure pods of a domain are running. 

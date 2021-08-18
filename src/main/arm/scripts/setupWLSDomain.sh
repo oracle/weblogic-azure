@@ -1,56 +1,49 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+# This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
 echo "Script ${0} starts"
 
-#Function to output message to stdout
-function echo_stderr() {
-    echo "$@" >&2
-    echo "$@" >>stdout
-}
-
-function echo_stdout() {
-    echo "$@"
-    echo "$@" >>stdout
+# read <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentityKeyPsw> <wlsTrustPsw> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read ocrSSOPSW wlsPassword wdtRuntimePassword wlsIdentityPsw wlsIdentityKeyPsw wlsTrustPsw
 }
 
 #Function to display usage message
 function usage() {
-    cat<<EOF
-Usage: 
-./setupWLSDomain.sh \
-    <ocrSSOUser> \
-    <ocrSSOPSW> \
-    <aksClusterRGName> \
-    <aksClusterName> \
-    <wlsImageTag> \
-    <acrName> \
-    <wlsDomainName> \
-    <wlsDomainUID> \
-    <wlsUserName> \
-    <wlsPassword> \
-    <wdtRuntimePassword> \
-    <wlsCPU> \
-    <wlsMemory> \
-    <managedServerPrefix> \
-    <appReplicas> \
-    <appPackageUrls> \
-    <currentResourceGroup> \
-    <scriptURL> \
-    <storageAccountName> \
-    <wlsClusterSize> \
-    <enableCustomSSL> \
-    <wlsIdentityData> \
-    <wlsIdentityPsw> \
-    <wlsIdentityType> \
-    <wlsIdentityAlias> \
-    <wlsIdentityKeyPsw> \
-    <wlsTrustData> \
-    <wlsTrustPsw> \
-    <wlsTrustType> \
+    usage=$(cat <<-END
+Usage:
+echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentityKeyPsw> <wlsTrustPsw> | 
+./setupWLSDomain.sh
+    <ocrSSOUser>
+    <aksClusterRGName>
+    <aksClusterName>
+    <wlsImageTag>
+    <acrName>
+    <wlsDomainName>
+    <wlsDomainUID>
+    <wlsUserName>
+    <wlsCPU>
+    <wlsMemory>
+    <managedServerPrefix>
+    <appReplicas>
+    <appPackageUrls>
+    <currentResourceGroup>
+    <scriptURL>
+    <storageAccountName>
+    <wlsClusterSize>
+    <enableCustomSSL>
+    <wlsIdentityData>
+    <wlsIdentityType>
+    <wlsIdentityAlias>
+    <wlsTrustData>
+    <wlsTrustType>
     <enablePV>
-EOF
+END
+)
+    echo_stdout ${usage}
     if [ $1 -eq 1 ]; then
+        echo_stderr ${usage}
         exit 1
     fi
 }
@@ -329,16 +322,15 @@ function query_acr_credentials() {
 function build_docker_image() {
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    bash $scriptDir/createVMAndBuildImage.sh \
+    echo $azureACRPassword $ocrSSOPSW | \
+        bash $scriptDir/createVMAndBuildImage.sh \
         $currentResourceGroup \
         $wlsImageTag \
         $azureACRServer \
         $azureACRUserName \
-        $azureACRPassword \
         $newImageTag \
         "$appPackageUrls" \
         $ocrSSOUser \
-        $ocrSSOPSW \
         $wlsClusterSize \
         $enableCustomSSL \
         "$scriptURL"
@@ -564,17 +556,17 @@ function create_domain_namespace() {
     else
         updateNamepace=${constTrue}
         echo "Remove existing secrets and replace with new values"
-        kubectl -n ${wlsDomainNS} delete secret ${kubectlWLSCredentials}
+        kubectl -n ${wlsDomainNS} delete secret ${kubectlWLSCredentialName}
         kubectl -n ${wlsDomainNS} delete secret ${kubectlWDTEncryptionSecret}
         kubectl -n ${wlsDomainNS} delete secret ${kubectlSecretForACR}
     fi
 
     kubectl -n ${wlsDomainNS} create secret generic \
-    ${kubectlWLSCredentials} \
+    ${kubectlWLSCredentialName} \
     --from-literal=username=${wlsUserName} \
     --from-literal=password=${wlsPassword}
 
-    kubectl -n ${wlsDomainNS} label secret ${kubectlWLSCredentials} weblogic.domainUID=${wlsDomainUID}
+    kubectl -n ${wlsDomainNS} label secret ${kubectlWLSCredentialName} weblogic.domainUID=${wlsDomainUID}
 
     kubectl -n ${wlsDomainNS} create secret generic ${kubectlWDTEncryptionSecret} \
     --from-literal=password=${wdtRuntimePassword}
@@ -605,14 +597,14 @@ function parsing_ssl_certs_and_create_ssl_secret() {
         validate_ssl_keystores
         unmount_fileshare
 
-        echo "check if ${kubectlWLSSSLCredentials} exists."
-        ret=$(kubectl get secret -n ${wlsDomainNS} | grep "${kubectlWLSSSLCredentials}")
+        echo "check if ${kubectlWLSSSLCredentialsName} exists."
+        ret=$(kubectl get secret -n ${wlsDomainNS} | grep "${kubectlWLSSSLCredentialsName}")
         if [ -n "${ret}" ]; then
-            echo "delete secret  ${kubectlWLSSSLCredentials}"
-            kubectl -n ${wlsDomainNS} delete secret ${kubectlWLSSSLCredentials}
+            echo "delete secret  ${kubectlWLSSSLCredentialsName}"
+            kubectl -n ${wlsDomainNS} delete secret ${kubectlWLSSSLCredentialsName}
         fi
-        echo "create secret  ${kubectlWLSSSLCredentials}"
-        kubectl -n ${wlsDomainNS} create secret generic ${kubectlWLSSSLCredentials} \
+        echo "create secret  ${kubectlWLSSSLCredentialsName}"
+        kubectl -n ${wlsDomainNS} create secret generic ${kubectlWLSSSLCredentialsName} \
             --from-literal=sslidentitykeyalias=${wlsIdentityAlias} \
             --from-literal=sslidentitykeypassword=${wlsIdentityKeyPsw} \
             --from-literal=sslidentitystorepath=${sharedPath}/$wlsIdentityKeyStoreFileName \
@@ -622,7 +614,7 @@ function parsing_ssl_certs_and_create_ssl_secret() {
             --from-literal=ssltruststoretype=${wlsTrustType} \
             --from-literal=ssltruststorepassword=${wlsTrustPsw}
 
-        kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentials} weblogic.domainUID=${wlsDomainUID}
+        kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${wlsDomainUID}
         javaOptions="-Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName}"
     fi
 }
@@ -705,43 +697,37 @@ source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
 export ocrSSOUser=$1
-export ocrSSOPSW=$2
-export aksClusterRGName=$3
-export aksClusterName=$4
-export wlsImageTag=$5
-export acrName=$6
-export wlsDomainName=$7
-export wlsDomainUID=$8
-export wlsUserName=$9
-export wlsPassword=${10}
-export wdtRuntimePassword=${11}
-export wlsCPU=${12}
-export wlsMemory=${13}
-export managedServerPrefix=${14}
-export appReplicas=${15}
-export appPackageUrls=${16}
-export currentResourceGroup=${17}
-export scriptURL=${18}
-export storageAccountName=${19}
-export wlsClusterSize=${20}
-export enableCustomSSL=${21}
-export wlsIdentityData=${22}
-export wlsIdentityPsw=${23}
-export wlsIdentityType=${24}
-export wlsIdentityAlias=${25}
-export wlsIdentityKeyPsw=${26}
-export wlsTrustData=${27}
-export wlsTrustPsw=${28}
-export wlsTrustType=${29}
-export enablePV=${30}
+export aksClusterRGName=$2
+export aksClusterName=$3
+export wlsImageTag=$4
+export acrName=$5
+export wlsDomainName=$6
+export wlsDomainUID=$7
+export wlsUserName=$8
+export wlsCPU=$9
+export wlsMemory=${10}
+export managedServerPrefix=${11}
+export appReplicas=${12}
+export appPackageUrls=${13}
+export currentResourceGroup=${14}
+export scriptURL=${15}
+export storageAccountName=${16}
+export wlsClusterSize=${17}
+export enableCustomSSL=${18}
+export wlsIdentityData=${19}
+export wlsIdentityType=${20}
+export wlsIdentityAlias=${21}
+export wlsTrustData=${22}
+export wlsTrustType=${23}
+export enablePV=${24}
 
 export adminServerName="admin-server"
 export azFileShareName="weblogic"
 export exitCode=0
 export kubectlSecretForACR="regsecret"
-export kubectlWLSCredentials="${wlsDomainUID}-weblogic-credentials"
-export kubectlWLSSSLCredentials="${wlsDomainUID}-weblogic-ssl-credentials"
 export kubectlWDTEncryptionSecret="${wlsDomainUID}-runtime-encryption-secret"
+export kubectlWLSCredentialName="${wlsDomainUID}-weblogic-credentials"
+export kubectlWLSSSLCredentialsName="${wlsDomainUID}-weblogic-ssl-credentials"
 export newImageTag=$(date +%s)
 export operatorName="weblogic-operator"
 export storageFileShareName="weblogic"
@@ -757,6 +743,8 @@ export wlsIdentityKeyStoreFileName="security/identity.keystore"
 export wlsTrustKeyStoreFileName="security/trust.keystore"
 export wlsTrustKeyStoreJKSFileName="security/trust.jks"
 export wlsIdentityRootCertFileName="security/root.cert"
+
+read_sensitive_parameters_from_stdin
 
 validate_input
 

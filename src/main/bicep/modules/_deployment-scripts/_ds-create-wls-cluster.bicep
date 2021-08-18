@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param _artifactsLocation string
@@ -54,6 +54,7 @@ param wlsUserName string = 'weblogic'
 var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} '
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
+var const_invokeSetUpDomainScript = 'invokeSetupWLSDomain.sh'
 var const_pvTempalte = 'pv.yaml.template'
 var const_pvcTempalte = 'pvc.yaml.template'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
@@ -70,8 +71,9 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azCliVersion: '2.15.0'
     arguments: const_arguments
-    primaryScriptUri: uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetUpDomainScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
+      uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_genDomainConfigScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_pvTempalte}${_artifactsLocationSasToken}')

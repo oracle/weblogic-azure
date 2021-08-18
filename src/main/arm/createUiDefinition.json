@@ -1254,6 +1254,26 @@
                                     ]
                                 },
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
+                                "name": "appgwForAdminRemote",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ]
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
                             }
                         ],
                         "visible": true
@@ -1516,6 +1536,7 @@
             "appGatewaySSLCertData": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
             "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
+            "appgwForRemoteConsole": "[steps('section_appGateway').appgwIngress.appgwForAdminRemote]",
             "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
             "createACR": "[bool(steps('section_aks').acrInfo.createACR)]",

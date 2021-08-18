@@ -1,5 +1,10 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
+# read <azureACRPassword> and <ocrSSOPSW> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read azureACRPassword ocrSSOPSW
+}
 
 function cleanup_vm() {
     #Remove VM resources
@@ -89,7 +94,7 @@ function build_docker_image() {
     --publisher Microsoft.Azure.Extensions \
     --version 2.0 \
     --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-    --protected-settings "{\"commandToExecute\":\"bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRPassword} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${ocrSSOPSW} ${wlsClusterSize} ${enableCustomSSL} \"}"
+    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} \"}"
 
     cleanup_vm
 }
@@ -101,16 +106,14 @@ export currentResourceGroup=$1
 export wlsImageTag=$2
 export azureACRServer=$3
 export azureACRUserName=$4
-export azureACRPassword=$5
-export newImageTag=$6
-export appPackageUrls=$7
-export ocrSSOUser=$8
-export ocrSSOPSW=$9
-export wlsClusterSize=${10}
-export enableCustomSSL=${11}
-export scriptURL=${12}
+export newImageTag=$5
+export appPackageUrls=$6
+export ocrSSOUser=$7
+export wlsClusterSize=$8
+export enableCustomSSL=$9
+export scriptURL=${10}
 
-echo ${scriptURL}
+read_sensitive_parameters_from_stdin
 
 build_docker_image
 

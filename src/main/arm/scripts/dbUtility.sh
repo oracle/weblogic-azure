@@ -1,7 +1,12 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script ${0} starts"
+
+# read <dbPassword> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read dbPassword
+}
 
 function generate_ds_model() {
     databaseDriver=${driverOracle}
@@ -135,13 +140,12 @@ export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
 export databaseType=$1
-export dbPassword=$2
-export dbUser=$3
-export dsConnectionURL=$4
-export jdbcDataSourceName=$5
-export wlsDomainUID=$6
-export dbSecretName=$7
-export operationType=$8
+export dbUser=$2
+export dsConnectionURL=$3
+export jdbcDataSourceName=$4
+export wlsDomainUID=$5
+export dbSecretName=$6
+export operationType=$7
 
 export domainNamespace=${wlsDomainUID}-ns
 export clusterName="cluster-1"
@@ -156,6 +160,8 @@ export testTableOracle="SQL ISVALID"
 export testTablePostgre="SQL SELECT 1"
 export testTableSQLServer="SQL SELECT 1"
 export wlsConfigmapName="${wlsDomainUID}-wdt-config-map"
+
+read_sensitive_parameters_from_stdin
 
 if [[ "${operationType}" == "${optTypeDelete}" ]]; then
     delete_model_and_secret

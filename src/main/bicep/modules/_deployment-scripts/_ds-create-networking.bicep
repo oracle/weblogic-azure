@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param _artifactsLocation string
@@ -15,6 +15,7 @@ param appgwName string = 'appgw-contoso'
 @description('Three scenarios we support for deploying app gateway')
 param appgwCertificateOption string = 'haveCert'
 param appgwForAdminServer bool = true
+param appgwForRemoteConsole bool = true
 @secure()
 param appgwFrontendSSLCertData string = newGuid()
 @secure()
@@ -42,10 +43,11 @@ param wlsDomainUID string = 'sample-domain1'
 
 var const_appgwHelmConfigTemplate='appgw-helm-config.yaml.template'
 var const_appgwSARoleBindingFile='appgw-ingress-clusterAdmin-roleBinding.yaml'
-var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneAppGatewayLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity}'
+var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneAppGatewayLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole}'
 var const_commonScript = 'common.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
-var const_primaryScript = 'setupNetworking.sh'
+var const_setupNetworkingScript= 'setupNetworking.sh'
+var const_primaryScript = 'invokeSetupNetworking.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-networking-deployment'
@@ -57,6 +59,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     arguments: const_arguments
     primaryScriptUri: uri(const_scriptLocation, '${const_primaryScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
+      uri(const_scriptLocation, '${const_setupNetworkingScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_appgwHelmConfigTemplate}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_appgwSARoleBindingFile}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')

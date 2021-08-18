@@ -1,17 +1,11 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script  ${0} starts"
 
-#Function to output message to stdout
-function echo_stderr() {
-  echo "$@" >&2
-  echo "$@" >>stdout
-}
-
-function echo_stdout() {
-  echo "$@" >&2
-  echo "$@" >>stdout
+# read <spBase64String> <appgwFrontendSSLCertPsw> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read spBase64String appgwFrontendSSLCertPsw
 }
 
 function install_helm() {
@@ -62,10 +56,40 @@ function output_result() {
 
 #Function to display usage message
 function usage() {
-  echo_stdout "./setupNetworking.sh <aksClusterRGName> <aksClusterName> <wlsDomainName> <wlsDomainUID> <lbSvcValues> <enableAppGWIngress> <subID> <curRGName> <appgwName> <vnetName> <spBase64String> <appgwForAdminServer> <enableCustomDNSAlias> <dnsRGName> <dnsZoneName> <dnsAdminLabel> <dnsClusterLabel> <appgwAlias> <enableInternalLB> <appgwFrontendSSLCertData> <appgwFrontendSSLCertPsw> <appgwCertificateOption> <enableCustomSSL> <enableCookieBasedAffinity> "
-  if [ $1 -eq 1 ]; then
-    exit 1
-  fi
+  usage=$(cat <<-END
+Usage:
+echo <spBase64String> <appgwFrontendSSLCertPsw> | 
+  ./setupNetworking.sh
+    <aksClusterRGName>
+    <aksClusterName>
+    <wlsDomainName>
+    <wlsDomainUID>
+    <lbSvcValues>
+    <enableAppGWIngress>
+    <subID>
+    <curRGName>
+    <appgwName>
+    <vnetName>
+    <appgwForAdminServer>
+    <enableCustomDNSAlias>
+    <dnsRGName>
+    <dnsZoneName>
+    <dnsAdminLabel>
+    <dnsClusterLabel>
+    <appgwAlias>
+    <enableInternalLB>
+    <appgwFrontendSSLCertData>
+    <appgwCertificateOption>
+    <enableCustomSSL>
+    <enableCookieBasedAffinity>
+    <enableRemoteConsole>
+END
+)
+    echo_stdout ${usage}
+    if [ $1 -eq 1 ]; then
+        echo_stderr ${usage}
+        exit 1
+    fi
 }
 
 #Validate teminal status with $?, exit with exception if errors happen.
@@ -192,6 +216,11 @@ function validate_input() {
 
   if [ -z "$enableCookieBasedAffinity" ]; then
     echo_stderr "enableCookieBasedAffinity is required. "
+    usage 1
+  fi
+
+  if [ -z "$enableRemoteConsole" ]; then
+    echo_stderr "enableRemoteConsole is required. "
     usage 1
   fi
 }
@@ -396,7 +425,7 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
 
-if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
   cat <<EOF >>${adminAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
@@ -408,6 +437,40 @@ spec:
     - http:
         paths:
         - path: /console*
+          pathType: Prefix
+          backend:
+            service:
+              name: ${svcAdminServer}
+              port:
+                number: ${adminTargetPort}
+EOF
+}
+
+function generate_appgw_admin_remote_config_file_nossl()
+{
+  cat <<EOF >${adminRemoteAppgwIngressYamlPath}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${adminRemoteIngressName}
+  namespace: ${wlsDomainNS}
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+EOF
+
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
+  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+EOF
+fi
+
+cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+spec:
+  rules:
+    - http:
+        paths:
+        - path: /remoteconsole*
           pathType: Prefix
           backend:
             service:
@@ -468,6 +531,57 @@ spec:
 EOF
 }
 
+function generate_appgw_admin_remote_config_file_ssl()
+{
+  cat <<EOF >${adminRemoteAppgwIngressYamlPath}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${adminRemoteIngressName}
+  namespace: ${wlsDomainNS}
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/backend-protocol: "https"
+    
+EOF
+
+  if [[ "${enableCustomDNSAlias,,}" == "true" ]];then
+    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/backend-hostname: "${dnsAdminLabel}.${dnsZoneName}"
+EOF
+  else
+    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/backend-hostname: "${appgwAlias}"
+EOF
+  fi
+
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
+  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+EOF
+fi
+
+  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
+
+spec:
+  tls:
+  - secretName: ${appgwFrontendSecretName}
+  rules:
+    - http:
+        paths:
+        - path: /remoteconsole*
+          pathType: Prefix
+          backend:
+            service:
+              name: ${svcAdminServer}
+              port:
+                number: ${adminTargetPort}
+EOF
+}
+
 function generate_appgw_cluster_config_file() {
   if [[ "${enableCustomSSL,,}" == "true" ]];then
     generate_appgw_cluster_config_file_ssl
@@ -482,6 +596,14 @@ function generate_appgw_admin_config_file() {
     generate_appgw_admin_config_file_ssl
   else
     generate_appgw_admin_config_file_nossl
+  fi
+}
+
+function generate_appgw_admin_remote_config_file() {
+  if [[ "${enableCustomSSL,,}" == "true" ]];then
+    generate_appgw_admin_remote_config_file_ssl
+  else
+    generate_appgw_admin_remote_config_file_nossl
   fi
 }
 
@@ -807,11 +929,21 @@ function create_appgw_ingress() {
     waitfor_svc_completed ${clusterIngressHttpsName}
   fi
 
-  if [[ ${appgwForAdminServer,,} == "true" ]]; then
+  if [[ "${appgwForAdminServer,,}" == "true" ]]; then
     generate_appgw_admin_config_file
     kubectl apply -f ${adminAppgwIngressYamlPath}
     validate_status "Create appgw ingress svc."
     waitfor_svc_completed ${adminIngressName}
+  fi
+
+  if [[ "${enableRemoteConsole,,}" == "true" ]]; then
+    export adminRemoteIngressName=${wlsDomainUID}-admin-remote-appgw-ingress-svc
+    export adminRemoteAppgwIngressYamlPath=${scriptDir}/appgw-admin-remote-ingress-svc.yaml
+    generate_appgw_admin_remote_config_file
+
+    kubectl apply -f ${adminRemoteAppgwIngressYamlPath}
+    validate_status "Create appgw ingress svc."
+    waitfor_svc_completed ${adminRemoteIngressName}
   fi
 
   create_dns_CNAME_record
@@ -822,6 +954,7 @@ export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
 source ${scriptDir}/common.sh
+source ${scriptDir}/utility.sh
 
 export aksClusterRGName=$1
 export aksClusterName=$2
@@ -833,20 +966,19 @@ export subID=$7
 export curRGName=${8}
 export appgwName=${9}
 export vnetName=${10}
-export spBase64String=${11}
-export appgwForAdminServer=${12}
-export enableCustomDNSAlias=${13}
-export dnsRGName=${14}
-export dnsZoneName=${15}
-export dnsAdminLabel=${16}
-export dnsClusterLabel=${17}
-export appgwAlias=${18}
-export enableInternalLB=${19}
-export appgwFrontendSSLCertData=${20}
-export appgwFrontendSSLCertPsw=${21}
-export appgwCertificateOption=${22}
-export enableCustomSSL=${23}
-export enableCookieBasedAffinity=${24}
+export appgwForAdminServer=${11}
+export enableCustomDNSAlias=${12}
+export dnsRGName=${13}
+export dnsZoneName=${14}
+export dnsAdminLabel=${15}
+export dnsClusterLabel=${16}
+export appgwAlias=${17}
+export enableInternalLB=${18}
+export appgwFrontendSSLCertData=${19}
+export appgwCertificateOption=${20}
+export enableCustomSSL=${21}
+export enableCookieBasedAffinity=${22}
+export enableRemoteConsole=${23}
 
 export adminServerName="admin-server"
 export adminConsoleEndpoint="null"
@@ -872,7 +1004,7 @@ export svcCluster="${wlsDomainUID}-cluster-${clusterName}"
 export wlsDomainNS="${wlsDomainUID}-ns"
 export appgwBackendCertPath="${sharedPath}/security/root.cert"
 
-echo $lbSvcValues
+read_sensitive_parameters_from_stdin
 
 validate_input
 

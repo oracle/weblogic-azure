@@ -1,4 +1,4 @@
-# Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script  ${0} starts"
@@ -8,9 +8,14 @@ function echo_stderr() {
     echo "$@" >&2
 }
 
+# read <azureACRPassword> and <ocrSSOPSW> from stdin
+function read_sensitive_parameters_from_stdin() {
+    read azureACRPassword ocrSSOPSW
+}
+
 #Function to display usage message
 function usage() {
-    echo_stdout "./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <azureACRPassword> <imageTag> <appPackageUrls> <ocrSSOUser> <ocrSSOPSW> <wlsClusterSize> <enableSSL>"
+    echo "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -226,13 +231,11 @@ source ${scriptDir}/common.sh
 export wlsImagePath=$1
 export azureACRServer=$2
 export azureACRUserName=$3
-export azureACRPassword=$4
-export imageTag=$5
-export appPackageUrls=$6
-export ocrSSOUser=$7
-export ocrSSOPSW=$8
-export wlsClusterSize=$9
-export enableSSL=${10}
+export imageTag=$4
+export appPackageUrls=$5
+export ocrSSOUser=$6
+export wlsClusterSize=$7
+export enableSSL=$8
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export ocrLoginServer="container-registry.oracle.com"
@@ -240,6 +243,8 @@ export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/release
 export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.12/imagetool.zip"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.2.8.jar"
 export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar"
+
+read_sensitive_parameters_from_stdin
 
 validate_inputs
 

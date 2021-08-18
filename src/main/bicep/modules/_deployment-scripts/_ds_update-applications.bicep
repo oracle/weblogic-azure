@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param _artifactsLocation string
@@ -28,6 +28,7 @@ var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClust
 var const_azcliVersion='2.15.0'
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
+var const_invokeScript = 'invokeUpdateApplications.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_updateAppScript= 'updateApplications.sh'
 var const_utilityScript= 'utility.sh'
@@ -40,8 +41,9 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azCliVersion: const_azcliVersion
     arguments: const_arguments
-    primaryScriptUri: uri(const_scriptLocation, '${const_updateAppScript}${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, '${const_invokeScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
+      uri(const_scriptLocation, '${const_updateAppScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_buildDockerImageScript}${_artifactsLocationSasToken}')
