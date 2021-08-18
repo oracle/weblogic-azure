@@ -25,10 +25,7 @@ Issue related to Oracle WebLogic Server on Microsoft Azure implementation are tr
 This section tracks GitHub Actions configured for each offer repo, 'Build and Test' and 'New Tag' are two different workflows.
 |  Offer Repo  |   Build and Test | New Tag |
 |--- |--- |--- |
-| [Single Node] | [Build and Test]| [New Tag]|
-| [Admin]  | [Build and Test] | [New Tag] |
-| [Configured Cluster]  | [Build and Test]svg) | [New Tag]) |
-| [Dynamic Cluster] |  [Build and Test] | [New Tag] |
+| [WLS on AKS] | [Build and Test]| [New Tag]|
 
 ## Pull Requests
 

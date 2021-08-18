@@ -2,15 +2,15 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param location string = 'eastus'
+param storageAccountName string
 param utcValue string = utcNow()
 
 var const_shareQuota = 5120
 var const_sku = 'Standard_LRS'
 var name_fileShare = 'weblogic'
-var name_storageAccount = 'stg${uniqueString(utcValue)}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
-  name: name_storageAccount
+  name: storageAccountName
   location: location
   kind: 'StorageV2'
   sku: {
@@ -36,6 +36,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
     }
     accessTier: 'Hot'
   }
+  tags:{
+    'managed-by-azure-weblogic': utcValue
+  }
 }
 
 resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-02-01' = {
@@ -49,5 +52,3 @@ resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@2021
     storageAccount
   ]
 }
-
-output storageAccountName string = name_storageAccount
