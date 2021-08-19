@@ -427,20 +427,12 @@ function output_ssl_keystore() {
     else
         rm -f ${mntPath}/$wlsIdentityKeyStoreFileName
         rm -f ${mntPath}/$wlsTrustKeyStoreFileName
-        rm -f ${mntPath}/${wlsIdentityRootCertFileName}
         rm -f ${mntPath}/${wlsTrustKeyStoreJKSFileName}
     fi
 
     #decode cert data once again as it would got base64 encoded
     echo "$wlsIdentityData" | base64 -d >${mntPath}/$wlsIdentityKeyStoreFileName
     echo "$wlsTrustData" | base64 -d >${mntPath}/$wlsTrustKeyStoreFileName
-    # export root cert. Used as gateway backend certificate
-    ${JAVA_HOME}/bin/keytool -export \
-        -alias ${wlsIdentityAlias} \
-        -noprompt \
-        -file ${mntPath}/${wlsIdentityRootCertFileName} \
-        -keystore ${mntPath}/$wlsIdentityKeyStoreFileName \
-        -storepass ${wlsIdentityPsw}
 
     # export jks file
     # -Dweblogic.security.SSL.trustedCAKeyStorePassPhrase for PKCS12 is not working correctly
@@ -744,7 +736,6 @@ export wlsOptVersion="3.2.5"
 export wlsIdentityKeyStoreFileName="security/identity.keystore"
 export wlsTrustKeyStoreFileName="security/trust.keystore"
 export wlsTrustKeyStoreJKSFileName="security/trust.jks"
-export wlsIdentityRootCertFileName="security/root.cert"
 
 read_sensitive_parameters_from_stdin
 

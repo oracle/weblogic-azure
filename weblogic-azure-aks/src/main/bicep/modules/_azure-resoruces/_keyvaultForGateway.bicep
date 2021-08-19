@@ -2,11 +2,17 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 // Deploy Application Gateway certificate secrets.
 
+@description('Backend certificate data to store in the secret')
+param backendCertificateDataValue string
+
 @description('Certificate data to store in the secret')
 param certificateDataValue string
 
 @description('Certificate password to store in the secret')
 param certificatePasswordValue string
+
+@description('true to upload trusted root certificate')
+param enableCustomSSL bool = false
 
 @description('Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault.')
 param enabledForTemplateDeployment bool = true
@@ -33,6 +39,7 @@ param useExistingAppGatewaySSLCertificate bool = false
 @description('Current deployment time. Used as a tag in deployment script.')
 param keyVaultName string = 'GEN_UNIQUE'
 
+var name_sslBackendCertSercretName= 'myAppGatewaySSLBackendRootCert'
 var name_sslCertSecretName = 'myAppGatewaySSLCert'
 var name_sslCertPasswordSecretName = 'myAppGatewaySSLCertPassword'
 
@@ -60,6 +67,19 @@ module keyVaultwithExistingAppGatewaySSLCert '_keyvault/_keyvaultWithExistingCer
   }
 }
 
+module keyvaultBackendRootCert '_keyvault/_keyvaultForGatewayBackendCert.bicep' = if (enableCustomSSL) {
+  name: 'kv-appgw-e2e-ssl-backend-certificate'
+  params:{
+    certificateDataName: name_sslBackendCertSercretName
+    certificateDataValue: backendCertificateDataValue
+    enabledForTemplateDeployment: enabledForTemplateDeployment
+    keyVaultName: keyVaultName
+    sku: sku
+  }
+}
+
 output keyVaultName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.keyVaultName : keyVaultwithSelfSignedAppGatewaySSLCert.outputs.keyVaultName)
 output sslCertDataSecretName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.sslCertDataSecretName : keyVaultwithSelfSignedAppGatewaySSLCert.outputs.secretName)
 output sslCertPwdSecretName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.sslCertPwdSecretName: '')
+output sslBackendCertDataSecretName string = (enableCustomSSL) ? keyvaultBackendRootCert.outputs.sslBackendCertDataSecretName : ''
+

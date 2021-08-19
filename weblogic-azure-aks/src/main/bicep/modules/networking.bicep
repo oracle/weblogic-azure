@@ -45,6 +45,7 @@ param identity object
 param keyVaultName string = 'kv-contoso'
 @description('Resource group name in current subscription containing the KeyVault')
 param keyVaultResourceGroup string = 'kv-contoso-rg'
+param keyvaultBackendCertDataSecretName string = 'kv-ssl-backend-data'
 @description('The name of the secret in the specified KeyVault whose value is the SSL Certificate Data')
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
 @description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate')
@@ -79,6 +80,12 @@ module pidAppgwStart './_pids/_pid.bicep' = if (enableAppGWIngress) {
   }
 }
 
+// get key vault object in a resource group
+resource existingKeyvault 'Microsoft.KeyVault/vaults@2019-09-01' existing = if (enableAppGWIngress) {
+  name: keyVaultName
+  scope: resourceGroup(keyVaultResourceGroup)
+}
+
 module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIngress) {
   name: 'app-gateway-deployment'
   params: {
@@ -90,11 +97,24 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
   ]
 }
 
-// get key vault object in a resource group
-resource existingKeyvault 'Microsoft.KeyVault/vaults@2019-09-01' existing = if (enableAppGWIngress) {
-  name: keyVaultName
-  scope: resourceGroup(keyVaultResourceGroup)
+/*
+  Upload trusted root certificate to Azure Application Gateway
+  To set up e2e TLS/SSL communication between Azure Application Gateway and WebLogic admin server or WebLogic cluster.
+  The certificate must be the CA certificate of WebLogic Server identity.
+*/
+module appgwBackendCertDeployment '_deployment-scripts/_ds-appgw-upload-trusted-root-certificate.bicep' = if (enableAppGWIngress && enableCustomSSL) {
+  name: 'app-gateway-backend-cert-deployment'
+  params: {
+    appgwName: appgwDeployment.outputs.appGatewayName
+    sslBackendRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
+    identity: identity
+  }
+  dependsOn: [
+    appgwDeployment
+  ]
 }
+
+
 
 module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfiguration && createDNSZone) {
   name: 'dnszone-deployment'
@@ -139,7 +159,7 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    appgwDeployment
+    appgwBackendCertDeployment
     dnsZoneDeployment
   ]
 }
@@ -177,7 +197,7 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    appgwDeployment
+    appgwBackendCertDeployment
     dnsZoneDeployment
   ]
 }
@@ -214,7 +234,7 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    appgwDeployment
+    appgwBackendCertDeployment
     dnsZoneDeployment
   ]
 }
