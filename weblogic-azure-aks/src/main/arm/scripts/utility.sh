@@ -39,6 +39,29 @@ function echo_stdout() {
     echo -e "$@" >>${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/debug.log
 }
 
+#
+# Check the state of a persistent volume.
+# Leverage source code from function "checkPvState" in weblogic-operator, kubernetes\samples\scripts\common\utility.sh 
+# $1 - name of volume
+# $2 - expected state of volume
+# $3 - max attempt
+# $4 - interval
+function utility_check_pv_state {
+
+  echo_stdout "Checking if the persistent volume ${1:?} is ${2:?}"
+  local pv_state=`kubectl get pv $1 -o jsonpath='{.status.phase}'`
+  attempts=0
+  while [ ! "$pv_state" = "$2" ] && [ ! $attempts -eq $3 ]; do
+    attempts=$((attempts + 1))
+    sleep $4
+    pv_state=`kubectl get pv $1 -o jsonpath='{.status.phase}'`
+  done
+  if [ "$pv_state" != "$2" ]; then
+    echo_stderr "The persistent volume state should be $2 but is $pv_state"
+    exit 1
+  fi
+}
+
 # Call this function to make sure pods of a domain are running. 
 #   * Make sure the admin server pod is running
 #   * Make sure all the managed server pods are running

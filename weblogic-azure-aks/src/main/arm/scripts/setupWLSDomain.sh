@@ -511,7 +511,9 @@ function create_pv() {
     sed -i -e "s:@STORAGE_ACCOUNT@:${storageAccountName}:g" ${customPVCYaml}
 
     kubectl apply -f ${customPVYaml}
+    utility_check_pv_state ${pvName} "Available" ${checkPVStateMaxAttempt} ${checkPVStateInterval}
     kubectl apply -f ${customPVCYaml}
+    utility_check_pv_state ${pvName} "Bound" ${checkPVStateMaxAttempt} ${checkPVStateInterval}
 
     # validate PV PVC
     ret=$(kubectl get pv | grep "${pvName}" | grep "${pvcName}")
