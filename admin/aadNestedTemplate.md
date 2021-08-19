@@ -61,7 +61,9 @@ Use the content as this file as the value of the `wlsLDAPSSLCertificate` paramet
 
 #### Example Parameters JSON
 
-Here is a fully filled out parameters file.   Note that we did not include values for parameters that have a default value.
+Here is a fully filled out parameters file.
+
+{{ site.data.var.passwordInFileNote }}
 
 ```json
 {

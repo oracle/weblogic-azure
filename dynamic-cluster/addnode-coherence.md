@@ -191,6 +191,8 @@ $ az resource list -g 'yourResourceGroup' --resource-type Microsoft.Storage/stor
 
 Here is a fully filled out parameters file. We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`,  `usePreviewImage` and `vmSizeSelectForCoherence` as default value. 
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",

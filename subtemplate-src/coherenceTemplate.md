@@ -111,6 +111,8 @@ $ az resource list -g 'yourResourceGroup' --resource-type Microsoft.Storage/stor
 
 Here is a fully filled out parameters file.  This is an example to set up Coherence*Web.  We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`,  and `usePreviewImage` as default value. 
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",

@@ -1,18 +1,18 @@
 # arm-oraclelinux-wls
-# Simple deployment of a Oracle Linux VM with Weblogic Server pre-installed
+# Simple deployment of a Oracle Linux VM with WebLogic Server pre-installed
 
-This template allows us to deploy a simple Oracle Linux VM with Weblogic Server (12.2.1.3.0) pre-installed. 
-This template deploy by default, an A3 size VM in the resource group location and return the fully qualified domain name of the VM.
+This template allows us to deploy a simple Oracle Linux VM with WebLogic Server (12.2.1.3.0) pre-installed. 
+By default, this template deploys an A3 size VM in the resource group location and return the fully qualified domain name of the VM.
 
-To install Weblogic Server, requires Oracle Weblogic Install kit and Oracle JDK to be downloaded, from OTN Site (https://www.oracle.com/technical-resources/). The OTN site requires the user to accept <a href="https://www.oracle.com/downloads/licenses/standard-license.html">OTN Free Developer License Agreement</a> before downloading any resources. 
-So, when this template is run, user will be required to accept the <a href="https://www.oracle.com/downloads/licenses/standard-license.html">OTN Free Developer License Agreement</a> and also provide OTN credentials (username and password), to download the Oracle Weblogic Install Kit and Oracle JDK.
+To install WebLogic Server, requires Oracle WebLogic Install kit and Oracle JDK to be downloaded, from OTN Site (https://www.oracle.com/technical-resources/). The OTN site requires the user to accept <a href="https://www.oracle.com/downloads/licenses/standard-license.html">OTN Free Developer License Agreement</a> before downloading any resources. 
+So, when this template is run, the user will be required to accept the <a href="https://www.oracle.com/downloads/licenses/standard-license.html">OTN Free Developer License Agreement</a> and also provide OTN credentials (username and password), to download the Oracle WebLogic Install Kit and Oracle JDK.
 
 
 <h3>Using the template</h3>
 
 <h4>Perform string substitution to generate the necessary artifacts for deployment or uploading to the Azure Cloud Partner Portal</h4>
 
-* Install Apache Maven.  This project uses Apache Maven to do simple
+* Install Apache Maven.  This project uses Apache Maven to do a simple
   string substitution for several required parameters in the templates.
   
 * From the top level run `mvn clean install`.
@@ -59,15 +59,15 @@ If you are new to template deployment, see:
 
 <h3>Running the tests</h3>
 
-Microsoft provides template validation tests in the Git repo for [azure-quickstart-templates](https://github.com/Azure/azure-quickstart-templates/tree/master/test/template-tests).  This project has maven configuration to run those tests against the ARM template.  This is useful when building the template as part of a CI/CD pipeline.
+Microsoft provides template validation tests in the Git repo for [azure-quickstart-templates](https://github.com/Azure/azure-quickstart-templates/tree/master/test/template-tests).  This project includes a Maven configuration to run those tests against the ARM template.  This is useful when building the template as part of a CI/CD pipeline.
 
 <h4>Preconditions</h4>
 
 The environment running the tests must have the git repo for 
 [Azure Quickstart Templates)[https://github.com/Azure/azure-quickstart-templates] checked
-out in the expected place, and the necessary powershell software installed
+out in the expected place, and the necessary PowerShell software installed
 
-1. Make it so the environment that runs `mvn` is able to execute the powershell command.
+1. Make it so the environment that runs `mvn` is able to execute the PowerShell command.
 
 2. Git clone the [Azure Quickstart Templates)[https://github.com/Azure/azure-quickstart-templates] into the top level `target` directory.
 

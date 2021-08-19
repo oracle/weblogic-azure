@@ -69,6 +69,8 @@ Size of the dynamic cluster, it should equal to numbers of Virtual Machines that
 
 Here is a fully filled out parameters file.   Note that we did not include values for parameters that have a default value. Pay attention to the value of `dynamicClusterSize`.
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",

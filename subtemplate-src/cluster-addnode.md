@@ -284,6 +284,8 @@ $ az resource list -g 'yourResourceGroup' --resource-type Microsoft.Storage/stor
 
 Here is a fully filled out parameters file, with Azure Active Directory enabled. We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`, `managedServerPrefix`, `skuUrnVersion`, `usePreviewImage` and `vmSizeSelect` as default value. 
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",

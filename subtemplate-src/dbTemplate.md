@@ -125,6 +125,8 @@ Finally, replace `{your_database}` with the name of your database.
 
 Here is a fully filled out parameters file.   Note that we did not include `adminVMName`.
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",

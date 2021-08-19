@@ -69,6 +69,8 @@ The number of existing nodes, includeing Administration Server node. It should e
 
 Here is a fully filled out parameters file.   Note that we did not include values for parameters that have a default value. Pay attention to the value of `numberOfInstances`.
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",

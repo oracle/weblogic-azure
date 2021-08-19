@@ -88,6 +88,7 @@ Use temp.txt contents to set the value for ohsSSLKeystoreData
 
 Here is a fully filled out parameters file.   Note that we did not include any optional parameters, assuming the {{ site.data.var.wlsFullBrandName }} was deployed accepting the default values.
 
+{{ site.data.var.passwordInFileNote }}
 
 ```json
 {

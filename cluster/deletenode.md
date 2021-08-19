@@ -69,6 +69,8 @@ You can get the server names from WebLogic Server Administration Console, follow
 
 Here is a fully filled out parameters file.   Note that here we do not include `adminVMName`.
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",

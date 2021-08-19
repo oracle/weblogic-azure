@@ -63,6 +63,8 @@ Use the content as this file as the value of the `wlsLDAPSSLCertificate` paramet
 
 Here is a fully filled out parameters file.   Note that we did not include values for parameters that have a default value.
 
+{{ site.data.var.passwordInFileNote }}
+
 ```json
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
