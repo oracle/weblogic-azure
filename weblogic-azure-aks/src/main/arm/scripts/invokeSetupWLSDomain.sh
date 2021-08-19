@@ -1,20 +1,47 @@
 # Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
-
-function echo_stderr() {
-    >&2 echo "$@"
-    echo "$@" >>stdout
-}
-
-function echo_stdout() {
-    echo "$@" 
-    echo "$@" >>stdout
-}
+# This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
 #Function to display usage message
 function usage() {
-    echo_stdout "./invokeSetupWLSDomain.sh ..."
+    usage=$(cat <<-END
+Usage:
+./invokeSetupWLSDomain.sh
+    <ocrSSOUser>
+    <ocrSSOPSW>
+    <aksClusterRGName>
+    <aksClusterName>
+    <wlsImageTag>
+    <acrName>
+    <wlsDomainName>
+    <wlsDomainUID>
+    <wlsUserName>
+    <wlsPassword>
+    <wdtRuntimePassword>
+    <wlsCPU>
+    <wlsMemory>
+    <managedServerPrefix>
+    <appReplicas>
+    <appPackageUrls>
+    <currentResourceGroup>
+    <scriptURL>
+    <storageAccountName>
+    <wlsClusterSize>
+    <enableCustomSSL>
+    <wlsIdentityData>
+    <wlsIdentityPsw>
+    <wlsIdentityType>
+    <wlsIdentityAlias>
+    <wlsIdentityKeyPsw>
+    <wlsTrustData>
+    <wlsTrustPsw>
+    <wlsTrustType>
+    <enablePV>
+END
+)
+    echo_stdout "${usage}"
     if [ $1 -eq 1 ]; then
+        echo_stderr "${usage}"
         exit 1
     fi
 }
@@ -23,15 +50,17 @@ function usage() {
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
-export ocrSSOUser=${1}
-ocrSSOPSW=${2}
-export aksClusterRGName=${3}
-export aksClusterName=${4}
-export wlsImageTag=${5}
-export acrName=${6}
-export wlsDomainName=${7}
-export wlsDomainUID=${8}
-export wlsUserName=${9}
+source ${scriptDir}/utility.sh
+
+export ocrSSOUser=$1
+ocrSSOPSW=$2
+export aksClusterRGName=$3
+export aksClusterName=$4
+export wlsImageTag=$5
+export acrName=$6
+export wlsDomainName=$7
+export wlsDomainUID=$8
+export wlsUserName=$9
 wlsPassword=${10}
 wdtRuntimePassword=${11}
 export wlsCPU=${12}
@@ -43,8 +72,49 @@ export currentResourceGroup=${17}
 export scriptURL=${18}
 export storageAccountName=${19}
 export wlsClusterSize=${20}
+export enableCustomSSL=${21}
+export wlsIdentityData=${22}
+wlsIdentityPsw=${23}
+export wlsIdentityType=${24}
+export wlsIdentityAlias=${25}
+wlsIdentityKeyPsw=${26}
+export wlsTrustData=${27}
+wlsTrustPsw=${28}
+export wlsTrustType=${29}
+export enablePV=${30}
 
-echo ${ocrSSOPSW} ${wlsPassword} ${wdtRuntimePassword} | bash ./setupWLSDomain.sh ${ocrSSOUser} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${appPackageUrls} ${currentResourceGroup} ${scriptURL} ${storageAccountName} ${wlsClusterSize}
+echo ${ocrSSOPSW} \
+    ${wlsPassword} \
+    ${wdtRuntimePassword} \
+    ${wlsIdentityPsw} \
+    ${wlsIdentityKeyPsw} \
+    ${wlsTrustPsw} | \
+    bash ./setupWLSDomain.sh \
+    ${ocrSSOUser} \
+    ${aksClusterRGName} \
+    ${aksClusterName} \
+    ${wlsImageTag} \
+    ${acrName} \
+    ${wlsDomainName} \
+    ${wlsDomainUID} \
+    ${wlsUserName} \
+    ${wlsCPU} \
+    ${wlsMemory} \
+    ${managedServerPrefix} \
+    ${appReplicas} \
+    ${appPackageUrls} \
+    ${currentResourceGroup} \
+    ${scriptURL} \
+    ${storageAccountName} \
+    ${wlsClusterSize} \
+    ${enableCustomSSL} \
+    ${wlsIdentityData} \
+    ${wlsIdentityType} \
+    ${wlsIdentityAlias} \
+    ${wlsTrustData} \
+    ${wlsTrustType} \
+    ${enablePV}
 
-
-exit $exitCode
+if [ $? -ne 0 ]; then
+    usage 1
+fi

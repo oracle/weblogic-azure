@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- mvn -Pbicep -Passembly clean install -->
+
+  <groupId>com.oracle.weblogic.azure</groupId>
+  <artifactId>wls-on-aks-azure-marketplace</artifactId>
+  <version>1.0.15</version>
+
+  <parent>
+    <groupId>com.microsoft.azure.iaas</groupId>
+    <artifactId>azure-javaee-iaas-parent</artifactId>
+    <version>1.0.10</version>
+    <relativePath></relativePath>
+  </parent>
+
+  <packaging>jar</packaging>
+  <name>wls-on-aks-azure-marketplace</name>
+  <properties>
+    <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
+  </properties>
+</project>

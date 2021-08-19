@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2020, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 /*
@@ -52,10 +52,12 @@ param appReplicas int = 2
 param createACR bool = false
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
+param createStorageAccount bool = false
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
-param enableAzureFileShare bool = false
+param enableCustomSSL bool = false
+param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
 param location string = 'eastus'
@@ -66,8 +68,7 @@ param managedServerPrefix string = 'managed-server'
 param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
-@description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
-param uploadAppPackage bool = false
+param storageAccountName string
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -79,19 +80,40 @@ param wlsCPU string = '200m'
 param wlsDomainName string = 'domain1'
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
+@secure()
+param wlsIdentityKeyStoreData string = newGuid()
+@secure()
+param wlsIdentityKeyStorePassphrase string = newGuid()
+@allowed([
+  'JKS'
+  'PKCS12'
+])
+param wlsIdentityKeyStoreType string = 'PKCS12'
 @description('Docker tag that comes after "container-registry.oracle.com/middleware/weblogic:"')
 param wlsImageTag string = '12.2.1.4'
 @description('Memory requests for admin server and managed server.')
 param wlsMemory string = '1.5Gi'
 @secure()
 param wlsPassword string
+@secure()
+param wlsPrivateKeyAlias string = newGuid()
+@secure()
+param wlsPrivateKeyPassPhrase string = newGuid()
+@secure()
+param wlsTrustKeyStoreData string = newGuid()
+@secure()
+param wlsTrustKeyStorePassPhrase string = newGuid()
+@allowed([
+  'JKS'
+  'PKCS12'
+])
+param wlsTrustKeyStoreType string = 'PKCS12'
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
-
 /*
 * Deploy a pid to tract an offer deployment starts
 */
-module pidStart './_pids/_pid.bicep'= {
+module pidStart './_pids/_pid.bicep' = {
   name: 'wls-aks-start-pid-deployment'
   params: {
     name: _pidStart
@@ -133,10 +155,12 @@ module acrDeployment './_azure-resoruces/_acr.bicep' = if (createACR) {
   ]
 }
 
-module storageDeployment './_azure-resoruces/_storage.bicep' = if (enableAzureFileShare) {
+// enableAppGWIngress: if true, will create storage for certificates.
+module storageDeployment './_azure-resoruces/_storage.bicep' = if (createStorageAccount) {
   name: 'storage-deployment'
   params: {
     location: location
+    storageAccountName: storageAccountName
   }
   dependsOn: [
     pidStart
@@ -156,19 +180,30 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     acrName: createACR ? acrDeployment.outputs.acrName : acrName
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
+    enableCustomSSL: enableCustomSSL
+    enablePV: enablePV
     identity: identity
     location: location
     managedServerPrefix: managedServerPrefix
-    storageAccountName: enableAzureFileShare ? storageDeployment.outputs.storageAccountName : 'null'
+    storageAccountName: storageAccountName
     ocrSSOUser: ocrSSOUser
     ocrSSOPSW: ocrSSOPSW
     wdtRuntimePassword: wdtRuntimePassword
+    wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
+    wlsIdentityKeyStoreData: wlsIdentityKeyStoreData
+    wlsIdentityKeyStorePassphrase: wlsIdentityKeyStorePassphrase
+    wlsIdentityKeyStoreType: wlsIdentityKeyStoreType
     wlsImageTag: wlsImageTag
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
+    wlsPrivateKeyAlias: wlsPrivateKeyAlias
+    wlsPrivateKeyPassPhrase: wlsPrivateKeyPassPhrase
+    wlsTrustKeyStoreData: wlsTrustKeyStoreData
+    wlsTrustKeyStorePassPhrase: wlsTrustKeyStorePassPhrase
+    wlsTrustKeyStoreType: wlsTrustKeyStoreType
     wlsUserName: wlsUserName
   }
   dependsOn: [
@@ -193,5 +228,6 @@ module pidEnd './_pids/_pid.bicep' = {
 }
 
 output aksClusterName string = createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
-output adminServerUrl string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console',wlsDomainUID)
+output aksClusterRGName string = createAKSCluster ? resourceGroup().name : aksClusterRGName
+output adminServerUrl string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console', wlsDomainUID)
 output clusterSVCUrl string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)

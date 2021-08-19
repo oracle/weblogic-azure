@@ -80,7 +80,7 @@
                         "name": "ocrSSOUserName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Username for Oracle Single Sign-On authentication",
-                        "defaultValue": "example@foo.com",
+                        "defaultValue": "example@contoso.com",
                         "toolTip": "Username for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
                         "constraints": {
                             "required": true,
@@ -512,6 +512,1019 @@
                         "visible": true
                     }
                 ]
+            },
+            {
+                "name": "section_sslConfiguration",
+                "type": "Microsoft.Common.Section",
+                "label": "TLS/SSL Configuration",
+                "elements": [
+                    {
+                        "name": "sslConfigurationText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
+                            }
+                        }
+                    },
+                    {
+                        "name": "enableCustomSSL",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Configure end to end TLS/SSL to WebLogic Administration Console and cluster on HTTPS (Secure) port, with your own certificate?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to configure end to end TLS/SSL to WebLogic Administration Console and cluster on HTTPS (Secure) port, with your own certificate.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": false
+                        }
+                    },
+                    {
+                        "name": "sslConfigurationAccessOption",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+                        "label": "How would you like to provide required configuration",
+                        "defaultValue": "Upload existing KeyStores",
+                        "toolTip": "Select 'Upload existing KeyStores' to use local stored KeyStores.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Upload existing KeyStores",
+                                    "value": "uploadConfig"
+                                },
+                                {
+                                    "label": "Use KeyStores stored in Azure Key Vault",
+                                    "value": "keyVaultStoredConfig"
+                                }
+                            ],
+                            "required": false
+                        }
+                    },
+                    {
+                        "name": "uploadedCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
+                        "label": "TLS/SSL Configuration Settings",
+                        "elements": [
+                            {
+                                "name": "sslKeystoreInfo0",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "true",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
+                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
+                                }
+                            },
+                            {
+                                "name": "uploadedCustomIdentityKeyStoreData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Identity KeyStore Data file(.jks,.p12)",
+                                "toolTip": "Identity KeyStore for TLS/SSL configuration",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".jks,.p12"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomIdentityKeyStorePassphrase",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": " The passphrase for the Identity KeyStore",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^.{6,}$",
+                                    "validationMessage": "Keypass must be at least 6 characters long."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomIdentityKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Identity KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "One of the supported KeyStore types",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "uploadedPrivateKeyAlias",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The alias of the server's private key within the Identity KeyStore",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "uploadedPrivateKeyPassPhrase",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "visible": "true",
+                                "label": {
+                                    "password": "The passphrase for the server's private key within the Identity KeyStore",
+                                    "confirmPassword": "Confirm passphrase"
+                                },
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^.{6,}$",
+                                    "validationMessage": "Keypass must be at least 6 characters long."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                }
+                            },
+                            {
+                                "name": "uploadedCustomTrustKeyStoreData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Trust KeyStore Data file(.jks,.p12)",
+                                "toolTip": "Trust KeyStore for TLS/SSL configuration.",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".jks,.p12"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomTrustKeyStorePassPhrase",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": " The passphrase for the Trust KeyStore",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^.{6,}$",
+                                    "validationMessage": "Keypass must be at least 6 characters long."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomTrustKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Trust KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "One of the supported KeyStore types",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "keyVaultStoredCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
+                        "label": "TLS/SSL Configuration Settings",
+                        "elements": [
+                            {
+                                "name": "sslKeystoreInfo1",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "true",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
+                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
+                                }
+                            },
+                            {
+                                "name": "keyVaultText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "true",
+                                "options": {
+                                    "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL certificate. The template will look for the certificate and other configuration items in the Azure Key Vault specified here.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "keyVaultResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "Resource group name in current subscription containing the Key Vault",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                                    "validationMessage": "[if(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                }
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "Name of the Azure Key Vault containing secrets for the TLS/SSL certificate",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 24), less(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomIdentityKeyStoreDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified Key Vault whose value is the Identity KeyStore Data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomIdentityKeyStorePassPhraseSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified Key Vault whose value is the passphrase for the Identity KeyStore",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomIdentityKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Identity KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "One of the supported KeyStore types",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "keyVaultPrivateKeyAliasSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified Key Vault whose value is the Private Key Alias",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultPrivateKeyPassPhraseSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified Key Vault whose value is the passphrase for the Private Key",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomTrustKeyStoreDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified Key Vault whose value is the Trust KeyStore Data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomTrustKeyStorePassPhraseSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified Key Vault whose value is the passphrase for the Trust KeyStore",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomTrustKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Trust KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "One of the supported KeyStore types",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "section_appGateway",
+                "type": "Microsoft.Common.Section",
+                "label": "Networking",
+                "subLabel": {
+                    "preValidation": "Provide required information for networking",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Networking",
+                "elements": [
+                    {
+                        "name": "connectToAGText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision Load Balancer service or Ingress service for WebLogic Administration Console and WebLogic cluster.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
+                            }
+                        }
+                    },
+                    {
+                        "name": "lbSVCInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Standard Load Balancer service",
+                        "elements": [
+                            {
+                                "name": "enableLBSVC",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create Standard Load Balancer services for the cluster?",
+                                "defaultValue": "No",
+                                "toolTip": "Select 'Yes' to create Standard Load Balancer services for the cluster.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ],
+                                    "required": false
+                                }
+                            },
+                            {
+                                "name": "enableInternalLB",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use Internal Load Balancer",
+                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]"
+                            },
+                            {
+                                "name": "lbSVC",
+                                "type": "Microsoft.Common.EditableGrid",
+                                "ariaLabel": "Enter information",
+                                "label": "Standard Load Balancer service",
+                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "constraints": {
+                                    "width": "Full",
+                                    "rows": {
+                                        "count": {
+                                            "min": 1,
+                                            "max": 10
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "id": "colName",
+                                            "header": "Service name prefix",
+                                            "width": "2fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "domain1-admin-server",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[a-z0-9A-Z-]{1,30}$",
+                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "colTarget",
+                                            "header": "Target",
+                                            "width": "2fr",
+                                            "element": {
+                                                "name": "dropDownTargets",
+                                                "type": "Microsoft.Common.DropDown",
+                                                "placeholder": "admin-server",
+                                                "constraints": {
+                                                    "allowedValues": [
+                                                        {
+                                                            "label": "admin-server",
+                                                            "value": "adminServer"
+                                                        },
+                                                        {
+                                                            "label": "cluster-1",
+                                                            "value": "cluster1"
+                                                        }
+                                                    ],
+                                                    "required": true
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "id": "colPort",
+                                            "header": "Port",
+                                            "width": "1fr",
+                                            "element": {
+                                                "type": "Microsoft.Common.TextBox",
+                                                "placeholder": "7001",
+                                                "constraints": {
+                                                    "required": true,
+                                                    "validations": [
+                                                        {
+                                                            "regex": "^[0-9]{1,5}$",
+                                                            "message": "Only numbers are allowed, and the value must be 1-65535."
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "appgwIngress",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Application Gateway Ingress",
+                        "elements": [
+                            {
+                                "name": "enableAppGateway",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Connect to Azure Application Gateway?",
+                                "defaultValue": "No",
+                                "toolTip": "Select 'Yes' to create an Azure Application Gateway Ingress as the load balancer for the cluster and admin server.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ],
+                                    "required": false
+                                }
+                            },
+                            {
+                                "name": "keyVaultText00",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
+                                "options": {
+                                    "text": "Choose an option for providing the TLS/SSL certificate:"
+                                }
+                            },
+                            {
+                                "name": "keyVaultText01",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
+                                "options": {
+                                    "text": "    ⁃ Upload a TLS/SSL certificate: Upload the pre-signed certificate now."
+                                }
+                            },
+                            {
+                                "name": "keyVaultText02",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
+                                "options": {
+                                    "text": "    ⁃ Identify an Azure Key Vault: The Key Vault must already contain the certificate and its password stored as secrets."
+                                }
+                            },
+                            {
+                                "name": "keyVaultText03",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
+                                "options": {
+                                    "text": "    ⁃ Generate a self-signed certificate: generate a self-signed certificate and apply it during deployment.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "certificateOption",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Select desired TLS/SSL certificate option",
+                                "defaultValue": "Generate a self-signed certificate",
+                                "toolTip": "Select desired TLS/SSL certificate option",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Upload a TLS/SSL certificate",
+                                            "value": "haveCert"
+                                        },
+                                        {
+                                            "label": "Identify an Azure Key Vault",
+                                            "value": "haveKeyVault"
+                                        },
+                                        {
+                                            "label": "Generate a self-signed certificate",
+                                            "value": "generateCert"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "TLS/SSL certificate(.pfx)",
+                                "toolTip": "TLS/SSL certificate used for App Gateway",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".pfx"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
+                            },
+                            {
+                                "name": "appGatewaySSLCertPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "TLS/SSL certificate password",
+                                "constraints": {
+                                    "required": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]",
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
+                            },
+                            {
+                                "name": "keyVaultResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Resource group name in current subscription containing the Key Vault",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                                    "validationMessage": "[if(greater(length(steps('section_appGateway').appgwIngress.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Name of the Azure Key Vault containing secrets for the certificate for TLS/SSL Termination",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "validationMessage": "[if(or(greater(length(steps('section_appGateway').appgwIngress.keyVaultName), 24), less(length(steps('section_appGateway').appgwIngress.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the TLS/SSL certificate data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertPasswordSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the password for the TLS/SSL certificate",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "servicePrincipal",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Service Principal",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --sdk-auth | base64 -w0'",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "options": {
+                                    "hideConfirmation": true
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
+                                "name": "enableCookieBasedAffinity",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable cookie based affinity",
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
+                                "name": "appgwForAdminServer",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ]
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
+                                "name": "appgwForAdminRemote",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ]
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "dnsConfiguration",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Custom DNS Configuration",
+                        "elements": [
+                            {
+                                "name": "enableDNSConfiguration",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Configure Custom DNS Alias",
+                                "defaultValue": "No",
+                                "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ],
+                                    "required": false
+                                }
+                            },
+                            {
+                                "name": "bringDNSZone",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Use an existing Azure DNS Zone",
+                                "defaultValue": "No",
+                                "toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ]
+                                },
+                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
+                            },
+                            {
+                                "name": "dnszoneName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DNS Zone Name",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers and periods to separate Domains",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
+                                    "validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                                },
+                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
+                            },
+                            {
+                                "name": "dnsZoneResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Name of the resource group contains the DNS Zone in current subscription",
+                                "defaultValue": "",
+                                "toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                                    "validationMessage": "[if(greater(length(steps('section_appGateway').dnsConfiguration.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                },
+                                "visible": "[and(steps('section_appGateway').dnsConfiguration.enableDNSConfiguration,steps('section_appGateway').dnsConfiguration.bringDNSZone)]"
+                            },
+                            {
+                                "name": "dnszoneAdminConsoleLabel",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Label for Oracle WebLogic Administration Console",
+                                "defaultValue": "admin",
+                                "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
+                                "constraints": {
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                                        },
+                                        {
+                                            "isValid": "[less(sub(length(concat(steps('section_appGateway').dnsConfiguration.dnszoneAdminConsoleLabel,'.',steps('section_appGateway').dnsConfiguration.dnszoneName)),length(replace(concat(steps('section_appGateway').dnsConfiguration.dnszoneAdminConsoleLabel,'.',steps('section_appGateway').dnsConfiguration.dnszoneName), '.', ''))),34)]",
+                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
+                                        }
+                                    ]
+                                },
+                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
+                            },
+                            {
+                                "name": "dnszoneGatewayLabel",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Label for WebLogic Cluster",
+                                "defaultValue": "www",
+                                "toolTip": "Specify a label to generate subdomain of WebLogic Cluster",
+                                "constraints": {
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                                        },
+                                        {
+                                            "isValid": "[less(sub(length(concat(if(empty(steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel), '', steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel),'.',steps('section_appGateway').dnsConfiguration.dnszoneName)),length(replace(concat(if(empty(steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel), '', steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel),'.',steps('section_appGateway').dnsConfiguration.dnszoneName), '.', ''))),34)]",
+                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
+                                        }
+                                    ]
+                                },
+                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "section_database",
+                "type": "Microsoft.Common.Section",
+                "label": "Database",
+                "subLabel": {
+                    "preValidation": "Configure integrations to database",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Database",
+                "elements": [
+                    {
+                        "name": "aboutDatabase",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the template."
+                        }
+                    },
+                    {
+                        "name": "enableDB",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Connect to database?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "databaseConnectionInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Connection settings",
+                        "elements": [
+                            {
+                                "name": "databaseType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Choose database type",
+                                "toolTip": "Choose database type",
+                                "defaultValue": "Oracle database",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Azure database for PostgreSQL",
+                                            "value": "postgresql"
+                                        },
+                                        {
+                                            "label": "Oracle database",
+                                            "value": "oracle"
+                                        },
+                                        {
+                                            "label": "Azure SQL",
+                                            "value": "sqlserver"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "jdbcDataSourceName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "JNDI Name",
+                                "toolTip": "The JNDI name for the database JDBC connection",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "regex": "^[a-z0-9A-Z/]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "dsConnectionURL",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DataSource Connection String",
+                                "toolTip": "The JDBC connection string for the database",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "dbUser",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Database username",
+                                "toolTip": "Use only letters and numbers",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
+                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "dbPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Database Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "Database Password",
+                                "constraints": {
+                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
+                                    "validationMessage": "The password must be between five and 128 characters long and have at least one number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": "[bool(steps('section_database').enableDB)]"
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -519,18 +1532,63 @@
             "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
+            "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
+            "appGatewaySSLCertData": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertData]",
+            "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
+            "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
+            "appgwForRemoteConsole": "[steps('section_appGateway').appgwIngress.appgwForAdminRemote]",
             "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
             "createACR": "[bool(steps('section_aks').acrInfo.createACR)]",
             "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+            "createDNSZone": "[not(bool(steps('section_appGateway').dnsConfiguration.bringDNSZone))]",
+            "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
+            "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
+            "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+            "dnszoneAdminConsoleLabel": "[steps('section_appGateway').dnsConfiguration.dnszoneAdminConsoleLabel]",
+            "dnszoneAppGatewayLabel": "[steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel]",
+            "dnszoneName": "[steps('section_appGateway').dnsConfiguration.dnszoneName]",
+            "dnszoneRGName": "[steps('section_appGateway').dnsConfiguration.dnsZoneResourceGroup]",
+            "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+            "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
             "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
             "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
+            "enableCookieBasedAffinity": "[bool(steps('section_appGateway').appgwIngress.enableCookieBasedAffinity)]",
+            "enableCustomSSL": "[bool(steps('section_sslConfiguration').enableCustomSSL)]",
+            "enableDB": "[bool(steps('section_database').enableDB)]",
+            "enableDNSConfiguration": "[bool(steps('section_appGateway').dnsConfiguration.enableDNSConfiguration)]",
             "identity": "[basics('basicsRequired').identity]",
+            "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
+            "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",
             "location": "[location()]",
+            "keyVaultName": "[steps('section_appGateway').appgwIngress.keyVaultName]",
+            "keyVaultResourceGroup": "[steps('section_appGateway').appgwIngress.keyVaultResourceGroup]",
+            "keyVaultSSLCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertDataSecretName]",
+            "keyVaultSSLCertPasswordSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertPasswordSecretName]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
             "ocrSSOPSW": "[basics('basicsRequired').ocrSSOPassword]",
             "ocrSSOUser": "[basics('basicsRequired').ocrSSOUserName]",
-            "uploadAppPackage": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]",
+            "servicePrincipal": "[steps('section_appGateway').appgwIngress.servicePrincipal]",
+            "sslConfigurationAccessOption": "[steps('section_sslConfiguration').sslConfigurationAccessOption]",
+            "sslKeyVaultCustomIdentityKeyStoreDataSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStoreDataSecretName]",
+            "sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStorePassPhraseSecretName]",
+            "sslKeyVaultCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStoreType]",
+            "sslKeyVaultCustomTrustKeyStoreDataSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStoreDataSecretName]",
+            "sslKeyVaultCustomTrustKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStorePassPhraseSecretName]",
+            "sslKeyVaultCustomTrustKeyStoreType": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStoreType]",
+            "sslKeyVaultName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName]",
+            "sslKeyVaultPrivateKeyAliasSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultPrivateKeyAliasSecretName]",
+            "sslKeyVaultPrivateKeyPassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultPrivateKeyPassPhraseSecretName]",
+            "sslKeyVaultResourceGroup": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup]",
+            "sslUploadedCustomIdentityKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreData]",
+            "sslUploadedCustomIdentityKeyStorePassphrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStorePassphrase]",
+            "sslUploadedCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreType]",
+            "sslUploadedCustomTrustKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreData]",
+            "sslUploadedCustomTrustKeyStorePassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStorePassPhrase]",
+            "sslUploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
+            "sslUploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
+            "sslUploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
+            "useInternalLB": "[bool(steps('section_appGateway').lbSVCInfo.enableInternalLB)]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
