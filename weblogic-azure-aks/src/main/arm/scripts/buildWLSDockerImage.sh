@@ -172,7 +172,7 @@ function prepare_wls_models() {
 CLUSTER_SIZE=${wlsClusterSize}
 EOF
 
-    echo "Starting generating image model file..."
+    echo "Starting generation of image model file..."
     modelFilePath="$scriptDir/model.yaml"
 
     chmod ugo+x $scriptDir/genImageModel.sh
