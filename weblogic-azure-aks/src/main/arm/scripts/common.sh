@@ -10,3 +10,5 @@ export curlMaxTime=120 # seconds
 export ocrLoginServer="container-registry.oracle.com"
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
 export optUninstallInterval=10
+
+export wlsContainerName="weblogic-server"

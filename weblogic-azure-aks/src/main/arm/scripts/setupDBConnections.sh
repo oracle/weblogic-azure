@@ -118,19 +118,11 @@ function apply_datasource_to_domain() {
     if [[ "${secretList}" != "null" ]];then
         secretList=$(cat ${domainConfigurationJsonFile} | jq -r '. | .spec.configuration.secrets[]')
         secretStrings="["
-        index=0;
         for item in $secretList; do
             if [[ "${item}" == "${dbSecretName}" ]]; then
                 continue
             fi
-
-            if [ $index -eq 0 ];then
-                secretStrings="${secretStrings}\"${item}\","
-            else
-                secretStrings="${secretStrings}\"${item}\","
-            fi
-
-            index=$((index+1))
+            secretStrings="${secretStrings}\"${item}\","
         done
 
         secretStrings="${secretStrings}\"${dbSecretName}\"]"
@@ -150,7 +142,7 @@ function apply_datasource_to_domain() {
 }
 
 function remove_datasource_from_domain() {
-    echo "rollback datasoure"
+    echo "remove datasoure secret from domain configuration"
     # get domain configurations
     domainConfigurationJsonFile=$scriptDir/domain.json
     kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json >${domainConfigurationJsonFile}
@@ -171,14 +163,14 @@ function remove_datasource_from_domain() {
                 continue
             fi
 
-            if [ $index -eq 0 ];then
-                secretStrings="${secretStrings}\"${item}\","
-            else
-                secretStrings="${secretStrings}\"${item}\","
-            fi
-
+            secretStrings="${secretStrings}\"${item}\","
             index=$((index+1))
         done
+
+        if [ $index -ge 1 ]; then
+            # remove the last comma
+            secretStrings=$(echo "${secretStrings:0:${#secretStrings}-1}")
+        fi
 
         secretStrings="${secretStrings}]"
     else
@@ -267,7 +259,7 @@ EOF
     echo "copy test script ${testDatasourceScript} to pod path /tmp/${dsScriptFileName}"
     targetDSFilePath=/tmp/${dsScriptFileName}
     kubectl cp ${testDatasourceScript} -n ${wlsDomainNS} ${podName}:${targetDSFilePath}
-    kubectl exec -it ${podName} -n ${wlsDomainNS} -- bash -c "wlst.sh ${targetDSFilePath}" | grep "State is Running"
+    kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} -- bash -c "wlst.sh ${targetDSFilePath}" | grep "State is Running"
     
     if [ $? == 1 ];then
         echo "Failed to configure datasource ${jdbcDataSourceName}. Please make sure the input values are correct."
