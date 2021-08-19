@@ -9,7 +9,7 @@ function read_sensitive_parameters_from_stdin() {
 }
 
 function install_helm() {
-  # Install helm
+  # Install Helm
   browserURL=$(curl -m ${curlMaxTime} -s https://api.github.com/repos/helm/helm/releases/latest |
     grep "browser_download_url.*linux-amd64.tar.gz.asc" |
     cut -d : -f 2,3 |
@@ -20,12 +20,12 @@ function install_helm() {
   curl -m ${curlMaxTime} -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
   tar -zxvf /tmp/${helmPackageName} -C /tmp
   mv /tmp/linux-amd64/helm /usr/local/bin/helm
-  echo "helm version"
+  echo "Helm version"
   helm version
-  validate_status "Finished installing helm."
+  validate_status "Finished installing Helm."
 }
 
-# Install latest kubectl and helm
+# Install latest kubectl and Helm
 function install_utilities() {
   if [ -d "apps" ]; then
     rm apps -f -r
@@ -862,7 +862,7 @@ function create_appgw_ingress() {
   # query identity client id
   # identityClientId=$(az identity show --ids ${identityId} -o tsv --query "clientId")
 
-  # generate helm config
+  # generate Helm config
   customAppgwHelmConfig=${scriptDir}/appgw-helm-config.yaml
   cp ${scriptDir}/appgw-helm-config.yaml.template ${customAppgwHelmConfig}
   subID=${subID#*\/subscriptions\/}

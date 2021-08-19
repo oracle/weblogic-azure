@@ -3,7 +3,7 @@
 #
 # Based on https://raw.githubusercontent.com/Azure/application-gateway-kubernetes-ingress/master/docs/examples/sample-helm-config.yaml
 
-# This file contains the essential configs for the ingress controller helm chart
+# This file contains the essential configs for the ingress controller Helm chart
 
 # Verbosity level of the App Gateway Ingress Controller
 verbosityLevel: 3

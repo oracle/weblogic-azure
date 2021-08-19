@@ -187,7 +187,7 @@ function validate_status() {
     fi
 }
 
-# Install latest kubectl and helm
+# Install latest kubectl and Helm
 function install_utilities() {
     if [ -d "apps" ]; then
         rm apps -f -r
@@ -202,7 +202,7 @@ function install_utilities() {
     ret=$(kubectl --help)
     validate_status ${ret}
 
-    # Install helm
+    # Install Helm
     browserURL=$(curl -m ${curlMaxTime} -s https://api.github.com/repos/helm/helm/releases/latest |
         grep "browser_download_url.*linux-amd64.tar.gz.asc" |
         cut -d : -f 2,3 |
@@ -213,9 +213,9 @@ function install_utilities() {
     curl -m ${curlMaxTime} -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
     tar -zxvf /tmp/${helmPackageName} -C /tmp
     mv /tmp/linux-amd64/helm /usr/local/bin/helm
-    echo "helm version"
+    echo "Helm version"
     helm version
-    validate_status "Finished installing helm."
+    validate_status "Finished installing Helm."
 
     echo "az cli version"
     ret=$(az --version)
