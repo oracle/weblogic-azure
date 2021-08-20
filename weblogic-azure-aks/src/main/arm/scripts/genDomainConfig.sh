@@ -14,7 +14,14 @@ export wlsMemory=$7
 export wlsManagedPrefix=$8
 export enableSSL=${9}
 export enablePV=${10}
-export javaOptions=${11}
+export enableT3Tunneling=${11}
+export t3AdminPort=${12}
+export t3ClusterPort=${13}
+export clusterName=${14}
+export javaOptions=${15}
+
+export adminServiceUrl="${wlsDomainUID}-admin-server.${wlsDomainUID}-ns.svc.cluster.local"
+export clusterServiceUrl="${wlsDomainUID}-cluster-${clusterName}.${wlsDomainUID}-ns.svc.cluster.local"
 
 cat <<EOF >$filePath
 # Copyright (c) 2021, Oracle Corporation and/or its affiliates.
@@ -86,7 +93,8 @@ spec:
     - name: MANAGED_SERVER_PREFIX
       value: "${wlsManagedPrefix}"
 EOF
-    if [[ "${enableSSL,,}" == "true" ]]; then
+
+if [[ "${enableSSL,,}" == "true" ]]; then
         cat <<EOF >>$filePath
     - name: SSL_IDENTITY_PRIVATE_KEY_ALIAS
       valueFrom:
@@ -131,15 +139,28 @@ EOF
 EOF
     fi
 
-    # Resources
-    cat <<EOF >>$filePath
+if [[ "${enableT3Tunneling,,}" == "true" ]]; then
+  cat <<EOF >>$filePath
+    - name: T3_TUNNELING_ADMIN_PORT
+      value: "${t3AdminPort}"
+    - name: T3_TUNNELING_ADMIN_ADDRESS
+      value: "${adminServiceUrl}"
+    - name: T3_TUNNELING_CLUSTER_PORT
+      value: "${t3ClusterPort}"
+    - name: T3_TUNNELING_CLUSTER_ADDRESS
+      value: "${clusterServiceUrl}"
+EOF
+fi
+
+# Resources
+cat <<EOF >>$filePath
     resources:
       requests:
         cpu: "${wlsCPU}"
         memory: "${wlsMemory}"
 EOF
 
-    if [[ "${enablePV,,}" == "true" ]]; then
+if [[ "${enablePV,,}" == "true" ]]; then
       cat <<EOF >>$filePath
     # Optional volumes and mounts for the domain's pods. See also 'logHome'.
     volumes:
@@ -150,9 +171,9 @@ EOF
     - mountPath: /shared
       name: ${wlsDomainUID}-pv-azurefile
 EOF
-    fi
+fi
 
-    cat <<EOF >>$filePath
+cat <<EOF >>$filePath
   # The desired behavior for starting the domain's administration server.
   adminServer:
     # The serverStartState legal values are "RUNNING" or "ADMIN"

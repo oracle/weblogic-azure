@@ -10,6 +10,9 @@ source ${scriptDir}/common.sh
 export filePath=$1
 export appPackageUrls=$2
 export enableCustomSSL=$3
+export enableT3Tunneling=$4
+
+export enableT3s=${enableCustomSSL,,}
 
 cat <<EOF >${filePath}
 # Copyright (c) 2020, 2021, Oracle and/or its affiliates.
@@ -42,7 +45,24 @@ topology:
       ListenPort: 7001
 EOF
 
-if [[ "${enableCustomSSL,,}" == "true" ]];then
+if [[ "${enableT3Tunneling,,}" == "true" ]];then
+  cat <<EOF >>${filePath}
+      NetworkAccessPoint:
+        MyT3Channel:
+          Protocol: 't3'
+          ListenPort: "@@ENV:T3_TUNNELING_ADMIN_PORT@@"
+          PublicPort: "@@ENV:T3_TUNNELING_ADMIN_PORT@@"
+          HttpEnabledForThisProtocol: true
+          OutboundEnabled: false
+          Enabled: true
+          ClientCertificateEnforced: ${enableCustomSSL}
+          TunnelingEnabled: true
+          PublicAddress: '@@ENV:T3_TUNNELING_ADMIN_ADDRESS@@'
+          TwoWaySslEnabled: ${enableT3s}
+EOF
+fi
+
+if [[ "${enableCustomSSL,,}" == "true" ]]; then
   cat <<EOF >>${filePath}
       SSL:
         HostnameVerificationIgnored: true
@@ -67,6 +87,23 @@ cat <<EOF >>${filePath}
       Cluster: "cluster-1"
       ListenPort: 8001
 EOF
+
+if [[ "${enableT3Tunneling,,}" == "true" ]];then
+  cat <<EOF >>${filePath}
+      NetworkAccessPoint:
+        MyT3Channel:
+          Protocol: 't3'
+          ListenPort: "@@ENV:T3_TUNNELING_CLUSTER_PORT@@"
+          PublicPort: "@@ENV:T3_TUNNELING_CLUSTER_PORT@@"
+          HttpEnabledForThisProtocol: true
+          OutboundEnabled: false
+          Enabled: true
+          ClientCertificateEnforced: ${enableCustomSSL}
+          TunnelingEnabled: true
+          PublicAddress: '@@ENV:T3_TUNNELING_CLUSTER_ADDRESS@@'
+          TwoWaySslEnabled: ${enableT3s}
+EOF
+fi
 
 if [[ "${enableCustomSSL,,}" == "true" ]];then
   cat <<EOF >>${filePath}
@@ -143,3 +180,6 @@ EOF
 EOF
         index=$((index + 1))
     done
+
+# print model
+cat ${filePath}

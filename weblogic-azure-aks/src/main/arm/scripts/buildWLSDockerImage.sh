@@ -15,7 +15,7 @@ function read_sensitive_parameters_from_stdin() {
 
 #Function to display usage message
 function usage() {
-    echo "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL>"
+    echo "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableT3Tunneling>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -78,6 +78,11 @@ function validate_inputs() {
 
     if [ -z "$enableSSL" ]; then
         echo_stderr "enableSSL is required. "
+        usage 1
+    fi
+
+    if [ -z "$enableT3Tunneling" ]; then
+        echo_stderr "enableT3Tunneling is required. "
         usage 1
     fi
 }
@@ -179,7 +184,8 @@ EOF
     bash $scriptDir/genImageModel.sh \
         ${modelFilePath} \
         ${appPackageUrls} \
-        ${enableSSL}
+        ${enableSSL} \
+        ${enableT3Tunneling}
     validate_status "Generate image model file."
 }
 
@@ -236,11 +242,12 @@ export appPackageUrls=$5
 export ocrSSOUser=$6
 export wlsClusterSize=$7
 export enableSSL=$8
+export enableT3Tunneling=$9
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export ocrLoginServer="container-registry.oracle.com"
-export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.14/weblogic-deploy.zip"
-export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.12/imagetool.zip"
+export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.17/weblogic-deploy.zip"
+export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.16/imagetool.zip"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.2.8.jar"
 export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar"
 

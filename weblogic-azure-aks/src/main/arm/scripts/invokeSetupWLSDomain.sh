@@ -37,6 +37,9 @@ Usage:
     <wlsTrustPsw>
     <wlsTrustType>
     <enablePV>
+    <enableT3Tunneling>
+    <t3AdminPort>
+    <t3ClusterPort>
 END
 )
     echo_stdout "${usage}"
@@ -82,6 +85,9 @@ export wlsTrustData=${27}
 wlsTrustPsw=${28}
 export wlsTrustType=${29}
 export enablePV=${30}
+export enableT3Tunneling=${31}
+export t3AdminPort=${32}
+export t3ClusterPort=${33}
 
 echo ${ocrSSOPSW} \
     ${wlsPassword} \
@@ -113,7 +119,10 @@ echo ${ocrSSOPSW} \
     ${wlsIdentityAlias} \
     ${wlsTrustData} \
     ${wlsTrustType} \
-    ${enablePV}
+    ${enablePV} \
+    ${enableT3Tunneling} \
+    ${t3AdminPort} \
+    ${t3ClusterPort}
 
 if [ $? -ne 0 ]; then
     usage 1

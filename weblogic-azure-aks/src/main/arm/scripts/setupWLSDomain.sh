@@ -39,6 +39,9 @@ echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentit
     <wlsTrustData>
     <wlsTrustType>
     <enablePV>
+    <enableT3Tunneling>
+    <t3AdminPort>
+    <t3ClusterPort>
 END
 )
     echo_stdout ${usage}
@@ -172,6 +175,21 @@ function validate_input() {
 
     if [ -z "$enablePV" ]; then
         echo_stderr "enablePV is required. "
+        usage 1
+    fi
+
+    if [ -z "$enableT3Tunneling" ]; then
+        echo_stderr "enableT3Tunneling is required. "
+        usage 1
+    fi
+
+    if [ -z "$t3AdminPort" ]; then
+        echo_stderr "t3AdminPort is required. "
+        usage 1
+    fi
+
+    if [ -z "$t3ClusterPort" ]; then
+        echo_stderr "t3ClusterPort is required. "
         usage 1
     fi
 }
@@ -333,7 +351,8 @@ function build_docker_image() {
         $ocrSSOUser \
         $wlsClusterSize \
         $enableCustomSSL \
-        "$scriptURL"
+        "$scriptURL" \
+        ${enableT3Tunneling}
     
     az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
@@ -657,6 +676,10 @@ function setup_wls_domain() {
         ${managedServerPrefix} \
         ${enableCustomSSL} \
         ${enablePV} \
+        ${enableT3Tunneling} \
+        ${t3AdminPort} \
+        ${t3ClusterPort} \
+        ${wlsClusterName} \
         "${javaOptions}"
     else
         echo "start to create domain  ${wlsDomainUID}"
@@ -673,6 +696,10 @@ function setup_wls_domain() {
         ${managedServerPrefix} \
         ${enableCustomSSL} \
         ${enablePV} \
+        ${enableT3Tunneling} \
+        ${t3AdminPort} \
+        ${t3ClusterPort} \
+        ${wlsClusterName} \
         "${javaOptions}"
     fi
 
@@ -714,6 +741,9 @@ export wlsIdentityAlias=${21}
 export wlsTrustData=${22}
 export wlsTrustType=${23}
 export enablePV=${24}
+export enableT3Tunneling=${25}
+export t3AdminPort=${26}
+export t3ClusterPort=${27}
 
 export adminServerName="admin-server"
 export azFileShareName="weblogic"
@@ -727,6 +757,7 @@ export operatorName="weblogic-operator"
 export storageFileShareName="weblogic"
 export storageResourceGroup=${currentResourceGroup}
 export sharedPath="/shared"
+export wlsClusterName="cluster-1"
 export wlsDomainNS="${wlsDomainUID}-ns"
 export wlsOptHelmChart="https://oracle.github.io/weblogic-kubernetes-operator/charts"
 export wlsOptNameSpace="weblogic-operator-ns"

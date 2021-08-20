@@ -83,6 +83,8 @@ echo <spBase64String> <appgwFrontendSSLCertPsw> |
     <enableCustomSSL>
     <enableCookieBasedAffinity>
     <enableRemoteConsole>
+    <dnszoneAdminT3ChannelLabel>
+    <dnszoneClusterT3ChannelLabel>
 END
 )
     echo_stdout ${usage}
@@ -223,6 +225,16 @@ function validate_input() {
     echo_stderr "enableRemoteConsole is required. "
     usage 1
   fi
+
+  if [ -z "$dnszoneAdminT3ChannelLabel" ]; then
+    echo_stderr "dnszoneAdminT3ChannelLabel is required. "
+    usage 1
+  fi
+
+  if [ -z "$dnszoneClusterT3ChannelLabel" ]; then
+    echo_stderr "dnszoneClusterT3ChannelLabel is required. "
+    usage 1
+  fi
 }
 
 function generate_admin_lb_definicion() {
@@ -257,6 +269,38 @@ spec:
 EOF
 }
 
+function generate_admin_t3_lb_definicion() {
+  cat <<EOF >${adminServerT3LBDefinitionPath}
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${adminServerT3LBSVCName}
+  namespace: ${wlsDomainNS}
+EOF
+
+  # to create internal load balancer service
+  if [[ "${enableInternalLB,,}" == "true" ]]; then
+    cat <<EOF >>${adminServerT3LBDefinitionPath}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+EOF
+  fi
+
+  cat <<EOF >>${adminServerT3LBDefinitionPath}
+spec:
+  ports:
+  - name: default
+    port: ${adminT3LBPort}
+    protocol: TCP
+    targetPort: ${adminT3Port}
+  selector:
+    weblogic.domainUID: ${wlsDomainUID}
+    weblogic.serverName: ${adminServerName}
+  sessionAffinity: None
+  type: LoadBalancer
+EOF
+}
+
 function generate_cluster_lb_definicion() {
   cat <<EOF >${scriptDir}/cluster-lb.yaml
 apiVersion: v1
@@ -281,6 +325,38 @@ spec:
     port: ${clusterLBPort}
     protocol: TCP
     targetPort: ${clusterTargetPort}
+  selector:
+    weblogic.domainUID: ${wlsDomainUID}
+    weblogic.clusterName: ${clusterName}
+  sessionAffinity: None
+  type: LoadBalancer
+EOF
+}
+
+function generate_cluster_t3_lb_definicion() {
+  cat <<EOF >${clusterT3LBDefinitionPath}
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${clusterT3LBSVCName}
+  namespace: ${wlsDomainNS}
+EOF
+
+  # to create internal load balancer service
+  if [[ "${enableInternalLB,,}" == "true" ]]; then
+    cat <<EOF >>${clusterT3LBDefinitionPath}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+EOF
+  fi
+
+  cat <<EOF >>${clusterT3LBDefinitionPath}
+spec:
+  ports:
+  - name: default
+    port: ${clusterT3LBPort}
+    protocol: TCP
+    targetPort: ${clusterT3Port}
   selector:
     weblogic.domainUID: ${wlsDomainUID}
     weblogic.clusterName: ${clusterName}
@@ -759,7 +835,7 @@ EOF
       if [ "${enableCustomDNSAlias,,}" == "true" ]; then
         adminConsoleEndpoint="${dnsAdminLabel}.${dnsZoneName}:${adminServerEndpoint#*:}/console"
       fi
-    else
+    elif [[ "${target}" == "cluster1" ]]; then
       clusterLBSVCNamePrefix=$(cut -d',' -f1 <<<$item)
       clusterLBSVCName="${clusterLBSVCNamePrefix}-svc-lb-cluster"
       clusterLBPort=$(cut -d',' -f3 <<<$item)
@@ -775,6 +851,58 @@ EOF
 
       if [ "${enableCustomDNSAlias,,}" == "true" ]; then
         clusterEndpoint="${dnsClusterLabel}.${dnsZoneName}:${clusterEndpoint#*:}/"
+      fi
+    elif [[ "${target}" == "adminServerT3" ]]; then
+      echo "query admin t3 port"
+      adminT3Port=$( kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json \
+        | jq '.spec.ports[] | select(.name=="t3channel") | .port')
+      if [[ "${adminT3Port}" == "null" ]]; then
+        continue
+      fi
+
+      adminServerT3LBSVCNamePrefix=$(cut -d',' -f1 <<<$item)
+      adminServerT3LBSVCName="${adminServerT3LBSVCNamePrefix}-svc-t3-lb-admin"
+      adminT3LBPort=$(cut -d',' -f3 <<<$item)
+
+      export adminServerT3LBDefinitionPath=${scriptDir}/admin-server-t3-lb.yaml
+      generate_admin_t3_lb_definicion
+
+      kubectl apply -f ${adminServerT3LBDefinitionPath}
+      waitfor_svc_completed ${adminServerT3LBSVCName}
+
+      adminServerT3Endpoint=$(kubectl get svc ${adminServerT3LBSVCName} -n ${wlsDomainNS} \
+        -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
+
+      create_dns_A_record "${adminServerT3Endpoint%%:*}" "${dnszoneAdminT3ChannelLabel}"
+
+      if [ "${enableCustomDNSAlias,,}" == "true" ]; then
+        adminServerT3Endpoint="${dnszoneAdminT3ChannelLabel}.${dnsZoneName}:${adminServerT3Endpoint#*:}"
+      fi
+    elif [[ "${target}" == "cluster1T3" ]]; then
+      echo "query cluster t3 port"
+      clusterT3Port=$( kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json \
+        | jq '.spec.ports[] | select(.name=="t3channel") | .port')
+      if [[ "${clusterT3Port}" == "null" ]]; then
+        continue
+      fi
+
+      clusterT3LBSVCNamePrefix=$(cut -d',' -f1 <<<$item)
+      clusterT3LBSVCName="${clusterT3LBSVCNamePrefix}-svc-lb-cluster"
+      clusterT3LBPort=$(cut -d',' -f3 <<<$item)
+
+      export clusterT3LBDefinitionPath=${scriptDir}/cluster-t3-lb.yaml
+      generate_cluster_t3_lb_definicion
+
+      kubectl apply -f ${clusterT3LBDefinitionPath}
+      waitfor_svc_completed ${clusterT3LBSVCName}
+
+      clusterT3Endpoint=$(kubectl get svc ${clusterT3LBSVCName} -n ${wlsDomainNS} \
+        -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
+      
+      create_dns_A_record "${clusterT3Endpoint%%:*}" ${dnszoneClusterT3ChannelLabel}
+
+      if [ "${enableCustomDNSAlias,,}" == "true" ]; then
+        clusterT3Endpoint="${dnszoneClusterT3ChannelLabel}.${dnsZoneName}:${clusterT3Endpoint#*:}"
       fi
     fi
   done
@@ -975,6 +1103,8 @@ export appgwCertificateOption=${20}
 export enableCustomSSL=${21}
 export enableCookieBasedAffinity=${22}
 export enableRemoteConsole=${23}
+export dnszoneAdminT3ChannelLabel=${24}
+export dnszoneClusterT3ChannelLabel=${25}
 
 export adminServerName="admin-server"
 export adminConsoleEndpoint="null"

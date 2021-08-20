@@ -23,7 +23,9 @@ param appgwFrontendSSLCertPsw string = newGuid()
 param aksClusterRGName string = 'aks-contoso-rg'
 param aksClusterName string = 'aks-contoso'
 param dnszoneAdminConsoleLabel string = 'admin'
-param dnszoneAppGatewayLabel string = 'www'
+param dnszoneAdminT3ChannelLabel string ='admin-t3'
+param dnszoneClusterLabel string = 'www'
+param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
 param dnszoneName string = 'contoso.xyz'
 param dnszoneRGName string = 'dns-contoso-rg'
 param enableAppGWIngress bool = false
@@ -43,11 +45,12 @@ param wlsDomainUID string = 'sample-domain1'
 
 var const_appgwHelmConfigTemplate='appgw-helm-config.yaml.template'
 var const_appgwSARoleBindingFile='appgw-ingress-clusterAdmin-roleBinding.yaml'
-var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneAppGatewayLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole}'
+var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneClusterLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole} ${dnszoneAdminT3ChannelLabel} ${dnszoneClusterT3ChannelLabel}'
 var const_commonScript = 'common.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_setupNetworkingScript= 'setupNetworking.sh'
 var const_primaryScript = 'invokeSetupNetworking.sh'
+var const_utilityScript= 'utility.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-networking-deployment'
@@ -63,6 +66,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       uri(const_scriptLocation, '${const_appgwHelmConfigTemplate}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_appgwSARoleBindingFile}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
+      uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
     ]
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'

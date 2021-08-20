@@ -93,10 +93,14 @@ param dbPassword string = newGuid()
 param dbUser string = 'contosoDbUser'
 @description('DNS prefix for ApplicationGateway')
 param dnsNameforApplicationGateway string = 'wlsgw'
-@description('Azure DNS Zone name.')
+@description('Specify a label used to generate subdomain of Admin server. The final subdomain name will be label.dnszoneName, e.g. admin.contoso.xyz')
 param dnszoneAdminConsoleLabel string = 'admin'
-@description('Specify a label used to generate subdomain of Application Gateway. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
-param dnszoneAppGatewayLabel string = 'www'
+@description('Specify a label used to generate subdomain of Admin server T3 channel. The final subdomain name will be label.dnszoneName, e.g. admin-t3.contoso.xyz')
+param dnszoneAdminT3ChannelLabel string ='admin-t3'
+@description('Specify a label used to generate subdomain of WebLogic cluster. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
+param dnszoneClusterLabel string = 'www'
+param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
+@description('Azure DNS Zone name.')
 param dnszoneName string = 'contoso.xyz'
 param dnszoneRGName string = 'dns-contoso-rg'
 @description('JDBC Connection String')
@@ -112,6 +116,8 @@ param enableCookieBasedAffinity bool = false
 param enableCustomSSL bool = false
 param enableDB bool = false
 param enableDNSConfiguration bool = false
+@description('Configure a custom channel for the T3 protocol that enables HTTP tunneling')
+param enableT3Tunneling bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
 @description('JNDI Name for JDBC Datasource')
@@ -202,6 +208,10 @@ param sslUploadedPrivateKeyAlias string = 'contoso'
 @secure()
 @description('Password of the private key')
 param sslUploadedPrivateKeyPassPhrase string = newGuid()
+@description('Public port of the custom T3 channel in admin server')
+param t3ChannelAdminPort int = 7005
+@description('Public port of the custom T3 channel in WebLoigc cluster')
+param t3ChannelClusterPort int = 8011
 @description('True to set up internal load balancer service.')
 param useInternalLB bool = false
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
@@ -338,6 +348,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     createStorageAccount: const_bCreateStorageAccount
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
+    enableT3Tunneling: enableT3Tunneling
     enablePV: const_enablePV
     identity: identity
     location: location
@@ -345,6 +356,8 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
     storageAccountName: name_storageAccountName
+    t3ChannelAdminPort: t3ChannelAdminPort
+    t3ChannelClusterPort: t3ChannelClusterPort
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
@@ -394,6 +407,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     createStorageAccount: const_bCreateStorageAccount
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
+    enableT3Tunneling: enableT3Tunneling
     enablePV: const_enablePV
     identity: identity
     location: location
@@ -401,6 +415,8 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
     storageAccountName: name_storageAccountName
+    t3ChannelAdminPort: t3ChannelAdminPort
+    t3ChannelClusterPort: t3ChannelClusterPort
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
@@ -478,7 +494,9 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     createDNSZone: createDNSZone
     dnsNameforApplicationGateway: name_domainLabelforApplicationGateway
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: dnszoneRGName
     enableAppGWIngress: enableAppGWIngress

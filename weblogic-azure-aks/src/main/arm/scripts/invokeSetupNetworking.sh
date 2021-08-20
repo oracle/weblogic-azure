@@ -32,6 +32,8 @@ Usage:
     <enableCustomSSL>
     <enableCookieBasedAffinity>
     <enableRemoteConsole>
+    <dnszoneAdminT3ChannelLabel>
+    <dnszoneClusterT3ChannelLabel>
 END
 )
     echo_stdout "${usage}"
@@ -72,6 +74,8 @@ export appgwCertificateOption=${22}
 export enableCustomSSL=${23}
 export enableCookieBasedAffinity=${24}
 export enableRemoteConsole=${25}
+export dnszoneAdminT3ChannelLabel=${26}
+export dnszoneClusterT3ChannelLabel=${27}
 
 echo ${spBase64String} \
     ${appgwFrontendSSLCertPsw} | \
@@ -98,7 +102,9 @@ echo ${spBase64String} \
     ${appgwCertificateOption} \
     ${enableCustomSSL} \
     ${enableCookieBasedAffinity} \
-    ${enableRemoteConsole}
+    ${enableRemoteConsole} \
+    ${dnszoneAdminT3ChannelLabel} \
+    ${dnszoneClusterT3ChannelLabel}
 
 if [ $? -ne 0 ]; then
     usage 1

@@ -94,13 +94,19 @@ function build_docker_image() {
     --publisher Microsoft.Azure.Extensions \
     --version 2.0 \
     --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} \"}"
+    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableT3Tunneling} \"}"
 
     cleanup_vm
 }
 
 # Shell Global settings
 set -e #Exit immediately if a command exits with a non-zero status.
+
+# Main script
+export script="${BASH_SOURCE[0]}"
+export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
+
+source ${scriptDir}/common.sh
 
 export currentResourceGroup=$1
 export wlsImageTag=$2
@@ -112,6 +118,7 @@ export ocrSSOUser=$7
 export wlsClusterSize=$8
 export enableCustomSSL=$9
 export scriptURL=${10}
+export enableT3Tunneling=${11}
 
 read_sensitive_parameters_from_stdin
 

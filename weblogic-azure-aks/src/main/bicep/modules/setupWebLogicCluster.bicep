@@ -57,6 +57,7 @@ param createStorageAccount bool = false
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
 param enableCustomSSL bool = false
+param enableT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
@@ -69,6 +70,8 @@ param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
 param storageAccountName string
+param t3ChannelAdminPort int = 7005
+param t3ChannelClusterPort int = 8011
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -181,13 +184,16 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     enableCustomSSL: enableCustomSSL
+    enableT3Tunneling: enableT3Tunneling
     enablePV: enablePV
     identity: identity
     location: location
     managedServerPrefix: managedServerPrefix
-    storageAccountName: storageAccountName
     ocrSSOUser: ocrSSOUser
     ocrSSOPSW: ocrSSOPSW
+    storageAccountName: storageAccountName
+    t3ChannelAdminPort: t3ChannelAdminPort
+    t3ChannelClusterPort: t3ChannelClusterPort
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU

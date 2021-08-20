@@ -32,8 +32,10 @@ param dnsNameforApplicationGateway string = 'wlsgw'
 @description('Azure DNS Zone name.')
 param dnszoneName string = 'contoso.xyz'
 param dnszoneAdminConsoleLabel string = 'admin'
-@description('Specify a label used to generate subdomain of Application Gateway. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
-param dnszoneAppGatewayLabel string = 'www'
+param dnszoneAdminT3ChannelLabel string ='admin-t3'
+@description('Specify a label used to generate subdomain of WebLogic cluster. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
+param dnszoneClusterLabel string = 'www'
+param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
 param dnszoneRGName string = 'dns-contoso-rg'
 @description('true to set up Application Gateway ingress.')
 param enableAppGWIngress bool = false
@@ -62,7 +64,7 @@ param wlsDomainName string = 'domain1'
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 
-var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneAppGatewayLabel, dnszoneName)
+var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_appgwSSLCertOptionGenerateCert = 'generateCert'
 
@@ -142,7 +144,9 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
@@ -180,7 +184,9 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
@@ -217,7 +223,9 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
@@ -245,7 +253,7 @@ module pidAppgwEnd './_pids/_pid.bicep' = if (enableAppGWIngress) {
     name: _pidAppgwEnd
   }
   dependsOn: [
-    networkingDeployment
+    appgwDeployment
   ]
 }
 
@@ -255,7 +263,9 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
     name: _pidNetworkingEnd
   }
   dependsOn: [
-    pidAppgwEnd
+    networkingDeployment
+    networkingDeployment2
+    networkingDeployment3
   ]
 }
 
