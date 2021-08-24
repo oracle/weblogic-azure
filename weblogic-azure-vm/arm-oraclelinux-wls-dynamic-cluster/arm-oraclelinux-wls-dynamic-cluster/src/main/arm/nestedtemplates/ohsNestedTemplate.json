@@ -352,7 +352,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh setupOHS.sh',' <<< \"',parameters('ohsDomainName'),' ',parameters('ohsComponentName'),' ',parameters('ohsNMUser'),' ',parameters('ohsNMPassword'),' ',parameters('ohshttpPort'),' ',parameters('ohshttpsPort'),' ',parameters('adminRestMgmtURL'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',base64(parameters('ohsSSLKeystoreData')),' ',base64(parameters('ohsSSLKeystorePassword')),' ',parameters('oracleVaultPswd'),' ',parameters('keyType'))]"
+                    "commandToExecute": "[concat('sh setupOHS.sh',' <<< \"',parameters('ohsDomainName'),' ',parameters('ohsComponentName'),' ',parameters('ohsNMUser'),' ',parameters('ohsNMPassword'),' ',parameters('ohshttpPort'),' ',parameters('ohshttpsPort'),' ',parameters('adminRestMgmtURL'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',base64(parameters('ohsSSLKeystoreData')),' ',base64(parameters('ohsSSLKeystorePassword')),' ',parameters('oracleVaultPswd'),' ',parameters('keyType'),'\"')]"
                 }
             }
         }
