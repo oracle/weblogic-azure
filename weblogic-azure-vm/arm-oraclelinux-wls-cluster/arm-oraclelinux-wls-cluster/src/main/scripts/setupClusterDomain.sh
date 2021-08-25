@@ -747,6 +747,7 @@ isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
 if [ "${isCustomSSLEnabled}" != "true" ];
+then
     isCustomSSLEnabled="false"
 fi
 
