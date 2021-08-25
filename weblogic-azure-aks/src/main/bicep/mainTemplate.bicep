@@ -116,8 +116,10 @@ param enableCookieBasedAffinity bool = false
 param enableCustomSSL bool = false
 param enableDB bool = false
 param enableDNSConfiguration bool = false
-@description('Configure a custom channel for the T3 protocol that enables HTTP tunneling')
-param enableT3Tunneling bool = false
+@description('Configure a custom channel in Admin Server for the T3 protocol that enables HTTP tunneling')
+param enableAdminT3Tunneling bool = false
+@description('Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling')
+param enableClusterT3Tunneling bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
 @description('JNDI Name for JDBC Datasource')
@@ -229,6 +231,7 @@ param wlsDomainName string = 'domain1'
 param wlsDomainUID string = 'sample-domain1'
 @description('Docker tag that comes after "container-registry.oracle.com/middleware/weblogic:"')
 param wlsImageTag string = '12.2.1.4'
+param wlsJavaOption string = 'null'
 @description('Memory requests for admin server and managed server.')
 param wlsMemory string = '1.5Gi'
 @secure()
@@ -348,7 +351,8 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     createStorageAccount: const_bCreateStorageAccount
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
-    enableT3Tunneling: enableT3Tunneling
+    enableAdminT3Tunneling: enableAdminT3Tunneling
+    enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: const_enablePV
     identity: identity
     location: location
@@ -367,6 +371,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     wlsIdentityKeyStorePassphrase: sslUploadedCustomIdentityKeyStorePassphrase
     wlsIdentityKeyStoreType: const_defaultKeystoreType
     wlsImageTag: wlsImageTag
+    wlsJavaOption: wlsJavaOption
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
     wlsPrivateKeyAlias: sslUploadedPrivateKeyAlias
@@ -426,6 +431,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     wlsIdentityKeyStorePassphrase: sslKeyvault.getSecret(name_identityKeyStorePswSecret)
     wlsIdentityKeyStoreType: const_identityKeyStoreType
     wlsImageTag: wlsImageTag
+    wlsJavaOption: wlsJavaOption
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
     wlsPrivateKeyAlias: sslKeyvault.getSecret(name_privateKeyAliasSecret)

@@ -10,9 +10,17 @@ source ${scriptDir}/common.sh
 export filePath=$1
 export appPackageUrls=$2
 export enableCustomSSL=$3
-export enableT3Tunneling=$4
+export enableAdminT3Tunneling=$4
+export enableClusterT3Tunneling=$5
 
 export enableT3s=${enableCustomSSL,,}
+export t3Protocol="t3"
+export t3ChannelName="T3Channel"
+
+if [ "${enableCustomSSL,,}" == "true" ]; then
+  t3Protocol="t3s"
+  t3ChannelName="T3sChannel"
+fi
 
 cat <<EOF >${filePath}
 # Copyright (c) 2020, 2021, Oracle and/or its affiliates.
@@ -45,20 +53,20 @@ topology:
       ListenPort: 7001
 EOF
 
-if [[ "${enableT3Tunneling,,}" == "true" ]];then
+if [[ "${enableAdminT3Tunneling,,}" == "true" ]];then
   cat <<EOF >>${filePath}
       NetworkAccessPoint:
-        MyT3Channel:
-          Protocol: 't3'
+        ${t3ChannelName}:
+          Protocol: '${t3Protocol}'
           ListenPort: "@@ENV:T3_TUNNELING_ADMIN_PORT@@"
           PublicPort: "@@ENV:T3_TUNNELING_ADMIN_PORT@@"
           HttpEnabledForThisProtocol: true
           OutboundEnabled: false
           Enabled: true
-          ClientCertificateEnforced: ${enableCustomSSL}
+          TwoWaySSLEnabled: ${enableT3s}
+          ClientCertificateEnforced: false
           TunnelingEnabled: true
           PublicAddress: '@@ENV:T3_TUNNELING_ADMIN_ADDRESS@@'
-          TwoWaySslEnabled: ${enableT3s}
 EOF
 fi
 
@@ -88,20 +96,20 @@ cat <<EOF >>${filePath}
       ListenPort: 8001
 EOF
 
-if [[ "${enableT3Tunneling,,}" == "true" ]];then
+if [[ "${enableClusterT3Tunneling,,}" == "true" ]];then
   cat <<EOF >>${filePath}
       NetworkAccessPoint:
-        MyT3Channel:
-          Protocol: 't3'
+        ${t3ChannelName}:
+          Protocol: '${t3Protocol}'
           ListenPort: "@@ENV:T3_TUNNELING_CLUSTER_PORT@@"
           PublicPort: "@@ENV:T3_TUNNELING_CLUSTER_PORT@@"
           HttpEnabledForThisProtocol: true
           OutboundEnabled: false
           Enabled: true
-          ClientCertificateEnforced: ${enableCustomSSL}
+          TwoWaySSLEnabled: ${enableT3s}
+          ClientCertificateEnforced: false
           TunnelingEnabled: true
           PublicAddress: '@@ENV:T3_TUNNELING_CLUSTER_ADDRESS@@'
-          TwoWaySslEnabled: ${enableT3s}
 EOF
 fi
 

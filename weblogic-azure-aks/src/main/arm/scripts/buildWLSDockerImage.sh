@@ -15,7 +15,7 @@ function read_sensitive_parameters_from_stdin() {
 
 #Function to display usage message
 function usage() {
-    echo "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableT3Tunneling>"
+    echo "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableAdminT3Tunneling> <enableClusterT3Tunneling>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -81,8 +81,13 @@ function validate_inputs() {
         usage 1
     fi
 
-    if [ -z "$enableT3Tunneling" ]; then
-        echo_stderr "enableT3Tunneling is required. "
+    if [ -z "$enableAdminT3Tunneling" ]; then
+        echo_stderr "enableAdminT3Tunneling is required. "
+        usage 1
+    fi
+
+    if [ -z "$enableClusterT3Tunneling" ]; then
+        echo_stderr "enableClusterT3Tunneling is required. "
         usage 1
     fi
 }
@@ -185,7 +190,8 @@ EOF
         ${modelFilePath} \
         ${appPackageUrls} \
         ${enableSSL} \
-        ${enableT3Tunneling}
+        ${enableAdminT3Tunneling} \
+        ${enableClusterT3Tunneling}
     validate_status "Generate image model file."
 }
 
@@ -242,7 +248,8 @@ export appPackageUrls=$5
 export ocrSSOUser=$6
 export wlsClusterSize=$7
 export enableSSL=$8
-export enableT3Tunneling=$9
+export enableAdminT3Tunneling=$9
+export enableClusterT3Tunneling=${10}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export ocrLoginServer="container-registry.oracle.com"

@@ -791,6 +791,97 @@ function create_dns_CNAME_record() {
   fi
 }
 
+function patch_admin_t3_public_address() {
+  # patch admin t3 public address
+  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
+    adminT3Address="${dnszoneAdminT3ChannelLabel}.${dnsZoneName}"
+  else
+    adminT3Address=$(kubectl -n ${wlsDomainNS} get svc ${adminServerT3LBSVCName} -o json \
+      | jq '. | .status.loadBalancer.ingress[0].ip' \
+      | tr -d "\"")
+  fi
+
+  if [ $? == 1 ]; then
+    echo_stderr "Failed to query public IP of admin t3 channel."
+  fi
+
+  currentDomainConfig=$(echo ${currentDomainConfig} \
+    | jq \
+    --arg match "${constAdminT3AddressEnvName}" \
+    --arg replace "${adminT3Address}" \
+    '.spec.serverPod.env |= map(if .name==$match then (.value=$replace) else . end)')
+}
+
+function patch_cluster_t3_public_address() {
+  #patch cluster t3 pubilc address
+  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
+    clusterT3Adress="${dnszoneClusterT3ChannelLabel}.${dnsZoneName}"
+  else
+    clusterT3Adress=$(kubectl -n ${wlsDomainNS} get svc ${clusterT3LBSVCName} -o json \
+      | jq '. | .status.loadBalancer.ingress[0].ip' \
+      | tr -d "\"")
+  fi
+
+  if [ $? == 1 ]; then
+    echo_stderr "Failed to query public IP of cluster t3 channel."
+  fi
+
+  currentDomainConfig=$(echo ${currentDomainConfig} \
+    | jq \
+    --arg match "${constClusterT3AddressEnvName}" \
+    --arg replace "${clusterT3Adress}" \
+    '.spec.serverPod.env |= map(if .name==$match then (.value=$replace) else . end)')
+}
+
+function rolling_update_with_t3_public_address() {
+  timestampBeforePatchingDomain=$(date +%s)
+  currentDomainConfig=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json)
+
+  # update public address of t3 channel
+  if [[ "${enableAdminT3Channel,,}" == "true" ]]; then
+    patch_admin_t3_public_address
+  fi
+
+  if [[ "${enableClusterT3Channel,,}" == "true" ]]; then
+    patch_cluster_t3_public_address
+  fi
+
+  if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
+    # restart cluster
+    restartVersion=$( kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+      | jq '. | .spec.restartVersion' \
+      | tr -d "\"")
+    restartVersion=$((restartVersion+1))
+
+    currentDomainConfig=$(echo ${currentDomainConfig} \
+      | jq \
+      --arg version "${restartVersion}" \
+      '.spec.restartVersion |= $version')
+
+    echo "rolling restart the cluster with t3 public address."
+    # echo the configuration for debugging
+    echo -e ${currentDomainConfig} >${scriptDir}/domainNewConfiguration.yaml
+    echo ${currentDomainConfig} | kubectl -n ${wlsDomainNS} apply -f -
+
+    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+        | jq '. | .spec.clusters[] | .replicas')
+
+    # wait for the restart completed.
+    utility_wait_for_pod_restarted \
+        ${timestampBeforePatchingDomain} \
+        ${replicas} \
+        ${wlsDomainUID} \
+        ${checkPodStatusMaxAttemps} \
+        ${checkPodStatusInterval}
+
+    utility_wait_for_pod_completed \
+        ${replicas} \
+        ${wlsDomainNS} \
+        ${checkPodStatusMaxAttemps} \
+        ${checkPodStatusInterval}
+  fi
+}
+
 function create_svc_lb() {
   # No lb svc inputs
   if [[ "${lbSvcValues}" == "[]" ]]; then
@@ -856,15 +947,21 @@ EOF
       echo "query admin t3 port"
       adminT3Port=$( kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json \
         | jq '.spec.ports[] | select(.name=="t3channel") | .port')
-      if [[ "${adminT3Port}" == "null" ]]; then
+      adminT3sPort=$( kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json \
+        | jq '.spec.ports[] | select(.name=="t3schannel") | .port')
+      if [[ "${adminT3Port}" == "null" ]] && [[ "${adminT3sPort}" == "null" ]]; then
         continue
+      fi
+
+      if [[ "${adminT3sPort}" != "null"  ]]; then
+        adminT3Port=${adminT3sPort}
       fi
 
       adminServerT3LBSVCNamePrefix=$(cut -d',' -f1 <<<$item)
       adminServerT3LBSVCName="${adminServerT3LBSVCNamePrefix}-svc-t3-lb-admin"
       adminT3LBPort=$(cut -d',' -f3 <<<$item)
 
-      export adminServerT3LBDefinitionPath=${scriptDir}/admin-server-t3-lb.yaml
+      adminServerT3LBDefinitionPath=${scriptDir}/admin-server-t3-lb.yaml
       generate_admin_t3_lb_definicion
 
       kubectl apply -f ${adminServerT3LBDefinitionPath}
@@ -878,19 +975,27 @@ EOF
       if [ "${enableCustomDNSAlias,,}" == "true" ]; then
         adminServerT3Endpoint="${dnszoneAdminT3ChannelLabel}.${dnsZoneName}:${adminServerT3Endpoint#*:}"
       fi
+
+      enableAdminT3Channel=true
     elif [[ "${target}" == "cluster1T3" ]]; then
       echo "query cluster t3 port"
       clusterT3Port=$( kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json \
         | jq '.spec.ports[] | select(.name=="t3channel") | .port')
-      if [[ "${clusterT3Port}" == "null" ]]; then
+      clusterT3sPort=$( kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json \
+        | jq '.spec.ports[] | select(.name=="t3schannel") | .port')
+      if [[ "${clusterT3Port}" == "null" ]] && [[ "${clusterT3sPort}" == "null" ]]; then
         continue
+      fi
+
+      if [[ "${clusterT3sPort}" != "null" ]]; then
+        clusterT3Port=${clusterT3sPort}
       fi
 
       clusterT3LBSVCNamePrefix=$(cut -d',' -f1 <<<$item)
       clusterT3LBSVCName="${clusterT3LBSVCNamePrefix}-svc-lb-cluster"
       clusterT3LBPort=$(cut -d',' -f3 <<<$item)
 
-      export clusterT3LBDefinitionPath=${scriptDir}/cluster-t3-lb.yaml
+      clusterT3LBDefinitionPath=${scriptDir}/cluster-t3-lb.yaml
       generate_cluster_t3_lb_definicion
 
       kubectl apply -f ${clusterT3LBDefinitionPath}
@@ -904,8 +1009,12 @@ EOF
       if [ "${enableCustomDNSAlias,,}" == "true" ]; then
         clusterT3Endpoint="${dnszoneClusterT3ChannelLabel}.${dnsZoneName}:${clusterT3Endpoint#*:}"
       fi
+
+      enableClusterT3Channel=true
     fi
   done
+
+  rolling_update_with_t3_public_address
 }
 
 # Create network peers for aks and appgw

@@ -57,7 +57,8 @@ param createStorageAccount bool = false
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
 param enableCustomSSL bool = false
-param enableT3Tunneling bool = false
+param enableAdminT3Tunneling bool = false
+param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
@@ -94,6 +95,7 @@ param wlsIdentityKeyStorePassphrase string = newGuid()
 param wlsIdentityKeyStoreType string = 'PKCS12'
 @description('Docker tag that comes after "container-registry.oracle.com/middleware/weblogic:"')
 param wlsImageTag string = '12.2.1.4'
+param wlsJavaOption string = 'null'
 @description('Memory requests for admin server and managed server.')
 param wlsMemory string = '1.5Gi'
 @secure()
@@ -184,7 +186,8 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     enableCustomSSL: enableCustomSSL
-    enableT3Tunneling: enableT3Tunneling
+    enableAdminT3Tunneling: enableAdminT3Tunneling
+    enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: enablePV
     identity: identity
     location: location
@@ -203,6 +206,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     wlsIdentityKeyStorePassphrase: wlsIdentityKeyStorePassphrase
     wlsIdentityKeyStoreType: wlsIdentityKeyStoreType
     wlsImageTag: wlsImageTag
+    wlsJavaOption: wlsJavaOption
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
     wlsPrivateKeyAlias: wlsPrivateKeyAlias

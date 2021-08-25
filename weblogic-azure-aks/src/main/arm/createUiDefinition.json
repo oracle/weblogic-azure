@@ -214,9 +214,15 @@
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
-                        "name": "enableT3Tunneling",
+                        "name": "enableAdminT3Tunneling",
                         "type": "Microsoft.Common.CheckBox",
-                        "label": "Enable T3 tunneling",
+                        "label": "Enable T3 tunneling for Admin Server",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "enableClusterT3Tunneling",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "Enable T3 tunneling for WebLogic cluster",
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     }
                 ],
@@ -1015,8 +1021,16 @@
                                                             "value": "adminServer"
                                                         },
                                                         {
+                                                            "label": "admin-server-t3",
+                                                            "value": "adminServerT3"
+                                                        },
+                                                        {
                                                             "label": "cluster-1",
                                                             "value": "cluster1"
+                                                        },
+                                                        {
+                                                            "label": "cluster-1-t3",
+                                                            "value": "cluster1T3"
                                                         }
                                                     ],
                                                     "required": true
@@ -1637,7 +1651,8 @@
             "enableCustomSSL": "[bool(steps('section_sslConfiguration').enableCustomSSL)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "enableDNSConfiguration": "[bool(steps('section_appGateway').dnsConfiguration.enableDNSConfiguration)]",
-            "enableT3Tunneling": "[basics('basicsOptional').enableT3Tunneling]",
+            "enableAdminT3Tunneling": "[basics('basicsOptional').enableAdminT3Tunneling]",
+            "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
             "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",

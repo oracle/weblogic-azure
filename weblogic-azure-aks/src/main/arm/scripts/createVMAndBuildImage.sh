@@ -94,7 +94,7 @@ function build_docker_image() {
     --publisher Microsoft.Azure.Extensions \
     --version 2.0 \
     --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableT3Tunneling} \"}"
+    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} \"}"
 
     cleanup_vm
 }
@@ -118,7 +118,8 @@ export ocrSSOUser=$7
 export wlsClusterSize=$8
 export enableCustomSSL=$9
 export scriptURL=${10}
-export enableT3Tunneling=${11}
+export enableAdminT3Tunneling=${11}
+export enableClusterT3Tunneling=${12}
 
 read_sensitive_parameters_from_stdin
 

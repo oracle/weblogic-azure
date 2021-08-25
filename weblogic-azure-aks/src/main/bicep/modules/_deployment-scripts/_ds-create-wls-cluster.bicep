@@ -11,7 +11,8 @@ param acrName string = ''
 param appPackageUrls array = []
 param appReplicas int = 2
 param enableCustomSSL bool = false
-param enableT3Tunneling bool = false
+param enableAdminT3Tunneling bool = false
+param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 param identity object
 param location string = 'eastus'
@@ -38,6 +39,7 @@ param wlsIdentityKeyStorePassphrase string = newGuid()
 ])
 param wlsIdentityKeyStoreType string = 'PKCS12'
 param wlsImageTag string = '12.2.1.4'
+param wlsJavaOption string = 'null'
 param wlsMemory string = '1.5Gi'
 @secure()
 param wlsPassword string
@@ -54,7 +56,7 @@ param wlsTrustKeyStorePassPhrase string = newGuid()
 param wlsTrustKeyStoreType string = 'PKCS12'
 param wlsUserName string = 'weblogic'
 
-var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} ${enableT3Tunneling} ${t3ChannelAdminPort} ${t3ChannelClusterPort} '
+var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${t3ChannelAdminPort} ${t3ChannelClusterPort} "${wlsJavaOption}"'
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
 var const_invokeSetUpDomainScript = 'invokeSetupWLSDomain.sh'

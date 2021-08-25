@@ -3,6 +3,8 @@ export checkPodStatusMaxAttemps=30 # max attempt to check pod status.
 export checkPVStateInterval=5 # interval of checking pvc status.
 export checkPVStateMaxAttempt=10 # max attempt to check pvc status.
 
+export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
+export constClusterT3AddressEnvName="T3_TUNNELING_CLUSTER_ADDRESS"
 export constFalse="false"
 export constTrue="true"
 

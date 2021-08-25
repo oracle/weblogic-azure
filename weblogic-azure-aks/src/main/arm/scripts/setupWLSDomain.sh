@@ -39,7 +39,8 @@ echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentit
     <wlsTrustData>
     <wlsTrustType>
     <enablePV>
-    <enableT3Tunneling>
+    <enableAdminT3Tunneling>
+    <enableClusterT3Tunneling>
     <t3AdminPort>
     <t3ClusterPort>
 END
@@ -178,8 +179,13 @@ function validate_input() {
         usage 1
     fi
 
-    if [ -z "$enableT3Tunneling" ]; then
-        echo_stderr "enableT3Tunneling is required. "
+    if [ -z "$enableAdminT3Tunneling" ]; then
+        echo_stderr "enableAdminT3Tunneling is required. "
+        usage 1
+    fi
+
+    if [ -z "$enableClusterT3Tunneling" ]; then
+        echo_stderr "enableClusterT3Tunneling is required. "
         usage 1
     fi
 
@@ -352,7 +358,8 @@ function build_docker_image() {
         $wlsClusterSize \
         $enableCustomSSL \
         "$scriptURL" \
-        ${enableT3Tunneling}
+        ${enableAdminT3Tunneling} \
+        ${enableClusterT3Tunneling}
     
     az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
@@ -595,7 +602,6 @@ function create_domain_namespace() {
 }
 
 function parsing_ssl_certs_and_create_ssl_secret() {
-    export javaOptions=""
     if [[ "${enableCustomSSL,,}" == "${constTrue}" ]]; then
         # use default Java, if no, install open jdk 11.
         # why not Microsoft open jdk? No apk installation package!
@@ -628,7 +634,7 @@ function parsing_ssl_certs_and_create_ssl_secret() {
             --from-literal=ssltruststorepassword=${wlsTrustPsw}
 
         kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${wlsDomainUID}
-        javaOptions="-Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName}"
+        javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} ${javaOptions}"
     fi
 }
 
@@ -661,6 +667,13 @@ function setup_wls_domain() {
     echo "print pvc info"
     kubectl -n ${wlsDomainNS} get pvc -o wide
 
+    export javaOptions=${wlsJavaOption}
+    if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
+        # for remote t3/t3s access.
+        # refer to https://oracle.github.io/weblogic-kubernetes-operator/faq/external-clients/#enabling-unknown-host-access
+        javaOptions="-Dweblogic.rjvm.allowUnknownHost=true ${javaOptions}"
+    fi
+
     customDomainYaml=${scriptDir}/custom-domain.yaml
     if [[ "${updateNamepace}" == "${constTrue}" ]]; then
         echo "start to update domain  ${wlsDomainUID}"
@@ -676,7 +689,8 @@ function setup_wls_domain() {
         ${managedServerPrefix} \
         ${enableCustomSSL} \
         ${enablePV} \
-        ${enableT3Tunneling} \
+        ${enableAdminT3Tunneling} \
+        ${enableClusterT3Tunneling} \
         ${t3AdminPort} \
         ${t3ClusterPort} \
         ${wlsClusterName} \
@@ -696,7 +710,8 @@ function setup_wls_domain() {
         ${managedServerPrefix} \
         ${enableCustomSSL} \
         ${enablePV} \
-        ${enableT3Tunneling} \
+        ${enableAdminT3Tunneling} \
+        ${enableClusterT3Tunneling} \
         ${t3AdminPort} \
         ${t3ClusterPort} \
         ${wlsClusterName} \
@@ -741,9 +756,11 @@ export wlsIdentityAlias=${21}
 export wlsTrustData=${22}
 export wlsTrustType=${23}
 export enablePV=${24}
-export enableT3Tunneling=${25}
-export t3AdminPort=${26}
-export t3ClusterPort=${27}
+export enableAdminT3Tunneling=${25}
+export enableClusterT3Tunneling=${26}
+export t3AdminPort=${27}
+export t3ClusterPort=${28}
+export wlsJavaOption=${29}
 
 export adminServerName="admin-server"
 export azFileShareName="weblogic"
