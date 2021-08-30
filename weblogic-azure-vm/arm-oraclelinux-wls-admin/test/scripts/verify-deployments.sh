@@ -13,23 +13,23 @@ az group create --verbose --name $groupName --location ${location}
 # generate parameters for testing differnt cases
 parametersList=()
 # parameters for cluster
-bash ${scriptsDir}/gen-parameters.sh ${scriptsDir}/parameters.json $githubUserName $testbranchName
+bash ${scriptsDir}/gen-parameters.sh <<< "${scriptsDir}/parameters.json $githubUserName $testbranchName"
 parametersList+=(${scriptsDir}/parameters.json)
 
 # parameters for cluster+db
-bash ${scriptsDir}/gen-parameters-db.sh ${scriptsDir}/parameters-db.json $githubUserName $testbranchName
+bash ${scriptsDir}/gen-parameters-db.sh <<< "${scriptsDir}/parameters-db.json $githubUserName $testbranchName"
 parametersList+=(${scriptsDir}/parameters-db.json)
 
 # parameters for cluster+aad
-bash ${scriptsDir}/gen-parameters-aad.sh ${scriptsDir}/parameters-aad.json $githubUserName $testbranchName
+bash ${scriptsDir}/gen-parameters-aad.sh <<< "${scriptsDir}/parameters-aad.json $githubUserName $testbranchName"
 parametersList+=(${scriptsDir}/parameters-aad.json)
 
 # parameters for admin+elk
-bash ${scriptsDir}/gen-parameters-elk.sh ${scriptsDir}/parameters-elk.json $githubUserName $testbranchName
+bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-elk.json $githubUserName $testbranchName"
 parametersList+=(${scriptsDir}/parameters-elk.json)
 
 # parameters for cluster+db+aad
-bash ${scriptsDir}/gen-parameters-db-aad.sh ${scriptsDir}/parameters-db-aad.json $githubUserName $testbranchName
+bash ${scriptsDir}/gen-parameters-db-aad.sh <<< "${scriptsDir}/parameters-db-aad.json $githubUserName $testbranchName"
 parametersList+=(${scriptsDir}/parameters-db-aad.json)
 
 # run preflight tests

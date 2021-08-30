@@ -1,0 +1,104 @@
+name: New Tag
+on:
+  workflow_dispatch:
+    inputs:
+      tagname:
+        description: 'Specify Tag name to create/update.'
+        required: true
+        default: '2020-12-02-01-Q4'
+      ref:
+        description: 'Specify Git Ref if needed.'
+        required: false
+        default: 'refs/heads/develop'
+env:
+  tagbranch: "tagbranch"
+  refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
+  refJavaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
+  gitToken: ${{ secrets.GIT_TOKEN }}
+  repoName: "arm-oraclelinux-wls-cluster"
+  userEmail: ${{ secrets.USER_EMAIL }}
+  userName: ${{ secrets.USER_NAME }}
+
+jobs:
+  newtag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout azure-javaee-iaas
+        uses: actions/checkout@v2
+        with:
+          repository: Azure/azure-javaee-iaas
+          path: azure-javaee-iaas
+          ref: ${{ env.refJavaee }}
+      - name: Checkout arm-ttk
+        uses: actions/checkout@v2
+        with:
+          repository: Azure/arm-ttk
+          path: arm-ttk
+          ref: ${{ env.refArmttk }}
+      - name: Checkout ${{ env.repoName }}
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.repoName }}
+          ref: ${{ github.event.inputs.ref }}
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build azure-javaee-iaas
+        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+
+      - name: Build and test ${{ env.repoName }}
+        run: |
+          cd ${{ env.repoName }}
+          mvn -Ptemplate-validation-tests clean install
+
+      - name: Create new tag
+        run: |
+          cd ${{ env.repoName }}
+          git config --global core.longpaths true
+          git config --global user.email $userEmail
+          git config --global user.name $userName
+
+          authGitPath=https://$gitToken@github.com/$userName/${{ env.repoName }}.git
+
+          echo "Create tag branch"
+          remoteBranches=$(git ls-remote --heads)
+          echo ${remoteBranches}
+          if [[ -n `echo ${remoteBranches} | grep "${tagbranch}"` ]]; then
+            git push ${authGitPath} --delete ${tagbranch} -f
+          fi
+          git checkout -b ${tagbranch}
+
+          # replace pids
+          export targetARM="target/arm"
+          for d in */ ; do
+              echo $d
+              if [ ! -d ${d}${targetARM} ];then  
+                  continue;
+              fi
+
+              list=$(find ${d}${targetARM} | grep ".json")
+              for file in ${list}; do
+                  targetPath=$(echo "$file" | sed "s:target:src/main:g")
+                  if test -f "$targetPath"; then
+                      echo "Replace ${targetPath} with ${file}"
+                      cp -f $file $targetPath
+                  fi
+              done
+          done
+
+          git status
+          git commit -a -m "hard code pids"
+          git fetch --unshallow
+          git push ${authGitPath} tagbranch -f
+
+          # remove existing tag
+          tagname=${{ github.event.inputs.tagname }}
+          if [[ -n `git ls-remote --tags | grep "${tagname}"` ]]; then 
+              git push ${authGitPath} --delete ${tagname} -f
+          fi
+
+          # create new tag
+          git tag ${tagname}
+          git push ${authGitPath} ${tagname} -f
+          git push ${authGitPath} --delete ${tagbranch} -f
