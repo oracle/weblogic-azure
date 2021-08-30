@@ -80,7 +80,6 @@
         }
     },
     "variables": {
-        "const_singleQuote": "'",
         "const_wlsAdminPort": "7005",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "name_scriptFilePrefix": "datasourceConfig-",
@@ -121,7 +120,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh <<< \"',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',variables('const_singleQuote'),parameters('wlsPassword'),variables('const_singleQuote'),' ',parameters('jdbcDataSourceName'),' ',variables('const_singleQuote'),parameters('dsConnectionURL'),variables('const_singleQuote'),' ',parameters('dbUser'),' ',variables('const_singleQuote'),parameters('dbPassword'),variables('const_singleQuote'),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh <<< \"',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('jdbcDataSourceName'),' ',parameters('dsConnectionURL'),' ',parameters('dbUser'),' ',parameters('dbPassword'),'\"')]"
                 }
             }
         },
