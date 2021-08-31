@@ -432,7 +432,7 @@
                                     "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
                                     "link": {
                                         "label": "Must be a valid tag value from Oracle Container Registry",
-                                        "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                                        "uri": "https://aka.ms/wls-aks-fromImage-tag?${project.version}-${maven.build.timestamp}"
                                     }
                                 }
                             },
