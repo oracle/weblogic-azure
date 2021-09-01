@@ -412,7 +412,8 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     createStorageAccount: const_bCreateStorageAccount
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
-    enableT3Tunneling: enableT3Tunneling
+    enableAdminT3Tunneling: enableAdminT3Tunneling
+    enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: const_enablePV
     identity: identity
     location: location
