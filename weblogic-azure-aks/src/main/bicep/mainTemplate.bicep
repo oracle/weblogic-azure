@@ -53,6 +53,8 @@ param aksVersion string = 'default'
 param appGatewayCertificateOption string = 'haveCert'
 @description('Public IP Name for the Application Gateway')
 param appGatewayPublicIPAddressName string = 'gwip'
+@description('The one-line, base64 string of the backend SSL root certificate data.')
+param appGatewaySSLBackendRootCertData string = 'appgw-ssl-backend-data'
 @description('The one-line, base64 string of the SSL certificate data.')
 param appGatewaySSLCertData string = 'appgw-ssl-data'
 @secure()
@@ -120,6 +122,8 @@ param keyVaultName string = 'kv-contoso'
 param keyVaultResourceGroup string = 'kv-contoso-rg'
 @description('Price tier for Key Vault.')
 param keyVaultSku string = 'Standard'
+@description('The name of the secret in the specified KeyVault whose value is the SSL Root Certificate Data for Appliation Gateway backend TLS/SSL.')
+param keyVaultSSLBackendRootCertDataSecretName string = 'kv-ssl-backend-data'
 @description('The name of the secret in the specified KeyVault whose value is the SSL Certificate Data for Appliation Gateway frontend TLS/SSL.')
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
 @description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate of Appliation Gateway frontend TLS/SSL')
@@ -421,11 +425,13 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   ]
 }
 
-module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultAdapter.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
   name: 'appgateway-certificates-secrets-deployment'
   params: {
+    backendCertificateDataValue: appGatewaySSLBackendRootCertData
     certificateDataValue: appGatewaySSLCertData
     certificatePasswordValue: appGatewaySSLCertPassword
+    enableCustomSSL: enableCustomSSL
     identity: identity
     sku: keyVaultSku
     subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
@@ -482,6 +488,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     identity: identity
     keyVaultName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultName : appgwSecretDeployment.outputs.keyVaultName
     keyVaultResourceGroup: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultResourceGroup : resourceGroup().name
+    keyvaultBackendCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLBackendRootCertDataSecretName : appgwSecretDeployment.outputs.sslBackendCertDataSecretName
     keyVaultSSLCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
     keyVaultSSLCertPasswordSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
     location: location

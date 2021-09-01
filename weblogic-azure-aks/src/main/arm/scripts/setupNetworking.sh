@@ -905,16 +905,12 @@ function create_appgw_ingress() {
 
   
   if [[ "${enableCustomSSL,,}" == "true" ]];then
-    # create backend tls secret
-    rootcertPath=${scriptDir}/root.cert
-    kubectl cp -n ${wlsDomainNS} ${wlsDomainUID}-${adminServerName}:${appgwBackendCertPath} ${rootcertPath}
-    validate_status "Copy public key from fileshare."
-
-    az network application-gateway root-cert create \
-      --gateway-name $appgwName  \
+    az network application-gateway root-cert list \
+      --gateway-name $appgwName \
       --resource-group $curRGName \
-      --name ${appgwBackendSecretName} \
-      --cert-file ${rootcertPath}
+      | jq '.[] | .name' | grep "${appgwBackendSecretName}"
+
+    validate_status "check if backend cert exists."
   fi
 
   # generate ingress svc config for cluster  
@@ -1002,7 +998,6 @@ export sharedPath="/shared"
 export svcAdminServer="${wlsDomainUID}-${adminServerName}"
 export svcCluster="${wlsDomainUID}-cluster-${clusterName}"
 export wlsDomainNS="${wlsDomainUID}-ns"
-export appgwBackendCertPath="${sharedPath}/security/root.cert"
 
 read_sensitive_parameters_from_stdin
 

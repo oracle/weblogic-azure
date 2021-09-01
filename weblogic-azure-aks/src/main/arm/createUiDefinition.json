@@ -1095,7 +1095,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
                                 "options": {
-                                    "text": "    ⁃ Generate a self-signed certificate: generate a self-signed certificate and apply it during deployment.",
+                                    "text": "    ⁃ Generate a self-signed frontend certificate: generate a self-signed frontend certificate and apply it during deployment.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
@@ -1106,7 +1106,7 @@
                                 "name": "certificateOption",
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Select desired TLS/SSL certificate option",
-                                "defaultValue": "Generate a self-signed certificate",
+                                "defaultValue": "Upload a TLS/SSL certificate",
                                 "toolTip": "Select desired TLS/SSL certificate option",
                                 "constraints": {
                                     "allowedValues": [
@@ -1119,7 +1119,7 @@
                                             "value": "haveKeyVault"
                                         },
                                         {
-                                            "label": "Generate a self-signed certificate",
+                                            "label": "Generate a self-signed frontend certificate",
                                             "value": "generateCert"
                                         }
                                     ],
@@ -1130,7 +1130,7 @@
                             {
                                 "name": "keyVaultSSLCertData",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "TLS/SSL certificate(.pfx)",
+                                "label": "Frontend TLS/SSL certificate(.pfx)",
                                 "toolTip": "TLS/SSL certificate used for App Gateway",
                                 "constraints": {
                                     "required": true,
@@ -1150,7 +1150,7 @@
                                     "password": "Password",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "TLS/SSL certificate password",
+                                "toolTip": "Frontend TLS/SSL certificate password",
                                 "constraints": {
                                     "required": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]",
                                     "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
@@ -1160,6 +1160,22 @@
                                     "hideConfirmation": false
                                 },
                                 "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
+                            },
+                            {
+                                "name": "keyVaultBackendSSLCertData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Trusted root certificate(.cer, cert)",
+                                "toolTip": "Trusted root certificate (CA certificate) used to set up end to end TLS/SSL",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".cer, cert"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[and(steps('section_appGateway').appgwIngress.enableAppGateway, steps('section_sslConfiguration').enableCustomSSL, not(equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')))]"
                             },
                             {
                                 "name": "keyVaultResourceGroup",
@@ -1190,7 +1206,7 @@
                             {
                                 "name": "keyVaultSSLCertDataSecretName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the TLS/SSL certificate data",
+                                "label": "The name of the secret in the specified Key Vault whose value is the frontend TLS/SSL certificate data",
                                 "defaultValue": "",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
@@ -1203,7 +1219,7 @@
                             {
                                 "name": "keyVaultSSLCertPasswordSecretName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the password for the TLS/SSL certificate",
+                                "label": "The name of the secret in the specified Key Vault whose value is the password for the frontend TLS/SSL certificate",
                                 "defaultValue": "",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
@@ -1212,6 +1228,19 @@
                                     "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
                                 },
                                 "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultBackendSSLCertDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the trusted root certificate data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault'))]"
                             },
                             {
                                 "name": "servicePrincipal",
@@ -1533,6 +1562,7 @@
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
+            "appGatewaySSLBackendRootCertData": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertData]",
             "appGatewaySSLCertData": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
             "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
@@ -1563,6 +1593,7 @@
             "location": "[location()]",
             "keyVaultName": "[steps('section_appGateway').appgwIngress.keyVaultName]",
             "keyVaultResourceGroup": "[steps('section_appGateway').appgwIngress.keyVaultResourceGroup]",
+            "keyVaultSSLBackendRootCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertDataSecretName]",
             "keyVaultSSLCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertDataSecretName]",
             "keyVaultSSLCertPasswordSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertPasswordSecretName]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
