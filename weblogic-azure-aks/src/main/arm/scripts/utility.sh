@@ -62,6 +62,39 @@ function utility_check_pv_state {
   fi
 }
 
+# 
+# Create directory in specified file share
+# $1 - name of directory
+# $2 - name of file share
+# $3 - name of storage account
+# $4 - sas token
+function utility_create_directory_to_fileshare() {
+    ret=$(az storage directory exists --name $1 --share-name $2 --account-name $3 --sas-token ${4} | jq '.exists')
+    if [[ "${ret,,}" == "false" ]]; then
+        az storage directory create --name $1 --share-name $2 --account-name $3 --sas-token ${4} --timeout 30
+    fi
+    
+    if [ $? != 0 ]; then
+        echo_stderr "Failed to create directory ${1} in file share ${3}/${2}"
+        exit 1
+    fi
+}
+
+# 
+# Upload file to file share
+# $1 - name of file share
+# $2 - name of storage account
+# $3 - path of file
+# $4 - source path of file
+# $5 - sas token
+function utility_upload_file_to_fileshare(){
+    az storage file upload --share-name ${1} --account-name ${2} --path ${3} --source ${4}  --sas-token ${5} --timeout 60
+    if [ $? != 0 ]; then
+        echo_stderr "Failed to upload ${3} to file share ${2}/${1}"
+        exit 1
+    fi
+}
+
 # Call this function to make sure pods of a domain are running. 
 #   * Make sure the admin server pod is running
 #   * Make sure all the managed server pods are running

@@ -368,39 +368,21 @@ function build_docker_image() {
     fi
 }
 
-function mount_fileshare() {
-    fileShareName="${azFileShareName}"
-
-    # Disable https-only
-    az storage account update --name ${storageAccountName} --resource-group ${storageResourceGroup} --https-only false
-
+function create_source_folder_for_certificates() {
     mntRoot="/wls"
-    mntPath="$mntRoot/$storageAccountName/$fileShareName"
+    mntPath="$mntRoot/$storageAccountName/$azFileShareName"
 
     mkdir -p $mntPath
 
-    httpEndpoint=$(
-        az storage account show \
-        --resource-group $storageResourceGroup \
-        --name $storageAccountName \
-        --query "primaryEndpoints.file" | tr -d '"'
-    )
-    smbPath=$(echo $httpEndpoint | cut -c7-$(expr length $httpEndpoint))$fileShareName
-
-    export storageAccountKey=$(az storage account keys list \
-        --resource-group $storageResourceGroup \
-        --account-name $storageAccountName \
-        --query "[0].value" -o tsv)
-
-    mount -t cifs $smbPath $mntPath -o username=$storageAccountName,password=$storageAccountKey,serverino,vers=3.0,file_mode=0777,dir_mode=0777
-    validate_status "Mounting path."
-}
-
-function unmount_fileshare() {
-    echo "unmount fileshare."
-    umount ${mntPath}
-    # Disable https-only
-    az storage account update --name ${storageAccountName} --resource-group ${storageResourceGroup} --https-only true
+    # Create a folder for certificates
+    securityDir=${mntPath}/security
+    if [ ! -d "${securityDir}" ]; then
+        mkdir ${mntPath}/security
+    else
+        rm -f ${mntPath}/$wlsIdentityKeyStoreFileName
+        rm -f ${mntPath}/$wlsTrustKeyStoreFileName
+        rm -f ${mntPath}/${wlsTrustKeyStoreJKSFileName}
+    fi
 }
 
 function validate_ssl_keystores() {
@@ -444,18 +426,50 @@ function validate_ssl_keystores() {
     echo "Validate SSL key stores successfull !!"
 }
 
+function upload_certificates_to_fileshare() {
+    expiryData=$(( `date +%s`+${sasTokenValidTime}))
+    sasTokenEnd=`date -d@"$expiryData" -u '+%Y-%m-%dT%H:%MZ'`
+    sasToken=$(az storage share generate-sas \
+        --name ${fileShareName} \
+        --account-name ${storageAccountName} \
+        --https-only \
+        --permissions dlrw \
+        --expiry $sasTokenEnd -o tsv)
+
+    echo "create directory security"
+    fsSecurityDirName="security"
+    utility_create_directory_to_fileshare \
+        ${fsSecurityDirName} \
+        ${fileShareName} \
+        ${storageAccountName} \
+        $sasToken
+
+    echo "upload $wlsIdentityKeyStoreFileName"
+    utility_upload_file_to_fileshare \
+        ${fileShareName} \
+        ${storageAccountName} \
+        "${fsSecurityDirName}/$wlsIdentityKeyStoreFileName" \
+        ${mntPath}/$wlsIdentityKeyStoreFileName \
+        $sasToken
+
+    echo "upload $wlsTrustKeyStoreFileName"
+    utility_upload_file_to_fileshare \
+        ${fileShareName} ${storageAccountName} \
+        "${fsSecurityDirName}/$wlsTrustKeyStoreFileName" \
+        ${mntPath}/$wlsTrustKeyStoreFileName \
+        $sasToken
+
+    echo "upload $wlsTrustKeyStoreJKSFileName"
+    utility_upload_file_to_fileshare \
+        ${fileShareName} \
+        ${storageAccountName} \
+        "${fsSecurityDirName}/$wlsTrustKeyStoreJKSFileName" \
+        ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
+        $sasToken
+}
+
 function output_ssl_keystore() {
     echo "Custom SSL is enabled. Storing CertInfo as files..."
-    # Create a folder for certificates
-    securityDir=${mntPath}/security
-    if [ ! -d "${securityDir}" ]; then
-        mkdir ${mntPath}/security
-    else
-        rm -f ${mntPath}/$wlsIdentityKeyStoreFileName
-        rm -f ${mntPath}/$wlsTrustKeyStoreFileName
-        rm -f ${mntPath}/${wlsTrustKeyStoreJKSFileName}
-    fi
-
     #decode cert data once again as it would got base64 encoded
     echo "$wlsIdentityData" | base64 -d >${mntPath}/$wlsIdentityKeyStoreFileName
     echo "$wlsTrustData" | base64 -d >${mntPath}/$wlsTrustKeyStoreFileName
@@ -604,17 +618,17 @@ function create_domain_namespace() {
 function parsing_ssl_certs_and_create_ssl_secret() {
     if [[ "${enableCustomSSL,,}" == "${constTrue}" ]]; then
         # use default Java, if no, install open jdk 11.
-        # why not Microsoft open jdk? No apk installation package!
+        # why not use Microsoft open jdk? No apk installation package!
         export JAVA_HOME=/usr/lib/jvm/default-jvm/
         if [ ! -d "${JAVA_HOME}" ]; then
             install_jdk
             JAVA_HOME=/usr/lib/jvm/java-11-openjdk
         fi
 
-        mount_fileshare
+        create_source_folder_for_certificates
         output_ssl_keystore
         validate_ssl_keystores
-        unmount_fileshare
+        upload_certificates_to_fileshare
 
         echo "check if ${kubectlWLSSSLCredentialsName} exists."
         ret=$(kubectl get secret -n ${wlsDomainNS} | grep "${kubectlWLSSSLCredentialsName}")
