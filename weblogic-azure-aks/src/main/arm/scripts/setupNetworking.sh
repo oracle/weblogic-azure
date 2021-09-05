@@ -836,6 +836,9 @@ function patch_cluster_t3_public_address() {
 function rolling_update_with_t3_public_address() {
   timestampBeforePatchingDomain=$(date +%s)
   currentDomainConfig=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json)
+  cat<<EOF >${scriptDir}/domainPreviousConfiguration.yaml
+${currentDomainConfig}
+EOF
 
   # update public address of t3 channel
   if [[ "${enableAdminT3Channel,,}" == "true" ]]; then
@@ -860,7 +863,9 @@ function rolling_update_with_t3_public_address() {
 
     echo "rolling restart the cluster with t3 public address."
     # echo the configuration for debugging
-    echo -e ${currentDomainConfig} >${scriptDir}/domainNewConfiguration.yaml
+    cat<<EOF >${scriptDir}/domainNewConfiguration.yaml
+${currentDomainConfig}
+EOF
     echo ${currentDomainConfig} | kubectl -n ${wlsDomainNS} apply -f -
 
     replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
