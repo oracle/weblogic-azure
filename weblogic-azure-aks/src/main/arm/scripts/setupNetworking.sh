@@ -1126,8 +1126,8 @@ function create_appgw_ingress() {
     echo Waiting for Pod running...${attempts}
     sleep ${perfRetryInterval}
 
-    ret=$(kubectl get pod | grep "ingress-azure")
-    if [ -z "${ret}" ]; then
+    ret=$(kubectl get pod -o json | jq '.items[] | .status.containerStatuses[] | select(.name=="ingress-azure") | .ready')
+    if [[ "${ret}"=="false" ]]; then
       podState="running"
 
       if [ $attempts -ge ${perfPodAttemps} ]; then
