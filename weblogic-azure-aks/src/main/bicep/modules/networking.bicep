@@ -67,6 +67,7 @@ param wlsDomainUID string = 'sample-domain1'
 var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_appgwSSLCertOptionGenerateCert = 'generateCert'
+var ref_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? reference('ds-networking-deployment-1'): reference('ds-networking-deployment')) : reference('ds-networking-deployment-2')
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
   name: 'pid-networking-start-deployment'
@@ -273,5 +274,7 @@ output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfigura
 output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ''
 output adminRemoteConsoleUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
 output adminRemoteConsoleSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ''
+output adminServerT3ChannelUrl string = ref_networkDeployment.outputs.adminServerT3LBUrl.value
 output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : networkingDeployment3.outputs.clusterLBUrl
 output clusterExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ''
+output clusterT3ChannelUrl string = ref_networkDeployment.outputs.clusterT3LBUrl.value

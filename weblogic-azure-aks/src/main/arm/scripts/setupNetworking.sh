@@ -45,11 +45,15 @@ function install_utilities() {
 function output_result() {
   echo ${adminConsoleEndpoint}
   echo ${clusterEndpoint}
+  echo ${adminServerT3Endpoint}
+  echo ${clusterT3Endpoint}
 
   result=$(jq -n -c \
     --arg adminEndpoint $adminConsoleEndpoint \
     --arg clusterEndpoint $clusterEndpoint \
-    '{adminConsoleEndpoint: $adminEndpoint, clusterEndpoint: $clusterEndpoint}')
+    --arg adminT3Endpoint $adminServerT3Endpoint \
+    --arg clusterT3Endpoint $clusterT3Endpoint \
+    '{adminConsoleEndpoint: $adminEndpoint, clusterEndpoint: $clusterEndpoint, adminServerT3Endpoint: $adminT3Endpoint, clusterT3Endpoint: $clusterT3Endpoint}')
   echo "result is: $result"
   echo $result >$AZ_SCRIPTS_OUTPUT_PATH
 }
@@ -1213,6 +1217,7 @@ export dnszoneClusterT3ChannelLabel=${25}
 
 export adminServerName="admin-server"
 export adminConsoleEndpoint="null"
+export adminServerT3Endpoint="null"
 export appgwIngressHelmRepo="https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/"
 export appgwFrontCertFileName="appgw-frontend-cert.pfx"
 export appgwFrontCertKeyDecrytedFileName="appgw-frontend-cert.key"
@@ -1224,6 +1229,7 @@ export appgwSelfsignedCert="generateCert"
 export azureAppgwIngressVersion="1.4.0"
 export clusterName="cluster-1"
 export clusterEndpoint="null"
+export clusterT3Endpoint="null"
 export httpsListenerName="myHttpsListenerName$(date +%s)"
 export httpsRuleName="myHttpsRule$(date +%s)"
 export perfRetryInterval=30 # seconds

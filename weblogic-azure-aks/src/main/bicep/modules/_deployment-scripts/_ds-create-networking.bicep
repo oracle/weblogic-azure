@@ -75,5 +75,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
 }
 
 output adminConsoleLBUrl string = length(lbSvcValues) > 0 && (reference('ds-networking-deployment').outputs.adminConsoleEndpoint != 'null') ? format('http://{0}/',reference('ds-networking-deployment').outputs.adminConsoleEndpoint): ''
+output adminServerT3LBUrl string = length(lbSvcValues) > 0 && (reference('ds-networking-deployment').outputs.adminServerT3Endpoint != 'null') ? reference('ds-networking-deployment').outputs.adminServerT3Endpoint: ''
 output clusterLBUrl string = length(lbSvcValues) > 0 && (reference('ds-networking-deployment').outputs.clusterEndpoint != 'null') ? format('http://{0}/',reference('ds-networking-deployment').outputs.clusterEndpoint): ''
+output clusterT3LBUrl string = length(lbSvcValues) > 0 && (reference('ds-networking-deployment').outputs.clusterT3Endpoint != 'null') ? reference('ds-networking-deployment').outputs.clusterT3Endpoint: ''
 

@@ -96,7 +96,7 @@ param dnsNameforApplicationGateway string = 'wlsgw'
 @description('Specify a label used to generate subdomain of Admin server. The final subdomain name will be label.dnszoneName, e.g. admin.contoso.xyz')
 param dnszoneAdminConsoleLabel string = 'admin'
 @description('Specify a label used to generate subdomain of Admin server T3 channel. The final subdomain name will be label.dnszoneName, e.g. admin-t3.contoso.xyz')
-param dnszoneAdminT3ChannelLabel string ='admin-t3'
+param dnszoneAdminT3ChannelLabel string = 'admin-t3'
 @description('Specify a label used to generate subdomain of WebLogic cluster. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
 param dnszoneClusterLabel string = 'www'
 param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
@@ -256,6 +256,7 @@ var const_hasStorageAccount = !createAKSCluster && reference('query-existing-sto
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
 var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
+var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
 var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_defaultPidDeployment = 'pid'
 var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
@@ -371,7 +372,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     wlsIdentityKeyStorePassphrase: sslUploadedCustomIdentityKeyStorePassphrase
     wlsIdentityKeyStoreType: const_defaultKeystoreType
     wlsImageTag: wlsImageTag
-    wlsJavaOption: wlsJavaOption
+    wlsJavaOption: const_wlsJavaOptions
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
     wlsPrivateKeyAlias: sslUploadedPrivateKeyAlias
@@ -432,7 +433,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     wlsIdentityKeyStorePassphrase: sslKeyvault.getSecret(name_identityKeyStorePswSecret)
     wlsIdentityKeyStoreType: const_identityKeyStoreType
     wlsImageTag: wlsImageTag
-    wlsJavaOption: wlsJavaOption
+    wlsJavaOption: const_wlsJavaOptions
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
     wlsPrivateKeyAlias: sslKeyvault.getSecret(name_privateKeyAliasSecret)
@@ -558,8 +559,13 @@ output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminSer
 output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
 output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalSecuredUrl : ''
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
-output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl: ''
-output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl: ''
+output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl : ''
+output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl : ''
+output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalUrl.value
+output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.adminServerT3ChannelUrl) : ''
 output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value
 output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalUrl : ''
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredUrl : ''
+output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalUrl.value
+output clusterT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.clusterT3ChannelUrl) : ''
+
