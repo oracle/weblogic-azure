@@ -5,7 +5,7 @@ echo "Script  ${0} starts"
 
 # read <spBase64String> <appgwFrontendSSLCertPsw> from stdin
 function read_sensitive_parameters_from_stdin() {
-    read spBase64String appgwFrontendSSLCertPsw
+  read spBase64String appgwFrontendSSLCertPsw
 }
 
 function install_helm() {
@@ -56,7 +56,8 @@ function output_result() {
 
 #Function to display usage message
 function usage() {
-  usage=$(cat <<-END
+  usage=$(
+    cat <<-END
 Usage:
 echo <spBase64String> <appgwFrontendSSLCertPsw> | 
   ./setupNetworking.sh
@@ -86,12 +87,12 @@ echo <spBase64String> <appgwFrontendSSLCertPsw> |
     <dnszoneAdminT3ChannelLabel>
     <dnszoneClusterT3ChannelLabel>
 END
-)
-    echo_stdout ${usage}
-    if [ $1 -eq 1 ]; then
-        echo_stderr ${usage}
-        exit 1
-    fi
+  )
+  echo_stdout ${usage}
+  if [ $1 -eq 1 ]; then
+    echo_stderr ${usage}
+    exit 1
+  fi
 }
 
 #Validate teminal status with $?, exit with exception if errors happen.
@@ -365,8 +366,7 @@ spec:
 EOF
 }
 
-function generate_appgw_cluster_config_file_expose_https()
-{
+function generate_appgw_cluster_config_file_expose_https() {
   export clusterIngressHttpsName=${wlsDomainUID}-cluster-appgw-ingress-https-svc
   export clusterAppgwIngressHttpsYamlPath=${scriptDir}/appgw-cluster-ingress-https-svc.yaml
   cat <<EOF >${clusterAppgwIngressHttpsYamlPath}
@@ -379,13 +379,13 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
 
-if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
-cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
+  cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
 spec:
   tls:
   - secretName: ${appgwFrontendSecretName}
@@ -402,8 +402,7 @@ spec:
 EOF
 }
 
-function generate_appgw_cluster_config_file_nossl()
-{
+function generate_appgw_cluster_config_file_nossl() {
   export clusterIngressName=${wlsDomainUID}-cluster-appgw-ingress-svc
   export clusterAppgwIngressYamlPath=${scriptDir}/appgw-cluster-ingress-svc.yaml
   cat <<EOF >${clusterAppgwIngressYamlPath}
@@ -416,13 +415,13 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
 
-if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${clusterAppgwIngressYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${clusterAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
-cat <<EOF >>${clusterAppgwIngressYamlPath}
+  cat <<EOF >>${clusterAppgwIngressYamlPath}
 spec:
   rules:
     - http:
@@ -437,8 +436,7 @@ spec:
 EOF
 }
 
-function generate_appgw_cluster_config_file_ssl()
-{
+function generate_appgw_cluster_config_file_ssl() {
   export clusterIngressName=${wlsDomainUID}-cluster-appgw-ingress-svc
   export clusterAppgwIngressYamlPath=${scriptDir}/appgw-cluster-ingress-svc.yaml
   cat <<EOF >${clusterAppgwIngressYamlPath}
@@ -452,7 +450,7 @@ metadata:
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
 EOF
-    if [[ "${enableCustomDNSAlias,,}" == "true" ]];then
+  if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
     cat <<EOF >>${clusterAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/backend-hostname: "${dnsClusterLabel}.${dnsZoneName}"
 EOF
@@ -462,13 +460,13 @@ EOF
 EOF
   fi
 
-  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${clusterAppgwIngressYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${clusterAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
-cat <<EOF >>${clusterAppgwIngressYamlPath}
+  cat <<EOF >>${clusterAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
 
 spec:
@@ -487,8 +485,7 @@ spec:
 EOF
 }
 
-function generate_appgw_admin_config_file_nossl()
-{
+function generate_appgw_admin_config_file_nossl() {
   export adminIngressName=${wlsDomainUID}-admin-appgw-ingress-svc
   export adminAppgwIngressYamlPath=${scriptDir}/appgw-admin-ingress-svc.yaml
   cat <<EOF >${adminAppgwIngressYamlPath}
@@ -501,13 +498,13 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
 
-  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${adminAppgwIngressYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${adminAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
-cat <<EOF >>${adminAppgwIngressYamlPath}
+  cat <<EOF >>${adminAppgwIngressYamlPath}
 spec:
   rules:
     - http:
@@ -522,8 +519,7 @@ spec:
 EOF
 }
 
-function generate_appgw_admin_remote_config_file_nossl()
-{
+function generate_appgw_admin_remote_config_file_nossl() {
   cat <<EOF >${adminRemoteAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -535,13 +531,13 @@ metadata:
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 EOF
 
-  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
-cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
 spec:
   rules:
     - http:
@@ -556,8 +552,7 @@ spec:
 EOF
 }
 
-function generate_appgw_admin_config_file_ssl()
-{
+function generate_appgw_admin_config_file_ssl() {
   export adminIngressName=${wlsDomainUID}-admin-appgw-ingress-svc
   export adminAppgwIngressYamlPath=${scriptDir}/appgw-admin-ingress-svc.yaml
   cat <<EOF >${adminAppgwIngressYamlPath}
@@ -572,7 +567,7 @@ metadata:
     appgw.ingress.kubernetes.io/backend-protocol: "https"
 EOF
 
-  if [[ "${enableCustomDNSAlias,,}" == "true" ]];then
+  if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
     cat <<EOF >>${adminAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/backend-hostname: "${dnsAdminLabel}.${dnsZoneName}"
 EOF
@@ -582,11 +577,11 @@ EOF
 EOF
   fi
 
-  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${adminAppgwIngressYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${adminAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
   cat <<EOF >>${adminAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
@@ -607,8 +602,7 @@ spec:
 EOF
 }
 
-function generate_appgw_admin_remote_config_file_ssl()
-{
+function generate_appgw_admin_remote_config_file_ssl() {
   cat <<EOF >${adminRemoteAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -623,7 +617,7 @@ metadata:
     
 EOF
 
-  if [[ "${enableCustomDNSAlias,,}" == "true" ]];then
+  if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
     cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/backend-hostname: "${dnsAdminLabel}.${dnsZoneName}"
 EOF
@@ -633,11 +627,11 @@ EOF
 EOF
   fi
 
-  if [[ "${enableCookieBasedAffinity,,}" == "true" ]];then
-  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+  if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
+    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
 EOF
-fi
+  fi
 
   cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
@@ -659,7 +653,7 @@ EOF
 }
 
 function generate_appgw_cluster_config_file() {
-  if [[ "${enableCustomSSL,,}" == "true" ]];then
+  if [[ "${enableCustomSSL,,}" == "true" ]]; then
     generate_appgw_cluster_config_file_ssl
   else
     generate_appgw_cluster_config_file_nossl
@@ -668,7 +662,7 @@ function generate_appgw_cluster_config_file() {
 }
 
 function generate_appgw_admin_config_file() {
-  if [[ "${enableCustomSSL,,}" == "true" ]];then
+  if [[ "${enableCustomSSL,,}" == "true" ]]; then
     generate_appgw_admin_config_file_ssl
   else
     generate_appgw_admin_config_file_nossl
@@ -676,28 +670,28 @@ function generate_appgw_admin_config_file() {
 }
 
 function generate_appgw_admin_remote_config_file() {
-  if [[ "${enableCustomSSL,,}" == "true" ]];then
+  if [[ "${enableCustomSSL,,}" == "true" ]]; then
     generate_appgw_admin_remote_config_file_ssl
   else
     generate_appgw_admin_remote_config_file_nossl
   fi
 }
 
-function output_create_gateway_ssl_k8s_secret(){
+function output_create_gateway_ssl_k8s_secret() {
   echo "export gateway frontend certificates"
   echo "$appgwFrontendSSLCertData" | base64 -d >${scriptDir}/$appgwFrontCertFileName
 
   appgwFrontendSSLCertPassin=${appgwFrontendSSLCertPsw}
-  if [[ "$appgwCertificateOption" == "${appgwSelfsignedCert}" ]];then
+  if [[ "$appgwCertificateOption" == "${appgwSelfsignedCert}" ]]; then
     appgwFrontendSSLCertPassin="" # empty password
   fi
 
   openssl pkcs12 \
-      -in ${scriptDir}/$appgwFrontCertFileName \
-      -nocerts \
-      -out ${scriptDir}/$appgwFrontCertKeyFileName \
-      -passin pass:${appgwFrontendSSLCertPassin} \
-      -passout pass:${appgwFrontendSSLCertPsw}
+    -in ${scriptDir}/$appgwFrontCertFileName \
+    -nocerts \
+    -out ${scriptDir}/$appgwFrontCertKeyFileName \
+    -passin pass:${appgwFrontendSSLCertPassin} \
+    -passout pass:${appgwFrontendSSLCertPsw}
 
   validate_status "Export key from frontend certificate."
 
@@ -708,11 +702,11 @@ function output_create_gateway_ssl_k8s_secret(){
   validate_status "Decryte private key."
 
   openssl pkcs12 \
-  -in ${scriptDir}/$appgwFrontCertFileName \
-  -clcerts \
-  -nokeys \
-  -out ${scriptDir}/$appgwFrontPublicCertFileName \
-  -passin pass:${appgwFrontendSSLCertPassin} \
+    -in ${scriptDir}/$appgwFrontCertFileName \
+    -clcerts \
+    -nokeys \
+    -out ${scriptDir}/$appgwFrontPublicCertFileName \
+    -passin pass:${appgwFrontendSSLCertPassin}
 
   validate_status "Export cert from frontend certificate."
 
@@ -723,7 +717,7 @@ function output_create_gateway_ssl_k8s_secret(){
 }
 
 function query_admin_target_port() {
-  if [[ "${enableCustomSSL,,}" == "true" ]];then
+  if [[ "${enableCustomSSL,,}" == "true" ]]; then
     adminTargetPort=$(kubectl describe service ${svcAdminServer} -n ${wlsDomainNS} | grep 'default-secure' | tr -d -c 0-9)
   else
     adminTargetPort=$(kubectl describe service ${svcAdminServer} -n ${wlsDomainNS} | grep 'default' | tr -d -c 0-9)
@@ -734,7 +728,7 @@ function query_admin_target_port() {
 }
 
 function query_cluster_target_port() {
-  if [[ "${enableCustomSSL,,}" == "true" ]];then
+  if [[ "${enableCustomSSL,,}" == "true" ]]; then
     clusterTargetPort=$(kubectl describe service ${svcCluster} -n ${wlsDomainNS} | grep 'default-secure' | tr -d -c 0-9)
   else
     clusterTargetPort=$(kubectl describe service ${svcCluster} -n ${wlsDomainNS} | grep 'default' | tr -d -c 0-9)
@@ -796,20 +790,20 @@ function patch_admin_t3_public_address() {
   if [ "${enableCustomDNSAlias,,}" == "true" ]; then
     adminT3Address="${dnszoneAdminT3ChannelLabel}.${dnsZoneName}"
   else
-    adminT3Address=$(kubectl -n ${wlsDomainNS} get svc ${adminServerT3LBSVCName} -o json \
-      | jq '. | .status.loadBalancer.ingress[0].ip' \
-      | tr -d "\"")
+    adminT3Address=$(kubectl -n ${wlsDomainNS} get svc ${adminServerT3LBSVCName} -o json |
+      jq '. | .status.loadBalancer.ingress[0].ip' |
+      tr -d "\"")
   fi
 
   if [ $? == 1 ]; then
     echo_stderr "Failed to query public IP of admin t3 channel."
   fi
 
-  currentDomainConfig=$(echo ${currentDomainConfig} \
-    | jq \
-    --arg match "${constAdminT3AddressEnvName}" \
-    --arg replace "${adminT3Address}" \
-    '.spec.serverPod.env |= map(if .name==$match then (.value=$replace) else . end)')
+  currentDomainConfig=$(echo ${currentDomainConfig} |
+    jq \
+      --arg match "${constAdminT3AddressEnvName}" \
+      --arg replace "${adminT3Address}" \
+      '.spec.serverPod.env |= map(if .name==$match then (.value=$replace) else . end)')
 }
 
 function patch_cluster_t3_public_address() {
@@ -817,26 +811,26 @@ function patch_cluster_t3_public_address() {
   if [ "${enableCustomDNSAlias,,}" == "true" ]; then
     clusterT3Adress="${dnszoneClusterT3ChannelLabel}.${dnsZoneName}"
   else
-    clusterT3Adress=$(kubectl -n ${wlsDomainNS} get svc ${clusterT3LBSVCName} -o json \
-      | jq '. | .status.loadBalancer.ingress[0].ip' \
-      | tr -d "\"")
+    clusterT3Adress=$(kubectl -n ${wlsDomainNS} get svc ${clusterT3LBSVCName} -o json |
+      jq '. | .status.loadBalancer.ingress[0].ip' |
+      tr -d "\"")
   fi
 
   if [ $? == 1 ]; then
     echo_stderr "Failed to query public IP of cluster t3 channel."
   fi
 
-  currentDomainConfig=$(echo ${currentDomainConfig} \
-    | jq \
-    --arg match "${constClusterT3AddressEnvName}" \
-    --arg replace "${clusterT3Adress}" \
-    '.spec.serverPod.env |= map(if .name==$match then (.value=$replace) else . end)')
+  currentDomainConfig=$(echo ${currentDomainConfig} |
+    jq \
+      --arg match "${constClusterT3AddressEnvName}" \
+      --arg replace "${clusterT3Adress}" \
+      '.spec.serverPod.env |= map(if .name==$match then (.value=$replace) else . end)')
 }
 
 function rolling_update_with_t3_public_address() {
   timestampBeforePatchingDomain=$(date +%s)
   currentDomainConfig=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json)
-  cat<<EOF >${scriptDir}/domainPreviousConfiguration.yaml
+  cat <<EOF >${scriptDir}/domainPreviousConfiguration.yaml
 ${currentDomainConfig}
 EOF
 
@@ -851,39 +845,39 @@ EOF
 
   if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
     # restart cluster
-    restartVersion=$( kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
-      | jq '. | .spec.restartVersion' \
-      | tr -d "\"")
-    restartVersion=$((restartVersion+1))
+    restartVersion=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json |
+      jq '. | .spec.restartVersion' |
+      tr -d "\"")
+    restartVersion=$((restartVersion + 1))
 
-    currentDomainConfig=$(echo ${currentDomainConfig} \
-      | jq \
-      --arg version "${restartVersion}" \
-      '.spec.restartVersion |= $version')
+    currentDomainConfig=$(echo ${currentDomainConfig} |
+      jq \
+        --arg version "${restartVersion}" \
+        '.spec.restartVersion |= $version')
 
     echo "rolling restart the cluster with t3 public address."
     # echo the configuration for debugging
-    cat<<EOF >${scriptDir}/domainNewConfiguration.yaml
+    cat <<EOF >${scriptDir}/domainNewConfiguration.yaml
 ${currentDomainConfig}
 EOF
     echo ${currentDomainConfig} | kubectl -n ${wlsDomainNS} apply -f -
 
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
-        | jq '. | .spec.clusters[] | .replicas')
+    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json |
+      jq '. | .spec.clusters[] | .replicas')
 
     # wait for the restart completed.
     utility_wait_for_pod_restarted \
-        ${timestampBeforePatchingDomain} \
-        ${replicas} \
-        ${wlsDomainUID} \
-        ${checkPodStatusMaxAttemps} \
-        ${checkPodStatusInterval}
+      ${timestampBeforePatchingDomain} \
+      ${replicas} \
+      ${wlsDomainUID} \
+      ${checkPodStatusMaxAttemps} \
+      ${checkPodStatusInterval}
 
     utility_wait_for_pod_completed \
-        ${replicas} \
-        ${wlsDomainNS} \
-        ${checkPodStatusMaxAttemps} \
-        ${checkPodStatusInterval}
+      ${replicas} \
+      ${wlsDomainNS} \
+      ${checkPodStatusMaxAttemps} \
+      ${checkPodStatusInterval}
   fi
 }
 
@@ -950,15 +944,15 @@ EOF
       fi
     elif [[ "${target}" == "adminServerT3" ]]; then
       echo "query admin t3 port"
-      adminT3Port=$( kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json \
-        | jq '.spec.ports[] | select(.name=="t3channel") | .port')
-      adminT3sPort=$( kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json \
-        | jq '.spec.ports[] | select(.name=="t3schannel") | .port')
+      adminT3Port=$(kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json |
+        jq '.spec.ports[] | select(.name=="t3channel") | .port')
+      adminT3sPort=$(kubectl get service ${svcAdminServer} -n ${wlsDomainNS} -o json |
+        jq '.spec.ports[] | select(.name=="t3schannel") | .port')
       if [[ "${adminT3Port}" == "null" ]] && [[ "${adminT3sPort}" == "null" ]]; then
         continue
       fi
 
-      if [[ "${adminT3sPort}" != "null"  ]]; then
+      if [[ "${adminT3sPort}" != "null" ]]; then
         adminT3Port=${adminT3sPort}
       fi
 
@@ -984,10 +978,10 @@ EOF
       enableAdminT3Channel=true
     elif [[ "${target}" == "cluster1T3" ]]; then
       echo "query cluster t3 port"
-      clusterT3Port=$( kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json \
-        | jq '.spec.ports[] | select(.name=="t3channel") | .port')
-      clusterT3sPort=$( kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json \
-        | jq '.spec.ports[] | select(.name=="t3schannel") | .port')
+      clusterT3Port=$(kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json |
+        jq '.spec.ports[] | select(.name=="t3channel") | .port')
+      clusterT3sPort=$(kubectl get service ${svcCluster} -n ${wlsDomainNS} -o json |
+        jq '.spec.ports[] | select(.name=="t3schannel") | .port')
       if [[ "${clusterT3Port}" == "null" ]] && [[ "${clusterT3sPort}" == "null" ]]; then
         continue
       fi
@@ -1008,7 +1002,7 @@ EOF
 
       clusterT3Endpoint=$(kubectl get svc ${clusterT3LBSVCName} -n ${wlsDomainNS} \
         -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
-      
+
       create_dns_A_record "${clusterT3Endpoint%%:*}" ${dnszoneClusterT3ChannelLabel}
 
       if [ "${enableCustomDNSAlias,,}" == "true" ]; then
@@ -1068,8 +1062,6 @@ function network_peers_aks_appgw() {
   validate_status "Associate the route table ${routeTableId} to Application Gateway's subnet ${appGatewaySubnetId}"
 }
 
-
-
 function create_appgw_ingress() {
   if [[ "${enableAppGWIngress,,}" != "true" ]]; then
     return
@@ -1125,43 +1117,42 @@ function create_appgw_ingress() {
 
   attempts=0
   podState="running"
-  while [ ! "$podState" == "completed" ] && [ $attempts -lt ${perfPodAttemps} ]; do
+  while [ "$podState" == "running" ] && [ $attempts -lt ${perfPodAttemps} ]; do
     podState="completed"
     attempts=$((attempts + 1))
     echo Waiting for Pod running...${attempts}
     sleep ${perfRetryInterval}
 
     ret=$(kubectl get pod -o json | jq '.items[] | .status.containerStatuses[] | select(.name=="ingress-azure") | .ready')
-    if [[ "${ret}"=="false" ]]; then
+    if [[ "${ret}" == "false" ]]; then
       podState="running"
-
-      if [ $attempts -ge ${perfPodAttemps} ]; then
-        echo_stderr "Failed to install app gateway ingress controller."
-        exit 1
-      fi
     fi
   done
+
+  if [ "$podState" == "running" ] && [ $attempts -ge ${perfPodAttemps} ]; then
+    echo_stderr "Failed to install app gateway ingress controller."
+    exit 1
+  fi
 
   # create tsl secret
   output_create_gateway_ssl_k8s_secret
 
-  
-  if [[ "${enableCustomSSL,,}" == "true" ]];then
+  if [[ "${enableCustomSSL,,}" == "true" ]]; then
     az network application-gateway root-cert list \
       --gateway-name $appgwName \
-      --resource-group $curRGName \
-      | jq '.[] | .name' | grep "${appgwBackendSecretName}"
+      --resource-group $curRGName |
+      jq '.[] | .name' | grep "${appgwBackendSecretName}"
 
     validate_status "check if backend cert exists."
   fi
 
-  # generate ingress svc config for cluster  
+  # generate ingress svc config for cluster
   generate_appgw_cluster_config_file
   kubectl apply -f ${clusterAppgwIngressYamlPath}
   validate_status "Create appgw ingress svc."
   waitfor_svc_completed ${clusterIngressName}
   # expose https if e2e ssl is not set up.
-  if [[ "${enableCustomSSL,,}" != "true" ]];then
+  if [[ "${enableCustomSSL,,}" != "true" ]]; then
     kubectl apply -f ${clusterAppgwIngressHttpsYamlPath}
     validate_status "Create appgw ingress https svc."
     waitfor_svc_completed ${clusterIngressHttpsName}
@@ -1236,7 +1227,7 @@ export clusterEndpoint="null"
 export httpsListenerName="myHttpsListenerName$(date +%s)"
 export httpsRuleName="myHttpsRule$(date +%s)"
 export perfRetryInterval=30 # seconds
-export perfPodAttemps=5
+export perfPodAttemps=10
 export perfSVCAttemps=10
 export sharedPath="/shared"
 export svcAdminServer="${wlsDomainUID}-${adminServerName}"
