@@ -67,7 +67,8 @@ param wlsDomainUID string = 'sample-domain1'
 var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_appgwSSLCertOptionGenerateCert = 'generateCert'
-var ref_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? reference('ds-networking-deployment-1'): reference('ds-networking-deployment')) : reference('ds-networking-deployment-2')
+var name_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? 'ds-networking-deployment-1': 'ds-networking-deployment') : 'ds-networking-deployment-2'
+var ref_networkDeployment = reference(name_networkDeployment)
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
   name: 'pid-networking-start-deployment'
@@ -108,7 +109,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
 module appgwBackendCertDeployment '_deployment-scripts/_ds-appgw-upload-trusted-root-certificate.bicep' = if (enableAppGWIngress && enableCustomSSL) {
   name: 'app-gateway-backend-cert-deployment'
   params: {
-    appgwName: appgwDeployment.outputs.appGatewayName
+    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
     sslBackendRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
     identity: identity
   }
@@ -214,8 +215,8 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
-    appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwName: 'null'
+    appgwAlias: 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
@@ -238,12 +239,11 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     location: location
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
-    vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
+    vnetName: 'null'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    appgwBackendCertDeployment
     dnsZoneDeployment
   ]
 }

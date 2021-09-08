@@ -718,7 +718,7 @@ function setup_wls_domain() {
             ${enableClusterT3Tunneling} \
             ${t3AdminPort} \
             ${t3ClusterPort} \
-            ${wlsClusterName} \
+            ${constClusterName} \
             "${javaOptions}"
     else
         echo "start to create domain  ${wlsDomainUID}"
@@ -739,7 +739,7 @@ function setup_wls_domain() {
             ${enableClusterT3Tunneling} \
             ${t3AdminPort} \
             ${t3ClusterPort} \
-            ${wlsClusterName} \
+            ${constClusterName} \
             "${javaOptions}"
     fi
 
@@ -801,7 +801,6 @@ export sasTokenValidTime=3600
 export storageFileShareName="weblogic"
 export storageResourceGroup=${currentResourceGroup}
 export sharedPath="/shared"
-export wlsClusterName="cluster-1"
 export wlsDomainNS="${wlsDomainUID}-ns"
 export wlsOptHelmChart="https://oracle.github.io/weblogic-kubernetes-operator/charts"
 export wlsOptNameSpace="weblogic-operator-ns"

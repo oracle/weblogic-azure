@@ -242,4 +242,4 @@ output aksClusterRGName string = createAKSCluster ? resourceGroup().name : aksCl
 output adminServerUrl string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console', wlsDomainUID)
 output adminServerT3InternalUrl string = enableAdminT3Tunneling ? format('{0}://{1}-admin-server.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelAdminPort): ''
 output clusterSVCUrl string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)
-output clusterT3InternalUrl string = enableClusterT3Tunneling ? format('{0}://{1}-cluster-cluster-1.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelAdminPort): ''
+output clusterT3InternalUrl string = enableClusterT3Tunneling ? format('{0}://{1}-cluster-cluster-1.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelClusterPort): ''

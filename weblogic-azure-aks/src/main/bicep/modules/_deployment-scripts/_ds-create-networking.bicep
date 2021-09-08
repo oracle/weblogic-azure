@@ -47,6 +47,9 @@ var const_appgwHelmConfigTemplate='appgw-helm-config.yaml.template'
 var const_appgwSARoleBindingFile='appgw-ingress-clusterAdmin-roleBinding.yaml'
 var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneClusterLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole} ${dnszoneAdminT3ChannelLabel} ${dnszoneClusterT3ChannelLabel}'
 var const_commonScript = 'common.sh'
+var const_createDnsRecordScript = 'createDnsRecord.sh'
+var const_createLbSvcScript = 'createLbSvc.sh'
+var const_createGatewayIngressSvcScript = 'createAppGatewayIngress.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_setupNetworkingScript= 'setupNetworking.sh'
 var const_primaryScript = 'invokeSetupNetworking.sh'
@@ -67,6 +70,9 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       uri(const_scriptLocation, '${const_appgwSARoleBindingFile}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
+      uri(const_scriptLocation, '${const_createDnsRecordScript}${_artifactsLocationSasToken}')
+      uri(const_scriptLocation, '${const_createLbSvcScript}${_artifactsLocationSasToken}')
+      uri(const_scriptLocation, '${const_createGatewayIngressSvcScript}${_artifactsLocationSasToken}')
     ]
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
