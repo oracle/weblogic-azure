@@ -124,7 +124,6 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
   name: 'dnszone-deployment'
   params: {
     dnszoneName: dnszoneName
-    location: location
   }
   dependsOn: [
     pidNetworkingStart
