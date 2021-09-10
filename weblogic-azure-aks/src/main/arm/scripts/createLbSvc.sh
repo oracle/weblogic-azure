@@ -458,8 +458,12 @@ dnszoneClusterT3ChannelLabel=$9
 lbSvcValues=${10}
 wlsDomainUID=${11}
 
+adminConsoleEndpoint="null"
 adminServerName=${constAdminServerName} # define in common.sh
+adminServerT3Endpoint="null"
+clusterEndpoint="null"
 clusterName=${constClusterName}
+clusterT3Endpoint="null"
 svcAdminServer="${wlsDomainUID}-${adminServerName}"
 svcCluster="${wlsDomainUID}-cluster-${clusterName}"
 wlsDomainNS="${wlsDomainUID}-ns"
