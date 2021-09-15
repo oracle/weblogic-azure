@@ -19,8 +19,14 @@ param databaseType string = 'oracle'
   'delete'
 ])
 param dbConfigurationType string = 'createOrUpdate'
+@description('Datasource driver name')
+param dbDriverName string = 'org.contoso.Driver'
+@description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
+param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 @description('Password for Database')
 param dbPassword string = newGuid()
+@description('The name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.')
+param dbTestTableName string = 'Null'
 @description('User id of Database')
 param dbUser string = 'contosoDbUser'
 @description('JDBC Connection String')
@@ -53,7 +59,10 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     aksClusterRGName: aksClusterRGName
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
+    dbDriverName: dbDriverName
+    dbGlobalTranPro: dbGlobalTranPro
     dbPassword: dbPassword
+    dbTestTableName: dbTestTableName
     dbUser: dbUser
     dsConnectionURL: dsConnectionURL
     identity: identity

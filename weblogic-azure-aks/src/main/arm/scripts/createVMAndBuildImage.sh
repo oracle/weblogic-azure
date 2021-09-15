@@ -6,6 +6,13 @@ function read_sensitive_parameters_from_stdin() {
     read azureACRPassword ocrSSOPSW
 }
 
+function initialize() {
+    # initialize URL_3RD_DATASOURCE
+    if [ -z "${URL_3RD_DATASOURCE}" ];then
+        URL_3RD_DATASOURCE="[]"
+    fi
+}
+
 function cleanup_vm() {
     #Remove VM resources
     az extension add --name resource-graph
@@ -89,11 +96,11 @@ function build_docker_image() {
     if [[ "${useOracleImage,,}" == "${constTrue}" ]]; then
         wlsImagePath="${ocrLoginServer}/middleware/weblogic:${wlsImageTag}"
     else
-        wlsImagePath="${userProvidedImagePath}"    
+        wlsImagePath="${userProvidedImagePath}"
     fi
 
     echo "wlsImagePath: ${wlsImagePath}"
-
+    URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | tr -d "\"") # remove " from the string
     az vm extension set --name CustomScript \
         --extension-instance-name wls-image-script \
         --resource-group ${currentResourceGroup} \
@@ -101,7 +108,7 @@ function build_docker_image() {
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
         --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-        --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${useOracleImage} \"}"
+        --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${useOracleImage} \\\"${URL_3RD_DATASOURCE}\\\" \"}"
     
     cleanup_vm
 }
@@ -131,6 +138,8 @@ export useOracleImage=${13}
 export userProvidedImagePath=${14}
 
 read_sensitive_parameters_from_stdin
+
+initialize
 
 build_docker_image
 

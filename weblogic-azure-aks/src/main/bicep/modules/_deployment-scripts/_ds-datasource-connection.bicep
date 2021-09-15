@@ -9,7 +9,10 @@ param aksClusterName string
 param aksClusterRGName string
 param databaseType string = 'oracle'
 param dbConfigurationType string
+param dbDriverName string = 'org.contoso.Driver'
+param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 param dbPassword string = newGuid()
+param dbTestTableName string = 'Null'
 param dbUser string
 param dsConnectionURL string
 param identity object
@@ -39,6 +42,20 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azCliVersion: const_azcliVersion
     arguments: const_arguments
+    environmentVariables: [
+      {
+        name: 'DB_DRIVER_NAME'
+        value:  dbDriverName
+      }
+      {
+        name: 'GLOBAL_TRANSATION_PROTOCOL'
+        value:  dbGlobalTranPro
+      }
+      {
+        name: 'TEST_TABLE_NAME'
+        value:  dbTestTableName
+      }
+    ]
     primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetupDBConnectionsScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
       uri(const_scriptLocation, '${const_datasourceScript}${_artifactsLocationSasToken}')

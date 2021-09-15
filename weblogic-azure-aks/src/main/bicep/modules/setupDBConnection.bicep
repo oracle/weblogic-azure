@@ -17,6 +17,7 @@ Parameters
     - createOrUpdate: create a new data source connection, or update an existing data source connection. 
     - delete: delete an existing data source connection
   - dbPassword: Password for Database
+  - dbGlobalTranPro: Determines the transaction protocol (global transaction processing behavior) for the data source..
   - dbUser: User id of Database
   - dsConnectionURL: JDBC Connection String
   - identity: Azure user managed identity used, make sure the identity has permission to create/update/delete Azure resources. It's recommended to assign "Contributor" role.
@@ -48,6 +49,8 @@ param databaseType string = 'oracle'
 ])
 @description('createOrUpdate: create a new data source connection, or update an existing data source connection. delete: delete an existing data source connection')
 param dbConfigurationType string = 'createOrUpdate'
+@description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
+param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('User id of Database')
@@ -81,6 +84,7 @@ module configDataSource './_setupDBConnection.bicep' = {
     aksClusterRGName: resourceGroup().name
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
+    dbGlobalTranPro: dbGlobalTranPro
     dbPassword: dbPassword
     dbUser: dbUser
     dsConnectionURL: dsConnectionURL

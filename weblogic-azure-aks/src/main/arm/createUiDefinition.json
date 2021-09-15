@@ -1672,6 +1672,10 @@
                                         {
                                             "label": "Azure SQL",
                                             "value": "sqlserver"
+                                        },
+                                        {
+                                            "label": "Others",
+                                            "value": "otherdb"
                                         }
                                     ],
                                     "required": true
@@ -1685,9 +1689,9 @@
                                 "toolTip": "The JNDI name for the database JDBC connection",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^[a-zA-Z0-9./_-]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, hyphens (-), underscores (_), periods (.) and slashes (/)."
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z/]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
                                 },
                                 "visible": true
                             },
@@ -1698,9 +1702,61 @@
                                 "toolTip": "The JDBC connection string for the database",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), not(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb')))]"
+                            },
+                            {
+                                "name": "dsConnectionURL2",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DataSource Connection String",
+                                "toolTip": "The JDBC connection string for the database",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^jdbc:.*$",
+                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                            },
+                            {
+                                "name": "dbGlobalTranPro",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Global transactions protocol",
+                                "defaultValue": "EmulateTwoPhaseCommit",
+                                "multiLine": true,
+                                "toolTip": "Determines the transaction protocol (global transaction processing behavior) for the data source.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "TwoPhaseCommit",
+                                            "description": "Standard XA transaction processing. Requires an XA driver.",
+                                            "value": "TwoPhaseCommit"
+                                        },
+                                        {
+                                            "label": "LoggingLastResource",
+                                            "description": "A performance enhancement for one non-XA resource.",
+                                            "value": "LoggingLastResource"
+                                        },
+                                        {
+                                            "label": "EmulateTwoPhaseCommit",
+                                            "description": "Enables one non-XA resource to participate in a global transaction, but has some risk to data.",
+                                            "value": "EmulateTwoPhaseCommit"
+                                        },
+                                        {
+                                            "label": "OnePhaseCommit",
+                                            "description": "One-phase XA transaction processing using a non-XA driver. This is the default setting.",
+                                            "value": "OnePhaseCommit"
+                                        },
+                                        {
+                                            "label": "None",
+                                            "description": "Support for local transactions only.",
+                                            "value": "None"
+                                        }
+                                    ],
+                                    "required": true
                                 },
                                 "visible": true
                             },
@@ -1711,8 +1767,8 @@
                                 "toolTip": "Use only letters and numbers",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^(?=.{1,128}$)[a-zA-Z](?!.*--)(?!.*@@)(?!.*-@)(?!.*@-)[a-zA-Z0-9-@]*[a-zA-Z0-9]$",
+                                    "required": true,
+                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
                                     "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
                                 },
                                 "visible": true
@@ -1726,7 +1782,7 @@
                                 },
                                 "toolTip": "Database Password",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
                                     "validationMessage": "The password must be between 5 and 128 characters long and have at least one number."
                                 },
@@ -1734,6 +1790,47 @@
                                     "hideConfirmation": false
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "dbDriverLibraries",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "DataSource driver (.jar)",
+                                "toolTip": "The datasource driver jar package for the specified database.",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".jar"
+                                },
+                                "options": {
+                                    "multiple": true,
+                                    "uploadMode": "url",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                            },
+                            {
+                                "name": "dbDriverName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DataSource driver name",
+                                "toolTip": "The driver name for the database",
+                                "placeholder": "com.informix.jdbc.IfxDriver",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-zA-Z_][a-zA-Z0-9_]+(\\.[a-zA-Z_][a-zA-Z0-9_]+){1,50}$",
+                                    "validationMessage": "A valid driver name for the chosen database type must be provided"
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                            },
+                            {
+                                "name": "dbTestTableName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Test table name",
+                                "toolTip": "The name of the database table to use when testing physical database connections. ",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^.*$",
+                                    "validationMessage": "A test table name for the chosen database type must be provided"
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
                             }
                         ],
                         "visible": "[bool(steps('section_database').enableDB)]"
@@ -1758,7 +1855,11 @@
             "createACR": "[bool(steps('section_aks').imageInfo.oracleCreateACR)]",
             "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
             "createDNSZone": "[not(bool(steps('section_dnsConfiguration').bringDNSZone))]",
+            "dbDriverLibrariesUrls": "[steps('section_database').databaseConnectionInfo.dbDriverLibraries]",
+            "dbDriverName": "[steps('section_database').databaseConnectionInfo.dbDriverName]",
+            "dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
+            "dbTestTableName": "[steps('section_database').databaseConnectionInfo.dbTestTableName]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "dnszoneAdminConsoleLabel": "[steps('section_dnsConfiguration').dnszoneAdminConsoleLabel]",
@@ -1767,7 +1868,7 @@
             "dnszoneClusterT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel]",
             "dnszoneName": "[steps('section_dnsConfiguration').dnszoneName]",
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
-            "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+            "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
             "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
             "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
             "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
