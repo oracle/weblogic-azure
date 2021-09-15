@@ -69,8 +69,6 @@ function cleanup()
     echo "Cleaning up temporary files..."
 
     rm -rf $DOMAIN_PATH/admin-domain.yaml
-    rm -rf $DOMAIN_PATH/weblogic-deploy.zip
-    rm -rf $DOMAIN_PATH/weblogic-deploy
     rm -rf $DOMAIN_PATH/deploy-app.yaml
     rm -rf $DOMAIN_PATH/shoppingcart.zip
  
@@ -178,25 +176,14 @@ EOF
 function create_adminDomain()
 {
     echo "Creating Admin Only Domain"
-    echo "Creating domain path /u01/domains"
-    echo "Downloading weblogic-deploy-tool"
-
-    DOMAIN_PATH="/u01/domains"
+    echo "Creating domain path $DOMAIN_PATH"
     sudo mkdir -p $DOMAIN_PATH
-    sudo rm -rf $DOMAIN_PATH/*
 
+    # WebLogic base images are already having weblogic-deploy, hence no need to download   
     if [ ! -d "$DOMAIN_PATH/weblogic-deploy" ];
     then
-        echo "Deployment tool not found. Downloading..."
-    cd $DOMAIN_PATH
-    wget -q $WEBLOGIC_DEPLOY_TOOL  
-    if [[ $? != 0 ]]; then
-       echo "Error : Downloading weblogic-deploy-tool failed"
-       exit 1
-    fi
-    sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
-    else
-        echo "Deploy tool already available at $DOMAIN_PATH/weblogic-deploy"
+        echo "Deployment tool not found in the path $DOMAIN_PATH"
+        exit 1
     fi
 
     storeCustomSSLCerts
@@ -502,7 +489,6 @@ installUtilities
 mountFileShare
 
 KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
-WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
 samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 wlsAdminPort=7001
 wlsSSLAdminPort=7002

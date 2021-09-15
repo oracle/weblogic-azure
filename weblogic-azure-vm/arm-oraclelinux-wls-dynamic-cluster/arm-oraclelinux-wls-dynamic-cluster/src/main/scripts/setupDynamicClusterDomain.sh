@@ -117,8 +117,6 @@ function cleanup()
     echo "Cleaning up temporary files..."
     rm -rf $DOMAIN_PATH/admin-domain.yaml
     rm -rf $DOMAIN_PATH/managed-domain.yaml
-    rm -rf $DOMAIN_PATH/weblogic-deploy.zip
-    rm -rf $DOMAIN_PATH/weblogic-deploy
     rm -rf $DOMAIN_PATH/deploy-app.yaml
     rm -rf $DOMAIN_PATH/shoppingcart.zip
     rm -rf $DOMAIN_PATH/*.py
@@ -366,17 +364,16 @@ function create_adminSetup()
     echo "Creating domain path $DOMAIN_PATH"
  
     sudo mkdir -p $DOMAIN_PATH 
-    sudo rm -rf $DOMAIN_PATH/*
 
-    echo "Downloading weblogic-deploy-tool"
     cd $DOMAIN_PATH
-    wget -q $WEBLOGIC_DEPLOY_TOOL  
-    if [[ $? != 0 ]]; then
-       echo "Error : Downloading weblogic-deploy-tool failed"
-       exit 1
-    fi
-    sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
 
+    # WebLogic base images are already having weblogic-deploy, hence no need to download
+    if [ ! -d "$DOMAIN_PATH/weblogic-deploy" ];
+    then
+        echo "weblogic-deploy tool not found in path $DOMAIN_PATH"
+        exit 1
+    fi
+    
     storeCustomSSLCerts
 
     create_admin_model
@@ -472,19 +469,16 @@ function start_nm()
 
 function create_managedSetup(){
     echo "Creating Managed Server Setup"
-    echo "Creating domain path /u01/domains"
-    DOMAIN_PATH="/u01/domains" 
+    echo "Creating domain path $DOMAIN_PATH"
+ 
     sudo mkdir -p $DOMAIN_PATH 
-    sudo rm -rf $DOMAIN_PATH/*
 
-    echo "Downloading weblogic-deploy-tool"
-    cd $DOMAIN_PATH
-    wget -q $WEBLOGIC_DEPLOY_TOOL  
-    if [[ $? != 0 ]]; then
-       echo "Error : Downloading weblogic-deploy-tool failed"
-       exit 1
+    # WebLogic base images are already having weblogic-deploy, hence no need to download
+    if [ ! -d "$DOMAIN_PATH/weblogic-deploy" ];
+    then
+        echo "weblogic-deploy tool not found in path $DOMAIN_PATH"
+        exit 1
     fi
-    sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
 
     storeCustomSSLCerts
 
@@ -855,7 +849,6 @@ nmHost=`hostname`
 nmPort=5556
 machineNamePrefix="machine"
 machineName="$machineNamePrefix-$nmHost"
-WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
 username="oracle"
 groupname="oracle"
 

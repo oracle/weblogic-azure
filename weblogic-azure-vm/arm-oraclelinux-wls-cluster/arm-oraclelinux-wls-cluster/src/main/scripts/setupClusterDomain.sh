@@ -496,7 +496,6 @@ fi
 function create_managedSetup(){
     echo "Creating Managed Server Setup"
 
-    DOMAIN_PATH="/u01/domains" 
     sudo mkdir -p $DOMAIN_PATH 
 
     cd $DOMAIN_PATH
