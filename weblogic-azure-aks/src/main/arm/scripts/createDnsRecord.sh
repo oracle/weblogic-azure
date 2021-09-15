@@ -23,7 +23,6 @@ function create_dns_A_record() {
     dnsZoneName=$4
 
     az network dns record-set a add-record --ipv4-address ${ipv4Addr} \
-        --if-none-match \
         --record-set-name ${label} \
         --resource-group ${dnsRGName} \
         --zone-name ${dnsZoneName}
@@ -46,13 +45,11 @@ function create_dns_CNAME_record() {
     dnsZoneName=$4
 
     az network dns record-set cname create \
-        --if-none-match \
         -g ${dnsRGName} \
         -z ${dnsZoneName} \
         -n ${label}
 
     az network dns record-set cname set-record \
-        --if-none-match \
         -g ${dnsRGName} \
         -z ${dnsZoneName} \
         --cname ${cname} \
@@ -60,6 +57,6 @@ function create_dns_CNAME_record() {
 
     if [ $? != 0 ]; then
         echo_stderr "Failed to create DNS record: ${label}.${dnsZoneName}, cname: ${cname}"
-        exit 1 
+        exit 1
     fi
 }
