@@ -10,6 +10,17 @@ source ${scriptDir}/common.sh
 export filePath=$1
 export appPackageUrls=$2
 export enableCustomSSL=$3
+export enableAdminT3Tunneling=$4
+export enableClusterT3Tunneling=$5
+
+export enableT3s=${enableCustomSSL,,}
+export t3Protocol="t3"
+export t3ChannelName="T3Channel"
+
+if [ "${enableCustomSSL,,}" == "true" ]; then
+  t3Protocol="t3s"
+  t3ChannelName="T3sChannel"
+fi
 
 cat <<EOF >${filePath}
 # Copyright (c) 2020, 2021, Oracle and/or its affiliates.
@@ -42,7 +53,24 @@ topology:
       ListenPort: 7001
 EOF
 
-if [[ "${enableCustomSSL,,}" == "true" ]];then
+if [[ "${enableAdminT3Tunneling,,}" == "true" ]];then
+  cat <<EOF >>${filePath}
+      NetworkAccessPoint:
+        ${t3ChannelName}:
+          Protocol: '${t3Protocol}'
+          ListenPort: "@@ENV:T3_TUNNELING_ADMIN_PORT@@"
+          PublicPort: "@@ENV:T3_TUNNELING_ADMIN_PORT@@"
+          HttpEnabledForThisProtocol: true
+          OutboundEnabled: false
+          Enabled: true
+          TwoWaySSLEnabled: ${enableT3s}
+          ClientCertificateEnforced: false
+          TunnelingEnabled: true
+          PublicAddress: '@@ENV:T3_TUNNELING_ADMIN_ADDRESS@@'
+EOF
+fi
+
+if [[ "${enableCustomSSL,,}" == "true" ]]; then
   cat <<EOF >>${filePath}
       SSL:
         HostnameVerificationIgnored: true
@@ -67,6 +95,23 @@ cat <<EOF >>${filePath}
       Cluster: "cluster-1"
       ListenPort: 8001
 EOF
+
+if [[ "${enableClusterT3Tunneling,,}" == "true" ]];then
+  cat <<EOF >>${filePath}
+      NetworkAccessPoint:
+        ${t3ChannelName}:
+          Protocol: '${t3Protocol}'
+          ListenPort: "@@ENV:T3_TUNNELING_CLUSTER_PORT@@"
+          PublicPort: "@@ENV:T3_TUNNELING_CLUSTER_PORT@@"
+          HttpEnabledForThisProtocol: true
+          OutboundEnabled: false
+          Enabled: true
+          TwoWaySSLEnabled: ${enableT3s}
+          ClientCertificateEnforced: false
+          TunnelingEnabled: true
+          PublicAddress: '@@ENV:T3_TUNNELING_CLUSTER_ADDRESS@@'
+EOF
+fi
 
 if [[ "${enableCustomSSL,,}" == "true" ]];then
   cat <<EOF >>${filePath}
@@ -143,3 +188,6 @@ EOF
 EOF
         index=$((index + 1))
     done
+
+# print model
+cat ${filePath}

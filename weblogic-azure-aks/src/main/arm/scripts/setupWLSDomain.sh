@@ -11,7 +11,8 @@ function read_sensitive_parameters_from_stdin() {
 
 #Function to display usage message
 function usage() {
-    usage=$(cat <<-END
+    usage=$(
+        cat <<-END
 Usage:
 echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentityKeyPsw> <wlsTrustPsw> | 
 ./setupWLSDomain.sh
@@ -39,8 +40,12 @@ echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentit
     <wlsTrustData>
     <wlsTrustType>
     <enablePV>
+    <enableAdminT3Tunneling>
+    <enableClusterT3Tunneling>
+    <t3AdminPort>
+    <t3ClusterPort>
 END
-)
+    )
     echo_stdout ${usage}
     if [ $1 -eq 1 ]; then
         echo_stderr ${usage}
@@ -174,6 +179,35 @@ function validate_input() {
         echo_stderr "enablePV is required. "
         usage 1
     fi
+
+    if [ -z "$enableAdminT3Tunneling" ]; then
+        echo_stderr "enableAdminT3Tunneling is required. "
+        usage 1
+    fi
+
+    if [ -z "$enableClusterT3Tunneling" ]; then
+        echo_stderr "enableClusterT3Tunneling is required. "
+        usage 1
+    fi
+
+    if [ -z "$t3AdminPort" ]; then
+        echo_stderr "t3AdminPort is required. "
+        usage 1
+    fi
+
+    if [ -z "$t3ClusterPort" ]; then
+        echo_stderr "t3ClusterPort is required. "
+        usage 1
+    fi
+
+    if [ -z "$wlsJavaOption" ]; then
+        echo_stderr "wlsJavaOption is required. "
+        usage 1
+    fi
+
+    if [[ "${wlsJavaOption}" == "null" ]];then
+        wlsJavaOption=""
+    fi
 }
 
 # Validate teminal status with $?, exit with exception if errors happen.
@@ -287,13 +321,13 @@ function install_wls_operator() {
 
     echo "install the operator"
     helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
-    --namespace ${wlsOptNameSpace} \
-    --set serviceAccount=${wlsOptSA} \
-    --set "enableClusterRoleBinding=true" \
-    --set "domainNamespaceSelectionStrategy=LabelSelector" \
-    --set "domainNamespaceLabelSelector=weblogic-operator\=enabled" \
-    --version ${wlsOptVersion} \
-    --wait
+        --namespace ${wlsOptNameSpace} \
+        --set serviceAccount=${wlsOptSA} \
+        --set "enableClusterRoleBinding=true" \
+        --set "domainNamespaceSelectionStrategy=LabelSelector" \
+        --set "domainNamespaceLabelSelector=weblogic-operator\=enabled" \
+        --version ${wlsOptVersion} \
+        --wait
 
     validate_status "Installing WLS operator."
 
@@ -322,19 +356,21 @@ function query_acr_credentials() {
 function build_docker_image() {
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    echo $azureACRPassword $ocrSSOPSW | \
+    echo $azureACRPassword $ocrSSOPSW |
         bash $scriptDir/createVMAndBuildImage.sh \
-        $currentResourceGroup \
-        $wlsImageTag \
-        $azureACRServer \
-        $azureACRUserName \
-        $newImageTag \
-        "$appPackageUrls" \
-        $ocrSSOUser \
-        $wlsClusterSize \
-        $enableCustomSSL \
-        "$scriptURL"
-    
+            $currentResourceGroup \
+            $wlsImageTag \
+            $azureACRServer \
+            $azureACRUserName \
+            $newImageTag \
+            "$appPackageUrls" \
+            $ocrSSOUser \
+            $wlsClusterSize \
+            $enableCustomSSL \
+            "$scriptURL" \
+            ${enableAdminT3Tunneling} \
+            ${enableClusterT3Tunneling}
+
     az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
         echo "Failed to create image ${azureACRServer}/aks-wls-images:${newImageTag}"
@@ -342,39 +378,21 @@ function build_docker_image() {
     fi
 }
 
-function mount_fileshare() {
-    fileShareName="${azFileShareName}"
-
-    # Disable https-only
-    az storage account update --name ${storageAccountName} --resource-group ${storageResourceGroup} --https-only false
-
+function create_source_folder_for_certificates() {
     mntRoot="/wls"
-    mntPath="$mntRoot/$storageAccountName/$fileShareName"
+    mntPath="$mntRoot/$storageAccountName/$azFileShareName"
 
     mkdir -p $mntPath
 
-    httpEndpoint=$(
-        az storage account show \
-        --resource-group $storageResourceGroup \
-        --name $storageAccountName \
-        --query "primaryEndpoints.file" | tr -d '"'
-    )
-    smbPath=$(echo $httpEndpoint | cut -c7-$(expr length $httpEndpoint))$fileShareName
-
-    export storageAccountKey=$(az storage account keys list \
-        --resource-group $storageResourceGroup \
-        --account-name $storageAccountName \
-        --query "[0].value" -o tsv)
-
-    mount -t cifs $smbPath $mntPath -o username=$storageAccountName,password=$storageAccountKey,serverino,vers=3.0,file_mode=0777,dir_mode=0777
-    validate_status "Mounting path."
-}
-
-function unmount_fileshare() {
-    echo "unmount fileshare."
-    umount ${mntPath}
-    # Disable https-only
-    az storage account update --name ${storageAccountName} --resource-group ${storageResourceGroup} --https-only true
+    # Create a folder for certificates
+    securityDir=${mntPath}/security
+    if [ ! -d "${securityDir}" ]; then
+        mkdir ${mntPath}/security
+    else
+        rm -f ${mntPath}/$wlsIdentityKeyStoreFileName
+        rm -f ${mntPath}/$wlsTrustKeyStoreFileName
+        rm -f ${mntPath}/${wlsTrustKeyStoreJKSFileName}
+    fi
 }
 
 function validate_ssl_keystores() {
@@ -418,18 +436,51 @@ function validate_ssl_keystores() {
     echo "Validate SSL key stores successfull !!"
 }
 
+function upload_certificates_to_fileshare() {
+    expiryData=$(($(date +%s) + ${sasTokenValidTime}))
+    sasTokenEnd=$(date -d@"$expiryData" -u '+%Y-%m-%dT%H:%MZ')
+    sasToken=$(az storage share generate-sas \
+        --name ${azFileShareName} \
+        --account-name ${storageAccountName} \
+        --https-only \
+        --permissions dlrw \
+        --expiry $sasTokenEnd -o tsv)
+
+    echo "create directory security"
+    fsSecurityDirName="security"
+    utility_create_directory_to_fileshare \
+        ${fsSecurityDirName} \
+        ${azFileShareName} \
+        ${storageAccountName} \
+        $sasToken
+
+    echo "upload $wlsIdentityKeyStoreFileName"
+    utility_upload_file_to_fileshare \
+        ${azFileShareName} \
+        ${storageAccountName} \
+        "$wlsIdentityKeyStoreFileName" \
+        ${mntPath}/$wlsIdentityKeyStoreFileName \
+        $sasToken
+
+    echo "upload $wlsTrustKeyStoreFileName"
+    utility_upload_file_to_fileshare \
+        ${azFileShareName} \
+        ${storageAccountName} \
+        "$wlsTrustKeyStoreFileName" \
+        ${mntPath}/$wlsTrustKeyStoreFileName \
+        $sasToken
+
+    echo "upload $wlsTrustKeyStoreJKSFileName"
+    utility_upload_file_to_fileshare \
+        ${azFileShareName} \
+        ${storageAccountName} \
+        "$wlsTrustKeyStoreJKSFileName" \
+        ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
+        $sasToken
+}
+
 function output_ssl_keystore() {
     echo "Custom SSL is enabled. Storing CertInfo as files..."
-    # Create a folder for certificates
-    securityDir=${mntPath}/security
-    if [ ! -d "${securityDir}" ]; then
-        mkdir ${mntPath}/security
-    else
-        rm -f ${mntPath}/$wlsIdentityKeyStoreFileName
-        rm -f ${mntPath}/$wlsTrustKeyStoreFileName
-        rm -f ${mntPath}/${wlsTrustKeyStoreJKSFileName}
-    fi
-
     #decode cert data once again as it would got base64 encoded
     echo "$wlsIdentityData" | base64 -d >${mntPath}/$wlsIdentityKeyStoreFileName
     echo "$wlsTrustData" | base64 -d >${mntPath}/$wlsTrustKeyStoreFileName
@@ -484,8 +535,8 @@ function create_pv() {
     export storageAccountKey=$(az storage account keys list --resource-group $storageResourceGroup --account-name $storageAccountName --query "[0].value" -o tsv)
     export azureSecretName="azure-secret"
     kubectl -n ${wlsDomainNS} create secret generic ${azureSecretName} \
-    --from-literal=azurestorageaccountname=${storageAccountName} \
-    --from-literal=azurestorageaccountkey=${storageAccountKey}
+        --from-literal=azurestorageaccountname=${storageAccountName} \
+        --from-literal=azurestorageaccountkey=${storageAccountKey}
 
     # generate pv configurations
     customPVYaml=${scriptDir}/pv.yaml
@@ -515,7 +566,7 @@ function create_pv() {
 }
 
 function wait_for_pod_completed() {
-    echo "Waiting for $((appReplicas+1)) pods are running."
+    echo "Waiting for $((appReplicas + 1)) pods are running."
 
     utility_wait_for_pod_completed \
         ${appReplicas} \
@@ -528,8 +579,8 @@ function wait_for_image_update_completed() {
     # Make sure all of the pods are updated with new image.
     # Assumption: we have only one cluster currently.
     acrImagePath=${azureACRServer}/aks-wls-images:${newImageTag}
-    echo "Waiting for $((appReplicas+1)) new pods created with image ${acrImagePath}"
-    
+    echo "Waiting for $((appReplicas + 1)) new pods created with image ${acrImagePath}"
+
     utility_wait_for_image_update_completed \
         "${acrImagePath}" \
         ${appReplicas} \
@@ -556,40 +607,39 @@ function create_domain_namespace() {
     fi
 
     kubectl -n ${wlsDomainNS} create secret generic \
-    ${kubectlWLSCredentialName} \
-    --from-literal=username=${wlsUserName} \
-    --from-literal=password=${wlsPassword}
+        ${kubectlWLSCredentialName} \
+        --from-literal=username=${wlsUserName} \
+        --from-literal=password=${wlsPassword}
 
     kubectl -n ${wlsDomainNS} label secret ${kubectlWLSCredentialName} weblogic.domainUID=${wlsDomainUID}
 
     kubectl -n ${wlsDomainNS} create secret generic ${kubectlWDTEncryptionSecret} \
-    --from-literal=password=${wdtRuntimePassword}
+        --from-literal=password=${wdtRuntimePassword}
     kubectl -n ${wlsDomainNS} label secret ${kubectlWDTEncryptionSecret} weblogic.domainUID=${wlsDomainUID}
 
     kubectl create secret docker-registry ${kubectlSecretForACR} \
-    --docker-server=${azureACRServer} \
-    --docker-username=${azureACRUserName} \
-    --docker-password=${azureACRPassword} \
-    -n ${wlsDomainNS}
+        --docker-server=${azureACRServer} \
+        --docker-username=${azureACRUserName} \
+        --docker-password=${azureACRPassword} \
+        -n ${wlsDomainNS}
 
     kubectl -n ${wlsDomainNS} label secret ${kubectlSecretForACR} weblogic.domainUID=${wlsDomainUID}
 }
 
 function parsing_ssl_certs_and_create_ssl_secret() {
-    export javaOptions=""
     if [[ "${enableCustomSSL,,}" == "${constTrue}" ]]; then
         # use default Java, if no, install open jdk 11.
-        # why not Microsoft open jdk? No apk installation package!
+        # why not use Microsoft open jdk? No apk installation package!
         export JAVA_HOME=/usr/lib/jvm/default-jvm/
         if [ ! -d "${JAVA_HOME}" ]; then
             install_jdk
             JAVA_HOME=/usr/lib/jvm/java-11-openjdk
         fi
 
-        mount_fileshare
+        create_source_folder_for_certificates
         output_ssl_keystore
         validate_ssl_keystores
-        unmount_fileshare
+        upload_certificates_to_fileshare
 
         echo "check if ${kubectlWLSSSLCredentialsName} exists."
         ret=$(kubectl get secret -n ${wlsDomainNS} | grep "${kubectlWLSSSLCredentialsName}")
@@ -609,7 +659,7 @@ function parsing_ssl_certs_and_create_ssl_secret() {
             --from-literal=ssltruststorepassword=${wlsTrustPsw}
 
         kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${wlsDomainUID}
-        javaOptions="-Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName}"
+        javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} ${javaOptions}"
     fi
 }
 
@@ -621,6 +671,13 @@ function parsing_ssl_certs_and_create_ssl_secret() {
 #  * Deploy WebLogic domain using image in ACR
 #  * Wait for the domain completed
 function setup_wls_domain() {
+    export javaOptions=${wlsJavaOption}
+    if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
+        # for remote t3/t3s access.
+        # refer to https://oracle.github.io/weblogic-kubernetes-operator/faq/external-clients/#enabling-unknown-host-access
+        javaOptions="-Dweblogic.rjvm.allowUnknownHost=true ${javaOptions}"
+    fi
+    
     # create namespace
     create_domain_namespace
 
@@ -647,33 +704,43 @@ function setup_wls_domain() {
         echo "start to update domain  ${wlsDomainUID}"
         chmod ugo+x $scriptDir/updateDomainConfig.sh
         bash $scriptDir/updateDomainConfig.sh \
-        ${customDomainYaml} \
-        ${appReplicas} \
-        ${wlsCPU} \
-        ${wlsDomainUID} \
-        ${wlsDomainName} \
-        "${azureACRServer}/aks-wls-images:${newImageTag}" \
-        ${wlsMemory} \
-        ${managedServerPrefix} \
-        ${enableCustomSSL} \
-        ${enablePV} \
-        "${javaOptions}"
+            ${customDomainYaml} \
+            ${appReplicas} \
+            ${wlsCPU} \
+            ${wlsDomainUID} \
+            ${wlsDomainName} \
+            "${azureACRServer}/aks-wls-images:${newImageTag}" \
+            ${wlsMemory} \
+            ${managedServerPrefix} \
+            ${enableCustomSSL} \
+            ${enablePV} \
+            ${enableAdminT3Tunneling} \
+            ${enableClusterT3Tunneling} \
+            ${t3AdminPort} \
+            ${t3ClusterPort} \
+            ${constClusterName} \
+            "${javaOptions}"
     else
         echo "start to create domain  ${wlsDomainUID}"
         # generate domain yaml
         chmod ugo+x $scriptDir/genDomainConfig.sh
         bash $scriptDir/genDomainConfig.sh \
-        ${customDomainYaml} \
-        ${appReplicas} \
-        ${wlsCPU} \
-        ${wlsDomainUID} \
-        ${wlsDomainName} \
-        "${azureACRServer}/aks-wls-images:${newImageTag}" \
-        ${wlsMemory} \
-        ${managedServerPrefix} \
-        ${enableCustomSSL} \
-        ${enablePV} \
-        "${javaOptions}"
+            ${customDomainYaml} \
+            ${appReplicas} \
+            ${wlsCPU} \
+            ${wlsDomainUID} \
+            ${wlsDomainName} \
+            "${azureACRServer}/aks-wls-images:${newImageTag}" \
+            ${wlsMemory} \
+            ${managedServerPrefix} \
+            ${enableCustomSSL} \
+            ${enablePV} \
+            ${enableAdminT3Tunneling} \
+            ${enableClusterT3Tunneling} \
+            ${t3AdminPort} \
+            ${t3ClusterPort} \
+            ${constClusterName} \
+            "${javaOptions}"
     fi
 
     kubectl apply -f ${customDomainYaml}
@@ -714,6 +781,11 @@ export wlsIdentityAlias=${21}
 export wlsTrustData=${22}
 export wlsTrustType=${23}
 export enablePV=${24}
+export enableAdminT3Tunneling=${25}
+export enableClusterT3Tunneling=${26}
+export t3AdminPort=${27}
+export t3ClusterPort=${28}
+export wlsJavaOption=${29}
 
 export adminServerName="admin-server"
 export azFileShareName="weblogic"
@@ -724,6 +796,8 @@ export kubectlWLSCredentialName="${wlsDomainUID}-weblogic-credentials"
 export kubectlWLSSSLCredentialsName="${wlsDomainUID}-weblogic-ssl-credentials"
 export newImageTag=$(date +%s)
 export operatorName="weblogic-operator"
+# seconds
+export sasTokenValidTime=3600
 export storageFileShareName="weblogic"
 export storageResourceGroup=${currentResourceGroup}
 export sharedPath="/shared"

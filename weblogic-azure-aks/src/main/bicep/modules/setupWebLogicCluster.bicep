@@ -57,6 +57,8 @@ param createStorageAccount bool = false
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
 param enableCustomSSL bool = false
+param enableAdminT3Tunneling bool = false
+param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
@@ -69,6 +71,8 @@ param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
 param storageAccountName string
+param t3ChannelAdminPort int = 7005
+param t3ChannelClusterPort int = 8011
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -91,6 +95,7 @@ param wlsIdentityKeyStorePassphrase string = newGuid()
 param wlsIdentityKeyStoreType string = 'PKCS12'
 @description('Docker tag that comes after "container-registry.oracle.com/middleware/weblogic:"')
 param wlsImageTag string = '12.2.1.4'
+param wlsJavaOption string = 'null'
 @description('Memory requests for admin server and managed server.')
 param wlsMemory string = '1.5Gi'
 @secure()
@@ -181,13 +186,17 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     enableCustomSSL: enableCustomSSL
+    enableAdminT3Tunneling: enableAdminT3Tunneling
+    enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: enablePV
     identity: identity
     location: location
     managedServerPrefix: managedServerPrefix
-    storageAccountName: storageAccountName
     ocrSSOUser: ocrSSOUser
     ocrSSOPSW: ocrSSOPSW
+    storageAccountName: storageAccountName
+    t3ChannelAdminPort: t3ChannelAdminPort
+    t3ChannelClusterPort: t3ChannelClusterPort
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
@@ -197,6 +206,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     wlsIdentityKeyStorePassphrase: wlsIdentityKeyStorePassphrase
     wlsIdentityKeyStoreType: wlsIdentityKeyStoreType
     wlsImageTag: wlsImageTag
+    wlsJavaOption: wlsJavaOption
     wlsMemory: wlsMemory
     wlsPassword: wlsPassword
     wlsPrivateKeyAlias: wlsPrivateKeyAlias
@@ -230,4 +240,6 @@ module pidEnd './_pids/_pid.bicep' = {
 output aksClusterName string = createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
 output aksClusterRGName string = createAKSCluster ? resourceGroup().name : aksClusterRGName
 output adminServerUrl string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console', wlsDomainUID)
+output adminServerT3InternalUrl string = enableAdminT3Tunneling ? format('{0}://{1}-admin-server.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelAdminPort): ''
 output clusterSVCUrl string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)
+output clusterT3InternalUrl string = enableClusterT3Tunneling ? format('{0}://{1}-cluster-cluster-1.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelClusterPort): ''

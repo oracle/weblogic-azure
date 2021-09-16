@@ -212,6 +212,30 @@
                             "required": true
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsJavaOption",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Custom Java Options to start WebLogic Server",
+                        "placeholder": "-Xms1200m -XX:MaxNewSize=300m -Dweblogic.webservice.i18n.charset=utf-8",
+                        "toolTip": "Specify Java options to start WebLogic Server.",
+                        "constraints": {
+                            "regex": "^-[a-z0-9A-Z:./+_=-]+(\\s-[a-z0-9A-Z:./+_=-]+){0,99}$",
+                            "validationMessage": "Allow letters, numbers, space, colon(:), plus(+), minus(-), full stop(.), slash(/), equal sign(=), underscore(_), and the value must be less then 100 Java options."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "enableAdminT3Tunneling",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "Enable T3 tunneling for Admin Server",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "enableClusterT3Tunneling",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "Enable T3 tunneling for WebLogic cluster",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     }
                 ],
                 "visible": true
@@ -523,7 +547,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate.",
+                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console, Remote Console, cluster and custom T3 channel on HTTPS (Secure) port, with your own TLS/SSL certificate.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
@@ -971,7 +995,7 @@
                                     "width": "Full",
                                     "rows": {
                                         "count": {
-                                            "min": 1,
+                                            "min": 0,
                                             "max": 10
                                         }
                                     },
@@ -1009,8 +1033,16 @@
                                                             "value": "adminServer"
                                                         },
                                                         {
+                                                            "label": "admin-server-t3",
+                                                            "value": "adminServerT3"
+                                                        },
+                                                        {
                                                             "label": "cluster-1",
                                                             "value": "cluster1"
+                                                        },
+                                                        {
+                                                            "label": "cluster-1-t3",
+                                                            "value": "cluster1T3"
                                                         }
                                                     ],
                                                     "required": true
@@ -1164,11 +1196,11 @@
                             {
                                 "name": "keyVaultBackendSSLCertData",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Trusted root certificate(.cer, cert)",
+                                "label": "Trusted root certificate(.cer, .cert)",
                                 "toolTip": "Trusted root certificate (CA certificate) used to set up end to end TLS/SSL",
                                 "constraints": {
                                     "required": true,
-                                    "accept": ".cer, cert"
+                                    "accept": ".cer, .cert"
                                 },
                                 "options": {
                                     "multiple": false,
@@ -1306,122 +1338,175 @@
                             }
                         ],
                         "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "section_dnsConfiguration",
+                "type": "Microsoft.Common.Section",
+                "label": "DNS Configuration",
+                "elements": [
+                    {
+                        "name": "dnsConfigurationText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console, cluster, Remote Console and custom T3 channel using custom DNS Name (example: admin.contoso.com)",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
+                            }
+                        }
                     },
                     {
-                        "name": "dnsConfiguration",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Custom DNS Configuration",
-                        "elements": [
-                            {
-                                "name": "enableDNSConfiguration",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Configure Custom DNS Alias",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ],
-                                    "required": false
+                        "name": "enableDNSConfiguration",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Configure Custom DNS Alias",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
                                 }
-                            },
-                            {
-                                "name": "bringDNSZone",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use an existing Azure DNS Zone",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
+                            ],
+                            "required": false
+                        }
+                    },
+                    {
+                        "name": "bringDNSZone",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Use an existing Azure DNS Zone",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
                                 },
-                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
-                            },
-                            {
-                                "name": "dnszoneName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DNS Zone Name",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers and periods to separate Domains",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
-                                    "validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ]
+                        },
+                        "visible": "[steps('section_dnsConfiguration').enableDNSConfiguration]"
+                    },
+                    {
+                        "name": "dnszoneName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "DNS Zone Name",
+                        "defaultValue": "",
+                        "toolTip": "Use only letters and numbers and periods to separate Domains",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
+                            "validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                        },
+                        "visible": "[steps('section_dnsConfiguration').enableDNSConfiguration]"
+                    },
+                    {
+                        "name": "dnsZoneResourceGroup",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Name of the resource group contains the DNS Zone in current subscription",
+                        "defaultValue": "",
+                        "toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                            "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                        },
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,steps('section_dnsConfiguration').bringDNSZone)]"
+                    },
+                    {
+                        "name": "dnszoneAdminConsoleLabel",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Label for Oracle WebLogic Administration Console",
+                        "defaultValue": "admin",
+                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
+                        "constraints": {
+                            "required": true,
+                            "validations": [
+                                {
+                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                    "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
                                 },
-                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
-                            },
-                            {
-                                "name": "dnsZoneResourceGroup",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Name of the resource group contains the DNS Zone in current subscription",
-                                "defaultValue": "",
-                                "toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_appGateway').dnsConfiguration.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                {
+                                    "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').dnszoneName), '.', ''))),34)]",
+                                    "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
+                                }
+                            ]
+                        },
+                        "visible": "[steps('section_dnsConfiguration').enableDNSConfiguration]"
+                    },
+                    {
+                        "name": "dnszoneAdminT3ChannelLabel",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Label for Oracle WebLogic Admin Server T3 channel",
+                        "defaultValue": "admin-t3",
+                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Admin Server T3 channel",
+                        "constraints": {
+                            "required": true,
+                            "validations": [
+                                {
+                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                    "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
                                 },
-                                "visible": "[and(steps('section_appGateway').dnsConfiguration.enableDNSConfiguration,steps('section_appGateway').dnsConfiguration.bringDNSZone)]"
-                            },
-                            {
-                                "name": "dnszoneAdminConsoleLabel",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Label for Oracle WebLogic Administration Console",
-                                "defaultValue": "admin",
-                                "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
-                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                        },
-                                        {
-                                            "isValid": "[less(sub(length(concat(steps('section_appGateway').dnsConfiguration.dnszoneAdminConsoleLabel,'.',steps('section_appGateway').dnsConfiguration.dnszoneName)),length(replace(concat(steps('section_appGateway').dnsConfiguration.dnszoneAdminConsoleLabel,'.',steps('section_appGateway').dnsConfiguration.dnszoneName), '.', ''))),34)]",
-                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
-                                        }
-                                    ]
+                                {
+                                    "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').dnszoneAdminT3ChannelLabel,'.',steps('section_dnsConfiguration').dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').dnszoneAdminT3ChannelLabel,'.',steps('section_dnsConfiguration').dnszoneName), '.', ''))),34)]",
+                                    "message": "Subdomain must be between 2 and 34 labels. For example, \"admin-t3.contoso.com\" has 3 labels."
+                                }
+                            ]
+                        },
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,basics('basicsOptional').enableAdminT3Tunneling, steps('section_appGateway').lbSVCInfo.enableLBSVC)]"
+                    },
+                    {
+                        "name": "dnszoneGatewayLabel",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Label for WebLogic Cluster",
+                        "defaultValue": "www",
+                        "toolTip": "Specify a label to generate subdomain of WebLogic Cluster",
+                        "constraints": {
+                            "required": true,
+                            "validations": [
+                                {
+                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                    "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
                                 },
-                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
-                            },
-                            {
-                                "name": "dnszoneGatewayLabel",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Label for WebLogic Cluster",
-                                "defaultValue": "www",
-                                "toolTip": "Specify a label to generate subdomain of WebLogic Cluster",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
-                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                        },
-                                        {
-                                            "isValid": "[less(sub(length(concat(if(empty(steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel), '', steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel),'.',steps('section_appGateway').dnsConfiguration.dnszoneName)),length(replace(concat(if(empty(steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel), '', steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel),'.',steps('section_appGateway').dnsConfiguration.dnszoneName), '.', ''))),34)]",
-                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
-                                        }
-                                    ]
+                                {
+                                    "isValid": "[less(sub(length(concat(if(empty(steps('section_dnsConfiguration').dnszoneGatewayLabel), '', steps('section_dnsConfiguration').dnszoneGatewayLabel),'.',steps('section_dnsConfiguration').dnszoneName)),length(replace(concat(if(empty(steps('section_dnsConfiguration').dnszoneGatewayLabel), '', steps('section_dnsConfiguration').dnszoneGatewayLabel),'.',steps('section_dnsConfiguration').dnszoneName), '.', ''))),34)]",
+                                    "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
+                                }
+                            ]
+                        },
+                        "visible": "[steps('section_dnsConfiguration').enableDNSConfiguration]"
+                    },
+                    {
+                        "name": "dnszoneClusterT3ChannelLabel",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Label for Oracle WebLogic cluster T3 channel",
+                        "defaultValue": "cluster-t3",
+                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic cluster T3 channel",
+                        "constraints": {
+                            "required": true,
+                            "validations": [
+                                {
+                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                    "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
                                 },
-                                "visible": "[steps('section_appGateway').dnsConfiguration.enableDNSConfiguration]"
-                            }
-                        ],
-                        "visible": true
+                                {
+                                    "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel,'.',steps('section_dnsConfiguration').dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel,'.',steps('section_dnsConfiguration').dnszoneName), '.', ''))),34)]",
+                                    "message": "Subdomain must be between 2 and 34 labels. For example, \"application-t3.contoso.com\" has 3 labels."
+                                }
+                            ]
+                        },
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,basics('basicsOptional').enableClusterT3Tunneling, steps('section_appGateway').lbSVCInfo.enableLBSVC)]"
                     }
                 ]
             },
@@ -1571,14 +1656,16 @@
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
             "createACR": "[bool(steps('section_aks').acrInfo.createACR)]",
             "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
-            "createDNSZone": "[not(bool(steps('section_appGateway').dnsConfiguration.bringDNSZone))]",
+            "createDNSZone": "[not(bool(steps('section_dnsConfiguration').bringDNSZone))]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
-            "dnszoneAdminConsoleLabel": "[steps('section_appGateway').dnsConfiguration.dnszoneAdminConsoleLabel]",
-            "dnszoneAppGatewayLabel": "[steps('section_appGateway').dnsConfiguration.dnszoneGatewayLabel]",
-            "dnszoneName": "[steps('section_appGateway').dnsConfiguration.dnszoneName]",
-            "dnszoneRGName": "[steps('section_appGateway').dnsConfiguration.dnsZoneResourceGroup]",
+            "dnszoneAdminConsoleLabel": "[steps('section_dnsConfiguration').dnszoneAdminConsoleLabel]",
+            "dnszoneAdminT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneAdminT3ChannelLabel]",
+            "dnszoneClusterLabel": "[steps('section_dnsConfiguration').dnszoneGatewayLabel]",
+            "dnszoneClusterT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel]",
+            "dnszoneName": "[steps('section_dnsConfiguration').dnszoneName]",
+            "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
             "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
             "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
@@ -1586,7 +1673,9 @@
             "enableCookieBasedAffinity": "[bool(steps('section_appGateway').appgwIngress.enableCookieBasedAffinity)]",
             "enableCustomSSL": "[bool(steps('section_sslConfiguration').enableCustomSSL)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
-            "enableDNSConfiguration": "[bool(steps('section_appGateway').dnsConfiguration.enableDNSConfiguration)]",
+            "enableDNSConfiguration": "[bool(steps('section_dnsConfiguration').enableDNSConfiguration)]",
+            "enableAdminT3Tunneling": "[basics('basicsOptional').enableAdminT3Tunneling]",
+            "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
             "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",
@@ -1625,6 +1714,7 @@
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
             "wlsDomainUID": "[basics('basicsOptional').wlsDomainUID]",
             "wlsImageTag": "[steps('section_aks').imageInfo.fromImage]",
+            "wlsJavaOption": "[basics('basicsOptional').wlsJavaOption]",
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]"
         }

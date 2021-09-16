@@ -14,8 +14,15 @@ export wlsMemory=$7
 export wlsManagedPrefix=$8
 export enableSSL=${9}
 export enablePV=${10}
-export javaOptions=${11}
+export enableAdminT3Tunneling=${11}
+export enableClusterT3Tunneling=${12}
+export t3AdminPort=${13}
+export t3ClusterPort=${14}
+export clusterName=${15}
+export javaOptions=${16}
 
+export adminServiceUrl="${wlsDomainUID}-admin-server.${wlsDomainUID}-ns.svc.cluster.local"
+export clusterServiceUrl="${wlsDomainUID}-cluster-${clusterName}.${wlsDomainUID}-ns.svc.cluster.local"
 export wlsDomainNS="${wlsDomainUID}-ns"
 
 # output the existing domain configuration
@@ -150,6 +157,24 @@ if [[ "${enableSSL,,}" == "true" ]]; then
 EOF
 fi
 
+if [[ "${enableAdminT3Tunneling,,}" == "true" ]]; then
+  cat <<EOF >>$filePath
+    - name: T3_TUNNELING_ADMIN_PORT
+      value: "${t3AdminPort}"
+    - name: T3_TUNNELING_ADMIN_ADDRESS
+      value: "${adminServiceUrl}"
+EOF
+fi
+
+if [[ "${enableClusterT3Tunneling,,}" == "true" ]]; then
+  cat <<EOF >>$filePath
+    - name: T3_TUNNELING_CLUSTER_PORT
+      value: "${t3ClusterPort}"
+    - name: T3_TUNNELING_CLUSTER_ADDRESS
+      value: "${clusterServiceUrl}"
+EOF
+fi
+
 index=0
 while [ $index -lt ${envLength} ]; do
     envItemName=$(cat ${previousConfig} | jq ". | .spec.serverPod.env[$index] | .name" | tr -d "\"")
@@ -168,7 +193,11 @@ while [ $index -lt ${envLength} ]; do
       || [[ "${envItemName}" == "SSL_IDENTITY_PRIVATE_KEYSTORE_PSW" ]] \
       || [[ "${envItemName}" == "SSL_TRUST_KEYSTORE_PATH" ]] \
       || [[ "${envItemName}" == "SSL_TRUST_KEYSTORE_TYPE" ]] \
-      || [[ "${envItemName}" == "SSL_TRUST_KEYSTORE_PSW" ]];then
+      || [[ "${envItemName}" == "SSL_TRUST_KEYSTORE_PSW" ]] \
+      || [[ "${envItemName}" == "T3_TUNNELING_ADMIN_PORT" ]] \
+      || [[ "${envItemName}" == "T3_TUNNELING_ADMIN_ADDRESS" ]] \
+      || [[ "${envItemName}" == "T3_TUNNELING_CLUSTER_PORT" ]] \
+      || [[ "${envItemName}" == "T3_TUNNELING_CLUSTER_ADDRESS" ]];then
       continue
     fi
 

@@ -32,8 +32,10 @@ param dnsNameforApplicationGateway string = 'wlsgw'
 @description('Azure DNS Zone name.')
 param dnszoneName string = 'contoso.xyz'
 param dnszoneAdminConsoleLabel string = 'admin'
-@description('Specify a label used to generate subdomain of Application Gateway. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
-param dnszoneAppGatewayLabel string = 'www'
+param dnszoneAdminT3ChannelLabel string ='admin-t3'
+@description('Specify a label used to generate subdomain of WebLogic cluster. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
+param dnszoneClusterLabel string = 'www'
+param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
 param dnszoneRGName string = 'dns-contoso-rg'
 @description('true to set up Application Gateway ingress.')
 param enableAppGWIngress bool = false
@@ -62,9 +64,11 @@ param wlsDomainName string = 'domain1'
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 
-var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneAppGatewayLabel, dnszoneName)
+var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_appgwSSLCertOptionGenerateCert = 'generateCert'
+var name_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? 'ds-networking-deployment-1': 'ds-networking-deployment') : 'ds-networking-deployment-2'
+var ref_networkDeployment = reference(name_networkDeployment)
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
   name: 'pid-networking-start-deployment'
@@ -105,7 +109,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
 module appgwBackendCertDeployment '_deployment-scripts/_ds-appgw-upload-trusted-root-certificate.bicep' = if (enableAppGWIngress && enableCustomSSL) {
   name: 'app-gateway-backend-cert-deployment'
   params: {
-    appgwName: appgwDeployment.outputs.appGatewayName
+    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
     sslBackendRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
     identity: identity
   }
@@ -120,7 +124,6 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
   name: 'dnszone-deployment'
   params: {
     dnszoneName: dnszoneName
-    location: location
   }
   dependsOn: [
     pidNetworkingStart
@@ -142,7 +145,9 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
@@ -180,7 +185,9 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
@@ -207,8 +214,8 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
-    appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwName: 'null'
+    appgwAlias: 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
@@ -217,7 +224,9 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
-    dnszoneAppGatewayLabel: dnszoneAppGatewayLabel
+    dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
+    dnszoneClusterLabel: dnszoneClusterLabel
+    dnszoneClusterT3ChannelLabel: dnszoneClusterT3ChannelLabel
     dnszoneName: dnszoneName
     dnszoneRGName: createDNSZone ? resourceGroup().name : dnszoneRGName
     enableAppGWIngress: enableAppGWIngress
@@ -229,12 +238,11 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     location: location
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
-    vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
+    vnetName: 'null'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    appgwBackendCertDeployment
     dnsZoneDeployment
   ]
 }
@@ -245,7 +253,7 @@ module pidAppgwEnd './_pids/_pid.bicep' = if (enableAppGWIngress) {
     name: _pidAppgwEnd
   }
   dependsOn: [
-    networkingDeployment
+    appgwDeployment
   ]
 }
 
@@ -255,7 +263,9 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
     name: _pidNetworkingEnd
   }
   dependsOn: [
-    pidAppgwEnd
+    networkingDeployment
+    networkingDeployment2
+    networkingDeployment3
   ]
 }
 
@@ -263,5 +273,7 @@ output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfigura
 output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ''
 output adminRemoteConsoleUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
 output adminRemoteConsoleSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ''
+output adminServerT3ChannelUrl string = ref_networkDeployment.outputs.adminServerT3LBUrl.value
 output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : networkingDeployment3.outputs.clusterLBUrl
 output clusterExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ''
+output clusterT3ChannelUrl string = ref_networkDeployment.outputs.clusterT3LBUrl.value

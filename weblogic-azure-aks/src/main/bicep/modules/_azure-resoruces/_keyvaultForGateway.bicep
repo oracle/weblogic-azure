@@ -76,6 +76,10 @@ module keyvaultBackendRootCert '_keyvault/_keyvaultForGatewayBackendCert.bicep' 
     keyVaultName: keyVaultName
     sku: sku
   }
+  dependsOn:[
+    keyVaultwithSelfSignedAppGatewaySSLCert
+    keyVaultwithExistingAppGatewaySSLCert
+  ]
 }
 
 output keyVaultName string = (useExistingAppGatewaySSLCertificate ? keyVaultwithExistingAppGatewaySSLCert.outputs.keyVaultName : keyVaultwithSelfSignedAppGatewaySSLCert.outputs.keyVaultName)
