@@ -271,7 +271,7 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
 
 output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
 output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ''
-output adminRemoteConsoleUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : networkingDeployment3.outputs.adminConsoleLBUrl
+output adminRemoteConsoleUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : replace(networkingDeployment3.outputs.adminConsoleLBUrl, '/console/', '')
 output adminRemoteConsoleSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ''
 output adminServerT3ChannelUrl string = ref_networkDeployment.outputs.adminServerT3LBUrl.value
 output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : networkingDeployment3.outputs.clusterLBUrl
