@@ -234,7 +234,7 @@ function create_lb_svc_for_cluster_default_channel() {
 
   if [ "${enableCustomDNSAlias,,}" == "true" ]; then
     create_dns_A_record "${clusterEndpoint%%:*}" ${dnsClusterLabel} ${dnsRGName} ${dnsZoneName}
-    clusterEndpoint="${dnsClusterLabel}.${dnsZoneName}:${clusterEndpoint#*:}/"
+    clusterEndpoint="${dnsClusterLabel}.${dnsZoneName}:${clusterEndpoint#*:}"
   fi
 }
 
