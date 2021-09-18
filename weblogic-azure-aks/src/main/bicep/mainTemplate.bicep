@@ -323,7 +323,6 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     identity: identity
-    wlsDomainUID: wlsDomainUID
   }
 }
 

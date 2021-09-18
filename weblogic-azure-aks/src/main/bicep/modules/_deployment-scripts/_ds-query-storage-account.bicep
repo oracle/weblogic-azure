@@ -6,9 +6,8 @@ param aksClusterRGName string = ''
 
 param identity object
 param utcValue string = utcNow()
-param wlsDomainUID string = 'sample-domain1'
 
-var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainUID}'
+var const_arguments = '${aksClusterRGName} ${aksClusterName}'
 var const_azcliVersion='2.15.0'
 var const_deploymentName='ds-query-storage-account'
 
