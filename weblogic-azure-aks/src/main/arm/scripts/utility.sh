@@ -306,3 +306,32 @@ function utility_waitfor_lb_svc_completed() {
         exit 1
     fi
 }
+
+# Call this function to make sure the ingress is avaliable.
+function utility_waitfor_ingress_completed() {
+    svcName=$1
+    wlsDomainNS=$2
+    perfSVCAttemps=$3
+    perfRetryInterval=$4
+
+    attempts=0
+    svcState="running"
+    while [ "$svcState" == "running" ] && [ $attempts -lt ${perfSVCAttemps} ]; do
+        svcState="completed"
+        attempts=$((attempts + 1))
+        echo Waiting for job completed...${attempts}
+        sleep ${perfRetryInterval}
+
+        ip=$(kubectl get ingress ${svcName} -n ${wlsDomainNS} -o json |
+            jq '.status.loadBalancer.ingress[0].ip')
+        echo "ip: ${ip}"
+        if [[ "${ip}" == "null" ]]; then
+            svcState="running"
+        fi
+    done
+
+    if [ "$svcState" == "running" ] && [ $attempts -ge ${perfSVCAttemps} ]; then
+        echo_stderr "Failed to create service: ${svcName}"
+        exit 1
+    fi
+}
