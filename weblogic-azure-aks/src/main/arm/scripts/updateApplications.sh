@@ -184,6 +184,21 @@ function query_app_urls() {
 }
 
 function build_docker_image() {
+    local enableAdminT3=${constFalse}
+    local enableClusterT3=${constFalse}
+
+    local adminT3AddressEnv=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+        | jq '. | .spec.serverPod.env[] | select(.name=="'${constAdminT3AddressEnvName}'")')
+    if [ -n "${adminT3AddressEnv}" ]; then
+        enableAdminT3=${constTrue}
+    fi
+
+    local clusterT3AddressEnv=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+        | jq '. | .spec.serverPod.env[] | select(.name=="'${constClusterT3AddressEnvName}'")')
+    if [ -n "${clusterT3AddressEnv}" ]; then
+        enableClusterT3=${constTrue}
+    fi
+
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
     echo $azureACRPassword $ocrSSOPSW | \
@@ -197,7 +212,9 @@ function build_docker_image() {
         $ocrSSOUser \
         $wlsClusterSize \
         $enableCustomSSL \
-        "$scriptURL"
+        "$scriptURL" \
+        ${enableAdminT3} \
+        ${enableClusterT3}
 
     az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
