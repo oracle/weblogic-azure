@@ -351,7 +351,7 @@
                                 "label": "Node count",
                                 "defaultValue": 2,
                                 "showStepMarkers": false,
-                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later",
+                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.",
                                 "constraints": {
                                     "required": true
                                 },
@@ -375,7 +375,7 @@
                                     "hideDiskTypeFilter": false
                                 },
                                 "osPlatform": "Linux",
-                                "count": 2,
+                                "count": "[steps('section_aks').clusterInfo.aksNodeCount]",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
