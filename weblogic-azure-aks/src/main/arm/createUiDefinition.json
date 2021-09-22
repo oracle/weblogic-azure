@@ -453,7 +453,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
-                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
+                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile from statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
                                     "link": {
                                         "label": "Must be a valid tag value from Oracle Container Registry",
                                         "uri": "https://aka.ms/wls-aks-fromImage-tag?${project.version}-${maven.build.timestamp}"
@@ -508,10 +508,11 @@
                             {
                                 "name": "appPackageUrl",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Application package (.war,.ear)",
-                                "toolTip": "The application war package to deploy.",
+                                "label": "Application package (.war,.ear,.jar)",
+                                "toolTip": "The application package to deploy.",
                                 "constraints": {
-                                    "required": true
+                                    "required": true,
+                                    "accept": ".war,.ear,.jar"
                                 },
                                 "options": {
                                     "multiple": true,
