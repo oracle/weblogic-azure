@@ -1412,7 +1412,7 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "DNS Zone Name",
                         "defaultValue": "",
-                        "toolTip": "Use only letters and numbers and periods to separate Domains",
+                        "toolTip": "Each label must only contain letters, numbers, underscores, and dashes. Use periods to separate Domains",
                         "constraints": {
                             "required": true,
                             "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
