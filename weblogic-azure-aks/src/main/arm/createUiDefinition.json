@@ -168,7 +168,7 @@
                         "defaultValue": "managed-server",
                         "constraints": {
                             "required": true,
-                            "regex": "^(?=.{3,20}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)",
+                            "regex": "^(?=.{3,20}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
                             "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
@@ -194,8 +194,8 @@
                         "defaultValue": "sample-domain1",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
-                            "validationMessage": "The Domain UID must be between 3 and 20 characters long and contain letters, numbers and -."
+                            "regex": "^(?=.{3,20}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
+                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
@@ -804,7 +804,7 @@
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
                                     "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 24), less(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
                                 }
                             },
@@ -1015,7 +1015,7 @@
                                                             "message": "You can not input the same service prefix repeadly, please change any of the value."
                                                         },
                                                         {
-                                                            "regex": "^(?=.{3,20}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)",
+                                                            "regex": "^(?=.{3,20}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
                                                             "message": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                                                         }
                                                     ]
@@ -1238,7 +1238,7 @@
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
                                     "validationMessage": "[if(or(greater(length(steps('section_appGateway').appgwIngress.keyVaultName), 24), less(length(steps('section_appGateway').appgwIngress.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
                                 },
                                 "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
