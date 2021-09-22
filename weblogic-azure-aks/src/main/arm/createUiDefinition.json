@@ -996,7 +996,7 @@
                                     "rows": {
                                         "count": {
                                             "min": 0,
-                                            "max": 10
+                                            "max": 4
                                         }
                                     },
                                     "columns": [
@@ -1011,8 +1011,12 @@
                                                     "required": true,
                                                     "validations": [
                                                         {
-                                                            "regex": "^[a-z0-9A-Z-]{1,30}$",
-                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                            "isValid": "[lessOrEquals(length(filter(steps('section_appGateway').lbSVCInfo.lbSVC, (item) => equals(item.colName, last(take(steps('section_appGateway').lbSVCInfo.lbSVC, $rowIndex)).colName))),1)]",
+                                                            "message": "You can not input the same service prefix repeadly, please change any of the value."
+                                                        },
+                                                        {
+                                                            "regex": "^(?=.{3,20}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)",
+                                                            "message": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                                                         }
                                                     ]
                                                 }
@@ -1060,7 +1064,11 @@
                                                     "required": true,
                                                     "validations": [
                                                         {
-                                                            "regex": "^[0-9]{1,5}$",
+                                                            "isValid": "[lessOrEquals(length(filter(steps('section_appGateway').lbSVCInfo.lbSVC, (item) => equals(item.colTarget, last(take(steps('section_appGateway').lbSVCInfo.lbSVC, $rowIndex)).colTarget))),1)]",
+                                                            "message": "You can not select the same target repeadly."
+                                                        },
+                                                        {
+                                                            "regex": "^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$",
                                                             "message": "Only numbers are allowed, and the value must be 1-65535."
                                                         }
                                                     ]
