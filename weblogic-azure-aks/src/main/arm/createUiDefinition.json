@@ -1595,8 +1595,8 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^[a-z0-9A-Z/]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
+                                    "regex": "^[a-zA-Z0-9./_-]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, hyphens (-), underscores (_), periods (.) and slashes (/)."
                                 },
                                 "visible": true
                             },
