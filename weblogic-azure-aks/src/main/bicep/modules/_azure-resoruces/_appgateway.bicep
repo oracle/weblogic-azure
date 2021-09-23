@@ -2,7 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 @description('DNS for ApplicationGateway')
-param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}-${toLower(resourceGroup().name)}', 63)
+param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
 @description('Public IP Name for the Application Gateway')
 param gatewayPublicIPAddressName string = 'gwip'
 param utcValue string = utcNow()
