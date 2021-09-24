@@ -129,7 +129,7 @@ function get_app_sas_url() {
     while [ $index -lt $appNumber ]; do
         appName=${args[${index}]}
         echo "app package file name: ${appName}"
-        if [[ "$appName" == *".war" || "$appName" == *".ear" ]]; then
+        if [[ "$appName" == *".war" || "$appName" == *".ear" || "$appName" == *".jar" ]]; then
             appSaSUrl=$(az storage blob url --container-name ${appContainerName} \
                 --name ${appName} \
                 --account-name ${appStorageAccountName} \

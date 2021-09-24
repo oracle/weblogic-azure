@@ -16,7 +16,7 @@ Parameters
   - aksClusterRGName: Name of resource group that contains the (AKS) instance, probably the resource group you are working on. It's recommended to run this sript with the same resource group that runs AKS.
   - aksClusterName: Name of the AKS instance that runs the WebLogic cluster.
   - appPackageUrls: String array of Java EE applciation location, which can be downloaded using "curl". Currently, only support urls of Azure Storage Account blob.
-  - appPackageFromStorageBlob: Storage blob that contains Java EE applciations, the script will download all the .war and .ear file from that blob. Do not include white space in the file name.
+  - appPackageFromStorageBlob: Storage blob that contains Java EE applciations, the script will download all the .war, .jar and .ear file from that blob. Do not include white space in the file name.
     - storageAccountName: Storage account name.
     - containerName: container name.
   - identity: Azure user managed identity used, make sure the identity has permission to create/update/delete Azure resources. It's recommended to assign "Contributor" role.
@@ -42,7 +42,7 @@ param aksClusterRGName string = ''
 @description('Name of an existing AKS cluster.')
 param aksClusterName string = ''
 
-@description('Download all the .war and .ear packages from the specified storage blob. You can specify the applciation using "appPackageUrls" and "appPackageFromStorageBlob", please do not specify the same applciation in both parameters.')
+@description('Download all the .war .jar and .ear packages from the specified storage blob. You can specify the applciation using "appPackageUrls" and "appPackageFromStorageBlob", please do not specify the same applciation in both parameters.')
 param appPackageFromStorageBlob object = {
   storageAccountName: 'stg-contoso'
   containerName: 'container-contoso'
