@@ -20,6 +20,8 @@ Usage:
     <scriptURL>
     <appStorageAccountName>
     <appContainerName>
+    <userProvidedImagePath>
+    <useOracleImage>
 END
 )
     echo_stdout "${usage}"
@@ -48,6 +50,8 @@ export appPackageUrls=${10}
 export scriptURL=${11}
 export appStorageAccountName=${12}
 export appContainerName=${13}
+export userProvidedImagePath=${14}
+export useOracleImage=${15}
 
 echo ${ocrSSOPSW} | \
     bash ./updateApplications.sh \
@@ -62,7 +66,9 @@ echo ${ocrSSOPSW} | \
     ${appPackageUrls} \
     ${scriptURL} \
     ${appStorageAccountName} \
-    ${appContainerName}
+    ${appContainerName} \
+    ${userProvidedImagePath} \
+    ${useOracleImage}
 
 if [ $? -ne 0 ]; then
     usage 1

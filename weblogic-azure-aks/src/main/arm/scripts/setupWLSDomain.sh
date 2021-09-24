@@ -44,6 +44,8 @@ echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentit
     <enableClusterT3Tunneling>
     <t3AdminPort>
     <t3ClusterPort>
+    <userProvidedImagePath>
+    <useOracleImage>
 END
     )
     echo_stdout ${usage}
@@ -55,7 +57,12 @@ END
 
 #Function to validate input
 function validate_input() {
-    if [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
+    if [ -z "$useOracleImage" ]; then
+        echo_stderr "userProvidedImagePath is required. "
+        usage 1
+    fi
+
+    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
         echo_stderr "Oracle SSO account is required. "
         usage 1
     fi
@@ -207,6 +214,11 @@ function validate_input() {
 
     if [[ "${wlsJavaOption}" == "null" ]];then
         wlsJavaOption=""
+    fi
+
+    if [[ "${useOracleImage,,}" == "${constFalse}" ]] && [ -z "$userProvidedImagePath" ]; then
+        echo_stderr "userProvidedImagePath is required. "
+        usage 1
     fi
 }
 
@@ -369,7 +381,9 @@ function build_docker_image() {
             $enableCustomSSL \
             "$scriptURL" \
             ${enableAdminT3Tunneling} \
-            ${enableClusterT3Tunneling}
+            ${enableClusterT3Tunneling} \
+            ${useOracleImage} \
+            ${userProvidedImagePath}
 
     az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
@@ -786,6 +800,8 @@ export enableClusterT3Tunneling=${26}
 export t3AdminPort=${27}
 export t3ClusterPort=${28}
 export wlsJavaOption=${29}
+export userProvidedImagePath=${30}
+export useOracleImage=${31}
 
 export adminServerName="admin-server"
 export azFileShareName="weblogic"

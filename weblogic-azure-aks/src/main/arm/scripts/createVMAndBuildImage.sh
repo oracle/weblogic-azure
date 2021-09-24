@@ -86,16 +86,23 @@ function build_docker_image() {
     --enable-auto-update false \
     --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
-    wlsImagePath="${ocrLoginServer}/middleware/weblogic:${wlsImageTag}"
-    az vm extension set --name CustomScript \
-    --extension-instance-name wls-image-script \
-    --resource-group ${currentResourceGroup} \
-    --vm-name ${vmName} \
-    --publisher Microsoft.Azure.Extensions \
-    --version 2.0 \
-    --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-    --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} \"}"
+    if [[ "${useOracleImage,,}" == "${constTrue}" ]]; then
+        wlsImagePath="${ocrLoginServer}/middleware/weblogic:${wlsImageTag}"
+    else
+        wlsImagePath="${userProvidedImagePath}"    
+    fi
 
+    echo "wlsImagePath: ${wlsImagePath}"
+
+    az vm extension set --name CustomScript \
+        --extension-instance-name wls-image-script \
+        --resource-group ${currentResourceGroup} \
+        --vm-name ${vmName} \
+        --publisher Microsoft.Azure.Extensions \
+        --version 2.0 \
+        --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
+        --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${useOracleImage} \"}"
+    
     cleanup_vm
 }
 
@@ -120,6 +127,8 @@ export enableCustomSSL=$9
 export scriptURL=${10}
 export enableAdminT3Tunneling=${11}
 export enableClusterT3Tunneling=${12}
+export useOracleImage=${13}
+export userProvidedImagePath=${14}
 
 read_sensitive_parameters_from_stdin
 

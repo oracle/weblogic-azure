@@ -31,6 +31,11 @@ function validate_status() {
 }
 
 function validate_inputs() {
+    if [ -z "$useOracleImage" ]; then
+        echo_stderr "userProvidedImagePath is required. "
+        usage 1
+    fi
+
     if [ -z "$wlsImagePath" ]; then
         echo_stderr "wlsImagePath is required. "
         usage 1
@@ -61,12 +66,12 @@ function validate_inputs() {
         usage 1
     fi
 
-    if [ -z "$ocrSSOUser" ]; then
+    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [ -z "$ocrSSOUser" ]; then
         echo_stderr "ocrSSOUser is required. "
         usage 1
     fi
 
-    if [ -z "$ocrSSOPSW" ]; then
+    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [ -z "$ocrSSOPSW" ]; then
         echo_stderr "ocrSSOPSW is required. "
         usage 1
     fi
@@ -169,7 +174,16 @@ function install_utilities() {
 function get_wls_image_from_ocr() {
     sudo docker logout
     sudo docker login ${ocrLoginServer} -u ${ocrSSOUser} -p ${ocrSSOPSW}
-    echo "Start to pull image ${wlsImagePath}"
+    echo "Start to pull oracle image ${wlsImagePath}  ${ocrLoginServer} ${ocrSSOUser} ${ocrSSOPSW}"
+    sudo docker pull -q ${wlsImagePath}
+    validate_status "Finish pulling image from OCR."
+}
+
+# Get user provided image
+function get_user_provided_wls_image_from_acr() {
+    sudo docker logout
+    sudo docker login ${azureACRServer} -u ${azureACRUserName} -p ${azureACRPassword}
+    echo "Start to pull user provided image ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRPassword}"
     sudo docker pull -q ${wlsImagePath}
     validate_status "Finish pulling image from OCR."
 }
@@ -250,6 +264,7 @@ export wlsClusterSize=$7
 export enableSSL=$8
 export enableAdminT3Tunneling=$9
 export enableClusterT3Tunneling=${10}
+export useOracleImage=${11}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export ocrLoginServer="container-registry.oracle.com"
@@ -266,7 +281,11 @@ initialize
 
 install_utilities
 
-get_wls_image_from_ocr
+if [[ "${useOracleImage,,}" == "${constTrue}" ]]; then
+    get_wls_image_from_ocr
+else
+    get_user_provided_wls_image_from_acr
+fi
 
 prepare_wls_models
 
