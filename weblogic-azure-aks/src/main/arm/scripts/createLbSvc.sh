@@ -180,12 +180,14 @@ function create_lb_svc_for_admin_server_default_channel() {
 
   adminServerEndpoint=$(kubectl get svc ${adminServerLBSVCName} -n ${wlsDomainNS} \
     -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
-  adminConsoleEndpoint="${adminServerEndpoint}/console"
 
   if [ "${enableCustomDNSAlias,,}" == "true" ]; then
     create_dns_A_record "${adminServerEndpoint%%:*}" ${dnsAdminLabel} ${dnsRGName} ${dnsZoneName}
-    adminConsoleEndpoint="${dnsAdminLabel}.${dnsZoneName}:${adminServerEndpoint#*:}/console"
+    adminServerEndpoint="${dnsAdminLabel}.${dnsZoneName}:${adminServerEndpoint#*:}"
   fi
+
+  adminConsoleEndpoint="${adminServerEndpoint}/console"
+  adminRemoteEndpoint=${adminServerEndpoint}
 }
 
 function create_lb_svc_for_admin_t3_channel() {
@@ -234,7 +236,7 @@ function create_lb_svc_for_cluster_default_channel() {
 
   if [ "${enableCustomDNSAlias,,}" == "true" ]; then
     create_dns_A_record "${clusterEndpoint%%:*}" ${dnsClusterLabel} ${dnsRGName} ${dnsZoneName}
-    clusterEndpoint="${dnsClusterLabel}.${dnsZoneName}:${clusterEndpoint#*:}/"
+    clusterEndpoint="${dnsClusterLabel}.${dnsZoneName}:${clusterEndpoint#*:}"
   fi
 }
 
@@ -360,19 +362,48 @@ EOF
   fi
 }
 
+function validate_admin_console_url() {
+  local podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=${constAdminServerName} -o json |
+    jq '.items[0] | .metadata.name' |
+    tr -d "\"")
+
+  if [[ "${podName}" == "null" ]]; then
+    echo "Ensure your domain has at least one admin server."
+    exit 1
+  fi
+
+  adminTargetPort=$(kubectl get svc ${svcAdminServer} -n ${wlsDomainNS} -o json |
+    jq '.spec.ports[] | select(.name=="default") | .port')
+  local adminConsoleUrl="http://${svcAdminServer}.${wlsDomainNS}:${adminTargetPort}/console/"
+
+  kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+    -- bash -c 'curl --write-out "%{http_code}\n" --silent --output /dev/null "'${adminConsoleUrl}'" | grep "302"'
+
+  if [ $? == 1 ]; then
+    echo "admin console is not accessible."
+    # reset admin console endpoint
+    adminConsoleEndpoint="null"
+  fi
+}
+
 #Output value to deployment scripts
 function output_result() {
   echo ${adminConsoleEndpoint}
   echo ${clusterEndpoint}
   echo ${adminServerT3Endpoint}
   echo ${clusterT3Endpoint}
+  echo ${adminRemoteEndpoint}
+
+  # check if the admin console is accessible, do not output it
+  validate_admin_console_url
 
   result=$(jq -n -c \
     --arg adminEndpoint $adminConsoleEndpoint \
     --arg clusterEndpoint $clusterEndpoint \
     --arg adminT3Endpoint $adminServerT3Endpoint \
     --arg clusterT3Endpoint $clusterT3Endpoint \
-    '{adminConsoleEndpoint: $adminEndpoint, clusterEndpoint: $clusterEndpoint, adminServerT3Endpoint: $adminT3Endpoint, clusterT3Endpoint: $clusterT3Endpoint}')
+    --arg adminRemoteEndpoint ${adminRemoteEndpoint} \
+    '{adminConsoleEndpoint: $adminEndpoint, clusterEndpoint: $clusterEndpoint, adminServerT3Endpoint: $adminT3Endpoint, clusterT3Endpoint: $clusterT3Endpoint, adminRemoteEndpoint: $adminRemoteEndpoint}')
   echo "result is: $result"
   echo $result >$AZ_SCRIPTS_OUTPUT_PATH
 }
@@ -461,6 +492,7 @@ wlsDomainUID=${11}
 adminConsoleEndpoint="null"
 adminServerName=${constAdminServerName} # define in common.sh
 adminServerT3Endpoint="null"
+adminRemoteEndpoint="null"
 clusterEndpoint="null"
 clusterName=${constClusterName}
 clusterT3Endpoint="null"

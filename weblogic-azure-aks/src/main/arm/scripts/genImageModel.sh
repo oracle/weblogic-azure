@@ -175,6 +175,14 @@ EOF
         fileName="${urlWithoutQueryString##*/}"
         echo $fileName
         fileExtension="${fileName##*.}"
+        echo ${fileExtension}
+        # support .ear, .war, .jar files.
+        if [[ "${fileExtension,,}" != "ear" ]] &&
+          [[ "${fileExtension,,}" != "war" ]] &&
+          [[ "${fileExtension,,}" != "jar" ]]; then
+          continue
+        fi
+
         curl -m ${curlMaxTime} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/applications/${fileName}
         if [ $? -ne 0 ];then
           echo "Failed to download $item"

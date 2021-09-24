@@ -492,7 +492,7 @@ function appgw_ingress_svc_for_cluster() {
     generate_appgw_cluster_config_file
     kubectl apply -f ${clusterAppgwIngressYamlPath}
     utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_lb_svc_completed \
+    utility_waitfor_ingress_completed \
         ${clusterIngressName} \
         ${wlsDomainNS} \
         ${checkSVCStateMaxAttempt} \
@@ -502,7 +502,7 @@ function appgw_ingress_svc_for_cluster() {
     if [[ "${enableCustomSSL,,}" != "true" ]]; then
         kubectl apply -f ${clusterAppgwIngressHttpsYamlPath}
         utility_validate_status "Create appgw ingress https svc."
-        utility_waitfor_lb_svc_completed \
+        utility_waitfor_ingress_completed \
             ${clusterIngressHttpsName} \
             ${wlsDomainNS} \
             ${checkSVCStateMaxAttempt} \

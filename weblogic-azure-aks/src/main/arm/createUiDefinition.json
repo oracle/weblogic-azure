@@ -99,7 +99,7 @@
                         "toolTip": "Password for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
                         "constraints": {
                             "required": true,
-                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d\\$\\&\\+\\,:;\\=\\?@#|'.\\^\\*!\\-_~/'\\[\\]\\{\\}\"]{8,}$",
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d\\$\\&\\+\\,:\\=\\?@#|'.\\^\\*!\\-_~/'\\[\\]\\{\\}\"]{8,}$",
                             "validationMessage": "The password must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
                         },
                         "options": {
@@ -168,8 +168,8 @@
                         "defaultValue": "managed-server",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
-                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and -."
+                            "regex": "^(?=.{3,20}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
+                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
@@ -194,8 +194,8 @@
                         "defaultValue": "sample-domain1",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z\\-]{3,20}$",
-                            "validationMessage": "The Domain UID must be between 3 and 20 characters long and contain letters, numbers and -."
+                            "regex": "^(?=.{3,20}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
+                            "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
@@ -351,7 +351,7 @@
                                 "label": "Node count",
                                 "defaultValue": 2,
                                 "showStepMarkers": false,
-                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later",
+                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.",
                                 "constraints": {
                                     "required": true
                                 },
@@ -375,7 +375,7 @@
                                     "hideDiskTypeFilter": false
                                 },
                                 "osPlatform": "Linux",
-                                "count": 2,
+                                "count": "[steps('section_aks').clusterInfo.aksNodeCount]",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
@@ -453,7 +453,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
-                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
+                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile from statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
                                     "link": {
                                         "label": "Must be a valid tag value from Oracle Container Registry",
                                         "uri": "https://aka.ms/wls-aks-fromImage-tag?${project.version}-${maven.build.timestamp}"
@@ -508,10 +508,11 @@
                             {
                                 "name": "appPackageUrl",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Application package (.war,.ear)",
-                                "toolTip": "The application war package to deploy.",
+                                "label": "Application package (.war,.ear,.jar)",
+                                "toolTip": "The application package to deploy.",
                                 "constraints": {
-                                    "required": true
+                                    "required": true,
+                                    "accept": ".war,.ear,.jar"
                                 },
                                 "options": {
                                     "multiple": true,
@@ -804,7 +805,7 @@
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
                                     "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 24), less(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
                                 }
                             },
@@ -996,7 +997,7 @@
                                     "rows": {
                                         "count": {
                                             "min": 0,
-                                            "max": 10
+                                            "max": 4
                                         }
                                     },
                                     "columns": [
@@ -1011,8 +1012,12 @@
                                                     "required": true,
                                                     "validations": [
                                                         {
-                                                            "regex": "^[a-z0-9A-Z-]{1,30}$",
-                                                            "message": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+                                                            "isValid": "[lessOrEquals(length(filter(steps('section_appGateway').lbSVCInfo.lbSVC, (item) => equals(item.colName, last(take(steps('section_appGateway').lbSVCInfo.lbSVC, $rowIndex)).colName))),1)]",
+                                                            "message": "You can not input the same service prefix repeadly, please change any of the value."
+                                                        },
+                                                        {
+                                                            "regex": "^(?=.{3,20}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
+                                                            "message": "The prefix must be between 3 and 20 characters long and contain letters, numbers and hyphens(-). The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
                                                         }
                                                     ]
                                                 }
@@ -1060,7 +1065,11 @@
                                                     "required": true,
                                                     "validations": [
                                                         {
-                                                            "regex": "^[0-9]{1,5}$",
+                                                            "isValid": "[lessOrEquals(length(filter(steps('section_appGateway').lbSVCInfo.lbSVC, (item) => equals(item.colTarget, last(take(steps('section_appGateway').lbSVCInfo.lbSVC, $rowIndex)).colTarget))),1)]",
+                                                            "message": "You can not select the same target repeadly."
+                                                        },
+                                                        {
+                                                            "regex": "^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$",
                                                             "message": "Only numbers are allowed, and the value must be 1-65535."
                                                         }
                                                     ]
@@ -1185,7 +1194,7 @@
                                 "toolTip": "Frontend TLS/SSL certificate password",
                                 "constraints": {
                                     "required": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]",
-                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
                                     "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                                 },
                                 "options": {
@@ -1230,7 +1239,7 @@
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
                                     "validationMessage": "[if(or(greater(length(steps('section_appGateway').appgwIngress.keyVaultName), 24), less(length(steps('section_appGateway').appgwIngress.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
                                 },
                                 "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
@@ -1403,7 +1412,7 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "DNS Zone Name",
                         "defaultValue": "",
-                        "toolTip": "Use only letters and numbers and periods to separate Domains",
+                        "toolTip": "Each label must only contain letters, numbers, underscores, and dashes. Use periods to separate Domains",
                         "constraints": {
                             "required": true,
                             "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
@@ -1586,8 +1595,8 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^[a-z0-9A-Z/]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
+                                    "regex": "^[a-zA-Z0-9./_-]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, hyphens (-), underscores (_), periods (.) and slashes (/)."
                                 },
                                 "visible": true
                             },
@@ -1612,7 +1621,7 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
+                                    "regex": "^(?=.{1,128}$)[a-zA-Z](?!.*--)(?!.*@@)(?!.*-@)(?!.*@-)[a-zA-Z0-9-@]*[a-zA-Z0-9]$",
                                     "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
                                 },
                                 "visible": true
@@ -1628,7 +1637,7 @@
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
-                                    "validationMessage": "The password must be between five and 128 characters long and have at least one number."
+                                    "validationMessage": "The password must be between 5 and 128 characters long and have at least one number."
                                 },
                                 "options": {
                                     "hideConfirmation": false

@@ -260,12 +260,13 @@ var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
 var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_defaultPidDeployment = 'pid'
 var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
-var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(resourceGroup().name), '-', toLower(wlsDomainName)), 63)}'
+var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(name_rgNameWithoutSpecialCharacter), '-', toLower(wlsDomainName)), 63)}'
 var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData'
 var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw'
 var name_keyVaultName = empty(const_keyvaultNameFromTag) ? '${take(concat('wls-kv', uniqueString(utcValue)), 24)}' : resourceGroup().tags.wlsKeyVault
 var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias'
 var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
+var name_rgNameWithoutSpecialCharacter= replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
 var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
 var name_storageAccountName = const_hasStorageAccount ? reference('query-existing-storage-account').outputs.storageAccount.value : 'wls${uniqueString(utcValue)}'
 var name_tagNameForKeyVault = 'wlsKeyVault'
@@ -323,7 +324,6 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     identity: identity
-    wlsDomainUID: wlsDomainUID
   }
 }
 
