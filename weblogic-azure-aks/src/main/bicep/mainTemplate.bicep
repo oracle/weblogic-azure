@@ -290,7 +290,7 @@ module pids './modules/_pids/_pid.bicep' = {
 // Due to lack of preprocessor solution for the way we use bicep, must hard-code the pid here.
 // For test, replace the pid with testing one, and build the package.
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
-  name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
+  name: 'pid-cf7143e4-83ed-4b7e-ae86-1c5ecdd71bcb-partnercenter'
 }
 
 module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvaultForWLSSSLCert.bicep' = if (enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) {
