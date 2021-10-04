@@ -24,6 +24,8 @@ param storageAccountName string = 'null'
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
 param utcValue string = utcNow()
+param userProvidedImagePath string = 'null'
+param useOracleImage bool = true
 @secure()
 param wdtRuntimePassword string
 param wlsClusterSize int = 5
@@ -56,7 +58,7 @@ param wlsTrustKeyStorePassPhrase string = newGuid()
 param wlsTrustKeyStoreType string = 'PKCS12'
 param wlsUserName string = 'weblogic'
 
-var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${t3ChannelAdminPort} ${t3ChannelClusterPort} "${wlsJavaOption}"'
+var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${t3ChannelAdminPort} ${t3ChannelClusterPort} "${wlsJavaOption}" ${userProvidedImagePath} ${useOracleImage}'
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
 var const_invokeSetUpDomainScript = 'invokeSetupWLSDomain.sh'

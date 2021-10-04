@@ -42,6 +42,8 @@ Usage:
     <t3AdminPort>
     <t3ClusterPort>
     <wlsJavaOption>
+    <userProvidedImagePath>
+    <useOracleImage>
 END
 )
     echo_stdout "${usage}"
@@ -92,6 +94,8 @@ export enableClusterT3Tunneling=${32}
 export t3AdminPort=${33}
 export t3ClusterPort=${34}
 export wlsJavaOption=${35}
+export userProvidedImagePath=${36}
+export useOracleImage=${37}
 
 echo ${ocrSSOPSW} \
     ${wlsPassword} \
@@ -128,7 +132,9 @@ echo ${ocrSSOPSW} \
     ${enableClusterT3Tunneling} \
     ${t3AdminPort} \
     ${t3ClusterPort} \
-    ${wlsJavaOption}
+    ${wlsJavaOption} \
+    ${userProvidedImagePath} \
+    ${useOracleImage}
 
 if [ $? -ne 0 ]; then
     usage 1

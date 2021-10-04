@@ -143,9 +143,9 @@ param lbSvcValues array = []
 param managedServerPrefix string = 'managed-server'
 @secure()
 @description('Password of Oracle SSO account.')
-param ocrSSOPSW string
+param ocrSSOPSW string = newGuid()
 @description('User name of Oracle SSO account.')
-param ocrSSOUser string
+param ocrSSOUser string = 'null'
 @secure()
 @description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth | base64 -w0')
 param servicePrincipal string = newGuid()
@@ -218,6 +218,12 @@ param t3ChannelClusterPort int = 8011
 param useInternalLB bool = false
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
 param utcValue string = utcNow()
+@description('User provided ACR for base image')
+param userProvidedAcr string = 'null'
+@description('User provided base image path')
+param userProvidedImagePath string = 'null'
+@description('Use Oracle images or user provided patched images')
+param useOracleImage bool = true
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -284,7 +290,7 @@ module pids './modules/_pids/_pid.bicep' = {
 // Due to lack of preprocessor solution for the way we use bicep, must hard-code the pid here.
 // For test, replace the pid with testing one, and build the package.
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
-  name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
+  name: 'pid-cf7143e4-83ed-4b7e-ae86-1c5ecdd71bcb-partnercenter'
 }
 
 module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvaultForWLSSSLCert.bicep' = if (enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) {
@@ -364,6 +370,9 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     t3ChannelAdminPort: t3ChannelAdminPort
     t3ChannelClusterPort: t3ChannelClusterPort
     wdtRuntimePassword: wdtRuntimePassword
+    userProvidedAcr: userProvidedAcr
+    userProvidedImagePath: userProvidedImagePath
+    useOracleImage: useOracleImage
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
     wlsDomainName: wlsDomainName
@@ -424,6 +433,9 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     storageAccountName: name_storageAccountName
     t3ChannelAdminPort: t3ChannelAdminPort
     t3ChannelClusterPort: t3ChannelClusterPort
+    userProvidedAcr: userProvidedAcr
+    userProvidedImagePath: userProvidedImagePath
+    useOracleImage: useOracleImage
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU

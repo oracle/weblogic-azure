@@ -73,6 +73,9 @@ param ocrSSOUser string
 param storageAccountName string
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
+param userProvidedAcr string = 'null'
+param userProvidedImagePath string = 'null'
+param useOracleImage bool = true
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -150,7 +153,7 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
 /*
 * Deploy ACR
 */
-module acrDeployment './_azure-resoruces/_acr.bicep' = if (createACR) {
+module acrDeployment './_azure-resoruces/_acr.bicep' = if (useOracleImage && createACR) {
   name: 'acr-deployment'
   params: {
     location: location
@@ -182,7 +185,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
     aksClusterName: createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
-    acrName: createACR ? acrDeployment.outputs.acrName : acrName
+    acrName: useOracleImage ? (createACR ? acrDeployment.outputs.acrName : acrName) : userProvidedAcr
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     enableCustomSSL: enableCustomSSL
@@ -197,6 +200,8 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     storageAccountName: storageAccountName
     t3ChannelAdminPort: t3ChannelAdminPort
     t3ChannelClusterPort: t3ChannelClusterPort
+    userProvidedImagePath: userProvidedImagePath
+    useOracleImage: useOracleImage
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU

@@ -25,6 +25,8 @@ echo <ocrSSOPSW> |
     <scriptURL>
     <appStorageAccountName>
     <appContainerName>
+    <userProvidedImagePath>
+    <useOracleImage>
 END
 )
     echo_stdout "${usage}"
@@ -36,7 +38,12 @@ END
 
 #Function to validate input
 function validate_input() {
-    if [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
+    if [ -z "$useOracleImage" ]; then
+        echo_stderr "userProvidedImagePath is required. "
+        usage 1
+    fi
+
+    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
         echo_stderr "Oracle SSO account is required. "
         usage 1
     fi
@@ -88,6 +95,11 @@ function validate_input() {
 
     if [ -z "$appContainerName" ]; then
         echo_stderr "appContainerName is required. "
+        usage 1
+    fi
+
+    if [[ "${useOracleImage,,}" == "${constFalse}" ]] && [ -z "$userProvidedImagePath" ]; then
+        echo_stderr "userProvidedImagePath is required. "
         usage 1
     fi
 }
@@ -214,7 +226,9 @@ function build_docker_image() {
         $enableCustomSSL \
         "$scriptURL" \
         ${enableAdminT3} \
-        ${enableClusterT3}
+        ${enableClusterT3} \
+        ${useOracleImage} \
+        ${userProvidedImagePath}
 
     az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
@@ -289,6 +303,8 @@ export appPackageUrls=$9
 export scriptURL=${10}
 export appStorageAccountName=${11}
 export appContainerName=${12}
+export userProvidedImagePath=${13}
+export useOracleImage=${14}
 
 export newImageTag=$(date +%s)
 # seconds

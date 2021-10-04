@@ -54,9 +54,9 @@ param identity object
 
 @secure()
 @description('Password of Oracle SSO account.')
-param ocrSSOPSW string
+param ocrSSOPSW string = 'null'
 @description('User name of Oracle SSO account.')
-param ocrSSOUser string
+param ocrSSOUser string = 'null'
 
 @description('Name of WebLogic domain to create.')
 param wlsDomainName string = 'domain1'
@@ -64,6 +64,12 @@ param wlsDomainName string = 'domain1'
 param wlsDomainUID string = 'sample-domain1'
 @description('Docker tag that comes after "container-registry.oracle.com/middleware/weblogic:"')
 param wlsImageTag string = '12.2.1.4'
+@description('User provided ACR for base image')
+param userProvidedAcr string = 'null'
+@description('User provided base image path')
+param userProvidedImagePath string = 'null'
+@description('Use Oracle images or user provided patched images')
+param useOracleImage bool = true
 
 module pids './_pids/_pid.bicep' = {
   name: 'initialization'
@@ -86,7 +92,7 @@ module updateWLSApplications '_deployment-scripts/_ds_update-applications.bicep'
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
-    acrName: acrName
+    acrName: useOracleImage ? acrName : userProvidedAcr
     appPackageUrls: appPackageUrls
     appPackageFromStorageBlob: appPackageFromStorageBlob
     identity: identity
@@ -95,6 +101,8 @@ module updateWLSApplications '_deployment-scripts/_ds_update-applications.bicep'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
     wlsImageTag: wlsImageTag
+    userProvidedImagePath: userProvidedImagePath
+    useOracleImage: useOracleImage
   }
   dependsOn:[
     pidStart

@@ -89,4 +89,3 @@ output adminRemoteSecuredUrl string = enableCustomSSL && length(lbSvcValues) > 0
 output clusterLBUrl string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('https://{0}/',reference(name_deploymentName).outputs.clusterEndpoint): ''
 output clusterLBSecuredUrl string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('http://{0}/',reference(name_deploymentName).outputs.clusterEndpoint): ''
 output clusterT3LBUrl string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterT3Endpoint != 'null') ? reference(name_deploymentName).outputs.clusterT3Endpoint: ''
-

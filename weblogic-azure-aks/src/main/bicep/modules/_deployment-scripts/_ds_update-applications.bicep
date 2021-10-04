@@ -23,8 +23,10 @@ param utcValue string = utcNow()
 param wlsDomainName string = 'domain1'
 param wlsDomainUID string = 'sample-domain1'
 param wlsImageTag string = '12.2.1.4'
+param userProvidedImagePath string = 'null'
+param useOracleImage bool = true
 
-var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${resourceGroup().name} ${string(appPackageUrls)} ${const_scriptLocation} ${appPackageFromStorageBlob.storageAccountName} ${appPackageFromStorageBlob.containerName} '
+var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${resourceGroup().name} ${string(appPackageUrls)} ${const_scriptLocation} ${appPackageFromStorageBlob.storageAccountName} ${appPackageFromStorageBlob.containerName} ${userProvidedImagePath} ${useOracleImage} '
 var const_azcliVersion='2.15.0'
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
