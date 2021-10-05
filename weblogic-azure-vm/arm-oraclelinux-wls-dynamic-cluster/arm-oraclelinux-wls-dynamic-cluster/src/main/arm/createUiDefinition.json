@@ -309,15 +309,6 @@
                 "visible": true
             },
             {
-                "name": "About",
-                "type": "Microsoft.Common.InfoBox",
-                "options": {
-                    "icon": "None",
-                    "text": "Template version ${project.version}"
-                },
-                "visible": "[bool('${template.version.visible}')]"
-            },
-            {
                 "name": "howToReportIssues",
                 "type": "Microsoft.Common.Section",
                 "label": "Report issues, get help, and share feedback",
@@ -330,7 +321,7 @@
                             "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
                             "link": {
                                 "label": "Issue tracker",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues"
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=${project.version}"
                             }
                         }
                     },

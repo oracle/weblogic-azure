@@ -212,7 +212,7 @@
                             "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
                             "link": {
                                 "label": "Issue tracker",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues"
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=${project.version}"
                             }
                         }
                     },
@@ -242,15 +242,6 @@
                     }
                 ],
                 "visible": true
-            },
-            {
-                "name": "About",
-                "type": "Microsoft.Common.InfoBox",
-                "options": {
-                    "icon": "None",
-                    "text": "Template version ${project.version}"
-                },
-                "visible": "[bool('${template.version.visible}')]"
             }
         ],
         "steps": [
@@ -466,7 +457,7 @@
                                     "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile from statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
                                     "link": {
                                         "label": "Must be a valid tag value from Oracle Container Registry",
-                                        "uri": "https://aka.ms/wls-aks-fromImage-tag?${project.version}-${maven.build.timestamp}"
+                                        "uri": "https://aka.ms/wls-aks-fromImage-tag"
                                     }
                                 }
                             },
