@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2021, Oracle and/or its affiliates.
+Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+-->
+
 # What is this stuff?
 
 Content that goes into the "Marketplace" tab of the offer.
@@ -79,10 +84,3 @@ weblogic12c-n-dynamic-cluster
 Preview Subscription Ids
 
 REDACTED
-
-## License
-
-Copyright (c) 2021 Oracle and/or its affiliates.
-
-Released under the Universal Permissive License v1.0 as shown at
-<https://oss.oracle.com/licenses/upl/>.
