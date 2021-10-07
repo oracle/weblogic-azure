@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2021, Oracle and/or its affiliates.
+Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+-->
+
 <h1>Offer listing</h1>
 
 <h2>Name</h2>
@@ -31,6 +36,7 @@ WebLogic
 <h2>Privacy policy link</h2>
 
 https://www.oracle.com/legal/privacy/privacy-policy.html
+
 
 <h2>Useful links</h2>
 
