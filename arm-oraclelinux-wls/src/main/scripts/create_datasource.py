@@ -1,3 +1,6 @@
+# Copyright (c) 2021, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+
 connect('weblogic','gumby1234','t3://ejb1024010-ejb102401rg-ejb102401.eastus.cloudapp.azure.com:7001')
 edit("Edwards-MacBook-Pro.local")
 startEdit()
