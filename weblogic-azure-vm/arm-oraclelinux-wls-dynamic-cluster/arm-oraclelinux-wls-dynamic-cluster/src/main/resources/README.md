@@ -9,7 +9,7 @@ Content that goes into the "Marketplace" tab of the offer.
 
 See [the Marketplace documentation](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-marketplace-tab) for details.
 
-When submitting the offer, use content from [https://github.com/wls-eng/arm-oraclelinux-wls/tree/master/arm-oraclelinux-wls/src/main/resources](this directory), but apply the changes in this file on top.
+When submitting the offer, use content from [https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources](this directory), but apply the changes in this file on top.
 
 ## Offer Settings
 
@@ -71,7 +71,7 @@ Provisions an n-node Oracle WebLogic Server cluster on Oracle Linux 7.6
 
 Description
 
-[description.html](https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/master/arm-oraclelinux-wls/src/main/resources/description.html)
+[description.html](https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/description.html)
 
 Offer available to Microsoft CSP Reseller channel? *
 

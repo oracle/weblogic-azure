@@ -12,7 +12,7 @@ on:
         default: 'false'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
-  # REPO_NAME=wls-eng/arm-oraclelinux-wls-dynamic-cluster
+  # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
   # curl --verbose -XPOST -u "wls-eng:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "production-deploy"}'
   repository_dispatch:
 
@@ -820,7 +820,7 @@ jobs:
       - name: summarize jobs
         if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         run: |
-            workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/wls-eng/arm-oraclelinux-wls-dynamic-cluster/actions/runs/${{ github.run_id }}/jobs)
+            workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/actions/runs/${{ github.run_id }}/jobs)
             critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.name|test("^deploy-weblogic-cluster."))) | length')
             echo "$critical_job_num"
             succeed_critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.conclusion=="success") | select(.name|test("^deploy-weblogic-cluster."))) | length')
@@ -835,7 +835,7 @@ jobs:
                 {
                 "@context":"http://schema.org/extensions",
                 "@type":"MessageCard",
-                "text":"$failed_job_num jobs failed in Dynamic Cluster Offer's workflow, please take a look at: https://github.com/wls-eng/arm-oraclelinux-wls-dynamic-cluster/actions/runs/${{ github.run_id }}"
+                "text":"$failed_job_num jobs failed in Dynamic Cluster Offer's workflow, please take a look at: https://github.com/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/actions/runs/${{ github.run_id }}"
                 }
             EOF
             fi
