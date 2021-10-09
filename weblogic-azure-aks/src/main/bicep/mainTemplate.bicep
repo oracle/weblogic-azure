@@ -272,7 +272,7 @@ var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsS
 var name_keyVaultName = empty(const_keyvaultNameFromTag) ? '${take(concat('wls-kv', uniqueString(utcValue)), 24)}' : resourceGroup().tags.wlsKeyVault
 var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias'
 var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
-var name_rgNameWithoutSpecialCharacter= replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
+var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
 var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
 var name_storageAccountName = const_hasStorageAccount ? reference('query-existing-storage-account').outputs.storageAccount.value : 'wls${uniqueString(utcValue)}'
 var name_tagNameForKeyVault = 'wlsKeyVault'
@@ -290,7 +290,63 @@ module pids './modules/_pids/_pid.bicep' = {
 // Due to lack of preprocessor solution for the way we use bicep, must hard-code the pid here.
 // For test, replace the pid with testing one, and build the package.
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
-  name: 'pid-cf7143e4-83ed-4b7e-ae86-1c5ecdd71bcb-partnercenter'
+  name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
+}
+
+module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep' = {
+  name: 'validate-parameters-and-fail-fast'
+  params: {
+    acrName: acrName
+    aksAgentPoolNodeCount: aksAgentPoolNodeCount
+    aksAgentPoolVMSize: aksAgentPoolVMSize
+    aksClusterRGName: aksClusterRGName
+    aksClusterName: aksClusterName
+    appGatewayCertificateOption: appGatewayCertificateOption
+    appGatewaySSLCertData: appGatewaySSLCertData
+    appGatewaySSLCertPassword: appGatewaySSLCertPassword
+    createACR: createACR
+    createAKSCluster: createAKSCluster
+    createDNSZone: createDNSZone
+    dnszoneName: dnszoneName
+    dnszoneRGName: dnszoneRGName
+    enableAppGWIngress: enableAppGWIngress
+    enableCustomSSL: enableCustomSSL
+    enableDNSConfiguration: enableDNSConfiguration
+    keyVaultName: keyVaultName
+    keyVaultResourceGroup: keyVaultResourceGroup
+    keyVaultSSLCertDataSecretName: keyVaultSSLCertDataSecretName
+    keyVaultSSLCertPasswordSecretName: keyVaultSSLCertPasswordSecretName
+    identity: identity
+    ocrSSOPSW: ocrSSOPSW
+    ocrSSOUser: ocrSSOUser
+    servicePrincipal: servicePrincipal
+    sslConfigurationAccessOption: sslConfigurationAccessOption
+    sslKeyVaultCustomIdentityKeyStoreDataSecretName: sslKeyVaultCustomIdentityKeyStoreDataSecretName
+    sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName: sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName
+    sslKeyVaultCustomIdentityKeyStoreType: sslKeyVaultCustomIdentityKeyStoreType
+    sslKeyVaultCustomTrustKeyStoreDataSecretName: sslKeyVaultCustomTrustKeyStoreDataSecretName
+    sslKeyVaultCustomTrustKeyStorePassPhraseSecretName: sslKeyVaultCustomTrustKeyStorePassPhraseSecretName
+    sslKeyVaultCustomTrustKeyStoreType: sslKeyVaultCustomTrustKeyStoreType
+    sslKeyVaultName: sslKeyVaultName
+    sslKeyVaultPrivateKeyAliasSecretName: sslKeyVaultPrivateKeyAliasSecretName
+    sslKeyVaultPrivateKeyPassPhraseSecretName: sslKeyVaultPrivateKeyPassPhraseSecretName
+    sslKeyVaultResourceGroup: sslKeyVaultResourceGroup
+    sslUploadedCustomIdentityKeyStoreData: sslUploadedCustomIdentityKeyStoreData
+    sslUploadedCustomIdentityKeyStorePassphrase: sslUploadedCustomIdentityKeyStorePassphrase
+    sslUploadedCustomIdentityKeyStoreType: sslUploadedCustomIdentityKeyStoreType
+    sslUploadedCustomTrustKeyStoreData: sslUploadedCustomTrustKeyStoreData
+    sslUploadedCustomTrustKeyStorePassPhrase: sslUploadedCustomTrustKeyStorePassPhrase
+    sslUploadedCustomTrustKeyStoreType: sslUploadedCustomTrustKeyStoreType
+    sslUploadedPrivateKeyAlias: sslUploadedPrivateKeyAlias
+    sslUploadedPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
+    userProvidedAcr: userProvidedAcr
+    userProvidedImagePath: userProvidedImagePath
+    useOracleImage: useOracleImage
+    wlsImageTag: wlsImageTag
+  }
+  dependsOn: [
+    pids
+  ]
 }
 
 module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvaultForWLSSSLCert.bicep' = if (enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) {
@@ -580,4 +636,3 @@ output clusterExternalUrl string = const_enableNetworking ? networkingDeployment
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredUrl : ''
 output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalUrl.value
 output clusterT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.clusterT3ChannelUrl) : ''
-
