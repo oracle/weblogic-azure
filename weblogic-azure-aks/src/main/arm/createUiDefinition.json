@@ -1696,6 +1696,7 @@
         "outputs": {
             "acrName": "[last(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'))]",
             "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
+            "aksAgentPoolVMSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
