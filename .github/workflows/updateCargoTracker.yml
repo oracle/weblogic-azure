@@ -3,59 +3,115 @@ name: Update Cargo Tracker
 on:
   workflow_dispatch:
     inputs:
-      wlsImagePath:
-        description: 'Specify weblogic image path'
-        required: true
-        default: 'container-registry.oracle.com/middleware/weblogic:14.1.1.0-11'
-      resourceGroupForWlsAks:
+      aksClusterRGName:
         description: 'Specify resource group of aks cluster'
         required: true
-        default: 'wlsd-aks-1052320694-65'
+        default: 'wlsd-aks-1327934454-4'
+      aksClusterName:
+        description: 'Specify aks cluster name'
+        required: true
+        default: 'wlsonaks0esltmxel6os24'
+      acrName:
+        description: 'Specify acr name'
+        required: true
+        default: 'wlsaksacresltmxel6os24'
       storageAccountName:
         description: 'Specify storage account of uploading .war file'
         required: true
-        default: 'wlsdsa105232069465'
+        default: 'wlsdsa13279344541'
       storageContainerName:
         description: 'Specify container of uploading .war file'
         required: true
-        default: 'wlsdcon105232069465'
-      azureACRServer:
-        description: 'Specify ACR server of uploading image'
-        required: true
-        default: 'wlsaksacr7ozfx6l7kbssy.azurecr.io'
-      azureACRUserName:
-        description: 'Specify ACR server user name'
-        required: true
-        default: 'wlsaksacr7ozfx6l7kbssy'
-      wlsClusterSize:
-        description: 'Specify WLS on AKS cluster size'
-        required: true
-        default: '5'
-      wlsClusterNamespace:
-        description: 'Specify WLS on AKS cluster namespace'
-        required: true
-        default: 'sample-domain1-ns'
-      wlsCLusterDomainName:
-        description: 'Specify WLS on AKS cluster domain name'
-        required: true
-        default: 'sample-domain1'
+        default: 'wlsdcon13279344541'
   repository_dispatch:
 
 env:
+    refJavaee: bce4e6ec57726d4bc7992b45e1ff6e459b02fb39
     azCliVersion: 2.23.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
-    azureACRPassword: ${{ secrets.AZURE_ACR_PASSWORD }}
     imageTag: ${{ github.run_id }}${{ github.run_number }}
     aksRepoUserName: oracle
-    aksRepoBranchName: d1d50ccfc33bbda2420d77b8aed7dc341480ccdf
+    aksRepoBranchName: main
+    wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
+    userAssignedManagedIdentity: ${{ secrets.USER_ASSIGNED_MANAGED_IDENTITY_ID }}
+    wlsUserName: ${{ secrets.WLS_USERNAME }}
+    wlsPassword: ${{ secrets.WLS_PSW }}
+    acrName: ${{ github.event.inputs.acrName }}
+    aksClusterName: ${{ github.event.inputs.aksClusterName }}
+    aksClusterRGName: ${{ github.event.inputs.aksClusterRGName }}
 
 jobs:
-    deploy-cargo-tracker:
+    preflight:
         runs-on: ubuntu-latest
         steps:
+            - name: Set up JDK 1.8
+              uses: actions/setup-java@v1
+              with:
+                java-version: 1.8
+            - name: Set up bicep
+              run: |
+                curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+                chmod +x ./bicep
+                sudo mv ./bicep /usr/local/bin/bicep
+                bicep --version
+            - name: Checkout azure-javaee-iaas
+              uses: actions/checkout@v2
+              with:
+                repository: Azure/azure-javaee-iaas
+                path: azure-javaee-iaas
+                ref: ${{ env.refJavaee }}
+            - name: Build azure-javaee-iaas
+              run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+            - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
+              uses: actions/checkout@v2
+              with:
+                repository: ${{ env.aksRepoUserName }}/weblogic-azure
+                path: weblogic-azure
+                ref: ${{ env.aksRepoBranchName }}
+            - name: Build and test weblogic-azure/weblogic-azure-aks
+              run: mvn -Pbicep -Ddev -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
+            - name: Generate artifact file name and path
+              id: artifact_file
+              run: |
+                version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' weblogic-azure/weblogic-azure-aks/pom.xml)
+                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
+                unzip weblogic-azure/weblogic-azure-aks/target/$artifactName.zip -d weblogic-azure/weblogic-azure-aks/target/$artifactName
+                echo "##[set-output name=artifactName;]${artifactName}"
+                echo "##[set-output name=artifactPath;]weblogic-azure/weblogic-azure-aks/target/$artifactName"
+            - name: Archive weblogic-azure/weblogic-azure-aks template
+              uses: actions/upload-artifact@v1
+              if: success()
+              with:
+                name: ${{steps.artifact_file.outputs.artifactName}}
+                path: ${{steps.artifact_file.outputs.artifactPath}}
+    deploy-cargo-tracker:
+        needs: preflight
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
+              uses: actions/checkout@v2
+              with:
+                repository: ${{ env.aksRepoUserName }}/weblogic-azure
+                path: weblogic-azure
+                ref: ${{ env.aksRepoBranchName }}
+            - name: Get version information from weblogic-azure/weblogic-azure-aks/pom.xml
+              id: version
+              run: |
+                version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' weblogic-azure/weblogic-azure-aks/pom.xml)
+                echo "version=${version}" >> $GITHUB_ENV
+            - name: Output artifact name for Download action
+              id: artifact_file
+              run: |
+                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
+                echo "artifactName=${artifactName}" >> $GITHUB_ENV
+                echo "##[set-output name=artifactName;]${artifactName}"
+            - name: Download artifact for deployment
+              uses: actions/download-artifact@v1
+              with:
+                name: ${{steps.artifact_file.outputs.artifactName}}
             - name: Set up JDK 1.8
               uses: actions/setup-java@v1
               with:
@@ -95,49 +151,35 @@ jobs:
                 inlineScript: |
                     cargoTrackerBlobUrl=$(az storage blob url --account-name ${{ github.event.inputs.storageAccountName }} --container-name ${{ github.event.inputs.storageContainerName }} --name cargo-tracker.war -o tsv)
                     echo "cargoTrackerBlobUrl=${cargoTrackerBlobUrl}" >> $GITHUB_ENV
-            - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
-              uses: actions/checkout@v2
+            - name: Prepare parameter file
+              run: |
+                echo "replace placeholders using real parameter"
+                sed -i "s/#location#/${location}/g; \
+                        s/#wlsUserName#/${wlsUserName}/g; \
+                        s/#wlsPassword#/${wlsPassword}/g; \
+                        s/#userAssignedManagedIdentity#/${userAssignedManagedIdentity}/g; \
+                        s/#ocrSSOPSW#/${ocrSSOPSW}/g; \
+                        s/#ocrSSOUser#/${ocrSSOUser}/g; \
+                        s/#appPackageUrls#/${cargoTrackerBlobUrl}/g; \
+                        s/#wdtRuntimePassword#/${wdtRuntimePassword}/g; \
+                        s/#acrName#/${acrName}/g; \
+                        s/#aksClusterName#/${aksClusterName}/g; \
+                        s/#aksClusterRGName#/${aksClusterRGName}/g; \
+                        s/#testbranchName#/${aksRepoBranchName}/g; \
+                        s/#gitUserName#/${aksRepoUserName}/g \
+                        weblogic-azure/weblogic-azure-aks/src/test/updateAppParameters.json
+            - name: Deploy WebLogic Server Cluster Domain offer
+              id: deploy-wls-cluster
+              uses: azure/CLI@v1
               with:
-                repository: ${{ env.aksRepoUserName }}/weblogic-azure
-                path: weblogic-azure
-                ref: ${{ env.aksRepoBranchName }}
-            - name: Build image and upload to ACR
-              run: |
-                chmod ugo+x -R weblogic-azure/
-                cd weblogic-azure/weblogic-azure-aks/src/main/arm/scripts
-                echo ${{ env.azureACRPassword }} ${{ env.ocrSSOPSW }} | ./buildWLSDockerImage.sh ${{ github.event.inputs.wlsImagePath }} ${{ github.event.inputs.azureACRServer }} ${{ github.event.inputs.azureACRUserName }} ${{ env.imageTag }} ["${cargoTrackerBlobUrl}"] ${{ env.ocrSSOUser }} ${{ github.event.inputs.wlsClusterSize }} false
-            - name: Connect to AKS cluster
-              run: |
-                echo "connect to cluster"
-                aksClusterName=$(az resource list --resource-group ${{ github.event.inputs.resourceGroupForWlsAks }} --query "[?type=='Microsoft.ContainerService/managedClusters'].name|[0]" -o tsv)
-                az aks get-credentials --resource-group ${{ github.event.inputs.resourceGroupForWlsAks }} --name $aksClusterName
-            - name: Query current image in use
-              run: |
-                oldImageURL=$(kubectl get domain ${{ github.event.inputs.wlsCLusterDomainName }} -n ${{ github.event.inputs.wlsClusterNamespace }} -o json | jq -r '.spec.image')
-                echo "oldImageURL=${oldImageURL}" >> $GITHUB_ENV
-            - name: Update image path
-              run: |
-                acrImagePath="${{ github.event.inputs.azureACRServer }}/aks-wls-images:${{ env.imageTag }}"
-                restartVersion=$(kubectl -n ${{ github.event.inputs.wlsClusterNamespace }} get domain ${{ github.event.inputs.wlsCLusterDomainName }} '-o=jsonpath={.spec.restartVersion}')
-                # increase restart version
-                restartVersion=$((restartVersion + 1))
-                kubectl -n ${{ github.event.inputs.wlsClusterNamespace }} patch domain ${{ github.event.inputs.wlsCLusterDomainName }} \
-                    --type=json \
-                    '-p=[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/image", "value": "'${acrImagePath}'" }]'
-                echo "acrImagePath=${acrImagePath}" >> $GITHUB_ENV
-            - name: Verify all pods are updated with the latest image
-              run: |
-                echo "check if all pods are updated with the latest image"
-                chmod ugo+x -R cargotracker/
-                attempt=0
-                podVersionStatus="notAllUpdated"
-                while [[ $attempt -le 10 ]] && [[ $podVersionStatus = notAllUpdated ]]
-                do
-                  sleep 2m
-                  attempt=$((attempt + 1))
-                  podVersionStatus=$(./cargotracker/src/test/aks/checkPodsImage.sh ${{ github.event.inputs.wlsClusterNamespace }} ${{ env.acrImagePath }})
-                  echo "Pod image version status: ${podVersionStatus}"
-                done
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    az deployment group create \
+                    --verbose \
+                    --resource-group ${{ env.resourceGroupForWlsAks }} \
+                    --name wls-on-aks \
+                    --parameters @weblogic-azure/weblogic-azure-aks/src/test/updateAppParameters.json \
+                    --template-file ${artifactName}/mainTemplate.json
             - name: Query Application Gateway URL
               run: |
                 appgatewayname=$(az resource list --resource-group ${{ github.event.inputs.resourceGroupForWlsAks }} --query "[?type=='Microsoft.Network/applicationGateways'].name|[0]" -o tsv)
