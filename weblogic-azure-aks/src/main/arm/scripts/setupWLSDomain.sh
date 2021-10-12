@@ -410,34 +410,7 @@ function create_source_folder_for_certificates() {
 }
 
 function validate_ssl_keystores() {
-    #validate if identity keystore has entry
-    ${JAVA_HOME}/bin/keytool -list -v \
-        -keystore ${mntPath}/$wlsIdentityKeyStoreFileName \
-        -storepass $wlsIdentityPsw \
-        -storetype $wlsIdentityType |
-        grep 'Entry type:' |
-        grep 'PrivateKeyEntry'
-
-    validate_status "Validate Identity Keystore."
-
     #validate if trust keystore has entry
-    ${JAVA_HOME}/bin/keytool -list -v \
-        -keystore ${mntPath}/${wlsTrustKeyStoreFileName} \
-        -storepass $wlsTrustPsw \
-        -storetype $wlsTrustType |
-        grep 'Entry type:' |
-        grep 'trustedCertEntry'
-
-    validate_status "Validate Trust Keystore."
-
-    #validate if trust keystore has entry
-    ${JAVA_HOME}/bin/keytool -list -v \
-        -keystore ${mntPath}/${wlsTrustKeyStoreFileName} \
-        -storepass $wlsTrustPsw \
-        -storetype jks |
-        grep 'Entry type:' |
-        grep 'trustedCertEntry'
-
     ${JAVA_HOME}/bin/keytool -list -v \
         -keystore ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
         -storepass $wlsTrustPsw \
@@ -445,7 +418,7 @@ function validate_ssl_keystores() {
         grep 'Entry type:' |
         grep 'trustedCertEntry'
 
-    validate_status "Validate Trust Keystore."
+    validate_status "validate Trust Keystore."
 
     echo "Validate SSL key stores successfull !!"
 }
