@@ -368,7 +368,7 @@ module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvault
     wlsTrustKeyStorePassPhraseSecretName: name_trustKeyStorePswSecret
   }
   dependsOn: [
-    pids
+    validateInputs
   ]
 }
 
@@ -448,7 +448,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     wlsUserName: wlsUserName
   }
   dependsOn: [
-    pids
+    validateInputs
     queryStorageAccount
   ]
 }
