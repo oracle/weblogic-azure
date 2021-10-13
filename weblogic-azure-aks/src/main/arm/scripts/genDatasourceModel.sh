@@ -25,7 +25,7 @@ resources:
           JNDIName: [
             ${jndiName}
           ]
-          GlobalTransactionsProtocol: TwoPhaseCommit
+          GlobalTransactionsProtocol: EmulateTwoPhaseCommit
         JDBCDriverParams:
           DriverName: ${driver}
           URL: '@@SECRET:${secretName}:url@@'
