@@ -125,4 +125,4 @@ jobs:
           # create new tag
           git tag ${tagname}
           git push ${authGitPath} ${tagname} -f
-          # git push ${authGitPath} --delete ${tagbranch} -f
+          git push ${authGitPath} --delete ${tagbranch} -f
