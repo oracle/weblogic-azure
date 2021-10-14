@@ -82,6 +82,18 @@ jobs:
           # replace pids
           export targetARM="target"
           for d in weblogic-azure-vm/*/ ; do
+              # for admin offer and single node offer
+              if [ -d ${d}${targetARM} ];then
+                list=$(find ${d}${targetARM} | grep ".json")
+                  for file in ${list}; do
+                      sourcePath=$(echo "$file" | sed "s:target:src/main:g")
+                      if test -f "$sourcePath"; then
+                          echo "Replace ${sourcePath} with ${file}"
+                          cp -f $file $sourcePath
+                      fi
+                  done
+              fi
+
               for d1 in $d*/; do
                   if [ ! -d ${d1}${targetARM} ];then  
                       continue;
