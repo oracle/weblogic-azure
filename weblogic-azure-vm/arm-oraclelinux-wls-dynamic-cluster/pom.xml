@@ -16,7 +16,7 @@
     <description>
         
     </description>
-    <url>https://github.com/wls-eng/arm-oraclelinux-wls-dynamic-cluster</url>
+    <url>https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster</url>
 
     <scm>
         <connection>scm:git:git@github.com:wls-eng/arm-oraclelinux-wls-dynamic-cluster.git</connection>
