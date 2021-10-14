@@ -5,17 +5,17 @@ on:
       tagname:
         description: 'Specify Tag name to create/update.'
         required: true
-        default: '2020-12-02-01-Q4'
+        default: '2021-10-13-01-Q4'
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
-        default: 'refs/heads/develop'
+        default: 'refs/heads/main'
 env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
   refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
-  refJavaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
-  repoName: "arm-oraclelinux-wls-admin"
+  refJavaee: c073dee94765142158f62e5a3bee0f255dd7c3a0
+  repoName: "weblogic-azure"
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
 
@@ -23,6 +23,11 @@ jobs:
   newtag:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout ${{ env.repoName }}
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.repoName }}
+          ref: ${{ github.event.inputs.ref }}
       - name: Checkout azure-javaee-iaas
         uses: actions/checkout@v2
         with:
@@ -35,11 +40,7 @@ jobs:
           repository: Azure/arm-ttk
           path: arm-ttk
           ref: ${{ env.refArmttk }}
-      - name: Checkout ${{ env.repoName }}
-        uses: actions/checkout@v2
-        with:
-          path: ${{ env.repoName }}
-          ref: ${{ github.event.inputs.ref }}
+      
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -47,14 +48,18 @@ jobs:
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
 
-      - name: Build and test ${{ env.repoName }}
+      - name: Build ${{ env.repoName }}
         run: |
           cd ${{ env.repoName }}
-          mvn -Ptemplate-validation-tests clean install
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls/pom.xml
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-admin/pom.xml
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/pom.xml
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/pom.xml
 
       - name: Create new tag
         run: |
           cd ${{ env.repoName }}
+
           git config --global core.longpaths true
           git config --global user.email $userEmail
           git config --global user.name $userName
@@ -75,20 +80,33 @@ jobs:
           git checkout -b ${tagbranch}
 
           # replace pids
-          export targetARM="arm"
-          for d in */ ; do
-              echo $d
-              if [ ! -d ${d}${targetARM} ];then  
-                  continue;
+          export targetARM="target"
+          for d in weblogic-azure-vm/*/ ; do
+              # for admin offer and single node offer
+              if [ -d ${d}${targetARM} ];then
+                list=$(find ${d}${targetARM} | grep ".json")
+                  for file in ${list}; do
+                      sourcePath=$(echo "$file" | sed "s:target:src/main:g")
+                      if test -f "$sourcePath"; then
+                          echo "Replace ${sourcePath} with ${file}"
+                          cp -f $file $sourcePath
+                      fi
+                  done
               fi
 
-              list=$(find ${d}${targetARM} | grep ".json")
-              for file in ${list}; do
-                  targetPath=$(echo "$file" | sed "s:target:src/main:g")
-                  if test -f "$targetPath"; then
-                      echo "Replace ${targetPath} with ${file}"
-                      cp -f $file $targetPath
+              for d1 in $d*/; do
+                  if [ ! -d ${d1}${targetARM} ];then  
+                      continue;
                   fi
+
+                  list=$(find ${d1}${targetARM} | grep ".json")
+                  for file in ${list}; do
+                      sourcePath=$(echo "$file" | sed "s:target:src/main:g")
+                      if test -f "$sourcePath"; then
+                          echo "Replace ${sourcePath} with ${file}"
+                          cp -f $file $sourcePath
+                      fi
+                  done
               done
           done
 
@@ -96,7 +114,7 @@ jobs:
           git add --all
           git commit -m "hard code pids"
           git fetch --unshallow
-          git push ${authGitPath} tagbranch -f
+          git push ${authGitPath} ${tagbranch} -f
 
           # remove existing tag
           tagname=${{ github.event.inputs.tagname }}
