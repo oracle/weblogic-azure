@@ -25,8 +25,8 @@ env:
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
     userAssignedManagedIdentity: ${{ secrets.USER_ASSIGNED_MANAGED_IDENTITY_ID }}
-    aksRepoUserName: zhengchang907
-    aksRepoBranchName: pipelineforwlsaks
+    aksRepoUserName: oracle
+    aksRepoBranchName: main
     resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
@@ -118,10 +118,10 @@ jobs:
         needs: preflight
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout zhengchang907/cargotracker-azure
+            - name: Checkout Azure-Samples/cargotracker-azure
               uses: actions/checkout@v2
               with:
-                repository: zhengchang907/cargotracker-azure
+                repository: Azure-Samples/cargotracker-azure
                 path: cargotracker
             - name: Maven build web app
               run: |
@@ -209,10 +209,10 @@ jobs:
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForWlsAks }}
                     az group create --verbose --name ${{ env.resourceGroupForWlsAks }} --location ${{ env.location }}
-            - name: Checkout zhengchang907/cargotracker-azure
+            - name: Checkout Azure-Samples/cargotracker-azure
               uses: actions/checkout@v2
               with:
-                repository: zhengchang907/cargotracker-azure
+                repository: Azure-Samples/cargotracker-azure
                 path: cargotracker
             - name: Prepare parameter file
               run: |
