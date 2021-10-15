@@ -10,7 +10,7 @@ on:
   repository_dispatch:
 
 env:
-    refJavaee: bce4e6ec57726d4bc7992b45e1ff6e459b02fb39
+    refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691
     azCliVersion: 2.23.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus

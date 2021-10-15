@@ -17,7 +17,7 @@
 #
 AKS_REPO_USER_NAME=oracle
 DB_PASSWORD="Secret123!"
-# Three letters to disambiguate names. Leave blank to use ejb.
+# Three letters to disambiguate names.
 DISAMBIG_PREFIX=
 # The location of the resource group. For example `eastus`. Leave blank to use your default location.
 LOCATION=
@@ -55,9 +55,11 @@ msg() {
 
 setup_colors
 
-# get DISAMBIG_PREFIX if not set at the beginning of this file
+read -r -p "Enter a disambiguation prefix (try initials with a sequence number, such as ejb01): " DISAMBIG_PREFIX
+
 if [ "$DISAMBIG_PREFIX" == '' ] ; then
-    DISAMBIG_PREFIX=ejb
+    msg "${RED}You must enter a disambiguation prefix."
+    exit 1;
 fi
 
 # get ORC_SSOUSER if not set at the beginning of this file
@@ -157,6 +159,8 @@ az role assignment create --role Contributor --assignee-principal-type ServicePr
 
 # https://stackoverflow.com/questions/13210880/replace-one-substring-for-another-string-in-shell-script
 USER_ASSIGNED_MANAGED_IDENTITY_ID=${USER_ASSIGNED_MANAGED_IDENTITY_ID_NOT_ESCAPED//\//\\/}
+# remove leading and trailing quote
+USER_ASSIGNED_MANAGED_IDENTITY_ID=${USER_ASSIGNED_MANAGED_IDENTITY_ID//\"/}
 
 msg "${GREEN}(6/6) Create secrets in GitHub"
 if $USE_GITHUB_CLI; then
@@ -164,14 +168,22 @@ if $USE_GITHUB_CLI; then
     msg "${GREEN}Using the GitHub CLI to set secrets.${NOFORMAT}"
     gh ${GH_FLAGS} secret set AKS_REPO_USER_NAME -b"${AKS_REPO_USER_NAME}"
     gh ${GH_FLAGS} secret set AZURE_CREDENTIALS -b"${AZURE_CREDENTIALS}"
+    msg "${YELLOW}\"AZURE_CREDENTIALS\""
+    msg "${GREEN}${AZURE_CREDENTIALS}"
     gh ${GH_FLAGS} secret set DB_PASSWORD -b"${DB_PASSWORD}"
     gh ${GH_FLAGS} secret set ORC_SSOPSW -b"${ORC_SSOPSW}"
     gh ${GH_FLAGS} secret set ORC_SSOUSER -b"${ORC_SSOUSER}"
     gh ${GH_FLAGS} secret set SERVICE_PRINCIPAL -b"${SERVICE_PRINCIPAL}"
+    msg "${YELLOW}\"SERVICE_PRINCIPAL\""
+    msg "${GREEN}${SERVICE_PRINCIPAL}"
     gh ${GH_FLAGS} secret set USER_ASSIGNED_MANAGED_IDENTITY_ID -b"${USER_ASSIGNED_MANAGED_IDENTITY_ID}"
+    msg "${YELLOW}\"USER_ASSIGNED_MANAGED_IDENTITY_ID\""
+    msg "${GREEN}${USER_ASSIGNED_MANAGED_IDENTITY_ID}"
     gh ${GH_FLAGS} secret set WDT_RUNTIMEPSW -b"${WDT_RUNTIMEPSW}"
     gh ${GH_FLAGS} secret set WLS_PSW -b"${WLS_PSW}"    
-    gh ${GH_FLAGS} secret set WLS_USERNAME -b"${WLS_USERNAME}"    
+    gh ${GH_FLAGS} secret set WLS_USERNAME -b"${WLS_USERNAME}"
+    msg "${YELLOW}\"DISAMBIG_PREFIX\""
+    msg "${GREEN}${DISAMBIG_PREFIX}"
   } || {
     USE_GITHUB_CLI=false
   }
@@ -202,6 +214,8 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${GREEN}${WLS_PSW}"
   msg "${YELLOW}\"WLS_USERNAME\""
   msg "${GREEN}${WLS_USERNAME}"
+  msg "${YELLOW}\"DISAMBIG_PREFIX\""
+  msg "${GREEN}${DISAMBIG_PREFIX}"
   msg "${NOFORMAT}========================================================================"
 fi
 msg "${GREEN}Secrets configured"
