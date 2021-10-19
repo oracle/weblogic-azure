@@ -15,18 +15,20 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.7</version>
+        <version>1.0.12</version>
         <relativePath></relativePath>
     </parent>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <properties>
+        <artifactsLocationBase>https://raw.githubusercontent.com/oracle/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
+        <template.validation.tests.directory>${basedir}/../../../arm-ttk/arm-ttk</template.validation.tests.directory>
         <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=5}'</test.parameters>
-        <template.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/develop/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/develop/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+        <template.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
     </properties>
     
-    <description>
-        
-    </description>
+    <modules>
+      <module>admin-ssl-post-deploy</module>
+    </modules>
 </project>

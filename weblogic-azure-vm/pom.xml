@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+     Copyright (c) 2019, 2021, Oracle and/or its affiliates.
+     Licensed under the Universal Permissive License v 1.0 as shown at
+     https://oss.oracle.com/licenses/upl.
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.oracle.weblogic.azure</groupId>
+    <artifactId>weblogic-azure-vm</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <name>${project.artifactId}</name>
+    <url>https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm</url>
+	
+    <modules>
+      <module>arm-oraclelinux-wls</module>
+      <module>arm-oraclelinux-wls-admin</module>
+      <module>arm-oraclelinux-wls-cluster</module>
+      <module>arm-oraclelinux-wls-dynamic-cluster</module>
+    </modules>
+
+</project>
