@@ -23,16 +23,10 @@
     <name>${project.artifactId}</name>
 
     <properties>
-<<<<<<< HEAD
         <artifactsLocationBase>https://raw.githubusercontent.com/oracle/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
         <template.validation.tests.directory>${basedir}/../../../../arm-ttk/arm-ttk</template.validation.tests.directory>
         <test.parameters>-TestParameter '@{&quot;SampleName&quot;=&quot;admin-ssl-post-deploy/src/main&quot;;&quot;RawRepoPath&quot;=&quot;${artifactsLocationBase}/arm-oraclelinux-wls-admin/&quot;}'</test.parameters>
         <template.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.pid.properties.url>
-=======
-        <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-        <test.parameters>-TestParameter '@{&quot;SampleName&quot;=&quot;addnode/src/main&quot;;&quot;RawRepoPath&quot;=&quot;${artifactsLocationBase}/arm-oraclelinux-wls-admin/${git.tag}/&quot;}'</test.parameters>
-        <template.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
->>>>>>> 5c345c0... Updated license,copyrights and pid properties url
         <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
     </properties>
 
