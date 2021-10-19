@@ -7,7 +7,7 @@
          "metadata": {
             "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
          },
-         "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-admin/${git.tag}/admin-ssl-post-deploy/src/main/"
+         "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-admin/admin-ssl-post-deploy/src/main/"
       },
       "_artifactsLocationSasToken": {
          "type": "securestring",
@@ -85,7 +85,6 @@
       }
    },
    "variables": {
-      "const_hyphen": "-",
       "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
       "const_wlsDomainPath": "/u01/domains",
       "name_scriptFile": "configureCustomAdminSSL.sh"

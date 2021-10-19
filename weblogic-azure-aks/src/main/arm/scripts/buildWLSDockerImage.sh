@@ -222,6 +222,30 @@ function build_wls_image() {
     # Zip wls model and applications
     zip -r ${scriptDir}/model-images/archive.zip wlsdeploy
 
+    # inspect user/group of the base image
+    local imageInfo=$(./imagetool/bin/imagetool.sh inspect --image ${wlsImagePath})
+    # {
+    #     "os" : {
+    #         "id" : "ol",
+    #         "name" : "Oracle Linux Server",
+    #         "version" : "7.9"
+    #     },
+    #     "javaHome" : "/u01/jdk",
+    #     "javaVersion" : "1.8.0_271",
+    #     "oracleHome" : "/u01/oracle",
+    #     "oracleHomeGroup" : "oracle",
+    #     "oracleHomeUser" : "oracle",
+    #     "oracleInstalledProducts" : "WLS,COH,TOPLINK",
+    #     "packageManager" : "YUM",
+    #     "wlsVersion" : "12.2.1.4.0"
+    # }
+    echo ${imageInfo}
+    local user=${imageInfo#*oracleHomeUser}
+    local user=$(echo ${user%%\,*} | tr -d "\"\:\ ")
+    local group=${imageInfo#*oracleHomeGroup}
+    local group=$(echo ${group%%\,*} | tr -d "\"\:\ ")
+    echo "use ${user}:${group} to update the image"
+
     # Build image
     echo "Start building WLS image."
     ./imagetool/bin/imagetool.sh update \
@@ -232,8 +256,7 @@ function build_wls_image() {
         --wdtArchive ${scriptDir}/model-images/archive.zip \
         --wdtModelOnly \
         --wdtDomainType WLS \
-        --chown oracle:root
-    # --additionalBuildCommands ${scriptDir}/nodemanager.dockerfile
+        --chown ${user}:${group}
 
     validate_status "Check status of building WLS domain image."
 
