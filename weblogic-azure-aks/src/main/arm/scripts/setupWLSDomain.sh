@@ -735,6 +735,16 @@ function setup_wls_domain() {
     wait_for_image_update_completed
 
     wait_for_pod_completed
+
+    # make sure all the application are active, if not, fail the deployment.
+    scriptCheckAppStatus=$scriptDir/checkApplicationStatus.py
+    chmod ugo+x $scriptDir/checkApplicationStatus.py
+    utility_validate_application_status \
+        ${wlsDomainNS} \
+        ${wlsAdminSvcName} \
+        ${wlsUserName} \
+        ${wlsPassword} \
+        ${scriptCheckAppStatus}
 }
 
 # Main script
@@ -790,6 +800,7 @@ export sasTokenValidTime=3600
 export storageFileShareName="weblogic"
 export storageResourceGroup=${currentResourceGroup}
 export sharedPath="/shared"
+export wlsAdminSvcName="${wlsDomainUID}-admin-server"
 export wlsDomainNS="${wlsDomainUID}-ns"
 export wlsOptHelmChart="https://oracle.github.io/weblogic-kubernetes-operator/charts"
 export wlsOptNameSpace="weblogic-operator-ns"
