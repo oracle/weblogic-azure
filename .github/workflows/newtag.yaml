@@ -10,9 +10,6 @@ on:
         description: 'Specify Git Ref if needed.'
         required: false
         default: 'refs/heads/main'
-      owner:
-        description: 'Specify repository owner.'
-        required: false
 
 env:
   tagbranch: "tagbranch"
@@ -67,14 +64,8 @@ jobs:
           git config --global core.longpaths true
           git config --global user.email $userEmail
           git config --global user.name $userName
-
-
-          owner=${{ github.event.inputs.owner }}
-          if [[ -z "${owner}" ]];then
-            owner=$userName
-          fi
           
-          authGitPath=https://$gitToken@github.com/$owner/${{ env.repoName }}.git
+          authGitPath=https://$gitToken@github.com/${GITHUB_REPOSITORY}.git
 
           echo "Create tag branch"
           remoteBranches=$(git ls-remote --heads)
