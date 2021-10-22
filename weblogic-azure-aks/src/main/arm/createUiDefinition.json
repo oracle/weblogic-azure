@@ -1674,7 +1674,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "Others",
+                                            "label": "Other",
                                             "value": "otherdb"
                                         }
                                     ],
@@ -1804,6 +1804,16 @@
                                     "multiple": true,
                                     "uploadMode": "url",
                                     "openMode": "binary"
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                            },
+                            {
+                                "name": "dbDriverInfoBox",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "WebLogic Server provides support for application data access to any database using a JDBC-compliant driver. Select here for more details.",
+                                    "uri": "https://aka.ms/wls-aks-dbdriver"
                                 },
                                 "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
                             },
