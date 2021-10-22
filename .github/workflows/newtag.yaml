@@ -10,6 +10,7 @@ on:
         description: 'Specify Git Ref if needed.'
         required: false
         default: 'refs/heads/main'
+
 env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
@@ -63,8 +64,8 @@ jobs:
           git config --global core.longpaths true
           git config --global user.email $userEmail
           git config --global user.name $userName
-
-          authGitPath=https://$gitToken@github.com/$userName/${{ env.repoName }}.git
+          
+          authGitPath=https://$gitToken@github.com/${GITHUB_REPOSITORY}.git
 
           echo "Create tag branch"
           remoteBranches=$(git ls-remote --heads)
