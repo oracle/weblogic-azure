@@ -51,6 +51,7 @@ for app in myapps:
                     inactiveApp=inactiveApp+1
                 serverConfig()
 
+# TIGHT COUPLING: this exact print text is expected to indicate a successful return.
 if inactiveApp == 0:
     print("Summary: all applications are active!")
 else:

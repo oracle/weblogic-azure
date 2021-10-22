@@ -142,7 +142,7 @@ function utility_upload_file_to_fileshare() {
 }
 
 #
-# Make sure all the applciations are running
+# Make sure all the applications are running
 # Exit with error if there is inactive application.
 # $1 - namespace of the domain
 # $2 - ClusterIP service name of admin server
