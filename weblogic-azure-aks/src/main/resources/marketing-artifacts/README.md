@@ -61,3 +61,9 @@ https://www.youtube.com/watch?v=gFS-64XQorA
 <p>Thumbnail</p>
 
 <img src="video.png" />
+
+LICENSE
+
+Copyright (c) 2021 Oracle and/or its affiliates.
+
+Released under the Universal Permissive License v1.0 as shown at https://oss.oracle.com/licenses/upl/.
