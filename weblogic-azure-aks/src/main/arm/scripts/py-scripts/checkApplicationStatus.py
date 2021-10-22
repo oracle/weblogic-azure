@@ -55,4 +55,4 @@ for app in myapps:
 if inactiveApp == 0:
     print("Summary: all applications are active!")
 else:
-    print("Summary: number of inactive application:" + inactiveApp + '.')
+    print("Summary: number of inactive application: " + str(inactiveApp) + '.')
