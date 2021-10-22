@@ -9,7 +9,7 @@ env:
   userEmail: ${{ secrets.USER_EMAIL }}
 jobs:
   merge:
-    if: (github.event_name == 'schedule' && github.repository_owner != 'oracle') || (github.event_name != 'schedule')
+    if: (github.event_name == 'schedule' && github.repository_owner == 'mriccell') || (github.event_name != 'schedule')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
