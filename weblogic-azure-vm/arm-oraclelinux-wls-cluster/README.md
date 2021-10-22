@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2021, Oracle and/or its affiliates.
+Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+-->
+
 ## WebLogic Server (with N-Node Cluster) on Microsoft Azure - Marketplace Offerings
 
 This git repository is used to maintain the Azure Resource Management (ARM) templates and other scripts 
