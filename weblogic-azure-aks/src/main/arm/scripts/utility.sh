@@ -141,6 +141,42 @@ function utility_upload_file_to_fileshare() {
     fi
 }
 
+#
+# Make sure all the applications are running
+# Exit with error if there is inactive application.
+# $1 - namespace of the domain
+# $2 - ClusterIP service name of admin server
+# $3 - domain user
+# $4 - domain password
+# $5 - path of python script which checks application status, the script will run on admin server pod.
+function utility_validate_application_status() {
+    local wlsDomainNS=$1
+    local wlsAdminSvcName=$2
+    local wlsUser=$3
+    local wlsPassword=$4
+    local pyScriptPath=$5
+
+    local podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json \
+        | jq '.items[0] | .metadata.name' \
+        | tr -d "\"")
+
+    # get non-ssl port
+    local adminTargetPort=$(kubectl get svc ${wlsAdminSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
+    local t3ChannelAddress="${podName}.${wlsDomainNS}"
+
+    local targetFilePath=/tmp/checkApplicationStatus.py
+    echo "copy ${pyScriptPath} to ${targetFilePath}"
+    kubectl cp ${pyScriptPath} -n ${wlsDomainNS} ${podName}:${targetFilePath}
+    kubectl exec -it ${podName} -n ${wlsDomainNS} -c "weblogic-server" \
+        -- bash -c "wlst.sh ${targetFilePath} -user ${wlsUser} -password ${wlsPassword} -t3ChannelAddress ${t3ChannelAddress} -t3ChannelPort ${adminTargetPort}" |
+        grep "Summary: all applications are active"
+    
+    if [ $? == 1 ];then
+        echo "Failed to deploy application to WLS cluster. Please make sure the configurations are correct."
+        exit 1
+    fi
+}
+
 # Call this function to make sure pods of a domain are running.
 #   * Make sure the admin server pod is running
 #   * Make sure all the managed server pods are running
