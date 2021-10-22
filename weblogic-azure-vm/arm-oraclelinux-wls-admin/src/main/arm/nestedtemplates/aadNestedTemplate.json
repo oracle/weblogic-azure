@@ -146,8 +146,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${admin.aad.start}",
+            "apiVersion": "2020-06-01",
+            "name": "fc7e031d-111d-5a3a-8b5a-e08602237dca",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -160,7 +160,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -180,8 +180,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${admin.aad.end}",
+            "apiVersion": "2020-06-01",
+            "name": "8295df19-fe6b-5745-ad24-51ef66522b24",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],

@@ -145,8 +145,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.elk.start}",
+            "apiVersion": "2020-06-01",
+            "name": "6890699c-97ad-5d76-91d3-3a3b7d64013f",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -159,7 +159,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -179,7 +179,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -206,7 +206,7 @@
         },
          {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(variables('const_managedCacheVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -233,8 +233,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.elk.end}",
+            "apiVersion": "2020-06-01",
+            "name": "e4165284-b017-5df9-9b91-3f11dd8a72e5",
             "dependsOn": [
                 "appVirtualMachineExtensionLoop",
                 "cacheVirtualMachineExtensionLoop"
