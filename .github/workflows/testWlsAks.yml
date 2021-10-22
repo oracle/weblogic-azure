@@ -8,6 +8,7 @@ on:
         required: true
         default: 'false'
   repository_dispatch:
+    types: [integration-test]
 
 env:
     refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691

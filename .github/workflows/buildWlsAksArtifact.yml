@@ -3,6 +3,7 @@ name: Build WLS on AKS artifact
 on:
   workflow_dispatch:
   repository_dispatch:
+    types: [build-zip]
 
 env:
     refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691
