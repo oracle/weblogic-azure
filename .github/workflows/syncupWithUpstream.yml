@@ -1,0 +1,28 @@
+name: Merge upstream branches
+on:
+  workflow_dispatch:
+  schedule:
+    # run it every 10 mins
+    - cron:  '*/10 * * * *'
+env:
+  userName: ${{ secrets.USER_NAME }}
+  userEmail: ${{ secrets.USER_EMAIL }}
+jobs:
+  merge:
+    if: (github.event_name == 'schedule' && github.repository_owner != 'oracle') || (github.event_name != 'schedule')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Merge upstream
+        run: |
+          git config --global user.name ${{ env.userName }}
+          git config --global user.email ${{ env.userEmail }}
+
+          # "git checkout main" is unnecessary, already here by default
+          git pull --unshallow
+
+          git remote add upstream https://github.com/oracle/weblogic-azure.git
+          git fetch upstream
+
+          git merge --no-edit upstream/main
+          git push origin main
