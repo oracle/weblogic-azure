@@ -622,6 +622,23 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
   ]
 }
 
+module validateApplciations 'modules/_deployment-scripts/_ds-validate-applications.bicep' = {
+  name: 'validate-wls-application-status'
+  params:{
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    identity: identity
+    wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    datasourceDeployment
+  ]
+}
+
 output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.value
 output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerUrl.value
 output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''

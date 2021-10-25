@@ -62,7 +62,6 @@ var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClust
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
 var const_invokeSetUpDomainScript = 'invokeSetupWLSDomain.sh'
-var const_pyCheckAppStatusScript = 'py-scripts/checkApplicationStatus.py'
 var const_pvTempalte = 'pv.yaml.template'
 var const_pvcTempalte = 'pvc.yaml.template'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
@@ -89,7 +88,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_buildDockerImageScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_updateDomainConfigScript}${_artifactsLocationSasToken}')
-      uri(const_scriptLocation, '${const_pyCheckAppStatusScript}${_artifactsLocationSasToken}')
     ]
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
