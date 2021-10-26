@@ -1,18 +1,20 @@
 name: Merge upstream branches
 on:
   workflow_dispatch:
-  schedule:
-    # run it every 10 mins
-    - cron:  '*/10 * * * *'
+  repository_dispatch:
+    types: [upstream-sync]
 env:
   userName: ${{ secrets.USER_NAME }}
   userEmail: ${{ secrets.USER_EMAIL }}
+  gitToken: ${{ secrets.GIT_TOKEN }}
 jobs:
   merge:
     if: (github.event_name == 'schedule' && github.repository_owner == 'mriccell') || (github.event_name != 'schedule')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ env.gitToken }}
       - name: Merge upstream
         run: |
           git config --global user.name ${{ env.userName }}
