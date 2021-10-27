@@ -172,7 +172,7 @@ function utility_validate_application_status() {
         grep "Summary: all applications are active"
     
     if [ $? == 1 ];then
-        echo "Failed to deploy application to WLS cluster. Please make sure the configurations are correct."
+        echo_stderr "Failed to deploy application to WLS cluster. Please make sure the configurations are correct."
         exit 1
     fi
 }

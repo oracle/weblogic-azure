@@ -13,7 +13,10 @@
 *
 * Build marketplace offer for test:
 *   Replace the partner center pid in mainTemplate.bicep, then run the following command to generate the ARM package, and upload it to partner center.
-*   $ mvn -Pbicep -Ddev -Passembly clean install
+*   If using azure-javaee-iaas-parent less than 1.0.13, use:
+*     $ mvn -Pbicep -Passembly -Ddev clean install
+*   otherwise, use
+*     $ mvn -Pbicep-dev -Passembly clean install
 */
 
 param _artifactsLocation string = deployment().properties.templateLink.uri
@@ -224,6 +227,7 @@ param userProvidedAcr string = 'null'
 param userProvidedImagePath string = 'null'
 @description('Use Oracle images or user provided patched images')
 param useOracleImage bool = true
+param validateApplications bool = false
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -619,6 +623,27 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
   }
   dependsOn: [
     networkingDeployment
+  ]
+}
+
+/*
+* To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
+* This should be the last step.
+*/
+module validateApplciations 'modules/_deployment-scripts/_ds-validate-applications.bicep' = if (validateApplications) {
+  name: 'validate-wls-application-status'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    identity: identity
+    wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    datasourceDeployment
   ]
 }
 
