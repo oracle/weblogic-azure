@@ -81,6 +81,7 @@ param createDNSZone bool = false
   'oracle'
   'postgresql'
   'sqlserver'
+  'otherdb'
 ])
 @description('One of the supported database types')
 param databaseType string = 'oracle'
@@ -90,8 +91,16 @@ param databaseType string = 'oracle'
 ])
 @description('createOrUpdate: create a new data source connection, or update an existing data source connection. delete: delete an existing data source connection')
 param dbConfigurationType string = 'createOrUpdate'
+@description('Urls of datasource drivers, must be specified if database type is otherdb')
+param dbDriverLibrariesUrls array = []
+@description('Datasource driver name, must be specified if database type is otherdb')
+param dbDriverName string = 'org.contoso.Driver'
+@description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
+param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 @description('Password for Database')
 param dbPassword string = newGuid()
+@description('The name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.')
+param dbTestTableName string = 'Null'
 @description('User id of Database')
 param dbUser string = 'contosoDbUser'
 @description('DNS prefix for ApplicationGateway')
@@ -416,6 +425,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     createACR: createACR
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
+    dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
@@ -480,6 +490,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     createACR: createACR
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
+    dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
@@ -612,7 +623,10 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
+    dbDriverName: dbDriverName
+    dbGlobalTranPro: dbGlobalTranPro
     dbPassword: dbPassword
+    dbTestTableName: dbTestTableName
     dbUser: dbUser
     dsConnectionURL: dsConnectionURL
     identity: identity

@@ -17,6 +17,9 @@ function generate_ds_model() {
     elif [[ "${databaseType}" == "${dbTypeSQLServer}" ]]; then
         databaseDriver=${driverSQLServer}
         databaseTestTableName=${testTableSQLServer}
+    elif [[ "${databaseType}" == "${dbTypeOthers}" ]]; then
+        databaseDriver=${DB_DRIVER_NAME}
+        databaseTestTableName=${TEST_TABLE_NAME}
     fi
 
     echo "generate data source model file"
@@ -152,6 +155,7 @@ export clusterName="cluster-1"
 export dbTypeOracle="oracle"
 export dbTypePostgre="postgresql"
 export dbTypeSQLServer="sqlserver"
+export dbTypeOthers="otherdb"
 export driverOracle="oracle.jdbc.OracleDriver"
 export driverPostgre="org.postgresql.Driver"
 export driverSQLServer="com.microsoft.sqlserver.jdbc.SQLServerDriver"

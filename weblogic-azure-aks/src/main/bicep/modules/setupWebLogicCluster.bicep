@@ -53,6 +53,7 @@ param createACR bool = false
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
+param dbDriverLibrariesUrls array = []
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
@@ -188,6 +189,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     acrName: useOracleImage ? (createACR ? acrDeployment.outputs.acrName : acrName) : userProvidedAcr
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
+    dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling

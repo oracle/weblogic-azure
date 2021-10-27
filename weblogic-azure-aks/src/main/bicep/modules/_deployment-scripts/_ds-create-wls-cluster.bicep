@@ -10,6 +10,7 @@ param aksClusterName string = ''
 param acrName string = ''
 param appPackageUrls array = []
 param appReplicas int = 2
+param dbDriverLibrariesUrls array = []
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
@@ -78,6 +79,12 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azCliVersion: '2.15.0'
     arguments: const_arguments
+    environmentVariables: [
+      {
+        name: 'URL_3RD_DATASOURCE'
+        value:  '${string(dbDriverLibrariesUrls)}'
+      }
+    ]
     primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetUpDomainScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
       uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')

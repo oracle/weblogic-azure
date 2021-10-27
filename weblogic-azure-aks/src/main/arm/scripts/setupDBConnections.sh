@@ -233,7 +233,7 @@ function validate_datasource() {
     testDatasourceScript=${scriptDir}/${dsScriptFileName}
     podNum=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${wlsClusterName} -o json | jq '.items| length')
     if [ ${podNum} -le 0 ]; then
-        echo "Ensure your cluster has at least one pod."
+        echo_stderr "Ensure your cluster has at least one pod."
         exit 1
     fi
 
@@ -262,7 +262,7 @@ EOF
     kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} -- bash -c "wlst.sh ${targetDSFilePath}" | grep "State is Running"
     
     if [ $? == 1 ];then
-        echo "Failed to configure datasource ${jdbcDataSourceName}. Please make sure the input values are correct."
+        echo_stderr "Failed to configure datasource ${jdbcDataSourceName}. Please make sure the input values are correct."
         delete_datasource
         exit 1
     fi

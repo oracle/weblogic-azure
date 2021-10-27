@@ -15,7 +15,7 @@ function read_sensitive_parameters_from_stdin() {
 
 #Function to display usage message
 function usage() {
-    echo "<azureACRPassword> <ocrSSOPSW> ./buildWLSDockerImage.sh ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableAdminT3Tunneling> <enableClusterT3Tunneling>"
+    echo "<azureACRPassword> <ocrSSOPSW> | ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableAdminT3Tunneling> <enableClusterT3Tunneling> <dbDriversUrls>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -95,6 +95,11 @@ function validate_inputs() {
         echo_stderr "enableClusterT3Tunneling is required. "
         usage 1
     fi
+
+    if [ -z "${dbDriversUrls}" ]; then
+        echo_stderr "dbDriversUrls is required. "
+        usage 1
+    fi
 }
 
 function initialize() {
@@ -167,6 +172,32 @@ function install_utilities() {
 
     curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/mssql-jdbc-7.4.1.jre8.jar
     validate_status "Install mssql driver."
+}
+
+function install_db_drivers() {
+    if [ "${dbDriversUrls}" == "[]" ] || [ -z "${dbDriversUrls}" ]; then
+        return
+    fi
+
+    local dbDriversUrls=$(echo "${dbDriversUrls:1:${#dbDriversUrls}-2}")
+    local dbDriversUrlsArray=$(echo $dbDriversUrls | tr "," "\n")
+
+    for item in $dbDriversUrlsArray; do
+        echo ${item}
+        # e.g. https://wlsaksapp.blob.core.windows.net/japps/mariadb-java-client-2.7.4.jar?sp=r&se=2021-04-29T15:12:38Z&sv=2020-02-10&sr=b&sig=7grL4qP%2BcJ%2BLfDJgHXiDeQ2ZvlWosRLRQ1ciLk0Kl7M%3D
+        local urlWithoutQueryString="${item%\?*}"
+        echo $urlWithoutQueryString
+        local fileName="${urlWithoutQueryString##*/}"
+        echo $fileName
+
+        curl -m ${curlMaxTime} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${fileName}
+        if [ $? -ne 0 ];then
+          echo "Failed to download $item"
+          exit 1
+        fi
+
+        dbDriverPaths="${dbDriverPaths},'wlsdeploy/domainLibraries/${fileName}'"
+    done
 }
 
 # Login in OCR
@@ -288,8 +319,10 @@ export enableSSL=$8
 export enableAdminT3Tunneling=$9
 export enableClusterT3Tunneling=${10}
 export useOracleImage=${11}
+export dbDriversUrls=${12}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
+export dbDriverPaths=""
 export ocrLoginServer="container-registry.oracle.com"
 export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.17/weblogic-deploy.zip"
 export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.16/imagetool.zip"
@@ -303,6 +336,8 @@ validate_inputs
 initialize
 
 install_utilities
+
+install_db_drivers
 
 if [[ "${useOracleImage,,}" == "${constTrue}" ]]; then
     get_wls_image_from_ocr
