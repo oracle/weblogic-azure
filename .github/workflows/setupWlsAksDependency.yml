@@ -1,0 +1,119 @@
+name: Setup DB and Storage Account
+
+on:
+  workflow_dispatch:
+  # Sample cURL
+  # curl --verbose -X POST https://api.github.com/repos/mriccell/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-deploy-dependency"}'
+  repository_dispatch:
+    types: [aks-deploy-dependency]
+
+env:
+    azCliVersion: 2.29.0
+    azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
+    location: eastus
+    dbAdminUser: weblogic
+    dbPassword: ${{ secrets.DB_PASSWORD }}
+    dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
+    aksRepoUserName: oracle
+    aksRepoBranchName: main
+    resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
+    resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
+    storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
+    storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
+
+jobs:
+    preflight:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Set up JDK 1.8
+              uses: actions/setup-java@v1
+              with:
+                java-version: 1.8
+    deploy-db:
+        needs: preflight
+        runs-on: ubuntu-latest
+        steps:
+            - uses: azure/login@v1
+              id: azure-login
+              with:
+                creds: ${{ env.azureCredentials }}
+            - name: Create Resource Group
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    echo "create resource group" ${{ env.resourceGroupForDB }}
+                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{ env.location }}
+            - name: Set Up Azure Postgresql to Test dbTemplate
+              id: setup-postgresql
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    echo "Deploy DB with name " ${{ env.dbName }}
+                    az postgres server create \
+                    --resource-group ${{ env.resourceGroupForDB }} \
+                    --name ${{ env.dbName }}  \
+                    --location ${{ env.location }} \
+                    --admin-user ${{ env.dbAdminUser }} \
+                    --ssl-enforcement Enabled \
+                    --public-network-access Enabled \
+                    --admin-password ${{ env.dbPassword }} \
+                    --sku-name B_Gen5_1
+                    echo "Allow Access To Azure Services"
+                    az postgres server firewall-rule create \
+                    -g ${{ env.resourceGroupForDB }} \
+                    -s ${{ env.dbName }} \
+                    -n "AllowAllWindowsAzureIps" \
+                    --start-ip-address "0.0.0.0" \
+                    --end-ip-address "0.0.0.0"
+    deploy-storage-account:
+        needs: preflight
+        runs-on: ubuntu-latest
+        steps:
+            - uses: azure/login@v1
+              id: azure-login
+              with:
+                creds: ${{ env.azureCredentials }}
+            - name: Create Resource Group
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    echo "create resource group" ${{ env.resourceGroupForStorageAccount }}
+                    az group create --verbose --name ${{ env.resourceGroupForStorageAccount }} --location ${{ env.location }}
+            - name: Create Storage Account
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    az storage account create --name ${{ env.storageAccountName }} \
+                        --resource-group ${{ env.resourceGroupForStorageAccount }} \
+                        --location ${{ env.location }} \
+                        --sku Standard_LRS \
+                        --kind StorageV2
+            - name: Create Storage Container
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    az storage container create -n ${{ env.storageContainerName }} --public-access container --account-name ${{ env.storageAccountName }}
+    format-db-sa-parameters-for-integration-test:
+        needs: [deploy-storage-account, deploy-db]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Generate integration-test parameter json
+              id: artifact_file
+              run: |
+                cat <<EOF >integration-test-data.txt
+                # sample request
+                curl --verbose -X POST https://api.github.com/repos/mriccell/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
+                # copy the JSON as <request_data>
+                {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"isForDemo": "false", "disambiguationSuffix": "${{ github.run_id }}", "storageAccountName": "${{ env.storageAccountName }}", "storageContainerName": "${{ env.storageContainerName }}", "dbName": "${{ env.dbName }}"}}
+                EOF
+            - name: Archive integration-test-data.txt
+              uses: actions/upload-artifact@v1
+              if: success()
+              with:
+                name: integration-test-data
+                path: integration-test-data.txt

@@ -35,7 +35,6 @@ env:
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
     userAssignedManagedIdentity: ${{ secrets.USER_ASSIGNED_MANAGED_IDENTITY_ID }}
-    aksRepoBranchName: main
     storageAccountName: ${{ github.event.client_payload.storageAccountName }}
     storageContainerName: ${{ github.event.client_payload.storageContainerName }}
     isForDemo: ${{ github.event.client_payload.isForDemo }}
