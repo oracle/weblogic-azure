@@ -26,7 +26,7 @@ env:
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
     userAssignedManagedIdentity: ${{ secrets.USER_ASSIGNED_MANAGED_IDENTITY_ID }}
-    aksRepoUserName: oracle
+    aksRepoUserName: galiacheng
     aksRepoBranchName: main
     resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
