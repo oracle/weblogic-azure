@@ -224,6 +224,7 @@ param userProvidedAcr string = 'null'
 param userProvidedImagePath string = 'null'
 @description('Use Oracle images or user provided patched images')
 param useOracleImage bool = true
+param validateApplications bool = false
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -622,9 +623,13 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
   ]
 }
 
-module validateApplciations 'modules/_deployment-scripts/_ds-validate-applications.bicep' = {
+/*
+* To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
+* This should be the last step.
+*/
+module validateApplciations 'modules/_deployment-scripts/_ds-validate-applications.bicep' = if (validateApplications) {
   name: 'validate-wls-application-status'
-  params:{
+  params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value

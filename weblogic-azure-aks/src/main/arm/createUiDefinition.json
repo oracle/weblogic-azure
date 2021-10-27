@@ -613,6 +613,12 @@
                                 "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
                             },
                             {
+                                "name": "validateApplications",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Fail deployment if application does not become ACTIVE.",
+                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
+                            },
+                            {
                                 "name": "appReplicas",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Number of application replicas",
@@ -1813,6 +1819,7 @@
             "useOracleImage": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
             "userProvidedAcr": "[last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/'))]",
             "userProvidedImagePath": "[steps('section_aks').imageInfo.userProvidedImagePath]",
+            "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
