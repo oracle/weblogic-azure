@@ -613,6 +613,16 @@
                                 "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
                             },
                             {
+                                "name": "validateApplicationsInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "If checked, verify the deployed app reaches the ACTIVE state and fail the deployment if it does not. See the documentation link for more information.",
+                                    "uri": "https://aka.ms/wls-aks-deployment-state"
+                                }
+                            },
+                            {
                                 "name": "validateApplications",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Fail deployment if application does not become ACTIVE.",
