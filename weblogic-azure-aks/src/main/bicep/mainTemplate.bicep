@@ -13,7 +13,10 @@
 *
 * Build marketplace offer for test:
 *   Replace the partner center pid in mainTemplate.bicep, then run the following command to generate the ARM package, and upload it to partner center.
-*   $ mvn -Pbicep -Ddev -Passembly clean install
+*   If using azure-javaee-iaas-parent less than 1.0.13, use:
+*     $ mvn -Pbicep -Passembly -Ddev clean install
+*   otherwise, use
+*     $ mvn -Pbicep-dev -Passembly clean install
 */
 
 param _artifactsLocation string = deployment().properties.templateLink.uri
