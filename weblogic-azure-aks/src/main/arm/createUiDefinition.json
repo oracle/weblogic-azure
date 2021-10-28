@@ -23,8 +23,8 @@
                                     "message": "The value must be 1-30 characters long and must only contain letters and numbers."
                                 },
                                 {
-                                    "isValid": "[greaterOrEquals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
-                                    "message": "Please select at least one user assigned managed identity from User assigned managed identity control below."
+                                    "isValid": "[equals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                                    "message": "Please select one user assigned managed identity from User assigned managed identity control below."
                                 }
                             ]
                         },
@@ -69,10 +69,10 @@
                     {
                         "name": "errInfo",
                         "type": "Microsoft.Common.InfoBox",
-                        "visible": "[less(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                        "visible": "[not(equals(length(basics('basicsRequired').identity.userAssignedIdentities),1))]",
                         "options": {
                             "icon": "Error",
-                            "text": "Please select at least one user assigned managed identity.",
+                            "text": "Please select one user assigned managed identity.",
                             "uri": "https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal"
                         }
                     },
