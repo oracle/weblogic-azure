@@ -24,7 +24,7 @@
                                 },
                                 {
                                     "isValid": "[equals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
-                                    "message": "Please select one user assigned managed identity from User assigned managed identity control below."
+                                    "message": "Please select exactly one user assigned managed identity from the User assigned managed identity control below."
                                 }
                             ]
                         },
@@ -72,7 +72,7 @@
                         "visible": "[not(equals(length(basics('basicsRequired').identity.userAssignedIdentities),1))]",
                         "options": {
                             "icon": "Error",
-                            "text": "Please select one user assigned managed identity.",
+                            "text": "Please select exactly one user assigned managed identity.  The identity must have the Contributor or Owner role in the specified subscription.",
                             "uri": "https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal"
                         }
                     },
