@@ -23,8 +23,8 @@
                                     "message": "The value must be 1-30 characters long and must only contain letters and numbers."
                                 },
                                 {
-                                    "isValid": "[greaterOrEquals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
-                                    "message": "Please select at least one user assigned managed identity from User assigned managed identity control below."
+                                    "isValid": "[equals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                                    "message": "Please select exactly one user assigned managed identity from the User assigned managed identity control below."
                                 }
                             ]
                         },
@@ -69,10 +69,10 @@
                     {
                         "name": "errInfo",
                         "type": "Microsoft.Common.InfoBox",
-                        "visible": "[less(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
+                        "visible": "[not(equals(length(basics('basicsRequired').identity.userAssignedIdentities),1))]",
                         "options": {
                             "icon": "Error",
-                            "text": "Please select at least one user assigned managed identity.",
+                            "text": "Please select exactly one user assigned managed identity.  The identity must have the Contributor or Owner role in the specified subscription.",
                             "uri": "https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal"
                         }
                     },
@@ -163,7 +163,7 @@
                         "type": "Microsoft.Common.Slider",
                         "min": 5,
                         "max": 1000,
-                        "label": "Cluster size",
+                        "label": "Maximum cluster size",
                         "defaultValue": 5,
                         "showStepMarkers": false,
                         "toolTip": "The maximum size of the WebLogic cluster.",
@@ -183,6 +183,18 @@
                             "validationMessage": "Allow letters, numbers, space, colon(:), plus(+), minus(-), full stop(.), slash(/), equal sign(=), underscore(_), and the value must be less then 100 Java options."
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "enableT3TunnelingTextBlock",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]",
+                        "options": {
+                            "text": "If checked, configure the necessary settings to enable T3 tunneling. You must take additional action on the Networking tab if either of these are checked.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/wls-aks-t3-tunneling"
+                            }
+                        }
                     },
                     {
                         "name": "enableAdminT3Tunneling",
@@ -310,7 +322,7 @@
                             {
                                 "name": "nodeVMSizeSelector",
                                 "type": "Microsoft.Compute.SizeSelector",
-                                "label": "Size",
+                                "label": "Node size",
                                 "toolTip": "",
                                 "recommendedSizes": [
                                     "Standard_DS2_v2"
@@ -329,10 +341,34 @@
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
+                                "name": "enableAzureMonitoringTextBlock",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+                                "options": {
+                                    "text": "If checked, configure the necessary settings to integrate with Container insights.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-container-insights"
+                                    }
+                                }
+                            },
+                            {
                                 "name": "enableAzureMonitoring",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable Azure Monitoring",
+                                "label": "Enable Container insights",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "enableAzureFileShareTextBlock",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+                                "options": {
+                                    "text": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-persistent-storage"
+                                    }
+                                }
                             },
                             {
                                 "name": "enableAzureFileShare",
@@ -350,9 +386,9 @@
                             {
                                 "name": "useOracleImage",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use a pre-existing WebLogic Server Docker image in Oracle Container Registry?",
+                                "label": "Use a pre-existing WebLogic Server Docker image from Oracle Container Registry?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom PSU images.",
+                                "toolTip": "Select 'Yes' to a use pre-existing WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set PSUs.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -373,7 +409,7 @@
                                 "visible": "[not(bool(steps('section_aks').imageInfo.useOracleImage))]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Make sure the Azure Container Registry has enabled admin user.",
+                                    "text": "Make sure the Azure Container Registry has enabled the admin user.",
                                     "uri": "https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account"
                                 }
                             },
@@ -431,7 +467,7 @@
                                 "visible": "[and(bool(steps('section_aks').imageInfo.useOracleImage),not(bool(steps('section_aks').imageInfo.oracleCreateACR)))]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Make sure the Azure Container Registry has enabled admin user.",
+                                    "text": "Make sure the Azure Container Registry has enabled the admin user.",
                                     "uri": "https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account"
                                 }
                             },
@@ -455,8 +491,8 @@
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Click the link to create Oracle SSO account.",
-                                    "uri": "https://profile.oracle.com/myprofile/account/create-account.jspx"
+                                    "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Select the link to create Oracle SSO account.",
+                                    "uri": "https://aka.ms/wls-aks-create-sso-account"
                                 }
                             },
                             {
@@ -581,7 +617,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Deploy your application package?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to deploy your application, or select 'No' to deploy a default 'hello world' open liberty application.",
+                                "toolTip": "Select 'Yes' to deploy your application.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -648,14 +684,14 @@
             {
                 "name": "section_sslConfiguration",
                 "type": "Microsoft.Common.Section",
-                "label": "TLS/SSL Configuration",
+                "label": "TLS/SSL configuration",
                 "elements": [
                     {
                         "name": "sslConfigurationText",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console, Remote Console, cluster and custom T3 channel on HTTPS (Secure) port, with your own TLS/SSL certificate.",
+                            "text": "Selecting 'Yes' here will cause the offer to configure WebLogic Administration Console, Remote Console, cluster and custom T3 channel to use HTTPS (Secure) ports, with your own TLS/SSL certificate.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
@@ -707,7 +743,7 @@
                         "name": "uploadedCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
-                        "label": "TLS/SSL Configuration Settings",
+                        "label": "TLS/SSL configuration Settings",
                         "elements": [
                             {
                                 "name": "sslKeystoreInfo0",
@@ -866,7 +902,7 @@
                         "name": "keyVaultStoredCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
-                        "label": "TLS/SSL Configuration Settings",
+                        "label": "TLS/SSL configuration settings",
                         "elements": [
                             {
                                 "name": "sslKeystoreInfo1",
@@ -883,7 +919,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "true",
                                 "options": {
-                                    "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL certificate. The template will look for the certificate and other configuration items in the Azure Key Vault specified here.",
+                                    "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL certificate. The offer will look for the certificate and other configuration items in the Azure Key Vault specified here.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
@@ -1055,11 +1091,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Load Balancer service or Ingress service for WebLogic Administration Console and WebLogic cluster.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
-                            }
+                            "text": "This blade allows configuring options for load balancing and ingress controller."
                         }
                     },
                     {
@@ -1067,6 +1099,18 @@
                         "type": "Microsoft.Common.Section",
                         "label": "Standard Load Balancer service",
                         "elements": [
+                            {
+                                "name": "enableLBSVCText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "Selecting 'Yes' here will cause the offer to provision the Azure Load Balancer as a Kubernetes load balancer service. Note, you must select 'Yes' and provide further configuration when T3 tunneling is enabled on the Basics blade.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-standard-load-balancer"
+                                    }
+                                }
+                            },
                             {
                                 "name": "enableLBSVC",
                                 "type": "Microsoft.Common.OptionsGroup",
@@ -1085,6 +1129,18 @@
                                         }
                                     ],
                                     "required": false
+                                }
+                            },
+                            {
+                                "name": "enableInternalLBText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "options": {
+                                    "text": "If checked, the offer will configure the load balancer as an internal load balancer.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-internal-load-balancer"
+                                    }
                                 }
                             },
                             {
@@ -1192,8 +1248,20 @@
                     {
                         "name": "appgwIngress",
                         "type": "Microsoft.Common.Section",
-                        "label": "Application Gateway Ingress",
+                        "label": "Application Gateway Ingress Controller",
                         "elements": [
+                            {
+                                "name": "enableAppGatewayText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "Selecting 'Yes' here will cause the offer to configure an Application Gateway Ingress Controller",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-app-gateway-ingress-controller"
+                                    }
+                                }
+                            },
                             {
                                 "name": "enableAppGateway",
                                 "type": "Microsoft.Common.OptionsGroup",
@@ -1460,14 +1528,14 @@
             {
                 "name": "section_dnsConfiguration",
                 "type": "Microsoft.Common.Section",
-                "label": "DNS Configuration",
+                "label": "DNS configuration",
                 "elements": [
                     {
                         "name": "dnsConfigurationText",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console, cluster, Remote Console and custom T3 channel using custom DNS Name (example: admin.contoso.com)",
+                            "text": "Selecting 'Yes' here will cause the offer to provision Oracle WebLogic Server Administration Console, cluster, Remote Console and custom T3 channel using custom DNS Name (example: admin.contoso.com)",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
@@ -1641,7 +1709,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the template."
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the offer to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the offer."
                         }
                     },
                     {
