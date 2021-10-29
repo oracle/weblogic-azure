@@ -199,7 +199,7 @@
                     {
                         "name": "enableAdminT3Tunneling",
                         "type": "Microsoft.Common.CheckBox",
-                        "label": "Enable T3 tunneling for Admin Server",
+                        "label": "Enable T3 tunneling for Administration Server",
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
@@ -697,7 +697,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the offer to configure WebLogic Administration Console, Remote Console, cluster and custom T3 channel to use HTTPS (Secure) ports, with your own TLS/SSL certificate.",
+                            "text": "Selecting 'Yes' here will cause the offer to configure WebLogic Server Administration Console, Remote Console, cluster and custom T3 channel to use HTTPS (Secure) ports, with your own TLS/SSL certificate.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
@@ -707,9 +707,9 @@
                     {
                         "name": "enableCustomSSL",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure end to end TLS/SSL to WebLogic Administration Console and cluster on HTTPS (Secure) port, with your own certificate?",
+                        "label": "Configure end to end TLS/SSL to WebLogic Server Administration Console and cluster on HTTPS (Secure) port, with your own certificate?",
                         "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure end to end TLS/SSL to WebLogic Administration Console and cluster on HTTPS (Secure) port, with your own certificate.",
+                        "toolTip": "Select 'Yes' to configure end to end TLS/SSL to WebLogic Server Administration Console and cluster on HTTPS (Secure) port, with your own certificate.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -1317,7 +1317,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
                                 "options": {
-                                    "text": "    ⁃ Generate a self-signed frontend certificate: generate a self-signed frontend certificate and apply it during deployment.",
+                                    "text": "    ⁃ Generate a self-signed front-end certificate: Generate a self-signed front-end certificate and apply it during deployment.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
@@ -1341,7 +1341,7 @@
                                             "value": "haveKeyVault"
                                         },
                                         {
-                                            "label": "Generate a self-signed frontend certificate",
+                                            "label": "Generate a self-signed front-end certificate",
                                             "value": "generateCert"
                                         }
                                     ],
@@ -1352,7 +1352,7 @@
                             {
                                 "name": "keyVaultSSLCertData",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Frontend TLS/SSL certificate(.pfx)",
+                                "label": "Front-End TLS/SSL certificate(.pfx)",
                                 "toolTip": "TLS/SSL certificate used for App Gateway",
                                 "constraints": {
                                     "required": true,
@@ -1372,7 +1372,7 @@
                                     "password": "Password",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "Frontend TLS/SSL certificate password",
+                                "toolTip": "Front-End TLS/SSL certificate password",
                                 "constraints": {
                                     "required": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]",
                                     "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
@@ -1428,7 +1428,7 @@
                             {
                                 "name": "keyVaultSSLCertDataSecretName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the frontend TLS/SSL certificate data",
+                                "label": "The name of the secret in the specified Key Vault whose value is the front-end TLS/SSL certificate data",
                                 "defaultValue": "",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
@@ -1441,7 +1441,7 @@
                             {
                                 "name": "keyVaultSSLCertPasswordSecretName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the password for the frontend TLS/SSL certificate",
+                                "label": "The name of the secret in the specified Key Vault whose value is the password for the front-end TLS/SSL certificate",
                                 "defaultValue": "",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
@@ -1617,9 +1617,9 @@
                     {
                         "name": "dnszoneAdminConsoleLabel",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Label for Oracle WebLogic Administration Console",
+                        "label": "Label for Oracle WebLogic Server Administration Console",
                         "defaultValue": "admin",
-                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
+                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Server Administration Console",
                         "constraints": {
                             "required": true,
                             "validations": [
@@ -1638,9 +1638,9 @@
                     {
                         "name": "dnszoneAdminT3ChannelLabel",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Label for Oracle WebLogic Admin Server T3 channel",
+                        "label": "Label for Oracle WebLogic Administration Server T3 channel",
                         "defaultValue": "admin-t3",
-                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Admin Server T3 channel",
+                        "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Server T3 channel",
                         "constraints": {
                             "required": true,
                             "validations": [
