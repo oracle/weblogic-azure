@@ -163,10 +163,10 @@
                         "type": "Microsoft.Common.Slider",
                         "min": 5,
                         "max": 1000,
-                        "label": "Maximum cluster size",
+                        "label": "Maximum dynamic cluster size",
                         "defaultValue": 5,
                         "showStepMarkers": false,
-                        "toolTip": "The maximum size of the WebLogic cluster.",
+                        "toolTip": "The maximum size of the dynamic WebLogic cluster.",
                         "constraints": {
                             "required": true
                         },
@@ -386,9 +386,9 @@
                             {
                                 "name": "useOracleImage",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use a pre-existing WebLogic Server Docker image from Oracle Container Registry?",
+                                "label": "Use a pre-existing, unpatched, WebLogic Server Docker image from Oracle Container Registry?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set PSUs.",
+                                "toolTip": "Select 'Yes' to a use pre-existing, unpatched, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set patches (PSUs).",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -673,13 +673,13 @@
                             {
                                 "name": "appReplicas",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Number of application replicas",
+                                "label": "Number of WebLogic Managed Server replicas",
                                 "defaultValue": "2",
-                                "toolTip": "The number of application replicas to deploy.",
+                                "toolTip": "The number of WebLogic Managed Server replicas to deploy.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(1|2|3|4|5)$",
-                                    "validationMessage": "Number of application replicas to deploy, limit 1-5."
+                                    "validationMessage": "Number of WebLogic Managed Server replicas to deploy, limit 1-5."
                                 }
                             }
                         ],
