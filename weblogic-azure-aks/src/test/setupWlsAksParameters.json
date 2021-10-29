@@ -37,6 +37,9 @@
         "createDNSZone": {
             "value": true
         },
+        "dbGlobalTranPro": {
+            "value": "EmulateTwoPhaseCommit"
+        },
         "dbPassword": {
             "value": "#dbPassword#"
         },
