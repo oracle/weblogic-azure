@@ -381,7 +381,7 @@
                     {
                         "name": "imageInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Image Selection",
+                        "label": "Image selection",
                         "elements": [
                             {
                                 "name": "useOracleImage",
@@ -531,17 +531,23 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
-                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile from statement. \nOracle Standard Terms and Restrictions terms must be agreed. \nClick the following link to make sure you have agree the terms and check the valid tags.",
-                                    "link": {
-                                        "label": "Must be a valid tag value from Oracle Container Registry",
-                                        "uri": "https://aka.ms/wls-aks-fromImage-tag"
-                                    }
+                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM clause."
+                                }
+                            },
+                            {
+                                "name": "fromImageInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "In the Oracle Container Registry, the Oracle Standard Terms and Restrictions must be accepted. Select this link the following link to make sure you have agreed to the terms for the desired WebLogic Server Docker image and check the valid tags. The deployment will fail if you have not accepted the terms.",
+                                    "uri": "https://aka.ms/wls-aks-fromImage-tag"
                                 }
                             },
                             {
                                 "name": "oracleImageSelector",
                                 "type": "Microsoft.Common.DropDown",
-                                "label": "Select WebLogic Docker tag",
+                                "label": "Select WebLogic Server Docker tag",
                                 "defaultValue": "14.1.1.0-11",
                                 "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromOracleImage option to 'imagetool'.",
                                 "constraints": {
@@ -743,7 +749,7 @@
                         "name": "uploadedCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
-                        "label": "TLS/SSL configuration Settings",
+                        "label": "TLS/SSL configuration settings",
                         "elements": [
                             {
                                 "name": "sslKeystoreInfo0",
@@ -1809,7 +1815,7 @@
                                 "name": "dbGlobalTranPro",
                                 "type": "Microsoft.Common.DropDown",
                                 "label": "Global transactions protocol",
-                                "defaultValue": "EmulateTwoPhaseCommit",
+                                "defaultValue": "OnePhaseCommit",
                                 "multiLine": true,
                                 "toolTip": "Determines the transaction protocol (global transaction processing behavior) for the data source.",
                                 "constraints": {
