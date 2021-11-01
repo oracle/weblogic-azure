@@ -37,9 +37,7 @@ jobs:
             - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
               uses: actions/checkout@v2
               with:
-                repository: ${{ env.aksRepoUserName }}/weblogic-azure
                 path: weblogic-azure
-                ref: ${{ env.aksRepoBranchName }}
             - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Ddev -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Generate artifact file name and path
