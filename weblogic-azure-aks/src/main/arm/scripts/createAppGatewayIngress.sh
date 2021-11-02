@@ -22,6 +22,10 @@ kind: Ingress
 metadata:
   name: ${clusterIngressHttpsName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constClusterName}"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
@@ -58,6 +62,10 @@ kind: Ingress
 metadata:
   name: ${clusterIngressName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constClusterName}"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
@@ -92,6 +100,10 @@ kind: Ingress
 metadata:
   name: ${clusterIngressName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constClusterName}"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
@@ -141,6 +153,10 @@ kind: Ingress
 metadata:
   name: ${adminIngressName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constAdminServerName}"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
 EOF
@@ -173,6 +189,10 @@ kind: Ingress
 metadata:
   name: ${adminRemoteIngressName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constAdminServerName}-remote-console"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
@@ -208,6 +228,10 @@ kind: Ingress
 metadata:
   name: ${adminIngressName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constAdminServerName}"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
@@ -256,6 +280,10 @@ kind: Ingress
 metadata:
   name: ${adminRemoteIngressName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constAdminServerName}-remote-console"
+    azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
