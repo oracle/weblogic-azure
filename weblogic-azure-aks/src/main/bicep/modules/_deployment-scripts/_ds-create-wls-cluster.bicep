@@ -16,7 +16,7 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 param identity object
-param location string = 'eastus'
+param location string = resourceGroup().location
 param managedServerPrefix string = 'managed-server'
 @secure()
 param ocrSSOPSW string

@@ -97,6 +97,7 @@ param dbDriverLibrariesUrls array = []
 param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('The name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.')
@@ -115,6 +116,8 @@ param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
 @description('Azure DNS Zone name.')
 param dnszoneName string = 'contoso.xyz'
 param dnszoneRGName string = 'dns-contoso-rg'
+@description('Internal load balancer targets array. Used when create standard load balancer is yes.')
+param dropDownTargets array = []
 @description('JDBC Connection String')
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 @description('true to set up Application Gateway ingress.')
@@ -148,7 +151,7 @@ param keyVaultSSLBackendRootCertDataSecretName string = 'kv-ssl-backend-data'
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
 @description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate of Appliation Gateway frontend TLS/SSL')
 param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
-param location string = 'eastus'
+param location string = resourceGroup().location
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
 @description('Name prefix of managed server.')
@@ -668,6 +671,7 @@ output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networki
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
 output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl : ''
 output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl : ''
+output standardLBTargetsLength string = const_enableNetworking ? format('{0}', length(dropDownTargets)) : ''
 output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalUrl.value
 output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.adminServerT3ChannelUrl) : ''
 output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value

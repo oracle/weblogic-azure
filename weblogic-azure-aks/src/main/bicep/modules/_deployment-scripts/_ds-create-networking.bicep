@@ -34,7 +34,7 @@ param enableCustomSSL bool = false
 param enableDNSConfiguration bool = false
 param identity object
 param lbSvcValues array = []
-param location string = 'eastus'
+param location string = resourceGroup().location
 @secure()
 param servicePrincipal string = newGuid()
 param useInternalLB bool = false

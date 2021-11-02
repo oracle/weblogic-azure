@@ -52,7 +52,7 @@ param keyvaultBackendCertDataSecretName string = 'kv-ssl-backend-data'
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
 @description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate')
 param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
-param location string = 'eastus'
+param location string = resourceGroup().location
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
 @secure()
