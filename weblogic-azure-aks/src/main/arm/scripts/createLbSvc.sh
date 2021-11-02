@@ -19,6 +19,10 @@ kind: Service
 metadata:
   name: ${adminServerLBSVCName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constAdminServerName}"
+    azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
@@ -51,6 +55,10 @@ kind: Service
 metadata:
   name: ${adminServerT3LBSVCName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constAdminServerName}-t3-channel"
+    azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
@@ -83,6 +91,10 @@ kind: Service
 metadata:
   name: ${clusterLBSVCName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constClusterName}"
+    azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
@@ -115,6 +127,10 @@ kind: Service
 metadata:
   name: ${clusterT3LBSVCName}
   namespace: ${wlsDomainNS}
+  labels:
+    weblogic.domainUID: "${wlsDomainUID}"
+    azure.weblogic.target: "${constClusterName}-t3-channel"
+    azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
