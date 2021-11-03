@@ -58,7 +58,7 @@ param utcValue string = utcNow()
 param wlsImageTag string
 
 var const_acrName= useOracleImage ? acrName: userProvidedAcr
-var const_arguments = '${resourceGroup().location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone} ${const_checkACRAdminEnabled}'
+var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone} ${const_checkACRAdminEnabled}'
 var const_azcliVersion = '2.15.0'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
 var const_checkACRAdminEnabled= useOracleImage || !createACR

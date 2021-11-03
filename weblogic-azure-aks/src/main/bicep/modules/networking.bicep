@@ -85,7 +85,7 @@ module pidAppgwStart './_pids/_pid.bicep' = if (enableAppGWIngress) {
 }
 
 // get key vault object in a resource group
-resource existingKeyvault 'Microsoft.KeyVault/vaults@2020-06-01' existing = if (enableAppGWIngress) {
+resource existingKeyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = if (enableAppGWIngress) {
   name: keyVaultName
   scope: resourceGroup(keyVaultResourceGroup)
 }
