@@ -5,6 +5,7 @@ param appgwName string
 @secure()
 param sslBackendRootCertData string = newGuid()
 param identity object
+param location string
 param utcValue string = utcNow()
 
 var const_arguments = '${resourceGroup().name} ${appgwName} ${sslBackendRootCertData}'
@@ -13,7 +14,7 @@ var const_deploymentName='ds-upload-trusted-root-certificatre-to-gateway'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
-  location: resourceGroup().location
+  location: location
   kind: 'AzureCLI'
   identity: identity
   properties: {

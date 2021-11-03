@@ -5,6 +5,7 @@
 param enabledForTemplateDeployment bool = true
 @description('Name of the vault')
 param keyVaultName string
+param location string
 @description('Price tier for Key Vault.')
 param sku string
 param utcValue string = utcNow()
@@ -26,7 +27,7 @@ param wlsTrustKeyStorePassPhraseSecretName string
 
 resource keyvault 'Microsoft.KeyVault/vaults@2020-06-01' = {
   name: keyVaultName
-  location: resourceGroup().location
+  location: location
   properties: {
     enabledForTemplateDeployment: enabledForTemplateDeployment
     sku: {

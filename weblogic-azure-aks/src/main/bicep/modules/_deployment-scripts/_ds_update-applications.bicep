@@ -14,6 +14,7 @@ param appPackageFromStorageBlob object = {
   containerName: 'container-contoso'
 }
 param identity object
+param location string
 
 @secure()
 param ocrSSOPSW string
@@ -37,7 +38,7 @@ var const_utilityScript= 'utility.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-wls-update-applications'
-  location: resourceGroup().location
+  location: location
   kind: 'AzureCLI'
   identity: identity
   properties: {

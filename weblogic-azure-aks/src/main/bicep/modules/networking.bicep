@@ -52,7 +52,7 @@ param keyvaultBackendCertDataSecretName string = 'kv-ssl-backend-data'
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
 @description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate')
 param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
-param location string = resourceGroup().location
+param location string
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
 @secure()
@@ -95,6 +95,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
   params: {
     dnsNameforApplicationGateway: dnsNameforApplicationGateway
     gatewayPublicIPAddressName: appGatewayPublicIPAddressName
+    location: location
   }
   dependsOn: [
     pidAppgwStart
@@ -112,6 +113,7 @@ module appgwBackendCertDeployment '_deployment-scripts/_ds-appgw-upload-trusted-
     appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
     sslBackendRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
     identity: identity
+    location: location
   }
   dependsOn: [
     appgwDeployment

@@ -5,6 +5,7 @@
 param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
 @description('Public IP Name for the Application Gateway')
 param gatewayPublicIPAddressName string = 'gwip'
+param location string
 param utcValue string = utcNow()
 
 var const_subnetAddressPrefix = '172.16.0.0/28'
@@ -27,7 +28,7 @@ var ref_httpListener = resourceId('Microsoft.Network/applicationGateways/httpLis
 
 resource nsg 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   name: name_nsg
-  location: resourceGroup().location
+  location: location
   properties: {
     securityRules: [
       {
@@ -65,7 +66,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
 
 resource vnet 'Microsoft.Network/virtualNetworks@2020-07-01' = {
   name: name_virtualNetwork
-  location: resourceGroup().location
+  location: location
   properties: {
     addressSpace: {
       addressPrefixes: [
@@ -94,7 +95,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
   sku: {
     name: 'Standard'
   }
-  location: resourceGroup().location
+  location: location
   properties: {
     publicIPAllocationMethod: 'Static'
     dnsSettings: {
@@ -105,7 +106,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
 
 resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
   name: name_appGateway
-  location: resourceGroup().location
+  location: location
   tags: {
     'managed-by-k8s-ingress': 'true'
   }

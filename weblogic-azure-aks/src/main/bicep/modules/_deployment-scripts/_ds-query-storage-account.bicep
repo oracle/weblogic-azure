@@ -5,6 +5,7 @@ param aksClusterName string = ''
 param aksClusterRGName string = ''
 
 param identity object
+param location string
 param utcValue string = utcNow()
 
 var const_arguments = '${aksClusterRGName} ${aksClusterName}'
@@ -13,7 +14,7 @@ var const_deploymentName='ds-query-storage-account'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
-  location: resourceGroup().location
+  location: location
   kind: 'AzureCLI'
   identity: identity
   properties: {

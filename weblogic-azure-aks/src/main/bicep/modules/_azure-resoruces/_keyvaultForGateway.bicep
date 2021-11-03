@@ -19,6 +19,7 @@ param enableCustomSSL bool = false
 param enabledForTemplateDeployment bool = true
 
 param identity object
+param location string
 param permission object = {
   certificates: [
     'get'
@@ -49,6 +50,7 @@ module keyVaultwithSelfSignedAppGatewaySSLCert '_keyvault/_keyvaultWithNewCert.b
   params: {
     identity: identity
     keyVaultName: keyVaultName
+    location: location
     permission: permission
     subjectName: subjectName
     sku: sku
@@ -64,6 +66,7 @@ module keyVaultwithExistingAppGatewaySSLCert '_keyvault/_keyvaultWithExistingCer
     certificatePasswordValue: certificatePasswordValue
     enabledForTemplateDeployment: enabledForTemplateDeployment
     keyVaultName: keyVaultName
+    location: location
     sku: sku
   }
 }
@@ -75,6 +78,7 @@ module keyvaultBackendRootCert '_keyvault/_keyvaultForGatewayBackendCert.bicep' 
     certificateDataValue: backendCertificateDataValue
     enabledForTemplateDeployment: enabledForTemplateDeployment
     keyVaultName: keyVaultName
+    location: location
     sku: sku
   }
   dependsOn:[

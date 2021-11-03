@@ -18,6 +18,7 @@ param dbUser string
 param dsConnectionURL string
 param identity object
 param jdbcDataSourceName string
+param location string
 param utcValue string = utcNow()
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -37,7 +38,7 @@ var const_utilityScript= 'utility.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-wls-db-connection'
-  location: resourceGroup().location
+  location: location
   kind: 'AzureCLI'
   identity: identity
   properties: {

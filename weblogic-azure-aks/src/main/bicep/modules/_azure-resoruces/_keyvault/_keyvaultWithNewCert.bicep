@@ -7,6 +7,8 @@ param identity object
 @description('Used to name the new Azure Key Vault resoure.')
 param keyVaultName string = 'wls-kv-${uniqueString(utcValue)}'
 
+param location string
+
 @description('Access permission of the key vault, will applied to all access policies.')
 param permission object = {
   certificates: [
@@ -31,7 +33,7 @@ var const_identityId = '${substring(string(identity.userAssignedIdentities), ind
 
 resource keyvault 'Microsoft.KeyVault/vaults@2020-06-01' = {
   name: keyVaultName
-  location: resourceGroup().location
+  location: location
   properties: {
     sku: {
       family: 'A'
@@ -58,7 +60,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2020-06-01' = {
 
 resource createAddCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-create-add-appgw-certificate'
-  location: resourceGroup().location
+  location: location
   identity: identity
   kind: 'AzurePowerShell'
   properties: {

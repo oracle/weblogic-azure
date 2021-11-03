@@ -23,6 +23,7 @@ param keyVaultResourceGroup string
 param keyVaultSSLCertDataSecretName string
 param keyVaultSSLCertPasswordSecretName string
 param identity object
+param location string
 @secure()
 param ocrSSOPSW string
 param ocrSSOUser string
@@ -65,7 +66,7 @@ var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
-  location: resourceGroup().location
+  location: location
   kind: 'AzureCLI'
   identity: identity
   properties: {
