@@ -29,6 +29,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   name: keyVaultName
   location: location
   properties: {
+    accessPolicies: []
     enabledForTemplateDeployment: enabledForTemplateDeployment
     sku: {
       name: sku
