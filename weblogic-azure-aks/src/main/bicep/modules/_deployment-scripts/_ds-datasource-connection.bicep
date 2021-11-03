@@ -11,6 +11,7 @@ param databaseType string = 'oracle'
 param dbConfigurationType string
 param dbDriverName string = 'org.contoso.Driver'
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 param dbPassword string = newGuid()
 param dbTestTableName string = 'Null'
 param dbUser string
