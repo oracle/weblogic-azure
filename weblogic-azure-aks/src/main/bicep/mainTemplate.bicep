@@ -604,6 +604,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     keyVaultSSLCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
     keyVaultSSLCertPasswordSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
     location: location
+    lbDropDownTargets: dropDownTargets
     lbSvcValues: lbSvcValues
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
@@ -671,7 +672,6 @@ output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networki
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
 output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl : ''
 output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl : ''
-output standardLBTargetsLength string = const_enableNetworking ? format('{0}', length(dropDownTargets)) : ''
 output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalUrl.value
 output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.adminServerT3ChannelUrl) : ''
 output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value
