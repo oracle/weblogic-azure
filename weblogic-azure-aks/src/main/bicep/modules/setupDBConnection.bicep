@@ -51,6 +51,7 @@ param databaseType string = 'oracle'
 param dbConfigurationType string = 'createOrUpdate'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('User id of Database')
