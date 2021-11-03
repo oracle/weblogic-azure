@@ -7,9 +7,8 @@ param certificateDataName string
 @description('Certificate data to store in the secret')
 param certificateDataValue string
 
-@secure()
 @description('Secret name of certificate password.')
-param certificatePasswordName string
+param certificatePswSecretName string
 
 @secure()
 @description('Certificate password to store in the secret')
@@ -53,7 +52,7 @@ resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2020-06-01' = {
 }
 
 resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2020-06-01' = {
-  name: '${keyVaultName}/${certificatePasswordName}'
+  name: '${keyVaultName}/${certificatePswSecretName}'
   properties: {
     value: certificatePasswordValue
   }
@@ -64,4 +63,4 @@ resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2020-06-01' = 
 
 output keyVaultName string = keyVaultName
 output sslCertDataSecretName string = certificateDataName
-output sslCertPwdSecretName string = certificatePasswordName
+output sslCertPwdSecretName string = certificatePswSecretName

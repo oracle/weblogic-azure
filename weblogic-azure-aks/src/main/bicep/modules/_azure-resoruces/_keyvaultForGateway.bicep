@@ -60,7 +60,7 @@ module keyVaultwithExistingAppGatewaySSLCert '_keyvault/_keyvaultWithExistingCer
   params: {
     certificateDataName: name_sslCertSecretName
     certificateDataValue: certificateDataValue
-    certificatePasswordName: name_sslCertPasswordSecretName
+    certificatePswSecretName: name_sslCertPasswordSecretName
     certificatePasswordValue: certificatePasswordValue
     enabledForTemplateDeployment: enabledForTemplateDeployment
     keyVaultName: keyVaultName
