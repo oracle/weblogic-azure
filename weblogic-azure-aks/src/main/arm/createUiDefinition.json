@@ -200,12 +200,14 @@
                         "name": "enableAdminT3Tunneling",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable T3 tunneling for Administration Server",
+                        "toolTip": "If checked, enable T3 tunneling for Administration Server",
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
                         "name": "enableClusterT3Tunneling",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable T3 tunneling for WebLogic cluster",
+                        "toolTip": "If checked, enable T3 tunneling for WebLogic cluster.",
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     }
                 ],
@@ -366,6 +368,7 @@
                                 "name": "enableAzureMonitoring",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Enable Container insights",
+                                "toolTip": "If checked, configure the necessary settings to integrate with Container insights.",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
@@ -382,6 +385,7 @@
                             },
                             {
                                 "name": "enableAzureFileShare",
+                                "toolTip": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster.",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Create Persistent Volume using Azure File share service",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
@@ -678,6 +682,7 @@
                                 "name": "validateApplications",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Fail deployment if application does not become ACTIVE.",
+                                "toolTip": "If checked, verify the deployed app reaches the ACTIVE state and fail the deployment if it does not. See the documentation link for more information.",
                                 "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
                             },
                             {
@@ -1163,6 +1168,7 @@
                                 "name": "enableInternalLB",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Use Internal Load Balancer",
+                                "toolTip": "If checked, the offer will configure the load balancer as an internal load balancer.",
                                 "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]"
                             },
                             {
@@ -1170,6 +1176,7 @@
                                 "type": "Microsoft.Common.EditableGrid",
                                 "ariaLabel": "Enter information",
                                 "label": "Standard Load Balancer service",
+                                "toolTip": "Create Azure Standard Load Balancer service for Administration Console and cluster.",
                                 "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
                                 "constraints": {
                                     "width": "Full",
@@ -1208,7 +1215,6 @@
                                             "header": "Target",
                                             "width": "2fr",
                                             "element": {
-                                                "name": "dropDownTargets",
                                                 "type": "Microsoft.Common.DropDown",
                                                 "placeholder": "admin-server",
                                                 "toolTip": "Select targets for load balancer",
@@ -1497,6 +1503,7 @@
                                 "name": "enableCookieBasedAffinity",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Enable cookie based affinity",
+                                "toolTip": "If checked, enable cookie based affinity",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
                             },
                             {
@@ -1981,7 +1988,6 @@
             "dnszoneClusterT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel]",
             "dnszoneName": "[steps('section_dnsConfiguration').dnszoneName]",
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
-            "dropDownTargets": "[steps('section_appGateway').lbSVCInfo.lbSVC.colTarget.dropDownTargets]",
             "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
             "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
             "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",

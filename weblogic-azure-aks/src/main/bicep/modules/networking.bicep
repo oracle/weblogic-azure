@@ -55,7 +55,6 @@ param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
 param location string = resourceGroup().location
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
-param lbDropDownTargets array = []
 @secure()
 param servicePrincipal string = newGuid()
 @description('True to set up internal load balancer service.')
@@ -278,4 +277,3 @@ output adminServerT3ChannelUrl string = ref_networkDeployment.outputs.adminServe
 output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : ref_networkDeployment.outputs.clusterLBUrl.value
 output clusterExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ref_networkDeployment.outputs.clusterLBSecuredUrl.value
 output clusterT3ChannelUrl string = ref_networkDeployment.outputs.clusterT3LBUrl.value
-output standardLBTargetsLength int = length(lbDropDownTargets)

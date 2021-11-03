@@ -116,8 +116,6 @@ param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
 @description('Azure DNS Zone name.')
 param dnszoneName string = 'contoso.xyz'
 param dnszoneRGName string = 'dns-contoso-rg'
-@description('Internal load balancer targets array. Used when create standard load balancer is yes.')
-param dropDownTargets array = []
 @description('JDBC Connection String')
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 @description('true to set up Application Gateway ingress.')
@@ -604,7 +602,6 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     keyVaultSSLCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
     keyVaultSSLCertPasswordSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
     location: location
-    lbDropDownTargets: dropDownTargets
     lbSvcValues: lbSvcValues
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
