@@ -14,8 +14,6 @@ env:
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
-    aksRepoUserName: oracle
-    aksRepoBranchName: main
     resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
