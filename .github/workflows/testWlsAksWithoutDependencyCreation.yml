@@ -1,4 +1,4 @@
-name: Test WLS on AKS
+name: Test WLS on AKS without dependency creation
 
 on:
   workflow_dispatch:
