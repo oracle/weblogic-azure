@@ -8,8 +8,9 @@ param certificateDataName string
 param certificateDataValue string
 
 @description('Secret name of certificate password.')
-param certificatePasswordName string
+param certificatePswSecretName string
 
+@secure()
 @description('Certificate password to store in the secret')
 param certificatePasswordValue string
 
@@ -19,21 +20,23 @@ param enabledForTemplateDeployment bool = true
 @description('Name of the vault')
 param keyVaultName string
 
+param location string
+
 @description('Price tier for Key Vault.')
 param sku string
 
 param utcValue string = utcNow()
 
-resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
+resource keyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   name: keyVaultName
-  location: resourceGroup().location
+  location: location
   properties: {
+    accessPolicies: []
     enabledForTemplateDeployment: enabledForTemplateDeployment
     sku: {
       name: sku
       family: 'A'
     }
-    accessPolicies: []
     tenantId: subscription().tenantId
   }
   tags:{
@@ -41,7 +44,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   }
 }
 
-resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
   name: '${keyVaultName}/${certificateDataName}'
   properties: {
     value: certificateDataValue
@@ -51,8 +54,8 @@ resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
   ]
 }
 
-resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
-  name: '${keyVaultName}/${certificatePasswordName}'
+resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+  name: '${keyVaultName}/${certificatePswSecretName}'
   properties: {
     value: certificatePasswordValue
   }
@@ -63,4 +66,4 @@ resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = 
 
 output keyVaultName string = keyVaultName
 output sslCertDataSecretName string = certificateDataName
-output sslCertPwdSecretName string = certificatePasswordName
+output sslCertPwdSecretName string = certificatePswSecretName

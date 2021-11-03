@@ -23,6 +23,7 @@ param keyVaultResourceGroup string
 param keyVaultSSLCertDataSecretName string
 param keyVaultSSLCertPasswordSecretName string
 param identity object
+param location string
 @secure()
 param ocrSSOPSW string
 param ocrSSOUser string
@@ -57,7 +58,7 @@ param utcValue string = utcNow()
 param wlsImageTag string
 
 var const_acrName= useOracleImage ? acrName: userProvidedAcr
-var const_arguments = '${resourceGroup().location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone} ${const_checkACRAdminEnabled}'
+var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone} ${const_checkACRAdminEnabled}'
 var const_azcliVersion = '2.15.0'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
 var const_checkACRAdminEnabled= useOracleImage || !createACR
@@ -65,7 +66,7 @@ var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
-  location: resourceGroup().location
+  location: location
   kind: 'AzureCLI'
   identity: identity
   properties: {

@@ -63,7 +63,7 @@ param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
-param location string = 'eastus'
+param location string
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
 @secure()

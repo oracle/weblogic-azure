@@ -22,7 +22,7 @@ param aksClusterNamePrefix string = 'wlsonaks'
 param aksVersion string = 'default'
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
-param location string = 'eastus'
+param location string
 param utcValue string = utcNow()
 
 var const_aksAgentPoolOSDiskSizeGB = 128
@@ -79,7 +79,6 @@ resource aksClusterDefault 'Microsoft.ContainerService/managedClusters@2021-02-0
         maxPods: const_aksAgentPoolMaxPods
         type: 'VirtualMachineScaleSets'
         availabilityZones: const_aksAvailabilityZones
-        nodeLabels: {}
         mode: 'System'
         osType: 'Linux'
       }
@@ -125,7 +124,6 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = if
         maxPods: const_aksAgentPoolMaxPods
         type: 'VirtualMachineScaleSets'
         availabilityZones: const_aksAvailabilityZones
-        nodeLabels: {}
         mode: 'System'
         osType: 'Linux'
       }

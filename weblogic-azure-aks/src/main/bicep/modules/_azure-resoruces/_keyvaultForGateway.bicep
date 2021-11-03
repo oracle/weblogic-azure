@@ -8,6 +8,7 @@ param backendCertificateDataValue string
 @description('Certificate data to store in the secret')
 param certificateDataValue string
 
+@secure()
 @description('Certificate password to store in the secret')
 param certificatePasswordValue string
 
@@ -18,6 +19,7 @@ param enableCustomSSL bool = false
 param enabledForTemplateDeployment bool = true
 
 param identity object
+param location string
 param permission object = {
   certificates: [
     'get'
@@ -48,6 +50,7 @@ module keyVaultwithSelfSignedAppGatewaySSLCert '_keyvault/_keyvaultWithNewCert.b
   params: {
     identity: identity
     keyVaultName: keyVaultName
+    location: location
     permission: permission
     subjectName: subjectName
     sku: sku
@@ -59,10 +62,11 @@ module keyVaultwithExistingAppGatewaySSLCert '_keyvault/_keyvaultWithExistingCer
   params: {
     certificateDataName: name_sslCertSecretName
     certificateDataValue: certificateDataValue
-    certificatePasswordName: name_sslCertPasswordSecretName
+    certificatePswSecretName: name_sslCertPasswordSecretName
     certificatePasswordValue: certificatePasswordValue
     enabledForTemplateDeployment: enabledForTemplateDeployment
     keyVaultName: keyVaultName
+    location: location
     sku: sku
   }
 }
@@ -74,6 +78,7 @@ module keyvaultBackendRootCert '_keyvault/_keyvaultForGatewayBackendCert.bicep' 
     certificateDataValue: backendCertificateDataValue
     enabledForTemplateDeployment: enabledForTemplateDeployment
     keyVaultName: keyVaultName
+    location: location
     sku: sku
   }
   dependsOn:[

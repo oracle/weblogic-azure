@@ -30,7 +30,7 @@ Build and run
   - Run command `az deployment group create -f setupDBConnection.json -p parameters.json -g <your-resource-group>`
 */
 
-param _artifactsLocation string = ''
+param _artifactsLocation string = 'https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/arm/'
 @secure()
 param _artifactsLocationSasToken string = ''
 
@@ -51,6 +51,7 @@ param databaseType string = 'oracle'
 param dbConfigurationType string = 'createOrUpdate'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('User id of Database')

@@ -3,7 +3,7 @@
 Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 */
 
-param _artifactsLocation string = ''
+param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
 param _pidEnd string = ''
@@ -23,6 +23,7 @@ param dbConfigurationType string = 'createOrUpdate'
 param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('The name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.')
@@ -36,6 +37,7 @@ param identity object
 
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
+param location string
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -67,6 +69,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     dsConnectionURL: dsConnectionURL
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
+    location: location
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName

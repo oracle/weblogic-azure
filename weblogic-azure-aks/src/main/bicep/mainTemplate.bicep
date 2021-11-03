@@ -97,6 +97,7 @@ param dbDriverLibrariesUrls array = []
 param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('The name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.')
@@ -148,7 +149,7 @@ param keyVaultSSLBackendRootCertDataSecretName string = 'kv-ssl-backend-data'
 param keyVaultSSLCertDataSecretName string = 'kv-ssl-data'
 @description('The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate of Appliation Gateway frontend TLS/SSL')
 param keyVaultSSLCertPasswordSecretName string = 'kv-ssl-psw'
-param location string = 'eastus'
+param location string
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
 @description('Name prefix of managed server.')
@@ -330,6 +331,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     keyVaultSSLCertDataSecretName: keyVaultSSLCertDataSecretName
     keyVaultSSLCertPasswordSecretName: keyVaultSSLCertPasswordSecretName
     identity: identity
+    location: location
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
     servicePrincipal: servicePrincipal
@@ -366,6 +368,7 @@ module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvault
   name: 'upload-wls-ssl-cert-to-keyvault'
   params: {
     keyVaultName: name_keyVaultName
+    location: location
     sku: keyVaultSku
     wlsIdentityKeyStoreData: sslUploadedCustomIdentityKeyStoreData
     wlsIdentityKeyStoreDataSecretName: name_identityKeyStoreDataSecret
@@ -386,7 +389,7 @@ module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvault
 }
 
 // get key vault object in a resource group
-resource sslKeyvault 'Microsoft.KeyVault/vaults@2019-09-01' existing = if (enableCustomSSL) {
+resource sslKeyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = if (enableCustomSSL) {
   name: (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultName : name_keyVaultName
   scope: resourceGroup(name_rgKeyvaultForWLSSSL)
 }
@@ -399,6 +402,7 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     identity: identity
+    location: location
   }
 }
 
@@ -540,6 +544,7 @@ module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep
     certificatePasswordValue: appGatewaySSLCertPassword
     enableCustomSSL: enableCustomSSL
     identity: identity
+    location: location
     sku: keyVaultSku
     subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
     useExistingAppGatewaySSLCertificate: (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
@@ -631,6 +636,7 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     dsConnectionURL: dsConnectionURL
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
+    location: location
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
@@ -652,6 +658,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     identity: identity
+    location: location
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName

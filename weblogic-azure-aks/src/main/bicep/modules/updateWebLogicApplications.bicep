@@ -32,7 +32,7 @@ Build and run
   - Run command `az deployment group create -f updateWebLogicApplications.json -p parameters.json -g <your-resource-group>`
 */
 
-param _artifactsLocation string = ''
+param _artifactsLocation string = 'https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/arm/'
 @secure()
 param _artifactsLocationSasToken string = ''
 

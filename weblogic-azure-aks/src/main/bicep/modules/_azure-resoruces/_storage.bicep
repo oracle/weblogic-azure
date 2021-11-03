@@ -1,7 +1,7 @@
 // Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-param location string = 'eastus'
+param location string
 param storageAccountName string
 param utcValue string = utcNow()
 
@@ -20,8 +20,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   properties: {
     networkAcls: {
       bypass: 'AzureServices'
-      virtualNetworkRules: []
-      ipRules: []
       defaultAction: 'Allow'
     }
     supportsHttpsTrafficOnly: true
