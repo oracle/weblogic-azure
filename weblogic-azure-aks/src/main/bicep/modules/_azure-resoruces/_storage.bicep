@@ -20,8 +20,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   properties: {
     networkAcls: {
       bypass: 'AzureServices'
-      virtualNetworkRules: []
-      ipRules: []
       defaultAction: 'Allow'
     }
     supportsHttpsTrafficOnly: true

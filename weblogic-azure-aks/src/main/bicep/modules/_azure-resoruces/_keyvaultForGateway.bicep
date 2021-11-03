@@ -8,6 +8,7 @@ param backendCertificateDataValue string
 @description('Certificate data to store in the secret')
 param certificateDataValue string
 
+@secure()
 @description('Certificate password to store in the secret')
 param certificatePasswordValue string
 

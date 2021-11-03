@@ -23,6 +23,7 @@ param dbConfigurationType string = 'createOrUpdate'
 param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
 @description('The name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.')

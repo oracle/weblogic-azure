@@ -79,7 +79,6 @@ resource aksClusterDefault 'Microsoft.ContainerService/managedClusters@2021-02-0
         maxPods: const_aksAgentPoolMaxPods
         type: 'VirtualMachineScaleSets'
         availabilityZones: const_aksAvailabilityZones
-        nodeLabels: {}
         mode: 'System'
         osType: 'Linux'
       }
@@ -125,7 +124,6 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = if
         maxPods: const_aksAgentPoolMaxPods
         type: 'VirtualMachineScaleSets'
         availabilityZones: const_aksAvailabilityZones
-        nodeLabels: {}
         mode: 'System'
         osType: 'Linux'
       }

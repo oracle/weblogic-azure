@@ -7,9 +7,11 @@ param certificateDataName string
 @description('Certificate data to store in the secret')
 param certificateDataValue string
 
+@secure()
 @description('Secret name of certificate password.')
 param certificatePasswordName string
 
+@secure()
 @description('Certificate password to store in the secret')
 param certificatePasswordValue string
 
@@ -33,7 +35,6 @@ resource keyvault 'Microsoft.KeyVault/vaults@2020-06-01' = {
       name: sku
       family: 'A'
     }
-    accessPolicies: []
     tenantId: subscription().tenantId
   }
   tags:{

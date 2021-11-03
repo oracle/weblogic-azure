@@ -27,7 +27,6 @@ resource keyvault 'Microsoft.KeyVault/vaults@2020-06-01' = {
       name: sku
       family: 'A'
     }
-    accessPolicies: []
     tenantId: subscription().tenantId
   }
   tags:{

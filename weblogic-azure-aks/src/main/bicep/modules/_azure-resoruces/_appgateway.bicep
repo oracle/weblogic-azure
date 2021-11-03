@@ -52,13 +52,10 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
           access: 'Allow'
           priority: 510
           direction: 'Inbound'
-          sourcePortRanges: []
           destinationPortRanges: [
             '80'
             '443'
           ]
-          sourceAddressPrefixes: []
-          destinationAddressPrefixes: []
         }
         name: 'ALLOW_HTTP_ACCESS'
       }
@@ -148,9 +145,6 @@ resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
     backendAddressPools: [
       {
         name: 'myGatewayBackendPool'
-        properties: {
-          backendAddresses: []
-        }
       }
     ]
     httpListeners: [
