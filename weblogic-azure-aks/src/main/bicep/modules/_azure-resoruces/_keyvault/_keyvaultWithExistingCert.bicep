@@ -24,7 +24,7 @@ param sku string
 
 param utcValue string = utcNow()
 
-resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
+resource keyvault 'Microsoft.KeyVault/vaults@2020-06-01' = {
   name: keyVaultName
   location: resourceGroup().location
   properties: {
@@ -41,7 +41,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   }
 }
 
-resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2020-06-01' = {
   name: '${keyVaultName}/${certificateDataName}'
   properties: {
     value: certificateDataValue
@@ -51,7 +51,7 @@ resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
   ]
 }
 
-resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2020-06-01' = {
   name: '${keyVaultName}/${certificatePasswordName}'
   properties: {
     value: certificatePasswordValue
