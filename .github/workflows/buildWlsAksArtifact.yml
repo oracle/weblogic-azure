@@ -5,7 +5,7 @@ on:
   repository_dispatch:
     types: [aks-package]
   # Sample cURL
-  # curl --verbose -X POST https://api.github.com/repos/mriccell/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-package"}'
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-package"}'
 
 env:
     refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691

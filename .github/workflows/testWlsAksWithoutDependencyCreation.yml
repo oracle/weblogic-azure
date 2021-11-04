@@ -12,7 +12,7 @@ on:
         required: true
         default: main
   # sample cURL
-  # curl --verbose -X POST https://api.github.com/repos/mriccell/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
   # sample <request_data>
   # {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"isForDemo": "false", "disambiguationSuffix": "1397121054", "storageAccountName": "wlsdsa13971210545", "storageContainerName": "wlsdcon13971210545", "dbName": "wlsdb13971210545"}}
   # the request data can be get from setupWlsAksDependency pipeline, please checkout the summary page and download the generated artifact name 'integration-test-data'

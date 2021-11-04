@@ -16,7 +16,7 @@ on:
         required: true
         default: main
   # sample cURL
-  # curl --verbose -X POST https://api.github.com/repos/mriccell/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation"}'
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation"}'
   repository_dispatch:
     types: [aks-integration-test-with-dependency-creation]
 
