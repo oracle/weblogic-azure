@@ -11,10 +11,26 @@ on:
         description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
         required: true
         default: main
+      isForDemo:
+        description: 'If set to true, resources will not be deleted'
+        required: true
+        default: 'false'
+      disambiguationSuffix:
+        description: 'Included in names to disambiguate. Get from another pipeline execution'
+        required: true
+      storageAccountName:
+        description: 'Specify storage account of uploading .war file'
+        required: true
+      storageContainerName:
+        description: 'Specify name of storage container within account'
+        required: true
+      dbName:
+        description: 'Name of the database. Get from another pipeline run'
+        required: true
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
   # sample <request_data>
-  # {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"isForDemo": "false", "disambiguationSuffix": "1397121054", "storageAccountName": "wlsdsa13971210545", "storageContainerName": "wlsdcon13971210545", "dbName": "wlsdb13971210545"}}
+  # {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false", "disambiguationSuffix": "1397121054", "storageAccountName": "wlsdsa13971210545", "storageContainerName": "wlsdcon13971210545", "dbName": "wlsdb13971210545"}}
   # the request data can be get from setupWlsAksDependency pipeline, please checkout the summary page and download the generated artifact name 'integration-test-data'
   repository_dispatch:
     types: [aks-integration-test-without-dependency-creation]
@@ -24,10 +40,8 @@ env:
     azCliVersion: 2.29.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus
-    resourceGroupForWlsAks: wlsd-aks-${{ github.event.client_payload.disambiguationSuffix }}-${{ github.run_number }}
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
-    dbName: ${{ github.event.client_payload.dbName }}
     servicePrincipal: ${{ secrets.SERVICE_PRINCIPAL }}
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
@@ -35,14 +49,55 @@ env:
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
     userAssignedManagedIdentity: ${{ secrets.USER_ASSIGNED_MANAGED_IDENTITY_ID }}
-    storageAccountName: ${{ github.event.client_payload.storageAccountName }}
-    storageContainerName: ${{ github.event.client_payload.storageContainerName }}
-    isForDemo: ${{ github.event.client_payload.isForDemo }}
 
 jobs:
     preflight:
         runs-on: ubuntu-latest
+        outputs:
+          resourceGroupForWlsAks: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.resourceGroupForWlsAks }}
+          dbName: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.dbName }}
+          storageAccountName: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.storageAccountName }}
+          storageContainerName: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.storageContainerName }}
+          isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
+          gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
+          testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
         steps:
+            - name: Setup environment variables
+              id: setup-env-variables-based-on-dispatch-event
+              run: |
+                if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+                  resourceGroupForWlsAks=wlsd-aks-${{ github.event.inputs.disambiguationSuffix }}-${{ github.run_number }}
+                  dbName=${{ github.event.inputs.dbName }}
+                  storageAccountName=${{ github.event.inputs.storageAccountName }}
+                  storageContainerName=${{ github.event.inputs.storageContainerName }}
+                  isForDemo=${{ github.event.inputs.isForDemo }}
+                  gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
+                  testBranchNameForArtifactsLocation=${{ github.event.inputs.testBranchNameForArtifactsLocation }}
+                else
+                  resourceGroupForWlsAks=wlsd-aks-${{ github.event.client_payload.disambiguationSuffix }}-${{ github.run_number }}
+                  dbName=${{ github.event.client_payload.dbName }}
+                  storageAccountName=${{ github.event.client_payload.storageAccountName }}
+                  storageContainerName=${{ github.event.client_payload.storageContainerName }}
+                  isForDemo=${{ github.event.client_payload.isForDemo }}
+                  gitUserNameForArtifactsLocation=${{ github.event.client_payload.gitUserNameForArtifactsLocation }}
+                  testBranchNameForArtifactsLocation=${{ github.event.client_payload.testBranchNameForArtifactsLocation }}
+                fi
+
+                echo "##[set-output name=resourceGroupForWlsAks;]${resourceGroupForWlsAks}"
+                echo "##[set-output name=dbName;]${dbName}"
+                echo "##[set-output name=storageAccountName;]${storageAccountName}"
+                echo "##[set-output name=storageContainerName;]${storageContainerName}"
+                echo "##[set-output name=isForDemo;]${isForDemo}"
+                echo "##[set-output name=gitUserNameForArtifactsLocation;]${gitUserNameForArtifactsLocation}"
+                echo "##[set-output name=testBranchNameForArtifactsLocation;]${testBranchNameForArtifactsLocation}"
+
+                echo "resourceGroupForWlsAks=${resourceGroupForWlsAks}" >> $GITHUB_ENV
+                echo "dbName=${dbName}" >> $GITHUB_ENV
+                echo "storageAccountName=${storageAccountName}" >> $GITHUB_ENV
+                echo "storageContainerName=${storageContainerName}" >> $GITHUB_ENV
+                echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
+                echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
+                echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
             - name: Set up JDK 1.8
               uses: actions/setup-java@v1
               with:
@@ -66,7 +121,7 @@ jobs:
               with:
                 path: weblogic-azure
             - name: Build and test weblogic-azure/weblogic-azure-aks
-              run: mvn -Pbicep -Ddev -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
+              run: mvn -Pbicep -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Generate artifact file name and path
               id: artifact_file
               run: |
@@ -131,7 +186,7 @@ jobs:
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
-                    cargoTrackerBlobUrl=$(az storage blob url --account-name ${{ env.storageAccountName }} --container-name ${{ env.storageContainerName }} --name cargo-tracker.war -o tsv)
+                    cargoTrackerBlobUrl=$(az storage blob url --account-name ${{ needs.preflight.outputs.storageAccountName }} --container-name ${{ needs.preflight.outputs.storageContainerName }} --name cargo-tracker.war -o tsv)
                     polishedUrl=$(echo ${cargoTrackerBlobUrl} | sed 's,/,\\\/,g')
                     echo "cargoTrackerBlobUrl=${polishedUrl}" >> $GITHUB_ENV
             - name: Create Resource Group
@@ -139,8 +194,8 @@ jobs:
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
-                    echo "create resource group" ${{ env.resourceGroupForWlsAks }}
-                    az group create --verbose --name ${{ env.resourceGroupForWlsAks }} --location ${{ env.location }}
+                    echo "create resource group" ${{ needs.preflight.outputs.resourceGroupForWlsAks }}
+                    az group create --verbose --name ${{ needs.preflight.outputs.resourceGroupForWlsAks }} --location ${{ env.location }}
             - name: Checkout Azure-Samples/cargotracker-azure
               uses: actions/checkout@v2
               with:
@@ -158,11 +213,11 @@ jobs:
                         s/#appPackageUrls#/${cargoTrackerBlobUrl}/g; \
                         s/#servicePrincipal#/${servicePrincipal}/g; \
                         s/#wdtRuntimePassword#/${wdtRuntimePassword}/g; \
-                        s/#testbranchName#/${{ github.event.inputs.testBranchNameForArtifactsLocation }}/g; \
-                        s/#gitUserName#/${{ github.event.inputs.gitUserNameForArtifactsLocation }}/g; \
+                        s/#testbranchName#/${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}/g; \
+                        s/#gitUserName#/${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }}/g; \
                         s/#dbPassword#/${dbPassword}/g; \
-                        s/#dbUser#/${dbAdminUser}@${dbName}/g; \
-                        s/#dsConnectionURL#/jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres/g" \
+                        s/#dbUser#/${dbAdminUser}@${{ needs.preflight.outputs.dbName }}/g; \
+                        s/#dsConnectionURL#/jdbc:postgresql:\/\/${{ needs.preflight.outputs.dbName }}.postgres.database.azure.com:5432\/postgres/g" \
                         weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.json
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
@@ -172,17 +227,17 @@ jobs:
                 inlineScript: |
                     az deployment group create \
                     --verbose \
-                    --resource-group ${{ env.resourceGroupForWlsAks }} \
+                    --resource-group ${{ needs.preflight.outputs.resourceGroupForWlsAks }} \
                     --name wls-on-aks \
                     --parameters @weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.json \
                     --template-file ${artifactName}/mainTemplate.json
             - name: Query Application Gateway URL
               run: |
-                appgatewayname=$(az resource list --resource-group ${{ env.resourceGroupForWlsAks }} --query "[?type=='Microsoft.Network/applicationGateways'].name|[0]" -o tsv)
+                appgatewayname=$(az resource list --resource-group ${{ needs.preflight.outputs.resourceGroupForWlsAks }} --query "[?type=='Microsoft.Network/applicationGateways'].name|[0]" -o tsv)
                 echo $appgatewayname
-                publicIpAddressId=$(az network application-gateway show --resource-group ${{ env.resourceGroupForWlsAks }} --name ${appgatewayname} --query frontendIpConfigurations[0].publicIpAddress.id -o tsv)
+                publicIpAddressId=$(az network application-gateway show --resource-group ${{ needs.preflight.outputs.resourceGroupForWlsAks }} --name ${appgatewayname} --query frontendIpConfigurations[0].publicIpAddress.id -o tsv)
                 echo $publicIpAddressId
-                appGatewayURL=$(az network public-ip show --resource-group ${{ env.resourceGroupForWlsAks }} --ids ${publicIpAddressId} --query dnsSettings.fqdn -o tsv)
+                appGatewayURL=$(az network public-ip show --resource-group ${{ needs.preflight.outputs.resourceGroupForWlsAks }} --ids ${publicIpAddressId} --query dnsSettings.fqdn -o tsv)
                 echo $appGatewayURL
                 echo "appGatewayURL=${appGatewayURL}" >> $GITHUB_ENV
             - name: Verify Cargo Tracker is deployed as expected
@@ -198,20 +253,17 @@ jobs:
                   echo "Cargo Tracker is accessible"
                 fi
             - name: Install kubectl
-              if: ${{ github.event.client_payload.isForDemo == 'true' }}
               run: |
                 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                 curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
                 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
                 kubectl version --client
             - name: Connect to AKS cluster
-              if: ${{ github.event.client_payload.isForDemo == 'true' }}
               run: |
                 echo "connect to cluster"
-                aksClusterName=$(az resource list --resource-group ${{ env.resourceGroupForWlsAks }} --query "[?type=='Microsoft.ContainerService/managedClusters'].name|[0]" -o tsv)
-                az aks get-credentials --resource-group ${{ env.resourceGroupForWlsAks }} --name $aksClusterName
+                aksClusterName=$(az resource list --resource-group ${{ needs.preflight.outputs.resourceGroupForWlsAks }} --query "[?type=='Microsoft.ContainerService/managedClusters'].name|[0]" -o tsv)
+                az aks get-credentials --resource-group ${{ needs.preflight.outputs.resourceGroupForWlsAks }} --name $aksClusterName
             - name: Generate&Apply configmap
-              if: ${{ github.event.client_payload.isForDemo == 'true' }}
               run: |
                 wlsConfigmapName=sample-domain1-wdt-config-map
                 wlsConfigmapJson=cargo-tracker-db.json
@@ -247,8 +299,8 @@ jobs:
                     --type=json \
                     '-p=[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "add", "path": "/spec/configuration/model/configMap", "value": "'${wlsConfigmapName}'" }]'
     cleanup:
-      needs: deploy-wls-on-aks
-      if: ${{ github.event.client_payload.isForDemo == 'false' }}
+      needs: [deploy-wls-on-aks, preflight]
+      if: ${{ needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
       - uses: azure/login@v1
@@ -261,5 +313,5 @@ jobs:
         with:
           azcliversion: ${{ env.azCliVersion }}
           inlineScript: |
-            echo "delete... " ${{ env.resourceGroupForWlsAks }}
-            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForWlsAks }}
+            echo "delete... " ${{ needs.preflight.outputs.resourceGroupForWlsAks }}
+            az group delete --yes --no-wait --verbose --name ${{ needs.preflight.outputs.resourceGroupForWlsAks }}
