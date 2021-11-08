@@ -17,8 +17,8 @@
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _pidEnd string
-param _pidStart string
+param _pidEnd string = 'pid-wls-end'
+param _pidStart string = 'pid-wls-start'
 @description('true to use resource or workspace permissions. false to require workspace permissions.')
 param aciResourcePermissions bool = true
 @description('Number of days to retain data in Azure Monitor workspace.')
@@ -71,7 +71,7 @@ param managedServerPrefix string = 'managed-server'
 param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
-param storageAccountName string
+param storageAccountName string = 'stg-contoso'
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
 param userProvidedAcr string = 'null'

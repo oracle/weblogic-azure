@@ -4,10 +4,10 @@
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _pidNetworkingEnd string
-param _pidNetworkingStart string
-param _pidAppgwEnd string
-param _pidAppgwStart string
+param _pidNetworkingEnd string = 'pid-networking-end'
+param _pidNetworkingStart string = 'pid-networking-start'
+param _pidAppgwEnd string = 'pid-networking-appgateway-end'
+param _pidAppgwStart string = 'pid-networking-appgateway-start'
 @description('Resource group name of an existing AKS cluster.')
 param aksClusterRGName string = 'aks-contoso-rg'
 @description('Name of an existing AKS cluster.')
