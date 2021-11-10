@@ -29,7 +29,7 @@ for managedServer in $managedServers
 do
   echo "Verifying managed server : $managedServer"
   isSuccess=false
-  maxAttempt=3
+  maxAttempt=10
   attempt=1
   while [ $attempt -le $maxAttempt ]
   do

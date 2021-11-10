@@ -4,7 +4,7 @@
 #
 #Generate parameters with value for deploying addnode template
 
-read parametersPath adminPasswordOrKey adminURL adminUsername numberOfExistingNodes skuUrnVersion storageAccountName wlsDomainName location wlsusername wlspassword gitUserName testbranchName managedServerPrefix dynamicClusterSize maxDynamicClusterSize
+read parametersPath adminPasswordOrKey adminURL adminUsername numberOfExistingNodes skuUrnVersion storageAccountName wlsDomainName location wlsusername wlspassword repoPath testbranchName managedServerPrefix dynamicClusterSize maxDynamicClusterSize
 
 cat <<EOF > ${parametersPath}
 {
@@ -45,7 +45,7 @@ cat <<EOF > ${parametersPath}
         "value": "${wlsUserName}"
       },
       "_artifactsLocation":{
-        "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-dynamic-cluster/${testbranchName}/addnode/src/main/"
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/addnode/src/main/"
       },
       "managedServerPrefix": {
         "value": "${managedServerPrefix}"

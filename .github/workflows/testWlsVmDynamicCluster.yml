@@ -2,7 +2,7 @@
 #Released under the Universal Permissive License v1.0 as shown at
 # https://oss.oracle.com/licenses/upl/
 
-name: Build and Test
+name: Test Dynamic Cluster on VM
 on:
   workflow_dispatch:
     inputs:
@@ -13,40 +13,44 @@ on:
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
-  # curl --verbose -XPOST -u "wls-eng:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "production-deploy"}'
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "production-deploy"}'
   repository_dispatch:
+    types: [integration-test]
 
 env:
   adminConsolePort: 7001
-  azCliVersion: 2.6.0
+  adminPassword: ${{ secrets.WLS_PSW }}
+  adminVMName: adminServerVM
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
+  dynamicClusterSize: 1
   elkURI: ${{ secrets.ELK_URI }}
   elkUser: ${{ secrets.ELK_USER_NAME }}
   elkPassword: ${{ secrets.ELK_PSW }}
+  gitEmail: ${{ secrets.USER_EMAIL }}
+  gitToken: ${{ secrets.GIT_TOKEN }}
+  gitUserName: ${{ secrets.USER_NAME }} 
   location: eastus
   nsg: wls-nsg
-  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
-  resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
-  userEmail: ${{ secrets.USER_EMAIL }}
-  userName: ${{ secrets.USER_NAME }}
-  wlsPassword: ${{ secrets.WLS_PASSWORD }}
-  adminPassword: ${{ secrets.WLS_PASSWORD }}
-  otnUser: ${{ secrets.OTN_USERID }}
-  otnPassword: ${{ secrets.OTN_PASSWORD }}
-  wlsDomainName: dyClusterDomain
-  wlsUserName: weblogic
   managedServerPrefix: managedServer
-  adminVMName: adminServerVM
   managedServers: "managedServer1"
   managedServerVM: "managedServerVM1"
-  testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
-  ref_javaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
-  ref_armttk: d97aa57d259e2fc8562e11501b1cf902265129d9
-  git_token: ${{ secrets.GIT_TOKEN }}
   maxDynamicClusterSize: 2
-  dynamicClusterSize: 1
-  wls_admin_services: "rngd wls_admin wls_nodemanager"
-  wls_managedServer_services: "rngd wls_nodemanager"
+  offerName: arm-oraclelinux-wls-dynamic-cluster
+  offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
+  otnUser: ${{ secrets.OTN_USERID }}
+  otnPassword: ${{ secrets.OTN_PASSWORD }}
+  refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
+  refArmTtk: d97aa57d259e2fc8562e11501b1cf902265129d9
+  repoName: weblogic-azure
+  repoOwner: galiacheng
+  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
+  testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
+  wlsAdminServices: "rngd wls_admin wls_nodemanager"
+  wlsDomainName: dyClusterDomain
+  wlsMsServices: "rngd wls_nodemanager"
+  wlsPassword: ${{ secrets.WLS_PSW }}
+  wlsUserName: weblogic
 
 jobs:
   preflight:
@@ -57,46 +61,48 @@ jobs:
         with:
           repository: Azure/azure-javaee-iaas
           path: azure-javaee-iaas
-          ref: ${{ env.ref_javaee }}
+          ref: ${{ env.refJavaee }}
       - name: Checkout arm-ttk
         uses: actions/checkout@v2
         with:
           repository: Azure/arm-ttk
           path: arm-ttk
-          ref: ${{ env.ref_armttk }}
-      - name: Checkout arm-oraclelinux-wls-dynamic-cluster
+          ref: ${{ env.refArmTtk }}
+      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: arm-oraclelinux-wls-dynamic-cluster
+          repository: ${{env.repoOwner}}/${{env.repoName}}
+          path: ${{env.repoName}}
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
-      - name: Built and test arm-oraclelinux-wls-dynamic-cluster
-        run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-dynamic-cluster/pom.xml
+      - name: Built and test ${{env.offerName}}
+        run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
 
-      - name: Checkout arm-oraclelinux-wls-dynamic-cluster for test
+      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: arm-oraclelinux-wls-dynamic-cluster-dev
-
+          repository: ${{env.repoOwner}}/${{env.repoName}}
+          path: ${{env.repoName}}-dev
       - name: Create a new branch with development pids in nestedtemplates
         run: |
           current=`pwd`
           echo "current=${current}" >> $GITHUB_ENV
-          cd arm-oraclelinux-wls-dynamic-cluster-dev/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/nestedtemplates
+          offerDevPath=${{ env.repoName }}-dev/weblogic-azure-vm/${{env.offerName}}/${{env.offerName}}
+          cd ${offerDevPath}/src/main/arm/nestedtemplates
           git config --global core.longpaths true
-          git config --global user.email $userEmail
-          git config --global user.name $userName
+          git config --global user.email $gitEmail
+          git config --global user.name $gitUserName
           echo "create branch $testbranchName"
           git checkout -b $testbranchName
-          rm -r -f $current/arm-oraclelinux-wls-dynamic-cluster-dev/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/nestedtemplates/*
-          cp -r -f $current/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/target/arm/nestedtemplates/* $current/arm-oraclelinux-wls-dynamic-cluster-dev/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/nestedtemplates/
+          rm -r -f $current/${offerDevPath}/src/main/arm/nestedtemplates/*
+          cp -r -f $current/${offerPath}/${{ env.offerName }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
           git status
           git commit -a -m "hard code pids"
-          git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-dynamic-cluster -f
+          git push https://$gitToken@github.com/${GITHUB_REPOSITORY}.git -f
 
       - uses: azure/login@v1
         id: azure-login
@@ -105,20 +111,20 @@ jobs:
       - name: Validate deployment templates for different combinations of service integration
         id: validate-deployment-templates
         run: |
-          bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-deployments.sh <<< \
+          bash ${offerPath}/test/scripts/verify-deployments.sh <<< \
             "${{ github.run_id }}${{ github.run_number }} ${location} \
-            arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/target/arm/mainTemplate.json \
-            ${userName} ${testbranchName} arm-oraclelinux-wls-dynamic-cluster/test/scripts"
+            ${offerPath}/${offerName}/target/arm/mainTemplate.json \
+            ${GITHUB_REPOSITORY} ${testbranchName} ${offerPath}/test/scripts"
 
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/pom.xml)
-          artifactName=arm-oraclelinux-wls-dynamic-cluster-$version-arm-assembly
-          unzip arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/target/$artifactName.zip -d arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/target/$artifactName
+          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/${{ env.offerName }}/pom.xml)
+          artifactName=${{ env.offerName }}-$version-arm-assembly
+          unzip ${offerPath}/${{ env.offerName }}/target/$artifactName.zip -d ${offerPath}/${{ env.offerName }}/target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}"
-          echo "##[set-output name=artifactPath;]arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/target/$artifactName"
-      - name: Archive arm-oraclelinux-wls-dynamic-cluster template
+          echo "##[set-output name=artifactPath;]${offerPath}/${{ env.offerName }}/target/$artifactName"
+      - name: Archive ${{env.offerName}} template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -128,12 +134,12 @@ jobs:
       - name: Generate addnode artifact file name and path
         id: addnode_artifact_file
         run: |
-          addnode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/addnode/pom.xml)
-          addnode_artifactName=arm-oraclelinux-wls-dynamic-cluster-addnode-$addnode_version-arm-assembly
-          unzip arm-oraclelinux-wls-dynamic-cluster/addnode/target/$addnode_artifactName.zip -d arm-oraclelinux-wls-dynamic-cluster/addnode/target/$addnode_artifactName
+          addnode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode/pom.xml)
+          addnode_artifactName=${{ env.offerName }}-addnode-$addnode_version-arm-assembly
+          unzip ${offerPath}/addnode/target/$addnode_artifactName.zip -d ${offerPath}/addnode/target/$addnode_artifactName
           echo "##[set-output name=addnode_artifactName;]${addnode_artifactName}"
-          echo "##[set-output name=addnode_artifactPath;]arm-oraclelinux-wls-dynamic-cluster/addnode/target/$addnode_artifactName"
-      - name: Archive arm-oraclelinux-wls-dynamic-cluster addnode template
+          echo "##[set-output name=addnode_artifactPath;]${offerPath}/addnode/target/$addnode_artifactName"
+      - name: Archive ${{env.offerName}} addnode template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -143,13 +149,13 @@ jobs:
       - name: Generate delete node artifact file name and path
         id: deletenode_artifact_file
         run: |
-          deletenode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/deletenode/pom.xml)
-          deletenode_artifactName=arm-oraclelinux-wls-dynamic-cluster-deletenode-$deletenode_version-arm-assembly
-          unzip arm-oraclelinux-wls-dynamic-cluster/deletenode/target/$deletenode_artifactName.zip -d arm-oraclelinux-wls-dynamic-cluster/deletenode/target/$deletenode_artifactName
+          deletenode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/deletenode/pom.xml)
+          deletenode_artifactName=${{ env.offerName }}-deletenode-$deletenode_version-arm-assembly
+          unzip ${offerPath}/deletenode/target/$deletenode_artifactName.zip -d ${offerPath}/deletenode/target/$deletenode_artifactName
           echo "##[set-output name=deletenode_artifactName;]${deletenode_artifactName}"
-          echo "##[set-output name=deletenode_artifactPath;]arm-oraclelinux-wls-dynamic-cluster/deletenode/target/$deletenode_artifactName"
+          echo "##[set-output name=deletenode_artifactPath;]${offerPath}/deletenode/target/$deletenode_artifactName"
 
-      - name: Archive arm-oraclelinux-wls-dynamic-cluster deletenode template
+      - name: Archive ${{env.offerName}} deletenode template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -159,13 +165,13 @@ jobs:
       - name: Generate addnode-coherence artifact file name and path
         id: addnode_coherence_artifact_file
         run: |
-          addnode_coherence_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/addnode-coherence/pom.xml)
-          addnode_coherence_artifactName=arm-oraclelinux-wls-dynamic-cluster-addnode-coherence-$addnode_coherence_version-arm-assembly
-          unzip arm-oraclelinux-wls-dynamic-cluster/addnode-coherence/target/$addnode_coherence_artifactName.zip -d arm-oraclelinux-wls-dynamic-cluster/addnode-coherence/target/$addnode_coherence_artifactName
+          addnode_coherence_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode-coherence/pom.xml)
+          addnode_coherence_artifactName=${{ env.offerName }}-addnode-coherence-$addnode_coherence_version-arm-assembly
+          unzip ${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName.zip -d ${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName
           echo "##[set-output name=addnode_coherence_artifactName;]${addnode_coherence_artifactName}"
-          echo "##[set-output name=addnode_coherence_artifactPath;]arm-oraclelinux-wls-dynamic-cluster/addnode-coherence/target/$addnode_coherence_artifactName"
+          echo "##[set-output name=addnode_coherence_artifactPath;]${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName"
 
-      - name: Archive arm-oraclelinux-wls-dynamic-cluster addnode-coherence template
+      - name: Archive ${{env.offerName}} addnode-coherence template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -173,7 +179,6 @@ jobs:
           path: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactPath}}
 
   deploy-dependencies:
-    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     needs: preflight
     runs-on: ubuntu-latest
     steps:
@@ -183,19 +188,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Create Resource Group
         id: create-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "create resource group" ${{ env.resourceGroupForDependency }}
             az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
 
       - name: Set Up Azure Postgresql to Test dbTemplate
         id: setup-postgresql
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Deploy DB with name " ${{ env.dbName }}
             az postgres server create \
             --resource-group ${{ env.resourceGroupForDependency }} \
@@ -216,7 +215,6 @@ jobs:
             --end-ip-address "0.0.0.0"
 
   deploy-weblogic-cluster:
-    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     needs: preflight
     runs-on: ubuntu-latest
     strategy:
@@ -229,22 +227,26 @@ jobs:
             "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
             "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
             "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
-            "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
+            "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+            "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
+            "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
+            "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
           ]
     steps:
-      - name: Checkout arm-oraclelinux-wls-dynamic-cluster
+      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: arm-oraclelinux-wls-dynamic-cluster
-      - name: Get version information from arm-oraclelinux-wls-dynamic-cluster/pom.xml
+          repository: ${{env.repoOwner}}/${{env.repoName}}
+          path: ${{env.repoName}}
+      - name: Get version information from ${{env.offerName}}/pom.xml
         id: version
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/pom.xml)
+          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/${offerName}/pom.xml)
           echo "version=${version}" >> $GITHUB_ENV
       - name: Output artifact name for Download action
         id: artifact_file
         run: |
-          artifactName=arm-oraclelinux-wls-dynamic-cluster-$version-arm-assembly
+          artifactName=${offerName}-$version-arm-assembly
           echo "artifactName=${artifactName}" >> $GITHUB_ENV
           echo "##[set-output name=artifactName;]${artifactName}"
       - name: Download artifact for deployment
@@ -266,10 +268,7 @@ jobs:
           echo "resourceGroup=${resourceGroup}" >> $GITHUB_ENV
       - name: Create Resource Group
         id: create-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "create resource group" $resourceGroup
             az group create --verbose --name $resourceGroup --location ${location}
 
@@ -278,17 +277,17 @@ jobs:
         run: |
           imageUrn="${{ matrix.images }}"
           sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-          arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-wls-path.sh
+          ${offerPath}/test/scripts/verify-wls-path.sh
           sed -i "s/#adminVMName#/$adminVMName/g; \
           s/#adminPasswordOrKey#/$wlsPassword/g; \
           s/#managedServers#/$managedServers/g; \
           s/#wlsUserName#/$wlsUserName/g; \
           s/#wlspassword#/$wlsPassword/g" \
-          arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-servers-lifecycle.sh
+          ${offerPath}/test/scripts/verify-servers-lifecycle.sh
 
           echo "Generate deployment parameters..."
-          bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy.sh <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-test.json \
+          bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
+            "${offerPath}/test/scripts/parameters-test.json \
             $location \
             $wlsPassword \
             $wlsDomainName \
@@ -300,14 +299,11 @@ jobs:
             $adminVMName \
             $imageUrn \
             $testbranchName \
-            $userName"
+            $GITHUB_REPOSITORY"
 
       - name: Accept Image Terms
         id: accept-terms
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "accept terms for " "${{ matrix.images }}"
             rawUrn="${{ matrix.images }}"
             publisherAndName=$(echo ${rawUrn} | grep -o ";.*:" | sed "s/;//g")
@@ -316,38 +312,29 @@ jobs:
 
       - name: Deploy WebLogic Server Dynamic Cluster Domain offer
         id: deploy-wls-dycluster
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             az deployment group create \
               --verbose \
               --resource-group $resourceGroup \
               --name wls-dycluster-node \
-              --parameters @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-test.json \
-              --template-file arm-oraclelinux-wls-dynamic-cluster-$version-arm-assembly/mainTemplate.json
+              --parameters @${offerPath}/test/scripts/parameters-test.json \
+              --template-file ${artifactName}/mainTemplate.json
 
       - name: Verify Network Security Group
         id: verify-nsg
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query nsg name, will exit with error if nsg does not exist."
             az network nsg show -g $resourceGroup -n ${nsg} --query "name"
 
       - name: Get IP of build machine
         id: get-ip-address
         run: |
-          myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short)
+          myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short | tr -d "\"")
           echo "myIP=${myIP}" >> $GITHUB_ENV
 
       - name: Add ip address to security rule to access the wls machine
         id: add-ip-to-security-rule
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query existing source address prefixes"
             attempt=0
             toCreateRule101=false
@@ -390,19 +377,13 @@ jobs:
             fi
       - name: Restart wls VM
         id: restart-wls-wm
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "restart vm to make sure security rule work."
             az vm restart -g $resourceGroup -n $adminVMName
 
       - name: Query public IP of AdminServer VM
         id: query-wls-admin-ip
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query public ip"
             publicIP=$(az vm show \
               --resource-group $resourceGroup \
@@ -415,10 +396,7 @@ jobs:
 
       - name: Query public IP of managedServerVM1
         id: query-wls-managed-ip
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query public ip"
             publicIP=$(az vm show \
               --resource-group $resourceGroup \
@@ -437,14 +415,11 @@ jobs:
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo install sshpass
           sudo apt-get install -y sshpass
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-wls-path.sh
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-wls-path.sh
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -453,15 +428,14 @@ jobs:
       - name: Verify wls admin services
         id: veriy-admin-service
         run: |
+          echo "wait for port 22"
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying WebLogic services at admin server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-services.sh $wls_admin_services
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-services.sh $wlsAdminServices
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -470,21 +444,20 @@ jobs:
       - name: Verify wls managed server services
         id: veriy-msservice
         run: |
+          echo "wait for port 22"
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying WebLogic services at managed server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${ms1PublicIP} 'bash -s' < arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-services.sh $wls_managedServer_services
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${ms1PublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-services.sh $wlsMsServices
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
         run: |
           echo "Verifying Weblogic Server Access"
-          bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
+          bash ${offerPath}/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -493,44 +466,40 @@ jobs:
       - name: Verify WebLogic Managed Server LifeCycle check
         id: verify-server-lifecycle
         run: |
+          echo "wait for port 22"
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying Weblogic managed server lifecycle"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-dynamic-cluster/test/scripts/verify-servers-lifecycle.sh
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-servers-lifecycle.sh
 
       - name: Deploy DB Template to Connect to Azure Postgresql Database
         id: enable-postgresql-db
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for db template deployment
-            bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy-db.sh  <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/ \
+            bash ${offerPath}/test/scripts/gen-parameters-deploy-db.sh  <<< \
+            "${offerPath}/test/scripts/ \
             ${{ env.adminVMName }} \
             ${{ env.wlsPassword}} \
             ${{ env.dbName }} \
             ${{ env.location }} \
             ${{ env.wlsUserName }} \
             ${{ env.wlsPassword }} \
-            ${{ env.userName }} \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }}"
             echo "Deploy DB Template..."
             az group deployment create \
             --verbose \
             --resource-group ${resourceGroup} \
             --name db \
-            --parameters @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-db.json \
-            --template-file arm-oraclelinux-wls-dynamic-cluster-$version-arm-assembly/nestedtemplates/dbTemplate.json
+            --parameters @${offerPath}/test/scripts/parameters-deploy-db.json \
+            --template-file ${artifactName}/nestedtemplates/dbTemplate.json
 
       - name: Set up ELK by deploying sub template
         id: enable-elk
         if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for ELK template deployment
-            bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy-elk.sh <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-elk.json \
+            bash ${offerPath}/test/scripts/gen-parameters-deploy-elk.sh <<< \
+            "${offerPath}/test/scripts/parameters-deploy-elk.json \
             ${{ env.adminVMName }} \
             ${{ env.elkPassword }} \
             ${{ env.elkURI }} \
@@ -539,7 +508,7 @@ jobs:
             ${{ env.wlsDomainName }} \
             ${{ env.wlsUserName }} \
             ${{ env.wlsPassword }} \
-            ${{ env.userName }} \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }} \
             ${{ env.managedServerPrefix }} \
             ${{ env.maxDynamicClusterSize }} \
@@ -551,7 +520,7 @@ jobs:
             --debug \
             --resource-group ${resourceGroup} \
             --name elk \
-            --parameters @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-elk.json \
+            --parameters @${offerPath}/test/scripts/parameters-deploy-elk.json \
             --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
 
       - name: Get storage account name
@@ -564,13 +533,10 @@ jobs:
 
       - name: Set up Coherence by deploying sub template
         id: enable-coherence
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for Coherence template deployment
-            bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy-coherence.sh <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-coherence.json \
+            bash ${offerPath}/test/scripts/gen-parameters-deploy-coherence.sh <<< \
+            "${offerPath}/test/scripts/parameters-deploy-coherence.json \
             ${{ env.adminVMName }} \
             ${{ env.wlsPassword }} \
             ${{ matrix.images }} \
@@ -579,7 +545,7 @@ jobs:
             ${{ env.wlsDomainName }} \
             ${{ env.wlsUserName }} \
             ${{ env.wlsPassword }} \
-            ${{ env.userName }} \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }} \
             ${{ env.managedServerPrefix }}"
             
@@ -588,14 +554,14 @@ jobs:
             --debug \
             --resource-group ${resourceGroup} \
             --name coherence \
-            --parameters @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-coherence.json \
+            --parameters @${offerPath}/test/scripts/parameters-deploy-coherence.json \
             --template-file ${artifactName}/nestedtemplates/coherenceTemplate.json
 
       - name: Output addnode artifact name
         id: artifact_file_addnode
         run: |
-          addnodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/addnode/pom.xml)
-          artifactNameOfAddnode=arm-oraclelinux-wls-dynamic-cluster-addnode-$addnodeVersion-arm-assembly
+          addnodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode/pom.xml)
+          artifactNameOfAddnode=${offerName}-addnode-$addnodeVersion-arm-assembly
           echo "artifactNameOfAddnode=${artifactNameOfAddnode}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfAddnode;]${artifactNameOfAddnode}"
       - name: Download artifact for deployment
@@ -605,14 +571,11 @@ jobs:
 
       - name: Add new nodes to existing cluster
         id: add-node
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "add two new nodes"
             echo "generate add-node parameters"
-            bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy-addnode.sh  <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-addnode.json \
+            bash ${offerPath}/test/scripts/gen-parameters-deploy-addnode.sh  <<< \
+            "${offerPath}/test/scripts/parameters-deploy-addnode.json \
               ${{ env.wlsPassword }} \
               ${{ env.adminVMName }}:${adminConsolePort} \
               weblogic \
@@ -623,7 +586,7 @@ jobs:
               ${{ env.location }} \
               ${{ env.wlsUserName }} \
               ${{ env.wlsPassword }} \
-              ${{ env.userName }} \
+              ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }} \
               ${{ env.dynamicClusterSize }} \
@@ -633,13 +596,13 @@ jobs:
             az group deployment validate \
               -g ${resourceGroup} \
               -f ${artifactNameOfAddnode}/mainTemplate.json \
-              -p @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-addnode.json \
+              -p @${offerPath}/test/scripts/parameters-deploy-addnode.json \
               --no-prompt
             az group deployment create \
               --debug \
               --resource-group ${resourceGroup} \
               --name addnode \
-              --parameters @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-addnode.json \
+              --parameters @${offerPath}/test/scripts/parameters-deploy-addnode.json \
               --template-file ${artifactNameOfAddnode}/mainTemplate.json
       - name: Verify new nodes
         id: verify-new-nodes
@@ -653,8 +616,8 @@ jobs:
       - name: Output addnode-coherence artifact name
         id: artifact_file_addnode_coherence
         run: |
-          addnodeCoherenceVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/addnode-coherence/pom.xml)
-          artifactNameOfAddnodeCo=arm-oraclelinux-wls-dynamic-cluster-addnode-coherence-$addnodeCoherenceVersion-arm-assembly
+          addnodeCoherenceVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode-coherence/pom.xml)
+          artifactNameOfAddnodeCo=${offerName}-addnode-coherence-$addnodeCoherenceVersion-arm-assembly
           echo "artifactNameOfAddnodeCo=${artifactNameOfAddnodeCo}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfAddnodeCo;]${artifactNameOfAddnodeCo}"
       - name: Download artifact for deployment
@@ -664,14 +627,11 @@ jobs:
 
       - name: Add new cache node to coherence cluster
         id: add-node-coherence
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "add new cache server"
             echo "generate parameters"
-            bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy-addnode-coherence.sh  <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-addnode-coherence.json \
+            bash ${offerPath}/test/scripts/gen-parameters-deploy-addnode-coherence.sh  <<< \
+            "${offerPath}/test/scripts/parameters-deploy-addnode-coherence.json \
               ${{ env.wlsPassword }} \
               ${{ env.adminVMName }} \
               weblogic \
@@ -682,20 +642,20 @@ jobs:
               ${{ env.location }} \
               ${{ env.wlsUserName }} \
               ${{ env.wlsPassword }} \
-              ${{ env.userName }} \
+              ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "deploy add-node template to create new nodes"
             az group deployment validate \
               -g ${resourceGroup} \
               -f ${artifactNameOfAddnodeCo}/mainTemplate.json \
-              -p @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-addnode-coherence.json \
+              -p @${offerPath}/test/scripts/parameters-deploy-addnode-coherence.json \
               --no-prompt
             az group deployment create \
               --debug \
               --resource-group ${resourceGroup} \
               --name addnode \
-              --parameters @arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-addnode-coherence.json \
+              --parameters @${offerPath}/test/scripts/parameters-deploy-addnode-coherence.json \
               --template-file ${artifactNameOfAddnodeCo}/mainTemplate.json
       - name: Verify new nodes
         id: verify-new-nodes-coherence
@@ -709,8 +669,8 @@ jobs:
       - name: Output delete-node artifact name
         id: artifact_file_deletenode
         run: |
-          deleteNodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-dynamic-cluster/deletenode/pom.xml)
-          artifactNameOfDeleteNode=arm-oraclelinux-wls-dynamic-cluster-deletenode-$deleteNodeVersion-arm-assembly
+          deleteNodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/deletenode/pom.xml)
+          artifactNameOfDeleteNode=${offerName}-deletenode-$deleteNodeVersion-arm-assembly
           echo "artifactNameOfDeleteNode=${artifactNameOfDeleteNode}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfDeleteNode;]${artifactNameOfDeleteNode}"
       - name: Download artifact for deployment
@@ -719,18 +679,15 @@ jobs:
           name: ${{steps.artifact_file_deletenode.outputs.artifactNameOfDeleteNode}}
       - name: Delete nodes from existing cluster
         id: delete-node
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "generate delete-node parameters"
-            bash arm-oraclelinux-wls-dynamic-cluster/test/scripts/gen-parameters-deploy-deletenode.sh <<< \
-            "arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-deletenode.json \
+            bash ${offerPath}/test/scripts/gen-parameters-deploy-deletenode.sh <<< \
+            "${offerPath}/test/scripts/parameters-deploy-deletenode.json \
               ${{ env.adminVMName }} \
               ${{ env.location }} \
               ${{ env.wlsUserName }} \
               ${{ env.wlsPassword }} \
-              ${{ env.userName }} \
+              ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "Run deletenode-cli.sh to remove nodes"
@@ -738,7 +695,7 @@ jobs:
             ${artifactNameOfDeleteNode}/scripts/deletenode-cli.sh \
               -g ${resourceGroup} \
               -f ${artifactNameOfDeleteNode}/mainTemplate.json \
-              -p arm-oraclelinux-wls-dynamic-cluster/test/scripts/parameters-deploy-deletenode.json \
+              -p ${offerPath}/test/scripts/parameters-deploy-deletenode.json \
               -s
       - name: Verify deleted nodes
         id: verify-deleted-nodes
@@ -760,10 +717,7 @@ jobs:
       - name: Delete Resource Group
         id: delete-resource-group
         if: always()
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
 
@@ -778,14 +732,15 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout arm-oraclelinux-wls-dynamic-cluster
+      - name: Checkout ${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: arm-oraclelinux-wls-dynamic-cluster
+          repository: ${{ env.repoOwner }}/${{env.repoName}}
+          path: ${{env.repoName}}
       - name: Delete testing branch
         run: |
-          cd arm-oraclelinux-wls-dynamic-cluster
-          git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-dynamic-cluster.git -f --delete $testbranchName
+          cd ${{env.repoName}}
+          git push https://$gitToken@github.com/${GITHUB_REPOSITORY}.git -f --delete $testbranchName
 
   cleanup-az-resource:
     if: always()
@@ -793,24 +748,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: azure/login@v1
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         id: azure-login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Delete DB Resource Group
         id: delete-db-resource-group
-        uses: azure/CLI@v1
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDependency }}
-      - name: Delete ELK index
-        id: delete-elk-index
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
-        run: |
-          curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-dynamic-cluster-${{ github.run_id }}${{ github.run_number }}
   
   summary:
     needs: deploy-weblogic-cluster
@@ -818,9 +763,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: summarize jobs
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
+        if: ${{ github.repository_owner == 'wls-eng' }}
         run: |
-            workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/actions/runs/${{ github.run_id }}/jobs)
+            workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}/jobs)
             critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.name|test("^deploy-weblogic-cluster."))) | length')
             echo "$critical_job_num"
             succeed_critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.conclusion=="success") | select(.name|test("^deploy-weblogic-cluster."))) | length')
@@ -835,7 +780,7 @@ jobs:
                 {
                 "@context":"http://schema.org/extensions",
                 "@type":"MessageCard",
-                "text":"$failed_job_num jobs failed in Dynamic Cluster Offer's workflow, please take a look at: https://github.com/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/actions/runs/${{ github.run_id }}"
+                "text":"$failed_job_num jobs failed in Dynamic Cluster Offer's workflow, please take a look at: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}"
                 }
             EOF
             fi

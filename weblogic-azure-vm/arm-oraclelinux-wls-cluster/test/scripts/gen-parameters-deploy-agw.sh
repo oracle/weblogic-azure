@@ -6,7 +6,7 @@
 # This script is to generate test parameters for Appgateway testing.
 
 #read arguments from stdin
-read parametersPath githubUserName testbranchName adminVMName appGatewaySSLCertificateData appGatewaySSLCertificatePassword numberOfInstances location wlsPassword wlsUserName wlsDomainName managedServerPrefix
+read parametersPath repoPath testbranchName adminVMName appGatewaySSLCertificateData appGatewaySSLCertificatePassword numberOfInstances location wlsPassword wlsUserName wlsDomainName managedServerPrefix
 
 cat <<EOF > ${parametersPath}
 {
@@ -14,7 +14,7 @@ cat <<EOF > ${parametersPath}
     "contentVersion": "1.0.0.0",
     "parameters": {
         "_artifactsLocation": {
-            "value": "https://raw.githubusercontent.com/${githubUserName}/arm-oraclelinux-wls-cluster/${testbranchName}/arm-oraclelinux-wls-cluster/src/main/arm/"
+            "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-cluster/arm-oraclelinux-wls-cluster/src/main/arm/"
         },
         "adminVMName": {
             "value": "${adminVMName}"

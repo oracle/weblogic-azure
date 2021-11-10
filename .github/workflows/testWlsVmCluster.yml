@@ -2,49 +2,51 @@
 #Released under the Universal Permissive License v1.0 as shown at
 # https://oss.oracle.com/licenses/upl/
 
-name: Build and Test
+name: Test Configured Cluster on VM
 on:
   workflow_dispatch:
     inputs:
       enableELK:
-        description: 'Specify whether to enable ELK depoyment or not.'
+        description: "Specify whether to enable ELK depoyment or not."
         required: true
-        default: 'false'
+        default: "false"
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
-  # curl --verbose -XPOST -u "wls-eng:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "production-deploy"}'
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "production-deploy"}'
   repository_dispatch:
 
 env:
   adminConsolePort: 7001
-  adminPassword: ${{ secrets.WLS_PASSWORD }}
+  adminPassword: ${{ secrets.WLS_PSW }}
   adminVMName: adminServerVM
-  azCliVersion: 2.6.0
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   elkURI: ${{ secrets.ELK_URI }}
   elkUser: ${{ secrets.ELK_USER_NAME }}
   elkPassword: ${{ secrets.ELK_PSW }}
+  gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
+  gitUserName: ${{ secrets.USER_NAME }}
   location: eastus
   managedServerPrefix: managedServer
   managedServerVM: "managedServerVM1"
   managedServers: "managedServer1"
   nsg: wls-nsg
   numberOfInstances: 2
+  offerName: arm-oraclelinux-wls-cluster
+  offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
   refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
-  refJavaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
-  repoName: arm-oraclelinux-wls-cluster
+  refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
+  repoName: weblogic-azure
+  repoOwner: galiacheng
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
   resourceGroupPrefix: ${{ github.run_id }}-${{ github.run_number }}
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
-  userEmail: ${{ secrets.USER_EMAIL }}
-  userName: ${{ secrets.USER_NAME }}
+  wlsAdminServices: "rngd wls_admin wls_nodemanager"
   wlsDomainName: wlsd
-  wlsPassword: ${{ secrets.WLS_PASSWORD }}
+  wlsMsServices: "rngd wls_nodemanager"
+  wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
-  wls_admin_services: "rngd wls_admin wls_nodemanager"
-  wls_managedServer_services: "rngd wls_nodemanager"
 
 jobs:
   preflight:
@@ -62,38 +64,41 @@ jobs:
           repository: Azure/arm-ttk
           path: arm-ttk
           ref: ${{ env.refArmttk }}
-      - name: Checkout ${{ env.repoName }}
+      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: ${{ env.repoName }}
+          repository: ${{env.repoOwner}}/${{env.repoName}}
+          path: ${{env.repoName}}
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
-      - name: Build and test ${{ env.repoName }}
-        run: mvn -Ptemplate-validation-tests clean install --file ${{ env.repoName }}/pom.xml
+      - name: Build and test ${{ env.offerName }}
+        run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
 
-      - name: Checkout ${{ env.repoName }} for test
+      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: ${{ env.repoName }}-dev
+          repository: ${{env.repoOwner}}/${{env.repoName}}
+          path: ${{env.repoName}}-dev
       - name: Create a new branch with development pids in nestedtemplates
         run: |
           current=`pwd`
           echo "current=${current}" >> $GITHUB_ENV
-          cd ${{ env.repoName }}-dev/${{ env.repoName }}/src/main/arm/nestedtemplates
+          offerDevPath=${{ env.repoName }}-dev/weblogic-azure-vm/${{env.offerName}}/${{env.offerName}}
+          cd ${offerDevPath}/src/main/arm/nestedtemplates
           git config --global core.longpaths true
-          git config --global user.email $userEmail
-          git config --global user.name $userName
+          git config --global user.email $gitEmail
+          git config --global user.name $gitUserName
           echo "create branch $testbranchName"
           git checkout -b $testbranchName
-          rm -r -f $current/${{ env.repoName }}-dev/${{ env.repoName }}/src/main/arm/nestedtemplates/*
-          cp -r -f $current/${{ env.repoName }}/${{ env.repoName }}/target/arm/nestedtemplates/* $current/${{ env.repoName }}-dev/${{ env.repoName }}/src/main/arm/nestedtemplates/
+          rm -r -f $current/${offerDevPath}/src/main/arm/nestedtemplates/*
+          cp -r -f $current/${offerPath}/${{ env.offerName }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
           git status
           git commit -a -m "hard code pids"
-          git push https://$gitToken@github.com/$userName/${{ env.repoName }}.git -f
+          git push https://$gitToken@github.com/${GITHUB_REPOSITORY}.git -f
 
       - uses: azure/login@v1
         id: azure-login
@@ -102,19 +107,19 @@ jobs:
       - name: Validate deployment templates for different combinations of service integration
         id: validate-deployment-templates
         run: |
-          bash ${{ env.repoName }}/test/scripts/verify-deployments.sh <<< "${{ github.run_id }}${{ github.run_number }} ${location} \
-            ${{ env.repoName }}/${{ env.repoName }}/target/arm/mainTemplate.json \
-            ${userName} ${testbranchName} ${{ env.repoName }}/test/scripts"
+          bash ${{ env.offerPath }}/test/scripts/verify-deployments.sh <<< "${{ github.run_id }}${{ github.run_number }} ${location} \
+            ${{ env.offerPath }}/${{ env.offerName }}/target/arm/mainTemplate.json \
+            ${GITHUB_REPOSITORY} ${testbranchName} ${{ env.offerPath }}/test/scripts"
 
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/${{ env.repoName }}/pom.xml)
-          artifactName=${{ env.repoName }}-$version-arm-assembly
-          unzip ${{ env.repoName }}/${{ env.repoName }}/target/$artifactName.zip -d ${{ env.repoName }}/${{ env.repoName }}/target/$artifactName
+          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/${{ env.offerName }}/pom.xml)
+          artifactName=${{ env.offerName }}-$version-arm-assembly
+          unzip ${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName.zip -d ${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}"
-          echo "##[set-output name=artifactPath;]${{ env.repoName }}/${{ env.repoName }}/target/$artifactName"
-      - name: Archive ${{ env.repoName }} template
+          echo "##[set-output name=artifactPath;]${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName"
+      - name: Archive ${{ env.offerName }} template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -124,12 +129,12 @@ jobs:
       - name: Generate addnode artifact file name and path
         id: addnode_artifact_file
         run: |
-          addnode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/addnode/pom.xml)
-          addnode_artifactName=${{ env.repoName }}-addnode-$addnode_version-arm-assembly
-          unzip ${{ env.repoName }}/addnode/target/$addnode_artifactName.zip -d ${{ env.repoName }}/addnode/target/$addnode_artifactName
+          addnode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/addnode/pom.xml)
+          addnode_artifactName=${{ env.offerName }}-addnode-$addnode_version-arm-assembly
+          unzip ${{ env.offerPath }}/addnode/target/$addnode_artifactName.zip -d ${{ env.offerPath }}/addnode/target/$addnode_artifactName
           echo "##[set-output name=addnode_artifactName;]${addnode_artifactName}"
-          echo "##[set-output name=addnode_artifactPath;]${{ env.repoName }}/addnode/target/$addnode_artifactName"
-      - name: Archive ${{ env.repoName }} addnode template
+          echo "##[set-output name=addnode_artifactPath;]${{ env.offerPath }}/addnode/target/$addnode_artifactName"
+      - name: Archive ${{ env.offerName }} addnode template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -139,13 +144,13 @@ jobs:
       - name: Generate delete node artifact file name and path
         id: deletenode_artifact_file
         run: |
-          deletenode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/deletenode/pom.xml)
-          deletenode_artifactName=${{ env.repoName }}-deletenode-$deletenode_version-arm-assembly
-          unzip ${{ env.repoName }}/deletenode/target/$deletenode_artifactName.zip -d ${{ env.repoName }}/deletenode/target/$deletenode_artifactName
+          deletenode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/deletenode/pom.xml)
+          deletenode_artifactName=${{ env.offerName }}-deletenode-$deletenode_version-arm-assembly
+          unzip ${{ env.offerPath }}/deletenode/target/$deletenode_artifactName.zip -d ${{ env.offerPath }}/deletenode/target/$deletenode_artifactName
           echo "##[set-output name=deletenode_artifactName;]${deletenode_artifactName}"
-          echo "##[set-output name=deletenode_artifactPath;]${{ env.repoName }}/deletenode/target/$deletenode_artifactName"
+          echo "##[set-output name=deletenode_artifactPath;]${{ env.offerPath }}/deletenode/target/$deletenode_artifactName"
 
-      - name: Archive ${{ env.repoName }} deletenode template
+      - name: Archive ${{ env.offerName }} deletenode template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -155,13 +160,13 @@ jobs:
       - name: Generate addnode-coherence artifact file name and path
         id: addnode_coherence_artifact_file
         run: |
-          addnode_coherence_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/addnode-coherence/pom.xml)
-          addnode_coherence_artifactName=${{ env.repoName }}-addnode-coherence-$addnode_coherence_version-arm-assembly
-          unzip ${{ env.repoName }}/addnode-coherence/target/$addnode_coherence_artifactName.zip -d ${{ env.repoName }}/addnode-coherence/target/$addnode_coherence_artifactName
+          addnode_coherence_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/addnode-coherence/pom.xml)
+          addnode_coherence_artifactName=${{ env.offerName }}-addnode-coherence-$addnode_coherence_version-arm-assembly
+          unzip ${{ env.offerPath }}/addnode-coherence/target/$addnode_coherence_artifactName.zip -d ${{ env.offerPath }}/addnode-coherence/target/$addnode_coherence_artifactName
           echo "##[set-output name=addnode_coherence_artifactName;]${addnode_coherence_artifactName}"
-          echo "##[set-output name=addnode_coherence_artifactPath;]${{ env.repoName }}/addnode-coherence/target/$addnode_coherence_artifactName"
+          echo "##[set-output name=addnode_coherence_artifactPath;]${{ env.offerPath }}/addnode-coherence/target/$addnode_coherence_artifactName"
 
-      - name: Archive ${{ env.repoName }} addnode-coherence template
+      - name: Archive ${{ env.offerName }} addnode-coherence template
         uses: actions/upload-artifact@v1
         if: success()
         with:
@@ -169,7 +174,6 @@ jobs:
           path: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactPath}}
 
   deploy-dependencies:
-    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     needs: preflight
     runs-on: ubuntu-latest
     steps:
@@ -177,42 +181,35 @@ jobs:
         id: azure-login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Create Resource Group
-        id: create-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
-            echo "create resource group" ${{ env.resourceGroupForDependency }}
-            az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
+        run: |
+          echo "create resource group" ${{ env.resourceGroupForDependency }}
+          az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
 
       - name: Set Up Azure Postgresql to Test dbTemplate
         id: setup-postgresql
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
-            echo "Deploy DB with name " ${{ env.dbName }}
-            az postgres server create \
-            --resource-group ${{ env.resourceGroupForDependency }} \
-            --name ${{ env.dbName }}  \
-            --location ${location} \
-            --admin-user weblogic \
-            --ssl-enforcement Enabled \
-            --public-network-access Enabled \
-            --admin-password ${{ env.wlsPassword }} \
-            --sku-name B_Gen5_1
+        run: |
+          echo "Deploy DB with name " ${{ env.dbName }}
+          az postgres server create \
+          --resource-group ${{ env.resourceGroupForDependency }} \
+          --name ${{ env.dbName }}  \
+          --location ${location} \
+          --admin-user weblogic \
+          --ssl-enforcement Enabled \
+          --public-network-access Enabled \
+          --admin-password ${{ env.wlsPassword }} \
+          --sku-name B_Gen5_1
 
-            echo "Allow Access To Azure Services"
-            az postgres server firewall-rule create \
-            -g ${{ env.resourceGroupForDependency }} \
-            -s ${{ env.dbName }} \
-            -n "AllowAllWindowsAzureIps" \
-            --start-ip-address "0.0.0.0" \
-            --end-ip-address "0.0.0.0"
+          echo "Allow Access To Azure Services"
+          az postgres server firewall-rule create \
+          -g ${{ env.resourceGroupForDependency }} \
+          -s ${{ env.dbName }} \
+          -n "AllowAllWindowsAzureIps" \
+          --start-ip-address "0.0.0.0" \
+          --end-ip-address "0.0.0.0"
 
   deploy-weblogic-cluster:
-    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     needs: deploy-dependencies
     runs-on: ubuntu-latest
     strategy:
@@ -226,21 +223,25 @@ jobs:
             "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
             "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
             "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+            "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
+            "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
+            "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
           ]
     steps:
-      - name: Checkout ${{ env.repoName }}
+      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
-          path: ${{ env.repoName }}
-      - name: Get version information from ${{ env.repoName }}/pom.xml
+          repository: ${{env.repoOwner}}/${{env.repoName}}
+          path: ${{env.repoName}}
+      - name: Get version information from ${{ env.offerName }}/pom.xml
         id: version
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/${{ env.repoName }}/pom.xml)
+          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/${{ env.offerName }}/pom.xml)
           echo "version=${version}" >> $GITHUB_ENV
       - name: Output artifact name for Download action
         id: artifact_file
         run: |
-          artifactName=${{ env.repoName }}-$version-arm-assembly
+          artifactName=${{ env.offerName }}-$version-arm-assembly
           echo "artifactName=${artifactName}" >> $GITHUB_ENV
           echo "##[set-output name=artifactName;]${artifactName}"
       - name: Download artifact for deployment
@@ -262,16 +263,14 @@ jobs:
           echo "resourceGroup=${resourceGroup}" >> $GITHUB_ENV
       - name: Create Resource Group
         id: create-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "create resource group" $resourceGroup
             az group create --verbose --name $resourceGroup --location ${location}
 
       - name: Prepare deployed parameters and test script
         id: prepare-deployed-parameters-and-test-script
         run: |
+          repoPath=${GITHUB_REPOSITORY//\//\\/}
           echo $managedServerPrefix $numberOfInstances $adminVMName
           sed -i "s/#location#/$location/g; \
            s/#adminPasswordOrKey#/$wlsPassword/g; \
@@ -283,25 +282,22 @@ jobs:
            s/#adminvmname#/$adminVMName/g; \
            s/#skuUrnVersion#/${{ matrix.images }}/g; \
            s/#testbranchName#/$testbranchName/g; \
-           s/#gitUserName#/$userName/g" \
-            ${{ env.repoName }}/test/data/parameters-test.json
+           s/#repoPath#/$repoPath/g" \
+           ${{ env.offerPath }}/test/data/parameters-test.json
 
           sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-          ${{ env.repoName }}/test/scripts/verify-wls-path.sh
+          ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
 
           sed -i "s/#adminVMName#/$adminVMName/g; \
           s/#adminPasswordOrKey#/$wlsPassword/g; \
           s/#managedServers#/$managedServers/g; \
           s/#wlsUserName#/$wlsUserName/g; \
           s/#wlspassword#/$wlsPassword/g" \
-          ${{ env.repoName }}/test/scripts/verify-servers-lifecycle.sh
+          ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh
 
       - name: Accept Image Terms
         id: accept-terms
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "accept terms for " "${{ matrix.images }}"
             rawUrn="${{ matrix.images }}"
             publisherAndName=$(echo ${rawUrn} | grep -o ";.*:" | sed "s/;//g")
@@ -310,38 +306,29 @@ jobs:
 
       - name: Deploy WebLogic Server Cluster Domain offer
         id: deploy-wls-cluster
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             az deployment group create \
               --verbose \
               --resource-group $resourceGroup \
               --name wls-cluster-node \
-              --parameters @${{ env.repoName }}/test/data/parameters-test.json \
+              --parameters @${{ env.offerPath }}/test/data/parameters-test.json \
               --template-file ${artifactName}/mainTemplate.json
 
       - name: Verify Network Security Group
         id: verify-nsg
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query nsg name, will exit with error if nsg does not exist."
             az network nsg show -g $resourceGroup -n ${nsg} --query "name"
 
       - name: Get IP of build machine
         id: get-ip-address
         run: |
-          myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short)
+          myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short | tr -d "\"")
           echo "myIP=${myIP}" >> $GITHUB_ENV
 
       - name: Add ip address to security rule to access the wls machine
         id: add-ip-to-security-rule
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query existing source address prefixes"
             attempt=0
             toCreateRule101=false
@@ -385,19 +372,13 @@ jobs:
 
       - name: Restart wls VM
         id: restart-wls-wm
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "restart vm to make sure security rule work."
             az vm restart -g $resourceGroup -n $adminVMName
 
       - name: Query public IP of AdminServer VM
         id: query-wls-admin-ip
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query public ip"
             publicIP=$(az vm show \
               --resource-group $resourceGroup \
@@ -410,10 +391,7 @@ jobs:
 
       - name: Query public IP of managedServerVM1
         id: query-wls-managed-ip
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query public ip"
             publicIP=$(az vm show \
               --resource-group $resourceGroup \
@@ -432,14 +410,11 @@ jobs:
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo install sshpass
           sudo apt-get install -y sshpass
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.repoName }}/test/scripts/verify-wls-path.sh
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -448,15 +423,14 @@ jobs:
       - name: Verify wls admin services
         id: veriy-admin-service
         run: |
+          echo "wait for port 22"
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying WebLogic services at admin server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.repoName }}/test/scripts/verify-services.sh $wls_admin_services
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-services.sh $wlsAdminServices
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -465,21 +439,20 @@ jobs:
       - name: Verify wls managed server services
         id: veriy-msservice
         run: |
+          echo "wait for port 22"
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying WebLogic services at managed server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${ms1PublicIP} 'bash -s' < ${{ env.repoName }}/test/scripts/verify-services.sh $wls_managedServer_services
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${ms1PublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-services.sh $wlsMsServices
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
         run: |
           echo "Verifying Weblogic Server Access"
-          bash ${{ env.repoName }}/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
+          bash ${{ env.offerPath }}/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -488,32 +461,31 @@ jobs:
       - name: Verify WebLogic Managed Server LifeCycle check
         id: verify-server-lifecycle
         run: |
+          echo "wait for port 22"
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying Weblogic managed server lifecycle"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.repoName }}/test/scripts/verify-servers-lifecycle.sh
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh
 
       - name: Deploy DB Template to Connect to Azure Postgresql Database
         id: enable-postgresql-db
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for db template deployment
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-db.sh \
-            <<< "${{ env.repoName }}/test/scripts/ \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-db.sh \
+            <<< "${{ env.offerPath }}/test/scripts/ \
             ${{ env.adminVMName }} \
             ${{ env.wlsPassword}} \
             ${{ env.dbName }} \
             ${{ env.location }} \
             ${{ env.wlsUserName }} \
             ${{ env.wlsPassword }} \
-            ${{ env.userName }} \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }}"
             echo "Deploy DB Template..."
             az group deployment create \
             --verbose \
             --resource-group ${resourceGroup} \
             --name db \
-            --parameters @${{ env.repoName }}/test/scripts/parameters-deploy-db.json \
+            --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-db.json \
             --template-file ${artifactName}/nestedtemplates/dbTemplate.json
 
       - name: Generate Application Gateway Certificate
@@ -527,14 +499,11 @@ jobs:
           echo "agwCertificateBase64String=${agwCertificateBase64String}" >> $GITHUB_ENV
       - name: Set up Application Gateway by Deploying Sub Template
         id: enable-application-gateway
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for application gateway template deployment
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-agw.sh \
-            <<< "${{ env.repoName }}/test/scripts/parameters-deploy-agw.json \
-            ${{ env.userName }} \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-agw.sh \
+            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-agw.json \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }} \
             ${{ env.adminVMName }} \
             ${agwCertificateBase64String} \
@@ -551,15 +520,12 @@ jobs:
             --debug \
             --resource-group ${resourceGroup} \
             --name agw \
-            --parameters @${{ env.repoName }}/test/scripts/parameters-deploy-agw.json \
+            --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-agw.json \
             --template-file ${artifactName}/nestedtemplates/appGatewayNestedTemplate.json
 
       - name: Query appGatewayURL of appgateway deployment
         id: query-agwurl
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query appgatewayURL"
             appGatewayURL=$(az network public-ip show \
               --resource-group $resourceGroup \
@@ -588,10 +554,7 @@ jobs:
 
       - name: Query adminVMsver DNS
         id: query-adminvmdns
-        uses: azure/CLI@v1
-        with: 
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query adminVMsver DNS for $adminVMName"
             adminVMDNS=$(az network public-ip show \
               --resource-group $resourceGroup \
@@ -613,18 +576,15 @@ jobs:
           sed -i "s/#adminVMDNS#/${adminVMDNS}/g; \
               s/#wlsUserName#/$wlsUserName/g; \
               s/#wlsPassword#/$wlsPassword/g" \
-              arm-oraclelinux-wls-cluster/test/scripts/deploy-webapp.sh
+              ${{ env.offerPath }}/test/scripts/deploy-webapp.sh
 
           echo ${appGatewayURL}
           sed -i "s|#appGatewayURL#|${appGatewayURL}|g;" \
-              arm-oraclelinux-wls-cluster/test/scripts/verify-webapp-deployment.sh
+              ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh
 
       - name: Add ip address to security rule to access the wls machine
         id: add-ip-to-security-rule-105
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "query existing source address prefixes"
             attempt=0
             toCreateRule105=false
@@ -658,19 +618,13 @@ jobs:
 
       - name: Restart wls VM
         id: restart-wls-admin-vm
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "restart vm to make sure security rule work."
             az vm restart -g $resourceGroup -n $adminVMName
 
       # Fix failure that caused by remote server closed.
       - name: Restart remote SSH agent
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "Restart remote SSH agent"
             az vm user reset-ssh \
               --resource-group $resourceGroup \
@@ -681,24 +635,21 @@ jobs:
         run: |
           echo "Deploy WebLogic Cafe to server"          
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} 7001
-          bash arm-oraclelinux-wls-cluster/test/scripts/deploy-webapp.sh
+          bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh
 
       - name: Verify WebLogicCafe app is successfully deployed
         id: verify-webapp-deployment
         run: |
           echo "Verify WebLogicCafe app is successfully deployed"
-          bash arm-oraclelinux-wls-cluster/test/scripts/verify-webapp-deployment.sh
+          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh
 
       - name: Set up ELK by deploying sub template
         id: enable-elk
         if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for ELK template deployment
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-elk.sh \
-            <<< "${{ env.repoName }}/test/scripts/parameters-deploy-elk.json \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-elk.sh \
+            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-elk.json \
             ${{ env.adminVMName }} \
             ${{ env.elkPassword }} \
             ${{ env.elkURI }} \
@@ -708,7 +659,7 @@ jobs:
             ${{ env.wlsDomainName }} \
             ${{ env.wlsUserName }} \
             ${{ env.wlsPassword }} \
-            ${{ env.userName }} \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }} \
             ${{ env.managedServerPrefix }} \
             ${{ github.run_id }}${{ github.run_number }}"
@@ -718,7 +669,7 @@ jobs:
             --debug \
             --resource-group ${resourceGroup} \
             --name elk \
-            --parameters @${{ env.repoName }}/test/scripts/parameters-deploy-elk.json \
+            --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-elk.json \
             --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
 
       - name: Get storage account name
@@ -731,13 +682,10 @@ jobs:
 
       - name: Set up Coherence by deploying sub template
         id: enable-coherence
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             # Generate parameters for Coherence template deployment
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-coherence.sh \
-            <<< "${{ env.repoName }}/test/scripts/parameters-deploy-coherence.json \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-coherence.sh \
+            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-coherence.json \
             ${{ env.adminVMName }} \
             ${{ env.wlsPassword }} \
             ${{ matrix.images }} \
@@ -746,7 +694,7 @@ jobs:
             ${{ env.wlsDomainName }} \
             ${{ env.wlsUserName }} \
             ${{ env.wlsPassword }} \
-            ${{ env.userName }} \
+            ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }} \
             ${{ env.managedServerPrefix }}"
 
@@ -755,14 +703,14 @@ jobs:
             --debug \
             --resource-group ${resourceGroup} \
             --name coherence \
-            --parameters @${{ env.repoName }}/test/scripts/parameters-deploy-coherence.json \
+            --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-coherence.json \
             --template-file ${artifactName}/nestedtemplates/coherenceTemplate.json
 
       - name: Output addnode artifact name
         id: artifact_file_addnode
         run: |
-          addnodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/addnode/pom.xml)
-          artifactNameOfAddnode=${{ env.repoName }}-addnode-$addnodeVersion-arm-assembly
+          addnodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/addnode/pom.xml)
+          artifactNameOfAddnode=${{ env.offerName }}-addnode-$addnodeVersion-arm-assembly
           echo "artifactNameOfAddnode=${artifactNameOfAddnode}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfAddnode;]${artifactNameOfAddnode}"
       - name: Download artifact for deployment
@@ -772,14 +720,11 @@ jobs:
 
       - name: Add new nodes to existing cluster
         id: add-node
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "add two new nodes and enable app gateway"
             echo "generate add-node parameters"
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-addnode.sh \
-            <<< "${{ env.repoName }}/test/scripts/parameters-deploy-addnode.json \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-addnode.sh \
+            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-addnode.json \
               ${{ env.wlsPassword }} \
               ${{ env.adminVMName }}:${adminConsolePort} \
               weblogic \
@@ -790,20 +735,20 @@ jobs:
               ${{ env.location }} \
               ${{ env.wlsUserName }} \
               ${{ env.wlsPassword }} \
-              ${{ env.userName }} \
+              ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "deploy add-node template to create new nodes"
             az group deployment validate \
               -g ${resourceGroup} \
               -f ${artifactNameOfAddnode}/mainTemplate.json \
-              -p @${{ env.repoName }}/test/scripts/parameters-deploy-addnode.json \
+              -p @${{ env.offerPath }}/test/scripts/parameters-deploy-addnode.json \
               --no-prompt
             az group deployment create \
               --debug \
               --resource-group ${resourceGroup} \
               --name addnode \
-              --parameters @${{ env.repoName }}/test/scripts/parameters-deploy-addnode.json \
+              --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-addnode.json \
               --template-file ${artifactNameOfAddnode}/mainTemplate.json
       - name: Verify new nodes
         id: verify-new-nodes
@@ -817,8 +762,8 @@ jobs:
       - name: Output addnode-coherence artifact name
         id: artifact_file_addnode_coherence
         run: |
-          addnodeCoherenceVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/addnode-coherence/pom.xml)
-          artifactNameOfAddnodeCo=${{ env.repoName }}-addnode-coherence-$addnodeCoherenceVersion-arm-assembly
+          addnodeCoherenceVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/addnode-coherence/pom.xml)
+          artifactNameOfAddnodeCo=${{ env.offerName }}-addnode-coherence-$addnodeCoherenceVersion-arm-assembly
           echo "artifactNameOfAddnodeCo=${artifactNameOfAddnodeCo}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfAddnodeCo;]${artifactNameOfAddnodeCo}"
       - name: Download artifact for deployment
@@ -828,14 +773,11 @@ jobs:
 
       - name: Add new cache node to coherence cluster
         id: add-node-coherence
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "add new cache server"
             echo "generate parameters"
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-addnode-coherence.sh \
-            <<< "${{ env.repoName }}/test/scripts/parameters-deploy-addnode-coherence.json \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-addnode-coherence.sh \
+            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-addnode-coherence.json \
               ${{ env.wlsPassword }} \
               ${{ env.adminVMName }} \
               weblogic \
@@ -846,20 +788,20 @@ jobs:
               ${{ env.location }} \
               ${{ env.wlsUserName }} \
               ${{ env.wlsPassword }} \
-              ${{ env.userName }} \
+              ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "deploy add-node template to create new nodes"
             az group deployment validate \
               -g ${resourceGroup} \
               -f ${artifactNameOfAddnodeCo}/mainTemplate.json \
-              -p @${{ env.repoName }}/test/scripts/parameters-deploy-addnode-coherence.json \
+              -p @${{ env.offerPath }}/test/scripts/parameters-deploy-addnode-coherence.json \
               --no-prompt
             az group deployment create \
               --debug \
               --resource-group ${resourceGroup} \
               --name addnode \
-              --parameters @${{ env.repoName }}/test/scripts/parameters-deploy-addnode-coherence.json \
+              --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-addnode-coherence.json \
               --template-file ${artifactNameOfAddnodeCo}/mainTemplate.json
       - name: Verify new nodes
         id: verify-new-nodes-coherence
@@ -873,8 +815,8 @@ jobs:
       - name: Output delete-node artifact name
         id: artifact_file_deletenode
         run: |
-          deleteNodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/deletenode/pom.xml)
-          artifactNameOfDeleteNode=${{ env.repoName }}-deletenode-$deleteNodeVersion-arm-assembly
+          deleteNodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.offerPath }}/deletenode/pom.xml)
+          artifactNameOfDeleteNode=${{ env.offerName }}-deletenode-$deleteNodeVersion-arm-assembly
           echo "artifactNameOfDeleteNode=${artifactNameOfDeleteNode}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfDeleteNode;]${artifactNameOfDeleteNode}"
       - name: Download artifact for deployment
@@ -883,18 +825,15 @@ jobs:
           name: ${{steps.artifact_file_deletenode.outputs.artifactNameOfDeleteNode}}
       - name: Delete nodes from existing cluster
         id: delete-node
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "generate delete-node parameters"
-            bash ${{ env.repoName }}/test/scripts/gen-parameters-deploy-deletenode.sh \
-            <<< "${{ env.repoName }}/test/scripts/parameters-deploy-deletenode.json \
+            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-deletenode.sh \
+            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-deletenode.json \
               ${{ env.adminVMName }} \
               ${{ env.location }} \
               ${{ env.wlsUserName }} \
               ${{ env.wlsPassword }} \
-              ${{ env.userName }} \
+              ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "Run deletenode-cli.sh to remove nodes"
@@ -902,7 +841,7 @@ jobs:
             ${artifactNameOfDeleteNode}/scripts/deletenode-cli.sh \
               -g ${resourceGroup} \
               -f ${artifactNameOfDeleteNode}/mainTemplate.json \
-              -p ${{ env.repoName }}/test/scripts/parameters-deploy-deletenode.json \
+              -p ${{ env.offerPath }}/test/scripts/parameters-deploy-deletenode.json \
               -s
       - name: Verify deleted nodes
         id: verify-deleted-nodes
@@ -928,10 +867,7 @@ jobs:
       - name: Delete Resource Group
         id: delete-resource-group
         if: always()
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
       - name: Delete ELK index
@@ -942,17 +878,18 @@ jobs:
 
   cleanup-github-resoruce:
     needs: deploy-weblogic-cluster
-    if: always()
+    if: success()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ${{ env.repoName }}
         uses: actions/checkout@v2
         with:
+          repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{ env.repoName }}
       - name: Delete testing branch
         run: |
           cd ${{ env.repoName }}
-          git push https://$gitToken@github.com/$userName/${{ env.repoName }}.git -f --delete $testbranchName
+          git push https://$gitToken@github.com/$GITHUB_REPOSITORY.git -f --delete $testbranchName
 
   cleanup-az-resource:
     if: always()
@@ -961,43 +898,38 @@ jobs:
     steps:
       - uses: azure/login@v1
         id: azure-login
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Delete DB Resource Group
         id: delete-db-resource-group
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDependency }}
-            
+
   summary:
     needs: deploy-weblogic-cluster
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: summarize jobs
-        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
+        if: ${{ github.repository_owner == 'wls-eng' }}
         run: |
-            workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster/actions/runs/${{ github.run_id }}/jobs)
-            critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.name|test("^deploy-weblogic-cluster."))) | length')
-            echo "$critical_job_num"
-            succeed_critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.conclusion=="success") | select(.name|test("^deploy-weblogic-cluster."))) | length')
-            echo "$succeed_critical_job_num"
-            failed_job_num="$(($critical_job_num-$succeed_critical_job_num))"
-            echo $failed_job_num
-            if (($failed_job_num >= 2));then
-                echo "too many jobs failed, send notification to Teams"
-                curl ${{ secrets.MSTEAMS_WEBHOOK }} \
-                -H 'Content-Type: application/json' \
-                --data-binary @- << EOF
-                {
-                "@context":"http://schema.org/extensions",
-                "@type":"MessageCard",
-                "text":"$failed_job_num jobs failed in Configured Cluster Offer's workflow, please take a look at: https://github.com/oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster/actions/runs/${{ github.run_id }}"
-                }
-            EOF
-            fi
+          workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}/jobs)
+          critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.name|test("^deploy-weblogic-cluster."))) | length')
+          echo "$critical_job_num"
+          succeed_critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.conclusion=="success") | select(.name|test("^deploy-weblogic-cluster."))) | length')
+          echo "$succeed_critical_job_num"
+          failed_job_num="$(($critical_job_num-$succeed_critical_job_num))"
+          echo $failed_job_num
+          if (($failed_job_num >= 2));then
+              echo "too many jobs failed, send notification to Teams"
+              curl ${{ secrets.MSTEAMS_WEBHOOK }} \
+              -H 'Content-Type: application/json' \
+              --data-binary @- << EOF
+              {
+              "@context":"http://schema.org/extensions",
+              "@type":"MessageCard",
+              "text":"$failed_job_num jobs failed in Configured Cluster Offer's workflow, please take a look at: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}"
+              }
+          EOF
+          fi
