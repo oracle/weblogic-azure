@@ -6,7 +6,7 @@
 # Generate parameters with value for deploying delete-node template.
 
 #read arguments from stdin
-read parametersPath adminVMName location wlsusername wlspassword gitUserName testbranchName managedServerPrefix
+read parametersPath adminVMName location wlsusername wlspassword repoPath testbranchName managedServerPrefix
 
 cat <<EOF > ${parametersPath}
 {
@@ -29,7 +29,7 @@ cat <<EOF > ${parametersPath}
         "value": "${wlsUserName}"
       },
       "_artifactsLocation":{
-        "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-cluster/${testbranchName}/deletenode/src/main/"
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-cluster/deletenode/src/main/"
       }
     }
 EOF
