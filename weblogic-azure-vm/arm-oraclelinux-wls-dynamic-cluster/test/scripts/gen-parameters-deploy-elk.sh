@@ -4,7 +4,7 @@
 #
 #Generate parameters with value for deploying elk template independently
 
-read parametersPath adminVMName elasticsearchPassword elasticsearchURI elasticsearchUserName location wlsDomainName wlsusername wlspassword gitUserName testbranchName managedServerPrefix maxDynamicClusterSize dynamicClusterSize guidValue
+read parametersPath adminVMName elasticsearchPassword elasticsearchURI elasticsearchUserName location wlsDomainName wlsusername wlspassword repoPath testbranchName managedServerPrefix maxDynamicClusterSize dynamicClusterSize guidValue
 
 
 cat <<EOF > ${parametersPath}
@@ -37,7 +37,7 @@ cat <<EOF > ${parametersPath}
         "value": "${wlsUserName}"
       },
       "_artifactsLocation":{
-        "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-dynamic-cluster/${testbranchName}/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
       },
       "managedServerPrefix": {
         "value": "${managedServerPrefix}"

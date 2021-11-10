@@ -4,7 +4,7 @@
 #
 #Generate parameters with value for deploying db template independently
 
-read parametersPath adminVMName dbPassword dbName location wlsusername wlspassword gitUserName testbranchName
+read parametersPath adminVMName dbPassword dbName location wlsusername wlspassword repoPath testbranchName
 
 cat <<EOF > ${parametersPath}/parameters-deploy-db.json
 {
@@ -36,7 +36,7 @@ cat <<EOF > ${parametersPath}/parameters-deploy-db.json
         "value": "${wlsUserName}"
       },
       "_artifactsLocation":{
-        "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-dynamic-cluster/${testbranchName}/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
       },
     }
 EOF
