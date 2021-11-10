@@ -8,7 +8,7 @@ on:
     types: [aks-deploy-dependency]
 
 env:
-    azCliVersion: 2.29.0
+    azCliVersion: 2.30.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus
     dbAdminUser: weblogic

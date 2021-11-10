@@ -9,7 +9,7 @@ on:
 
 env:
     refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691
-    azCliVersion: 2.23.0
+    azCliVersion: 2.30.0
     location: eastus
     aksRepoUserName: oracle
     aksRepoBranchName: main
