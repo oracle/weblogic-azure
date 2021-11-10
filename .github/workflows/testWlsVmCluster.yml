@@ -864,12 +864,12 @@ jobs:
             exit 1
           fi
 
-      # - name: Delete Resource Group
-      #   id: delete-resource-group
-      #   if: always()
-      #   run: |
-      #       echo "delete... " $resourceGroup
-      #       az group delete --yes --no-wait --verbose --name $resourceGroup
+      - name: Delete Resource Group
+        id: delete-resource-group
+        if: always()
+        run: |
+            echo "delete... " $resourceGroup
+            az group delete --yes --no-wait --verbose --name $resourceGroup
       - name: Delete ELK index
         id: delete-elk-index
         if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
