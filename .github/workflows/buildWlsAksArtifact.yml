@@ -3,11 +3,13 @@ name: Build WLS on AKS artifact
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [build-zip]
+    types: [aks-package]
+  # Sample cURL
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-package"}'
 
 env:
     refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691
-    azCliVersion: 2.23.0
+    azCliVersion: 2.30.0
     location: eastus
     aksRepoUserName: oracle
     aksRepoBranchName: main
@@ -39,7 +41,7 @@ jobs:
               with:
                 path: weblogic-azure
             - name: Build and test weblogic-azure/weblogic-azure-aks
-              run: mvn -Pbicep -Ddev -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
+              run: mvn -Pbicep -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Generate artifact file name and path
               id: artifact_file
               run: |

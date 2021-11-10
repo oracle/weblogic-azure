@@ -1,15 +1,16 @@
-name: Merge upstream branches
+name: Merge upstream branches for WLS on AKS
 on:
   workflow_dispatch:
+  # Sample cURL
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-upstream-sync"}'
   repository_dispatch:
-    types: [upstream-sync]
+    types: [aks-upstream-sync]
 env:
   userName: ${{ secrets.USER_NAME }}
   userEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
 jobs:
   merge:
-    if: (github.event_name == 'schedule' && github.repository_owner == 'mriccell') || (github.event_name != 'schedule')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
