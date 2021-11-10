@@ -150,7 +150,7 @@ https://www.oracle.com/legal/privacy/privacy-policy.html
 
 ## Scratch not currently in offer 
 
-* [Documentation](https://wls-eng.github.io/arm-oraclelinux-wls/)
+* [Documentation](https://oracle.github.io/weblogic-azure/)
 
 * [Official Blog](https://blogs.oracle.com/weblogicserver/)
 
