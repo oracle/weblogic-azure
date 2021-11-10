@@ -36,7 +36,7 @@ USER_EMAIL=
 USER_NAME=
 # Personal token for preceding GitHub account.
 GIT_TOKEN=
-WLS_PSW=Secret123456
+WLS_PSW=
 
 # End set environment variables
 ################################################
@@ -102,6 +102,8 @@ fi
 if [ "$GIT_TOKEN" == '' ] ; then
     read -s -r -p "Enter personal token of GitHub account: " GIT_TOKEN
 fi
+
+read -s -r -p "Enter password for WebLogic Server: " WLS_PSW
 
 # get ELK_URI if not set at the beginning of this file
 if [ "$ELK_URI" == '' ] ; then

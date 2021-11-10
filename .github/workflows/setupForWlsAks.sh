@@ -25,7 +25,7 @@ ORC_SSOPSW=
 ORC_SSOUSER=
 OWNER_REPONAME=
 SLEEP_VALUE=30s
-WDT_RUNTIMEPSW=Secret123456
+WDT_RUNTIMEPSW=
 WLS_PSW=${WDT_RUNTIMEPSW}
 WLS_USERNAME=weblogic
 
@@ -71,6 +71,10 @@ fi
 if [ "$ORC_SSOPSW" == '' ] ; then
     read -s -r -p "Enter password for preceding Oracle single sign-on userid: " ORC_SSOPSW
 fi
+
+read -s -r -p "Enter password for WebLogic Server and Runtime Deployment Tooling encryption: " WDT_RUNTIMEPSW
+WLS_PSW=${WDT_RUNTIMEPSW}
+
 
 # get OWNER_REPONAME if not set at the beginning of this file
 if [ "$OWNER_REPONAME" == '' ] ; then
