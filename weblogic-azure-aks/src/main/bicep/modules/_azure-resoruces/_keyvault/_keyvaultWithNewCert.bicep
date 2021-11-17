@@ -26,7 +26,7 @@ param secretName string = 'mySelfSignedCertificate'
 param sku string = 'Standard'
 
 @description('Subject name to create a new certificate, example: \'CN=contoso.com\'.')
-param subjectName string
+param subjectName string = 'contoso.xyz'
 param utcValue string = utcNow()
 
 var const_identityId = '${substring(string(identity.userAssignedIdentities), indexOf(string(identity.userAssignedIdentities), '"') + 1, lastIndexOf(string(identity.userAssignedIdentities), '"') - (indexOf(string(identity.userAssignedIdentities), '"') + 1))}'

@@ -36,6 +36,7 @@ on:
     types: [aks-integration-test-without-dependency-creation]
 
 env:
+    refArmttk: d208d8bc8e5a12b04f69239881c0e4e460b9ed15
     refJavaee: 1a21a792d6bae6768b155945cf2703c3026ac691
     azCliVersion: 2.30.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -114,6 +115,12 @@ jobs:
                 repository: Azure/azure-javaee-iaas
                 path: azure-javaee-iaas
                 ref: ${{ env.refJavaee }}
+            - name: Checkout arm-ttk
+              uses: actions/checkout@v2
+              with:
+                repository: Azure/arm-ttk
+                path: arm-ttk
+                ref: ${{ env.refArmttk }}
             - name: Build azure-javaee-iaas
               run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
             - name: Checkout weblogic-azure
@@ -121,7 +128,7 @@ jobs:
               with:
                 path: weblogic-azure
             - name: Build and test weblogic-azure/weblogic-azure-aks
-              run: mvn -Pbicep -Passembly clean install --file weblogic-azure/weblogic-azure-aks/pom.xml
+              run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Generate artifact file name and path
               id: artifact_file
               run: |

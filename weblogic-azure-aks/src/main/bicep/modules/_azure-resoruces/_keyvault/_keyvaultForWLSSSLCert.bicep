@@ -7,23 +7,23 @@ param enabledForTemplateDeployment bool = true
 param keyVaultName string
 param location string
 @description('Price tier for Key Vault.')
-param sku string
+param sku string = 'Standard'
 param utcValue string = utcNow()
-param wlsIdentityKeyStoreData string
-param wlsIdentityKeyStoreDataSecretName string
+param wlsIdentityKeyStoreData string = newGuid()
+param wlsIdentityKeyStoreDataSecretName string = 'myIdentityKeyStoreData'
 @secure()
-param wlsIdentityKeyStorePassphrase string
-param wlsIdentityKeyStorePassphraseSecretName string
-param wlsPrivateKeyAlias string
-param wlsPrivateKeyAliasSecretName string
+param wlsIdentityKeyStorePassphrase string = newGuid()
+param wlsIdentityKeyStorePassphraseSecretName string = 'myIdentityKeyStorePsw'
+param wlsPrivateKeyAlias string = 'server-cert'
+param wlsPrivateKeyAliasSecretName string = 'privateKeyAlias'
 @secure()
-param wlsPrivateKeyPassPhrase string
-param wlsPrivateKeyPassPhraseSecretName string
-param wlsTrustKeyStoreData string
-param wlsTrustKeyStoreDataSecretName string
+param wlsPrivateKeyPassPhrase string = newGuid()
+param wlsPrivateKeyPassPhraseSecretName string = 'privateKeyPsw'
+param wlsTrustKeyStoreData string = newGuid()
+param wlsTrustKeyStoreDataSecretName string = 'myTrustKeyStoreData'
 @secure()
-param wlsTrustKeyStorePassPhrase string
-param wlsTrustKeyStorePassPhraseSecretName string
+param wlsTrustKeyStorePassPhrase string = newGuid()
+param wlsTrustKeyStorePassPhraseSecretName string = 'myTrustKeyStorePsw'
 
 resource keyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   name: keyVaultName
@@ -37,7 +37,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
     }
     tenantId: subscription().tenantId
   }
-  tags:{
+  tags: {
     'managed-by-azure-weblogic': utcValue
   }
 }
@@ -101,4 +101,3 @@ resource trustKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-pr
     keyvault
   ]
 }
-
