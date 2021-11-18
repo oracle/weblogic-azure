@@ -187,7 +187,7 @@
                     {
                         "name": "enableT3TunnelingTextBlock",
                         "type": "Microsoft.Common.TextBlock",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]",
+                        "visible": false,
                         "options": {
                             "text": "If checked, configure the necessary settings to enable T3 tunneling. You must take additional action on the Networking tab if either of these are checked.",
                             "link": {
@@ -201,7 +201,7 @@
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable T3 tunneling for Administration Server",
                         "toolTip": "If checked, enable T3 tunneling for Administration Server",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                        "visible": false
                     },
                     {
                         "name": "enableClusterT3Tunneling",
