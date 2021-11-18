@@ -208,7 +208,7 @@
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable T3 tunneling for WebLogic cluster",
                         "toolTip": "If checked, enable T3 tunneling for WebLogic cluster.",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                        "visible": false
                     }
                 ],
                 "visible": true
@@ -1183,7 +1183,7 @@
                                     "rows": {
                                         "count": {
                                             "min": 0,
-                                            "max": 4
+                                            "max": 2
                                         }
                                     },
                                     "columns": [
@@ -1225,16 +1225,8 @@
                                                             "value": "adminServer"
                                                         },
                                                         {
-                                                            "label": "admin-server-t3",
-                                                            "value": "adminServerT3"
-                                                        },
-                                                        {
                                                             "label": "cluster-1",
                                                             "value": "cluster1"
-                                                        },
-                                                        {
-                                                            "label": "cluster-1-t3",
-                                                            "value": "cluster1T3"
                                                         }
                                                     ],
                                                     "required": true
