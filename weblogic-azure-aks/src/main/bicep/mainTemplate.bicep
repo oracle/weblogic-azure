@@ -680,6 +680,7 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     identity: identity
+    location: location
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
