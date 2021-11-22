@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 azureFullBrandName: Microsoft Azure IaaS
+aksFullName: Azure Kubernetes Service
 wlsFullBrandName: Oracle WebLogic Server
 brandNameNumber: 12c
 partNumber: E48696-01
