@@ -33,7 +33,7 @@ env:
   refArmTtk: d97aa57d259e2fc8562e11501b1cf902265129d9
   refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
   repoName: weblogic-azure
-  repoOwner: galiacheng
+  repoOwner: ${{ secrets.USER_NAME }}
   resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
   userEmail: ${{ secrets.USER_EMAIL }}
