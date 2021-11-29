@@ -3,7 +3,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 #Generate parameters with value for deployment
-read parametersPath location adminPasswordOrKey wlsdomainname wlsusername wlspassword managedserverprefix maxDynamicClusterSize dynamicClusterSize adminvmname skuUrnVersion testbranchName gitUserName 
+read parametersPath location adminPasswordOrKey wlsdomainname wlsusername wlspassword managedserverprefix maxDynamicClusterSize dynamicClusterSize adminvmname skuUrnVersion testbranchName repoPath 
 
 cat <<EOF >${parametersPath}
 {
@@ -52,7 +52,7 @@ cat <<EOF >${parametersPath}
     },
     "_artifactsLocation": {
 
-      "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-dynamic-cluster/${testbranchName}/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
+      "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
     }
   }
 }

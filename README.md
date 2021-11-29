@@ -8,7 +8,7 @@ The [Azure Marketplace WebLogic Server Offering](https://azuremarketplace.micros
 
 ## Documentation
 
-Please refer to the README for [documentation on WebLogic Server running on an Azure Kubernetes Service](https://github.com/oracle/weblogic-azure/weblogic-azure-aks/README.md)
+Please refer to the README for [documentation on WebLogic Server running on an Azure Kubernetes Service](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/)
 
 Please refer to the README for [documentation on WebLogic Server running on an Azure Virtual Machine](https://docs.oracle.com/en/middleware/standalone/weblogic-server/wlazu/get-started-oracle-weblogic-server-microsoft-azure-iaas.html#GUID-E0B24A45-F496-4509-858E-103F5EBF67A7)
 

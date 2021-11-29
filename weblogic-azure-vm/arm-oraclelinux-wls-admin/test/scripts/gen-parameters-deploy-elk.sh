@@ -5,7 +5,7 @@
 #Generate parameters with value for deploying elk template independently
 
 #read arguments from stdin
-read parametersPath adminVMName elasticsearchPassword elasticsearchURI elasticsearchUserName location wlsDomainName wlsusername wlspassword gitUserName testbranchName guidValue
+read parametersPath adminVMName elasticsearchPassword elasticsearchURI elasticsearchUserName location wlsDomainName wlsusername wlspassword repoPath testbranchName guidValue
 
 cat <<EOF > ${parametersPath}
 {
@@ -37,7 +37,7 @@ cat <<EOF > ${parametersPath}
         "value": "${wlsUserName}"
       },
       "_artifactsLocation":{
-        "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-admin/${testbranchName}/src/main/arm/"
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-admin/src/main/arm/"
       }
     }
 EOF

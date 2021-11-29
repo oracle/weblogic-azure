@@ -16,18 +16,27 @@
 # Set environment variables - the main variables you might want to configure.
 #
 AKS_REPO_USER_NAME=oracle
-DB_PASSWORD="Secret123!"
 # Three letters to disambiguate names.
 DISAMBIG_PREFIX=
+# URI (hostname:port) for Elastic server, leave blank if you don't want to integrate ELK.
+ELK_URI=
+# Account name for Elastic server, leave blank if you don't want to integrate ELK.
+ELK_USER_NAME=
+# Account password for Elastic server, leave blank if you don't want to integrate ELK.
+ELK_PSW= 
 # The location of the resource group. For example `eastus`. Leave blank to use your default location.
 LOCATION=
-ORC_SSOPSW=
-ORC_SSOUSER=
-OWNER_REPONAME=
-SLEEP_VALUE=30s
-WDT_RUNTIMEPSW=
-WLS_PSW=${WDT_RUNTIMEPSW}
-WLS_USERNAME=weblogic
+# Oracle single sign-on userid.
+OTN_USERID=
+# Password for preceding Oracle single sign-on userid.
+OTN_PASSWORD=
+# User Email of GitHub acount to access GitHub repository.
+USER_EMAIL=
+# User name for preceding GitHub account.
+USER_NAME=
+# Personal token for preceding GitHub account.
+GIT_TOKEN=
+WLS_PSW=
 
 # End set environment variables
 ################################################
@@ -56,29 +65,11 @@ msg() {
 setup_colors
 
 read -r -p "Enter a disambiguation prefix (try initials with a sequence number, such as ejb01): " DISAMBIG_PREFIX
+read -r -p "Enter owner/reponame (blank for upsteam of current fork): " OWNER_REPONAME
 
 if [ "$DISAMBIG_PREFIX" == '' ] ; then
     msg "${RED}You must enter a disambiguation prefix."
     exit 1;
-fi
-
-# get ORC_SSOUSER if not set at the beginning of this file
-if [ "$ORC_SSOUSER" == '' ] ; then
-    read -r -p "Enter Oracle single sign-on userid: " ORC_SSOUSER
-fi
-
-# get ORC_SSOPSW if not set at the beginning of this file
-if [ "$ORC_SSOPSW" == '' ] ; then
-    read -s -r -p "Enter password for preceding Oracle single sign-on userid: " ORC_SSOPSW
-fi
-
-read -s -r -p "Enter password for WebLogic Server and Runtime Deployment Tooling encryption: " WDT_RUNTIMEPSW
-WLS_PSW=${WDT_RUNTIMEPSW}
-
-
-# get OWNER_REPONAME if not set at the beginning of this file
-if [ "$OWNER_REPONAME" == '' ] ; then
-    read -r -p "Enter owner/reponame (blank for upsteam of current fork): " OWNER_REPONAME
 fi
 
 if [ -z "${OWNER_REPONAME}" ] ; then
@@ -87,9 +78,50 @@ else
     GH_FLAGS="--repo ${OWNER_REPONAME}"
 fi
 
+# get OTN_USERID if not set at the beginning of this file
+if [ "$OTN_USERID" == '' ] ; then
+    read -r -p "Enter Oracle single sign-on userid: " OTN_USERID
+fi
+
+# get OTN_PASSWORD if not set at the beginning of this file
+if [ "$OTN_PASSWORD" == '' ] ; then
+    read -s -r -p "Enter password for preceding Oracle single sign-on userid: " OTN_PASSWORD
+fi
+
+# get USER_EMAIL if not set at the beginning of this file
+if [ "$USER_EMAIL" == '' ] ; then
+    read -r -p "Enter user Email of GitHub acount to access GitHub repository: " USER_EMAIL
+fi
+
+# get USER_NAME if not set at the beginning of this file
+if [ "$USER_NAME" == '' ] ; then
+    read -r -p "Enter user name of GitHub account: " USER_NAME
+fi
+
+# get GIT_TOKEN if not set at the beginning of this file
+if [ "$GIT_TOKEN" == '' ] ; then
+    read -s -r -p "Enter personal token of GitHub account: " GIT_TOKEN
+fi
+
+read -s -r -p "Enter password for WebLogic Server: " WLS_PSW
+
+# get ELK_URI if not set at the beginning of this file
+if [ "$ELK_URI" == '' ] ; then
+    read -r -p "Enter URI (hostname:port) for Elastic server, leave blank if you don't want to integrate ELK.: " ELK_URI
+fi
+
+# get ELK_USER_NAME if not set at the beginning of this file
+if [ "$ELK_USER_NAME" == '' ] ; then
+    read -r -p "Enter account name for Elastic server, leave blank if you don't want to integrate ELK.: " ELK_USER_NAME
+fi
+
+# get ELK_USER_NAME if not set at the beginning of this file
+if [ "$ELK_PSW" == '' ] ; then
+    read -s -r -p "Enter account password for Elastic server, leave blank if you don't want to integrate ELK.: " ELK_PSW
+fi
+
 DISAMBIG_PREFIX=${DISAMBIG_PREFIX}`date +%m%d`
 SERVICE_PRINCIPAL_NAME=${DISAMBIG_PREFIX}sp
-USER_ASSIGNED_MANAGED_IDENTITY_NAME=${DISAMBIG_PREFIX}u
 
 # get default location if not set at the beginning of this file
 if [ "$LOCATION" == '' ] ; then
@@ -145,49 +177,22 @@ SUBSCRIPTION_ID=$(az account show --query id --output tsv --only-show-errors)
 SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}" --sdk-auth --only-show-errors | base64 -w0)
 AZURE_CREDENTIALS=$(echo $SERVICE_PRINCIPAL | base64 -d)
 
-### AZ ACTION CREATE
-
-msg "${GREEN}(4/6) Create User assigned managed identity ${USER_ASSIGNED_MANAGED_IDENTITY_NAME}"
-az group create --name ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --location ${LOCATION}
-az identity create --name ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --location ${LOCATION} --resource-group ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --subscription ${SUBSCRIPTION_ID}
-USER_ASSIGNED_MANAGED_IDENTITY_ID_NOT_ESCAPED=$(az identity show --name ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --resource-group ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --query id)
-
-### AZ ACTION MUTATE
-
-msg "${GREEN}(5/6) Grant Contributor role in subscription scope to ${USER_ASSIGNED_MANAGED_IDENTITY_NAME}. Sleeping for ${SLEEP_VALUE} first."
-sleep ${SLEEP_VALUE}
-ASSIGNEE_OBJECT_ID=$(az identity show --name ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --resource-group ${USER_ASSIGNED_MANAGED_IDENTITY_NAME} --query principalId)
-# strip quotes
-ASSIGNEE_OBJECT_ID=${ASSIGNEE_OBJECT_ID//\"/}
-az role assignment create --role Contributor --assignee-principal-type ServicePrincipal --assignee-object-id ${ASSIGNEE_OBJECT_ID} --subscription ${SUBSCRIPTION_ID} --scope /subscriptions/${SUBSCRIPTION_ID}
-
-# https://stackoverflow.com/questions/13210880/replace-one-substring-for-another-string-in-shell-script
-USER_ASSIGNED_MANAGED_IDENTITY_ID=${USER_ASSIGNED_MANAGED_IDENTITY_ID_NOT_ESCAPED//\//\\/}
-# remove leading and trailing quote
-USER_ASSIGNED_MANAGED_IDENTITY_ID=${USER_ASSIGNED_MANAGED_IDENTITY_ID//\"/}
-
 msg "${GREEN}(6/6) Create secrets in GitHub"
 if $USE_GITHUB_CLI; then
   {
     msg "${GREEN}Using the GitHub CLI to set secrets.${NOFORMAT}"
-    gh ${GH_FLAGS} secret set AKS_REPO_USER_NAME -b"${AKS_REPO_USER_NAME}"
     gh ${GH_FLAGS} secret set AZURE_CREDENTIALS -b"${AZURE_CREDENTIALS}"
     msg "${YELLOW}\"AZURE_CREDENTIALS\""
     msg "${GREEN}${AZURE_CREDENTIALS}"
-    gh ${GH_FLAGS} secret set DB_PASSWORD -b"${DB_PASSWORD}"
-    gh ${GH_FLAGS} secret set ORC_SSOPSW -b"${ORC_SSOPSW}"
-    gh ${GH_FLAGS} secret set ORC_SSOUSER -b"${ORC_SSOUSER}"
-    gh ${GH_FLAGS} secret set SERVICE_PRINCIPAL -b"${SERVICE_PRINCIPAL}"
-    msg "${YELLOW}\"SERVICE_PRINCIPAL\""
-    msg "${GREEN}${SERVICE_PRINCIPAL}"
-    gh ${GH_FLAGS} secret set USER_ASSIGNED_MANAGED_IDENTITY_ID -b"${USER_ASSIGNED_MANAGED_IDENTITY_ID}"
-    msg "${YELLOW}\"USER_ASSIGNED_MANAGED_IDENTITY_ID\""
-    msg "${GREEN}${USER_ASSIGNED_MANAGED_IDENTITY_ID}"
-    gh ${GH_FLAGS} secret set WDT_RUNTIMEPSW -b"${WDT_RUNTIMEPSW}"
-    gh ${GH_FLAGS} secret set WLS_PSW -b"${WLS_PSW}"    
-    gh ${GH_FLAGS} secret set WLS_USERNAME -b"${WLS_USERNAME}"
-    msg "${YELLOW}\"DISAMBIG_PREFIX\""
-    msg "${GREEN}${DISAMBIG_PREFIX}"
+    gh ${GH_FLAGS} secret set ELK_PSW -b"${ELK_PSW}"
+    gh ${GH_FLAGS} secret set ELK_URI -b"${ELK_URI}"
+    gh ${GH_FLAGS} secret set ELK_USER_NAME -b"${ELK_USER_NAME}"
+    gh ${GH_FLAGS} secret set GIT_TOKEN -b"${GIT_TOKEN}"
+    gh ${GH_FLAGS} secret set OTN_PASSWORD -b"${OTN_PASSWORD}"
+    gh ${GH_FLAGS} secret set OTN_USERID -b"${OTN_USERID}"
+    gh ${GH_FLAGS} secret set USER_EMAIL -b"${USER_EMAIL}"
+    gh ${GH_FLAGS} secret set USER_NAME -b"${USER_NAME}"
+    gh ${GH_FLAGS} secret set WLS_PSW -b"${WLS_PSW}"
   } || {
     USE_GITHUB_CLI=false
   }
@@ -198,26 +203,26 @@ if [ $USE_GITHUB_CLI == false ]; then
   msg "${NOFORMAT}Go to the GitHub repository you want to configure."
   msg "${NOFORMAT}In the \"settings\", go to the \"secrets\" tab and the following secrets:"
   msg "(in ${YELLOW}yellow the secret name and${NOFORMAT} in ${GREEN}green the secret value)"
-  msg "${YELLOW}\"AKS_REPO_USER_NAME\""
-  msg "${GREEN}${AKS_REPO_USER_NAME}"
   msg "${YELLOW}\"AZURE_CREDENTIALS\""
   msg "${GREEN}${AZURE_CREDENTIALS}"
-  msg "${YELLOW}\"DB_PASSWORD\""
-  msg "${GREEN}${DB_PASSWORD}"
-  msg "${YELLOW}\"ORC_SSOPSW\""
-  msg "${GREEN}${ORC_SSOPSW}"
-  msg "${YELLOW}\"ORC_SSOUSER\""
-  msg "${GREEN}${ORC_SSOUSER}"
-  msg "${YELLOW}\"SERVICE_PRINCIPAL\""
-  msg "${GREEN}${SERVICE_PRINCIPAL}"
-  msg "${YELLOW}\"USER_ASSIGNED_MANAGED_IDENTITY_ID\""
-  msg "${GREEN}${USER_ASSIGNED_MANAGED_IDENTITY_ID}"
-  msg "${YELLOW}\"WDT_RUNTIMEPSW\""
-  msg "${GREEN}${WDT_RUNTIMEPSW}"
+  msg "${YELLOW}\"OTN_USERID\""
+  msg "${GREEN}${OTN_USERID}"
+  msg "${YELLOW}\"OTN_PASSWORD\""
+  msg "${GREEN}${OTN_PASSWORD}"
+  msg "${YELLOW}\"USER_EMAIL\""
+  msg "${GREEN}${USER_EMAIL}"
+  msg "${YELLOW}\"USER_NAME\""
+  msg "${GREEN}${USER_NAME}"
+  msg "${YELLOW}\"GIT_TOKEN\""
+  msg "${GREEN}${GIT_TOKEN}"
+  msg "${YELLOW}\"ELK_URI\""
+  msg "${GREEN}${ELK_URI}"
+  msg "${YELLOW}\"ELK_USER_NAME\""
+  msg "${GREEN}${ELK_USER_NAME}"
+  msg "${YELLOW}\"ELK_PSW\""
+  msg "${GREEN}${ELK_PSW}"
   msg "${YELLOW}\"WLS_PSW\""
   msg "${GREEN}${WLS_PSW}"
-  msg "${YELLOW}\"WLS_USERNAME\""
-  msg "${GREEN}${WLS_USERNAME}"
   msg "${YELLOW}\"DISAMBIG_PREFIX\""
   msg "${GREEN}${DISAMBIG_PREFIX}"
   msg "${NOFORMAT}========================================================================"

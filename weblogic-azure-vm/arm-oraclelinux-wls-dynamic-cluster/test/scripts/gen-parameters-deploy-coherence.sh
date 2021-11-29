@@ -4,7 +4,7 @@
 #
 #Generate parameters with value for deploying coherence template independently
 
-read parametersPath adminVMName adminPasswordOrKey skuUrnVersion location storageAccountName wlsDomainName wlsusername wlspassword gitUserName testbranchName managedServerPrefix
+read parametersPath adminVMName adminPasswordOrKey skuUrnVersion location storageAccountName wlsDomainName wlsusername wlspassword repoPath testbranchName managedServerPrefix
 
 cat <<EOF > ${parametersPath}
 {
@@ -42,7 +42,7 @@ cat <<EOF > ${parametersPath}
         "value": "${wlsUserName}"
       },
       "_artifactsLocation":{
-        "value": "https://raw.githubusercontent.com/${gitUserName}/arm-oraclelinux-wls-dynamic-cluster/${testbranchName}/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
       },
       "managedServerPrefix": {
         "value": "${managedServerPrefix}"

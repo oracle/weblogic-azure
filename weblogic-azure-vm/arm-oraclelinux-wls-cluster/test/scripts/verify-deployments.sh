@@ -6,7 +6,7 @@
 # This scipt is to deploy the Azure deployments based on test parameters created.
 
 #read arguments from stdin
-read prefix location template githubUserName testbranchName scriptsDir
+read prefix location template repoPath testbranchName scriptsDir
 
 groupName=${prefix}-preflight
 keyVaultName=keyvault${prefix}
@@ -28,46 +28,46 @@ az keyvault secret set --vault-name ${keyVaultName} -n ${certPasswordName} --val
 # generate parameters for testing differnt cases
 parametersList=()
 # parameters for cluster
-bash ${scriptsDir}/gen-parameters.sh <<< "${scriptsDir}/parameters.json $githubUserName $testbranchName"
+bash ${scriptsDir}/gen-parameters.sh <<< "${scriptsDir}/parameters.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters.json)
 
 # parameters for cluster+db
-bash ${scriptsDir}/gen-parameters-db.sh <<< "${scriptsDir}/parameters-db.json $githubUserName $testbranchName"
+bash ${scriptsDir}/gen-parameters-db.sh <<< "${scriptsDir}/parameters-db.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-db.json)
 
 # parameters for cluster+aad
-bash ${scriptsDir}/gen-parameters-aad.sh <<< "${scriptsDir}/parameters-aad.json $githubUserName $testbranchName"
+bash ${scriptsDir}/gen-parameters-aad.sh <<< "${scriptsDir}/parameters-aad.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-aad.json)
 
 # parameters for cluster+coherence
-bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-coherence.json $githubUserName $testbranchName"
+bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-coherence.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-coherence.json)
 
 # parameters for cluster+elk
-bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-elk.json $githubUserName $testbranchName"
+bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-elk.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-elk.json)
 
 # parameters for cluster+db+aad
-bash ${scriptsDir}/gen-parameters-db-aad.sh <<< "${scriptsDir}/parameters-db-aad.json $githubUserName $testbranchName"
+bash ${scriptsDir}/gen-parameters-db-aad.sh <<< "${scriptsDir}/parameters-db-aad.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-db-aad.json)
 
 # parameters for cluster+ag
-bash ${scriptsDir}/gen-parameters-ag.sh <<< "${scriptsDir}/parameters-ag.json $githubUserName $testbranchName \
+bash ${scriptsDir}/gen-parameters-ag.sh <<< "${scriptsDir}/parameters-ag.json $repoPath $testbranchName \
     ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
 parametersList+=(${scriptsDir}/parameters-ag.json)
 
 # parameters for cluster+db+ag
-bash ${scriptsDir}/gen-parameters-db-ag.sh <<< "${scriptsDir}/parameters-db-ag.json $githubUserName $testbranchName \
+bash ${scriptsDir}/gen-parameters-db-ag.sh <<< "${scriptsDir}/parameters-db-ag.json $repoPath $testbranchName \
     ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
 parametersList+=(${scriptsDir}/parameters-db-ag.json)
 
 # parameters for cluster+aad+ag
-bash ${scriptsDir}/gen-parameters-aad-ag.sh <<< "${scriptsDir}/parameters-aad-ag.json $githubUserName $testbranchName \
+bash ${scriptsDir}/gen-parameters-aad-ag.sh <<< "${scriptsDir}/parameters-aad-ag.json $repoPath $testbranchName \
     ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
 parametersList+=(${scriptsDir}/parameters-aad-ag.json)
 
 # parameters for cluster+db+aad+ag
-bash ${scriptsDir}/gen-parameters-db-aad-ag.sh <<< "${scriptsDir}/parameters-db-aad-ag.json $githubUserName $testbranchName \
+bash ${scriptsDir}/gen-parameters-db-aad-ag.sh <<< "${scriptsDir}/parameters-db-aad-ag.json $repoPath $testbranchName \
     ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
 parametersList+=(${scriptsDir}/parameters-db-aad-ag.json)
 

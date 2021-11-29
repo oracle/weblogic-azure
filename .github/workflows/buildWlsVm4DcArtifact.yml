@@ -1,7 +1,8 @@
-# Copyright (c) 2021, Oracle and/or its affiliates.
-# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+#Copyright (c) 2021 Oracle and/or its affiliates.
+#Released under the Universal Permissive License v1.0 as shown at
+# https://oss.oracle.com/licenses/upl/
 
-name: Package ARM
+name: Build Dynamic Cluster VM artifact
 on:
   workflow_dispatch:
     inputs:
@@ -12,11 +13,12 @@ on:
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
-        default: 'refs/heads/develop'
+        default: 'refs/heads/main'
 env:
   refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
-  refJavaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
-  repoName: "arm-oraclelinux-wls-admin"
+  refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
+  offerName: "arm-oraclelinux-wls-dynamic-cluster"
+  repoName: "weblogic-azure"
 
 jobs:
   package:
@@ -46,30 +48,31 @@ jobs:
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
 
-      - name: Build and test ${{ env.repoName }} using ${{ github.event.inputs.pidType }} pids
+      - name: Build and test ${{ env.offerName }} using ${{ github.event.inputs.pidType }} pids
         run: |
-          cd ${{ env.repoName }}
+          cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
           pidType=${{ github.event.inputs.pidType }}
+          echo ${pidType}
           if [[ "${pidType}" == "oracle" ]];then
-            echo "using oracle pid"
+            echo "using oracle pids"
             mvn -Ptemplate-validation-tests clean install
           else
-            echo "using ms pid"
+            echo "using ms pids"
             mvn -Ptemplate-validation-tests clean install -Ddev
           fi
 
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.repoName }}/pom.xml)
-          artifactName=${{ env.repoName }}-$version-arm-assembly
-          unzip ${{ env.repoName }}/target/$artifactName.zip -d ${{ env.repoName }}/target/$artifactName
+          offerPath=${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}/${{ env.offerName }}
+          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/pom.xml)
+          artifactName=${{ env.offerName }}-$version-arm-assembly
+          unzip ${offerPath}/target/$artifactName.zip -d ${offerPath}/target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}-${{ github.event.inputs.pidType }}"
-          echo "##[set-output name=artifactPath;]${{ env.repoName }}/target/$artifactName"
-      - name: Archive ${{ env.repoName }} template
+          echo "##[set-output name=artifactPath;]${offerPath}/target/$artifactName"
+      - name: Archive ${{ env.offerName }} template
         uses: actions/upload-artifact@v1
         if: success()
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}
           path: ${{steps.artifact_file.outputs.artifactPath}}
-

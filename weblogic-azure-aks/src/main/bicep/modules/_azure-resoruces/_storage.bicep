@@ -2,7 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param location string
-param storageAccountName string
+param storageAccountName string = 'stg-contoso'
 param utcValue string = utcNow()
 
 var const_shareQuota = 5120

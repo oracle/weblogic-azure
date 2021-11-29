@@ -3,14 +3,14 @@
 // Deploy Application Gateway certificate secrets.
 
 @description('Backend certificate data to store in the secret')
-param backendCertificateDataValue string
+param backendCertificateDataValue string = newGuid()
 
 @description('Certificate data to store in the secret')
-param certificateDataValue string
+param certificateDataValue string = newGuid()
 
 @secure()
 @description('Certificate password to store in the secret')
-param certificatePasswordValue string
+param certificatePasswordValue string = newGuid()
 
 @description('true to upload trusted root certificate')
 param enableCustomSSL bool = false
@@ -33,7 +33,7 @@ param permission object = {
 param sku string = 'Standard'
 
 @description('Subject name to create a certificate.')
-param subjectName string
+param subjectName string = ''
 
 @description('If false, will create a certificate.')
 param useExistingAppGatewaySSLCertificate bool = false

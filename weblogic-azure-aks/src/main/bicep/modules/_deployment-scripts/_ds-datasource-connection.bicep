@@ -8,7 +8,7 @@ param _artifactsLocationSasToken string = ''
 param aksClusterName string 
 param aksClusterRGName string
 param databaseType string = 'oracle'
-param dbConfigurationType string
+param dbConfigurationType string = 'createOrUpdate'
 param dbDriverName string = 'org.contoso.Driver'
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 @secure()
