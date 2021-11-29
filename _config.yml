@@ -2,4 +2,4 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 theme: jekyll-theme-primer
-repository: "oracle/weblogic-azure/tree/main/weblogic-azure-vm/arm-oraclelinux-wls"
+repository: "oracle/weblogic-azure"

@@ -16,7 +16,12 @@ Account for variability in the repo paths.
   {% comment %}
   something like https://raw.githubusercontent.com/galiacheng/weblogic-azure/2021-10-13-01-Q4/weblogic-azure-vm/arm-oraclelinux-wls-admin/src/main/arm/
   {% endcomment %}
-  
+
+{% else if %}
+  {% capture armTemplateBasePath %}{{ site.data.var.artifactsLocationBase }}/{{ site.data.var.artifactsLocationTag }}/{{site.data.var.artifactsLocationSubPathForAks}}/src/main/arm/{% endcapture %}
+  {% comment %}
+  something like https://raw.githubusercontent.com/galiacheng/weblogic-azure/2021-10-13-01-Q4/weblogic-azure-aks/src/main/arm/
+  {% endcomment %}
 {% else %}
   {% assign repoPrefix = site.data.var.repoPrefix %}
   {% capture armTemplateBasePath %}{{ site.data.var.artifactsLocationBase }}/{{ site.data.var.artifactsLocationTag }}/{{site.data.var.artifactsLocationSubPathForVM}}{{ pageDir }}{{ repoPrefix }}{{ pageDir }}/src/main/arm/{% endcapture %}

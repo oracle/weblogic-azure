@@ -15,6 +15,7 @@ jdkVersionNumber: jdk1.8.0_131
 repoPrefix: /arm-oraclelinux-wls-
 artifactsLocationBase: https://raw.githubusercontent.com/oracle/weblogic-azure
 artifactsLocationSubPathForVM: weblogic-azure-vm/arm-oraclelinux-wls-
+artifactsLocationSubPathForAks: weblogic-azure-aks
 passwordInFileNote: |-3
    Some things to note:
 
