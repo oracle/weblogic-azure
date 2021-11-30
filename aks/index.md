@@ -11,4 +11,4 @@ Templates available for working with [{{ site.data.var.wlsFullBrandName }} on {{
 
 * [Configure a database connection](dbTemplate.md)
 
-* [Update application](aadNestedTemplate.md)
+* [Update application](updateAppTemplate.md)
