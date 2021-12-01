@@ -187,7 +187,7 @@
                     {
                         "name": "enableT3TunnelingTextBlock",
                         "type": "Microsoft.Common.TextBlock",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]",
+                        "visible": false,
                         "options": {
                             "text": "If checked, configure the necessary settings to enable T3 tunneling. You must take additional action on the Networking tab if either of these are checked.",
                             "link": {
@@ -201,14 +201,14 @@
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable T3 tunneling for Administration Server",
                         "toolTip": "If checked, enable T3 tunneling for Administration Server",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                        "visible": false
                     },
                     {
                         "name": "enableClusterT3Tunneling",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable T3 tunneling for WebLogic cluster",
                         "toolTip": "If checked, enable T3 tunneling for WebLogic cluster.",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                        "visible": false
                     }
                 ],
                 "visible": true
@@ -1183,7 +1183,7 @@
                                     "rows": {
                                         "count": {
                                             "min": 0,
-                                            "max": 4
+                                            "max": 2
                                         }
                                     },
                                     "columns": [
@@ -1225,16 +1225,8 @@
                                                             "value": "adminServer"
                                                         },
                                                         {
-                                                            "label": "admin-server-t3",
-                                                            "value": "adminServerT3"
-                                                        },
-                                                        {
                                                             "label": "cluster-1",
                                                             "value": "cluster1"
-                                                        },
-                                                        {
-                                                            "label": "cluster-1-t3",
-                                                            "value": "cluster1T3"
                                                         }
                                                     ],
                                                     "required": true
