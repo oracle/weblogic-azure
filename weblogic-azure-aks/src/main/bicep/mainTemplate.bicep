@@ -668,6 +668,26 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   ]
 }
 
+/*
+* Query and output WebLogic domain configuration, including: 
+*   - domain deployment description
+*   - image model
+*   - image properties
+*/
+module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-configurations.bicep' = {
+  name: 'query-wls-domain-configurations'
+  params: {
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    identity: identity
+    location: location
+    wlsDomainUID: wlsDomainUID
+  }
+  dependsOn: [
+    validateApplciations
+  ]
+}
+
 output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.value
 output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerUrl.value
 output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
@@ -682,3 +702,7 @@ output clusterExternalUrl string = const_enableNetworking ? networkingDeployment
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredUrl : ''
 output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalUrl.value
 output clusterT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.clusterT3ChannelUrl) : ''
+output shellCmdtoConnectAks string = format('az account set --subscription {0}; az aks get-credentials --resource-group {1} --name {2}', split(subscription().id, '/')[2], ref_wlsDomainDeployment.outputs.aksClusterRGName.value, ref_wlsDomainDeployment.outputs.aksClusterName.value)
+output shellCmdtoOutputWlsDomainYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsDomainYaml
+output shellCmdtoOutputWlsImageModelYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageModelYaml
+output shellCmdtoOutputWlsImageProperties string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageProperties
