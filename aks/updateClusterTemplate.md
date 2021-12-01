@@ -5,21 +5,25 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Create Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration
+# Update Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration
 
-This page documents how to create Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration using Azure CLI.
+This page documents how to update Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration using Azure CLI.
 
 ## Introduction
 
 {% include sub-template-advanced-usage.md %}
 
-This document will guide you to create a WebLogic cluster using the advanced configurations.
+This document will guide you to update a WebLogic cluster using the advanced configurations.
 
 ## Prerequisites
 
 ### Environment for Setup
 
 * [Azure CLI](https://docs.microsoft.com/en-us/cli/azure), use `az --version` to test if `az` works.
+
+### WebLogic Server Instance
+
+The database ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
 
 ### Azure Managed Indentify
 
@@ -59,4 +63,4 @@ Optional.
 
 {% include sub-template-dnszone.md %}
 
-{% include sub-template-create-update-wls-on-aks.md %} 
+{% include sub-template-create-update-wls-on-aks.md %}
