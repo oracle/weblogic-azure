@@ -13,4 +13,4 @@ Templates available for working with [{{ site.data.var.wlsFullBrandName }} on {{
 
 * [Configure a database connection](dbTemplate.md)
 
-* [Update application](updateAppTemplate.md)
+* [Update Java EE application](updateAppTemplate.md)

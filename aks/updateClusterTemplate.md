@@ -34,6 +34,17 @@ to create a user-assigned managed identity.
 
 To obtain ID of the indentify: go to Azure Portal; open the identity **Overview** page; click **JSON View** and copy the **Resource ID**.
 
+### Azure Storage account 
+
+If you are deploying Java EE application or using your own datasource driver, you are required to 
+have application packages and jdbc libraries in Azure Storage Account.
+
+Follow this [guide](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal) to create Azure Storage Account and blobs.
+
+Upload your application packages (.jar, .war, .ear files) to the blob.
+
+Upload your jdbc drivers (.jar files) to the blob.
+
 ### Azure Service Principal
 
 Optional.

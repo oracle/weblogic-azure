@@ -86,9 +86,6 @@ To deploy datasource using your own datasource driver, we assume the datasource 
 |----------------|-------------|
 | `_artifactsLocation`| Required. See below for details. |
 | `aksClusterName`| Required. Name of the AKS cluster. Must be the same value provided at deployment time. |
-| `databaseType`| Optinal. Defaults by `oracle`. <br> `oracle`: will provision a [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database) datasoruce connection. <br> `postgresql`: will provision a [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) datasource connection.<br> `sqlserver`: will provision a [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) datasource connection. |
-| `dbConfigurationType`| Optinal. Defaults by `createOrUpdate`. <br> `createOrUpdate`: the deployment will create a new datasource connection if there is no  datasource has the same name with `jdbcDataSourceName`, otherwise, will update the expected datasource with new inputs. <br> `delete`: the deployment will delete a datasource connection that has name `jdbcDataSourceName` |
-| `dbGlobalTranPro` | Optinal. Defaults by `OnePhaseCommit`. The transaction protocol (global transaction processing behavior) for the data source. You may use one from: `["TwoPhaseCommit", "LoggingLastResource", "OnePhaseCommit", "None"]`|
 | `dbPassword`| Required. Password for the datasource connection. |
 | `dbUser`| Required. User id for the datasource connection. |
 | `dsConnectionURL` | Required. JDBC connection string. |
@@ -97,6 +94,9 @@ To deploy datasource using your own datasource driver, we assume the datasource 
 | `wlsDomainUID` | Required. UID of the domain that you are going to update. Make sure it's the same with the initial cluster deployment. |
 | `wlsPassword` | Required. Password for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
 | `wlsUserName` | Required. User name for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
+| `databaseType`| Optinal. Defaults by `oracle`. <br> `oracle`: will provision a [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database) datasoruce connection. <br> `postgresql`: will provision a [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) datasource connection.<br> `sqlserver`: will provision a [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) datasource connection. |
+| `dbConfigurationType`| Optinal. Defaults by `createOrUpdate`. <br> `createOrUpdate`: the deployment will create a new datasource connection if there is no  datasource has the same name with `jdbcDataSourceName`, otherwise, will update the expected datasource with new inputs. <br> `delete`: the deployment will delete a datasource connection that has name `jdbcDataSourceName` |
+| `dbGlobalTranPro` | Optinal. Defaults by `OnePhaseCommit`. The transaction protocol (global transaction processing behavior) for the data source. You may use one from: `["TwoPhaseCommit", "LoggingLastResource", "OnePhaseCommit", "None"]`|
 
 ### `_artifactsLocation`
 
@@ -169,7 +169,7 @@ Assume your parameters file is available in the current directory and is named `
 The `az group deployment validate` command is very useful to validate your parameters file is syntactically correct.
 
 ```bash
-az group deployment validate --verbose --resource-group `yourResourceGroup` --parameters @parameters.json --template-uri {{ armTemplateBasePath }}nestedtemplates/dbTemplate.json
+az group deployment validate --verbose --resource-group `yourResourceGroup` --parameters @parameters.json --template-uri {{ armTemplateBasePath }}dbTemplate.json
 ```
 
 If the command returns with an exit status other than `0`, inspect the output and resolve the problem before proceeding.  You can check the exit status by executing the commad `echo $?` immediately after the `az` command.
@@ -179,7 +179,7 @@ If the command returns with an exit status other than `0`, inspect the output an
 After successfully validating the template invocation, change `validate` to `create` to invoke the template.
 
 ```bash
-az group deployment create --verbose --resource-group `yourResourceGroup` --parameters @parameters.json --template-uri {{ armTemplateBasePath }}nestedtemplates/dbTemplate.json
+az group deployment create --verbose --resource-group `yourResourceGroup` --parameters @parameters.json --template-uri {{ armTemplateBasePath }}dbTemplate.json
 ```
 
 As with the validate command, if the command returns with an exit status other than `0`, inspect the output and resolve the problem.
