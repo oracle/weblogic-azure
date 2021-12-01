@@ -343,10 +343,55 @@ jobs:
                 restartVersion=$(kubectl -n sample-domain1-ns get domain sample-domain1 '-o=jsonpath={.spec.restartVersion}')
                 # increase restart version
                 restartVersion=$((restartVersion + 1))
+                # record timestamp before apply changes
+                timestampBeforePatchingDomain=$(date +%s)
+                # get the replica number
+                replicas=$(kubectl -n sample-domain1-ns get domain sample-domain1 -o json | jq '. | .spec.clusters[] | .replicas')
                 echo "append configmap and update restart version"
                 kubectl -n sample-domain1-ns patch domain sample-domain1 \
                     --type=json \
                     '-p=[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "add", "path": "/spec/configuration/model/configMap", "value": "'${wlsConfigmapName}'" }]'
+                echo "timestampBeforePatchingDomain=${timestampBeforePatchingDomain}" >> $GITHUB_ENV
+                echo "replicas=${replicas}" >> $GITHUB_ENV
+            - name: Verify pods are restarted
+              run: |
+                # interval of checking pod status.
+                checkPodStatusInterval=20
+                # max attempt to check pod status.
+                checkPodStatusMaxAttemps=30
+                # domain and namespaces
+                wlsDomainUID="sample-domain1"
+                wlsDomainNS=${wlsDomainUID}-ns
+
+                updatedPodNum=0
+                attempt=0
+
+                echo $timestampBeforePatchingDomain $appReplicas $wlsDomainUID $checkPodStatusMaxAttemps $checkPodStatusInterval
+
+                while [[ ${updatedPodNum} -le ${appReplicas} ]] && [[ $attempt -le ${checkPodStatusMaxAttemps} ]]; do
+                    echo "attempts ${attempt}"
+                    ret=$(kubectl get pods -n ${wlsDomainNS} -l weblogic.domainUID=${wlsDomainUID} -o json | jq '.items[] | .metadata.creationTimestamp' | tr -d "\"")
+
+                    counter=0
+                    for item in $ret; do
+                        podCreateTimeStamp=$(date -u -d "${item}" +"%s")
+                        echo "pod create time: $podCreateTimeStamp, base time: ${timestampBeforePatchingDomain}"
+                        if [[ ${podCreateTimeStamp} -gt ${timestampBeforePatchingDomain} ]]; then
+                            counter=$((counter + 1))
+                        fi
+                    done
+
+                    updatedPodNum=$counter
+                    echo "Number of new pod: ${updatedPodNum}"
+
+                    attempt=$((attempt + 1))
+                    sleep ${checkPodStatusInterval}
+                done
+
+                if [[ ${attempt} -gt ${checkPodStatusMaxAttemps} ]]; then
+                    echo "Failed to restart all weblogic server pods. "
+                    exit 1
+                fi
     cleanup:
       needs: [deploy-wls-on-aks, preflight]
       if: ${{ needs.preflight.outputs.isForDemo == 'false' }}
