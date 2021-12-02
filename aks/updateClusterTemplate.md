@@ -50,7 +50,7 @@ Upload your jdbc drivers (.jar files) to the blob.
 Optional.
 
 If you have enabled Azure Application Gatway Ingress Controller, you are not allowed to configure the gateway ingress again. 
-You can access Console portal and application in cluster using the previous address.
+You can access console portal and application using the previous address.
 
 If you are going to enable Azure Application Gatway Ingress Controller, you are required to input 
 a Base64 encoded JSON string of a service principal for the selected subscription.
@@ -79,7 +79,7 @@ Optional.
 
 {% include sub-template-create-update-wls-on-aks.md %}
 
-As the template will apply the new confguration to a running WebLogic cluster, you must specify:
+The template will apply the new confguration in `parameters.json` to the running WebLogic cluster, please double check you have specified:
 
 - The same credentials for WebLogic
 - The same domain name and domain UID.
@@ -89,6 +89,9 @@ Parameters to specify WebLogic credentials:
 
 ```json
 {
+  "wdtRuntimePassword": {
+    "value": "Secret123!"
+  },
   "wlsPassword": {
     "value": "Secret123!"
   },
