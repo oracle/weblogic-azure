@@ -23,7 +23,11 @@ The following steps are leveraging [Azure Create UI Definition Sandbox](https://
 
   - **Basics** blade, configure the creadentials for WebLogic and select User assigned managed identity.
 
-  - **Configure** blade, configure the AKS cluster, image selection and Java EE application selection.
+    - If you are updating a WebLogic cluster, make sure you have right domain UID and domain name.
+
+  - **Configure AKS cluter** blade, configure the AKS cluster, image selection and Java EE application selection.
+
+    - If you are updating a WebLogic cluster, make sure you have selected the right AKS cluster and ACR.
 
   - **TLS/SSL configuration** blade, configure TLS/SSL certificates for Identity Key Store and Trust Key Store, which will be applied to WebLogic cluster.
 
@@ -66,65 +70,3 @@ This value must be the following.
 ```
 
 Append the expected advanced parameter to `parameters.json`. And make sure `_artifactsLocation` is presenting in `parameters.json`.
-
-#### Example Parameters JSON
-
-This is a sample to create WebLogic cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
-The parameters using default value haven't been shown for brevity.
-
-```json
-{
-    "_artifactsLocation": {
-        "value": "{{ armTemplateBasePath }}"
-    },
-    "createACR": {
-      "value": true
-    },
-    "enableAdminT3Tunneling": {
-      "value": true
-    },
-    "enableClusterT3Tunneling": {
-      "value": true
-    },
-    "identity": {
-      "value": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "/subscriptions/subscription-id/resourceGroups/samples/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azure_wls_aks": {}
-        }
-      }
-    },
-    "lbSvcValues": {
-      "value": [
-        {
-          "colName": "domain1-admin-t3",
-          "colTarget": "adminServerT3",
-          "colPort": "7005"
-        },
-        {
-          "colName": "domain-cluster-t3",
-          "colTarget": "cluster1T3",
-          "colPort": "8011"
-        }
-      ]
-    },
-    "location": {
-      "value": "eastus"
-    },
-    "ocrSSOPSW": {
-      "value": "Secret123!"
-    },
-    "ocrSSOUser": {
-      "value": "sample@foo.com"
-    },
-    "wdtRuntimePassword": {
-      "value": "Secret123!"
-    },
-    "wlsPassword": {
-      "value": "Secret123!"
-    },
-    "wlsUserName": {
-      "value": "weblogic"
-    }
-  }
-```

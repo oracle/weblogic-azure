@@ -72,6 +72,68 @@ Optional.
 
 {% include sub-template-create-update-wls-on-aks.md %} 
 
+#### Example Parameters JSON
+
+This is a sample to create WebLogic cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
+The parameters using default value haven't been shown for brevity.
+
+```json
+{
+    "_artifactsLocation": {
+        "value": "{{ armTemplateBasePath }}"
+    },
+    "createACR": {
+      "value": true
+    },
+    "enableAdminT3Tunneling": {
+      "value": true
+    },
+    "enableClusterT3Tunneling": {
+      "value": true
+    },
+    "identity": {
+      "value": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/subscription-id/resourceGroups/samples/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azure_wls_aks": {}
+        }
+      }
+    },
+    "lbSvcValues": {
+      "value": [
+        {
+          "colName": "domain1-admin-t3",
+          "colTarget": "adminServerT3",
+          "colPort": "7005"
+        },
+        {
+          "colName": "domain-cluster-t3",
+          "colTarget": "cluster1T3",
+          "colPort": "8011"
+        }
+      ]
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "ocrSSOPSW": {
+      "value": "Secret123!"
+    },
+    "ocrSSOUser": {
+      "value": "sample@foo.com"
+    },
+    "wdtRuntimePassword": {
+      "value": "Secret123!"
+    },
+    "wlsPassword": {
+      "value": "Secret123!"
+    },
+    "wlsUserName": {
+      "value": "weblogic"
+    }
+  }
+```
+
 ## Invoke the ARM template
 
 Assume your parameters file is available in the current directory and is named `parameters.json`. 
@@ -125,4 +187,4 @@ Obtain the address from deployment output:
   - Click **Settings** -> **Deployments** -> the deployment with name `advanced-deployment`, listed in the bottom.
   - Click **Outputs** of the deployment, copy the value of `adminServerT3ExternalUrl`
 
-Access `${adminServerT3ExternalUrl}/console` from browser, you should find the login page.
+Get public IP and port from `adminServerT3ExternalUrl`, access `http://<public-ip>:<port>/console` from browser, you should find the login page.

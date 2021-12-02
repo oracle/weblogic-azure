@@ -49,6 +49,9 @@ Upload your jdbc drivers (.jar files) to the blob.
 
 Optional.
 
+If you have enabled Azure Application Gatway Ingress Controller, you are not allowed to configure the gateway ingress again. 
+You can access Console portal and application in cluster using the previous address.
+
 If you are going to enable Azure Application Gatway Ingress Controller, you are required to input 
 a Base64 encoded JSON string of a service principal for the selected subscription.
 
@@ -75,6 +78,134 @@ Optional.
 {% include sub-template-dnszone.md %}
 
 {% include sub-template-create-update-wls-on-aks.md %}
+
+As the template will apply the new confguration to a running WebLogic cluster, you must specify:
+
+- The same credentials for WebLogic
+- The same domain name and domain UID.
+- The same AKS and ACR.
+
+Parameters to specify WebLogic credentials:
+
+```json
+{
+  "wlsPassword": {
+    "value": "Secret123!"
+  },
+  "wlsUserName": {
+    "value": "weblogic"
+  }
+}
+```
+
+Parameters for AKS and ACR should look like:
+
+```json
+{
+  "acrName": {
+      "value": "<your-acr-name>"
+  },
+  "aksClusterName": {
+    "value": "<your-aks-name>"
+  },
+  "aksClusterRGName": {
+    "value": "<your-aks-resource-group>"
+  },
+  "createACR": {
+    "value": false
+  },
+  "createAKSCluster": {
+    "value": false
+  }
+}
+```
+
+Parameters for domain should look like, ignore them if you used the default values:
+
+```json
+{
+  "wlsDomainName": {
+    "value": "domain2"
+  },
+  "wlsDomainUID": {
+    "value": "sample-domain2"
+  }
+}
+```
+
+#### Example Parameters JSON
+
+This is a sample to create WebLogic cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
+The parameters using default value haven't been shown for brevity.
+
+```json
+{
+    "_artifactsLocation": {
+        "value": "{{ armTemplateBasePath }}"
+    },
+    "acrName": {
+      "value": "sampleacr"
+    },
+    "aksClusterName": {
+      "value": "sampleaks"
+    },
+    "aksClusterRGName": {
+      "value": "sampleaksgroup"
+    },
+    "createACR": {
+      "value": false
+    },
+    "createAKSCluster": {
+      "value": false
+    },
+    "enableAdminT3Tunneling": {
+      "value": true
+    },
+    "enableClusterT3Tunneling": {
+      "value": true
+    },
+    "identity": {
+      "value": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/subscription-id/resourceGroups/samples/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azure_wls_aks": {}
+        }
+      }
+    },
+    "lbSvcValues": {
+      "value": [
+        {
+          "colName": "domain1-admin-t3",
+          "colTarget": "adminServerT3",
+          "colPort": "7005"
+        },
+        {
+          "colName": "domain-cluster-t3",
+          "colTarget": "cluster1T3",
+          "colPort": "8011"
+        }
+      ]
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "ocrSSOPSW": {
+      "value": "Secret123!"
+    },
+    "ocrSSOUser": {
+      "value": "sample@foo.com"
+    },
+    "wdtRuntimePassword": {
+      "value": "Secret123!"
+    },
+    "wlsPassword": {
+      "value": "Secret123!"
+    },
+    "wlsUserName": {
+      "value": "weblogic"
+    }
+  }
+```
 
 ## Invoke the ARM template
 
@@ -128,4 +259,4 @@ Obtain the address from deployment output:
   - Click **Settings** -> **Deployments** -> the deployment with name `advanced-deployment`, listed in the bottom.
   - Click **Outputs** of the deployment, copy the value of `adminServerT3ExternalUrl`
 
-Access `${adminServerT3ExternalUrl}/console` from browser, you should find the login page.
+Get public IP and port from `adminServerT3ExternalUrl`, access `http://<public-ip>:<port>/console` from browser, you should find the login page.
