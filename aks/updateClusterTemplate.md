@@ -13,6 +13,14 @@ This page documents how to update Oracle WebLogic cluster on {{ site.data.var.ak
 
 {% include sub-template-advanced-usage.md %}
 
+While, there are some limitations:
+
+- No support to update a WebLogic cluster using older weblogic version, for example, you can not downgrade a 14.1.1.0 cluster to 12.2.1.4.
+
+- If you have enabled Azure Application Gatway Ingress Controller, you can not update the WebLogic cluster with TLS/SSL enabled to a cluster without TLS/SSL, otherwise, ingress will fail, you have to create new ingress for HTTP access.
+
+- You have to specify all required parameters, even though you are not going to update some of them.
+
 This document will guide you to update a WebLogic cluster using the advanced configurations.
 
 ## Prerequisites
