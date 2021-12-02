@@ -5,7 +5,7 @@ on:
       tagname:
         description: 'Specify Tag name to create/update.'
         required: true
-        default: '2021-12-03-21-Q4'
+        default: '2021-12-04-02-Q4'
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
@@ -15,7 +15,7 @@ env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
   refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
-  refJavaee: c073dee94765142158f62e5a3bee0f255dd7c3a0
+  refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
   repoName: "weblogic-azure"
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
