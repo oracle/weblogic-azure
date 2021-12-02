@@ -78,7 +78,7 @@ You may want to enable multiple datasource in your cluster for the following usa
 
 You can deploy different datasource connections using the database ARM template, by changing the ARM parameters file and invoking the template again with Azure CLI.
 
-To deploy datasource using your own datasource driver, we assume the datasource driver have been uploaded to the cluster. See [WebLogic Server Instance](#webLogic-server-instance)
+To deploy datasource using your own datasource driver, we assume the datasource driver has been uploaded to the cluster. See [WebLogic Server Instance](#webLogic-server-instance)
 
 ## Prepare the Parameters JSON file
 
