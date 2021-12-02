@@ -64,7 +64,7 @@ Upload your application packages (.jar, .war, .ear files) to the blob.
 | `wlsImageTag` | Optional. String value. <br> Docker tag that comes after "container-registry.oracle.com/middleware/weblogic:". |
 | `userProvidedAcr` | Optional. String value. <br> User provided ACR for base image. |
 | `userProvidedImagePath` | Optional. String value. <br> User provided base image path. |
-| `useOracleImage` | Optional. Bool value. <br> `true`: use Oracle standard images from Oracle Container Registry. <br> `false`: use user provided images from Azure Container Registry. |
+| `useOracleImage` | Optional. Boolean value. <br> `true`: use Oracle standard images from Oracle Container Registry. <br> `false`: use user provided images from Azure Container Registry. |
 
 ### `_artifactsLocation`
 
@@ -246,7 +246,10 @@ Assume your parameters file is available in the current directory and is named `
 The `az group deployment validate` command is very useful to validate your parameters file is syntactically correct.
 
 ```bash
-az group deployment validate --verbose --resource-group `yourResourceGroup` --parameters @parameters.json --template-uri {{ armTemplateBasePath }}updateAppTemplate.json
+az deployment group validate --verbose \
+  --resource-group `yourResourceGroup` \
+  --parameters @parameters.json \
+  --template-uri {{ armTemplateBasePath }}updateAppTemplate.json
 ```
 
 If the command returns with an exit status other than `0`, inspect the output and resolve the problem before proceeding.  You can check the exit status by executing the commad `echo $?` immediately after the `az` command.
@@ -256,7 +259,10 @@ If the command returns with an exit status other than `0`, inspect the output an
 After successfully validating the template invocation, change `validate` to `create` to invoke the template.
 
 ```bash
-az group deployment create --verbose --resource-group `yourResourceGroup` --parameters @parameters.json --template-uri {{ armTemplateBasePath }}updateAppTemplate.json
+az deployment group create --verbose \
+  --resource-group `yourResourceGroup` \
+  --parameters @parameters.json \
+  --template-uri {{ armTemplateBasePath }}updateAppTemplate.json
 ```
 
 As with the validate command, if the command returns with an exit status other than `0`, inspect the output and resolve the problem.

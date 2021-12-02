@@ -44,17 +44,17 @@ The following steps are leveraging [Azure Create UI Definition Sandbox](https://
 | Advanced parameter Name | Explanation |
 |----------------|-------------|
 | `_artifactsLocation`| Required. See below for details. |
-| `aciResourcePermissions`| Optinal. The parameter activates when Azure Container Insight is enabled, `enableAzureMonitoring=true`. `false`: Set the workspace to workspace-context permissions. This is the default setting if the flag isn't set. `true`: Set the workspace to resource-context permissions. See [Azure Monitor access control mode](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/manage-access#configure-access-control-mode) |
-| `aciRetentionInDays`| Optinal. Number of days to retain data in Azure Monitor workspace. |
-| `aciWorkspaceSku`| Optinal. Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.. |
-| `aksAgentPoolName` | Optinal. The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters. |
-| `aksVersion`| Optinal. Version of Azure Kubernetes Service. Use default version if no specified value. |
-| `enableAdminT3Tunneling`| Optinal. Configure a custom channel in Admin Server for the T3 protocol that enables HTTP tunneling. |
-| `enableClusterT3Tunneling` | Optinal. Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling. |
-| `t3ChannelAdminPort` | Optinal. Sepcify cublic port of the custom T3 channel in admin server. |
-| `t3ChannelClusterPort` | Optinal. Specify public port of the custom T3 channel in WebLoigc cluster. |
-| `wlsCPU` | Optinal. Sepcify CPU requests for admin server and managed server pods. |
-| `wlsMemory` | Optinal. Specify memory requests for admin server and managed server pods. |
+| `aciResourcePermissions`| Optinal. Boolean value. <br> The parameter activates when Azure Container Insight is enabled, `enableAzureMonitoring=true`. `false`: Set the workspace to workspace-context permissions. This is the default setting if the flag isn't set. `true`: Set the workspace to resource-context permissions. See [Azure Monitor access control mode](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/manage-access#configure-access-control-mode) |
+| `aciRetentionInDays`| Optinal. Integer value. <br> Number of days to retain data in Azure Monitor workspace. |
+| `aciWorkspaceSku`| Optinal. Enum value. <br> Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.. |
+| `aksAgentPoolName` | Optinal. String value. <br> The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters. |
+| `aksVersion`| Optinal. String value. <br> Version of Azure Kubernetes Service. Use default version if no specified value. |
+| `enableAdminT3Tunneling`| Optinal. Boolean value. <br> Configure a custom channel in Admin Server for the T3 protocol that enables HTTP tunneling. |
+| `enableClusterT3Tunneling` | Optinal. Boolean value. <br> Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling. |
+| `t3ChannelAdminPort` | Optinal. Integer value, 1-65535. <br> Sepcify cublic port of the custom T3 channel in admin server. |
+| `t3ChannelClusterPort` | Optinal. Integer value, 1-65535. <br> Specify public port of the custom T3 channel in WebLoigc cluster. |
+| `wlsCPU` | Optinal. String value. <br> Sepcify CPU requests for admin server and managed server pods. See [Managing Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)|
+| `wlsMemory` | Optinal. String value. <br> Specify memory requests for admin server and managed server pods. See [Managing Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)|
 
 
 #### `_artifactsLocation`
@@ -128,58 +128,3 @@ The parameters using default value haven't been shown for brevity.
     }
   }
 ```
-
-## Invoke the ARM template
-
-Assume your parameters file is available in the current directory and is named `parameters.json`. 
-This section shows the commands to create WebLogic cluster on AKS.
-
-Use the command to create a resoruce group.
-
-```shell
-resourceGroupName="hello-wls-aks"
-az group create --name ${resourceGroupName} -l eastus
-```
-
-### Validate your parameters file
-
-The `az group deployment validate` command is very useful to validate your parameters file is syntactically correct.
-
-```bash
-az group deployment validate --verbose \
-  --resource-group ${resourceGroupName} \
-  --parameters @parameters.json \
-  --template-uri {{ armTemplateBasePath }}mainTemplate.json
-```
-
-If the command returns with an exit status other than `0`, inspect the output and resolve the problem before proceeding.  You can check the exit status by executing the commad `echo $?` immediately after the `az` command.
-
-### Execute the template
-
-After successfully validating the template invocation, change `validate` to `create` to invoke the template.
-
-```bash
-az group deployment create --verbose \
-  --resource-group ${resourceGroupName} \
-  --name advanced-deployment \
-  --parameters @parameters.json \
-  --template-uri {{ armTemplateBasePath }}mainTemplate.json
-```
-
-As with the validate command, if the command returns with an exit status other than `0`, inspect the output and resolve the problem.
-
-After a successful deployment, you should find `"provisioningState": "Succeeded"` in your output.
-
-
-## Verify deployment
-
-The sample has set up custom T3 channel for Administration Server and cluster, you should be able to access Administration Console portal 
-using the public address of T3 channel.
-
-Obtain the address from deployment output:
-
-  - Open your resource group from Azure portal.
-  - Click **Settings** -> **Deployments** -> the deployment with name `advanced-deployment`, listed in the bottom.
-  - Click **Outputs** of the deployment, copy the value of `adminServerT3ExternalUrl`
-
-Access `${adminServerT3ExternalUrl}/console` from browser, you should find the login page.
