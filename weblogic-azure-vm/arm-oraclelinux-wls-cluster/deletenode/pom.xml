@@ -28,8 +28,8 @@
         <artifactsLocationBase>https://raw.githubusercontent.com/oracle/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
         <template.validation.tests.directory>${basedir}/../../../../arm-ttk/arm-ttk</template.validation.tests.directory>
         <test.parameters>-TestParameter '@{&quot;SampleName&quot;=&quot;deletenode/src/main&quot;;&quot;RawRepoPath&quot;=&quot;${artifactsLocationBase}/arm-oraclelinux-wls-cluster/&quot;}'</test.parameters>
-        <template.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+        <template.pid.properties.url>https://raw.githubusercontent.com/galiacheng/weblogic-azure/vm-arm-ttk/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/galiacheng/weblogic-azure/vm-arm-ttk/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
     </properties>
 
     <description>
