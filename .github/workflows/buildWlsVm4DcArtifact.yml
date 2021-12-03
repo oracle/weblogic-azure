@@ -15,7 +15,7 @@ on:
         required: false
         default: 'refs/heads/main'
 env:
-  refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
+  refArmttk: d208d8bc8e5a12b04f69239881c0e4e460b9ed15
   refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
   offerName: "arm-oraclelinux-wls-dynamic-cluster"
   repoName: "weblogic-azure"
