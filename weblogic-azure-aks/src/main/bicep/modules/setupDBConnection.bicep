@@ -40,6 +40,7 @@ param aksClusterName string = ''
   'oracle'
   'postgresql'
   'sqlserver'
+  'otherdb'
 ])
 @description('One of the supported database types')
 param databaseType string = 'oracle'
@@ -91,6 +92,7 @@ module configDataSource './_setupDBConnection.bicep' = {
     dsConnectionURL: dsConnectionURL
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
+    location: resourceGroup().location
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
