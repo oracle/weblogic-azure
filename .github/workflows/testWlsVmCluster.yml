@@ -35,7 +35,7 @@ env:
   numberOfInstances: 2
   offerName: arm-oraclelinux-wls-cluster
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
-  refArmttk: d208d8bc8e5a12b04f69239881c0e4e460b9ed15
+  refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
   refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}

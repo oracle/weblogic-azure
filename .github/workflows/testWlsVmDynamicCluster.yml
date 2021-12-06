@@ -40,7 +40,7 @@ env:
   otnUser: ${{ secrets.OTN_USERID }}
   otnPassword: ${{ secrets.OTN_PASSWORD }}
   refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
-  refArmTtk: d208d8bc8e5a12b04f69239881c0e4e460b9ed15
+  refArmTtk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
