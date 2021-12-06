@@ -96,6 +96,7 @@ module updateWLSApplications '_deployment-scripts/_ds_update-applications.bicep'
     appPackageUrls: appPackageUrls
     appPackageFromStorageBlob: appPackageFromStorageBlob
     identity: identity
+    location: resourceGroup().location
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
     wlsDomainName: wlsDomainName

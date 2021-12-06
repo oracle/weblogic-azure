@@ -5,7 +5,7 @@ on:
       tagname:
         description: 'Specify Tag name to create/update.'
         required: true
-        default: '2021-10-13-01-Q4'
+        default: '2021-12-04-02-Q4'
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
@@ -41,7 +41,12 @@ jobs:
           repository: Azure/arm-ttk
           path: arm-ttk
           ref: ${{ env.refArmttk }}
-      
+      - name: Set up bicep
+        run: |
+          curl -Lo bicep https://github.com/Azure/bicep/releases/download/v0.4.613/bicep-linux-x64
+          chmod +x ./bicep
+          sudo mv ./bicep /usr/local/bin/bicep
+          bicep --version
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -56,6 +61,11 @@ jobs:
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-admin/pom.xml
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/pom.xml
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/pom.xml
+
+          echo "build bicep files"
+          bicep build weblogic-azure-aks/src/main/bicep/mainTemplate.bicep --outfile weblogic-azure-aks/src/main/arm/mainTemplate.json
+          bicep build weblogic-azure-aks/src/main/bicep/modules/setupDBConnection.bicep --outfile weblogic-azure-aks/src/main/arm/dbTemplate.json
+          bicep build weblogic-azure-aks/src/main/bicep/modules/updateWebLogicApplications.bicep --outfile weblogic-azure-aks/src/main/arm/updateAppTemplate.json
 
       - name: Create new tag
         run: |
