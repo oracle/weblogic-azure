@@ -14,7 +14,7 @@ on:
         required: false
         default: 'refs/heads/main'
 env:
-  refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
+  refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
   refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
   offerName: "arm-oraclelinux-wls"
   repoName: "weblogic-azure"

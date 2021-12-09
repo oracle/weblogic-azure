@@ -30,7 +30,7 @@ env:
   offerName: arm-oraclelinux-wls-admin
   adminOfferPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
-  refArmTtk: d97aa57d259e2fc8562e11501b1cf902265129d9
+  refArmTtk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
   refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}

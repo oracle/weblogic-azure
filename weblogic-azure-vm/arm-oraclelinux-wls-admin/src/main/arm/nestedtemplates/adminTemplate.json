@@ -273,7 +273,7 @@
       },
       {
          "type": "Microsoft.Storage/storageAccounts/fileServices",
-         "apiVersion": "2019-06-01",
+         "apiVersion": "${azure.apiVersion2}",
          "name": "[concat(variables('name_storageAccount'), '/default')]",
          "dependsOn": [
             "[variables('ref_storage')]"
@@ -285,7 +285,7 @@
       },
       {
          "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-         "apiVersion": "2019-06-01",
+         "apiVersion": "${azure.apiVersion2}",
          "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
          "dependsOn": [
             "[variables('ref_fileService')]",
@@ -437,7 +437,7 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn), '\"')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn), '\"')]"
             }
          }
       },
