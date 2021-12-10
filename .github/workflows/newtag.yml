@@ -150,7 +150,6 @@ jobs:
           git push ${authGitPath} ${tagbranch} -f
 
           # remove existing tag
-          tagname=${{ github.event.inputs.tagname }}
           if [[ -n `git ls-remote --tags | grep "${tagname}"` ]]; then 
               git push ${authGitPath} --delete ${tagname} -f
           fi
