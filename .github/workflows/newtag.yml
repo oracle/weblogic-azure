@@ -5,7 +5,7 @@ on:
       tagname:
         description: 'Specify Tag name to create/update.'
         required: true
-        default: '2021-12-04-02-Q4'
+        default: '2021-12-10-01-Q4'
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
