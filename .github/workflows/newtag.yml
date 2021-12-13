@@ -157,7 +157,7 @@ jobs:
           # create new tag
           git tag ${tagname}
           git push ${authGitPath} ${tagname} -f
-          git remote add upstream git@github.com:oracle/weblogic-azure.git
+          git remote add upstream $gitToken@github.com:oracle/weblogic-azure.git
           # ignore the error if cannot push, but log it
           push_upstream_ignore_failure () { echo "push upstream result: $?" return 0;  }
           git push upstream ${tagname} -f || push_upstream_ignore_failure
