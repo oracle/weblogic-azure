@@ -32,4 +32,4 @@ Name:   ns1-01.azure-dns.com
 Address: 2603:1061::1
 ```
 
-We strongly recommand you create an Azure DNS Zone for domain management and reuse it for other perpose. Follow the [guide](https://docs.microsoft.com/en-us/azure/dns/dns-getstarted-portal) to create an Azure DNS Zone.
+We strongly recommand you create an Azure DNS Zone for domain management and reuse it for other perpose. To create an Azure DNS Zone, follow the steps in [Quickstart: Create an Azure DNS zone and record using the Azure portal](https://docs.microsoft.com/en-us/azure/dns/dns-getstarted-portal).

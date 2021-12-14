@@ -1,7 +1,7 @@
 ## Prepare the Parameters
 
-You must construct a parameters JSON file containing the parameters to the database ARM template.
-See [Create Resource Manager parameter file](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/parameter-files) for background information about parameter files.
+You must construct a parameters JSON file containing the parameters to be passed to the ARM template.
+For background information about parameter files, see [Create Resource Manager parameter file](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/parameter-files). 
 This section shows how to obtain the values for the required properties.
 
 ### Obtain parameter values from Azure portal
@@ -9,39 +9,39 @@ This section shows how to obtain the values for the required properties.
 The first step is to obtain the parameter values from Azure portal, as Azure portal eases the interface and validation. 
 You can define TLS/SSL configuration, Load Balancer setting, Application Gateway integration, custom DNS configuration and Database using the interface.
 
-While if you prefer to edit a json file, you can also create the objects in your parameter file directly. 
+If you prefer to edit a json file, you can also create the objects in your parameter file directly. 
 
-The following steps are leveraging [Azure Create UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade) to obtain the value. The Azure UI Definition Sandbox provides controls to select resources and input your value easily. 
+The following steps use the [Azure Create UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade) to obtain the values. The Azure UI Definition Sandbox provides controls to select resources and input your values easily.  **More importantly, this approach generates syntactically valid JSON, eliminating an important class of data entry error.**
 
-- Use your favourite browser and open [Azure UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade).
+- Use your favourite browser and open the [Azure UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade).
 
-- Clear the content of Azure UI Definition Sandbox, and replace with the content of [createUiDefinition.json]({{ armTemplateBasePath }}createUiDefinition.json)
+- Clear the content of Azure UI Definition Sandbox, and replace with the contents of this file: [createUiDefinition.json]({{ armTemplateBasePath }}createUiDefinition.json).
 
-- Click **Preview**
+- Select **Preview**.
 
-- Fill in values, see [running Oracle WebLogic Server on Azure Kuberneters Service document](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/).
+- Fill in the appropriate values. For guidance, see [running Oracle WebLogic Server on Azure Kuberneters Service document](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/).
 
-  - **Basics** blade, configure the creadentials for WebLogic and select User assigned managed identity.
+  - **Basics** blade, configure the credentials for WebLogic and select User assigned managed identity.
 
     - If you are updating a WebLogic cluster, make sure you have right domain UID and domain name.
 
-  - **Configure AKS cluter** blade, configure the AKS cluster, image selection and Java EE application selection.
+  - In the **Configure AKS cluter** blade, configure the AKS cluster, image selection and Java EE application selection.
 
     - If you are updating a WebLogic cluster, make sure you have selected the right AKS cluster and ACR.
 
-  - **TLS/SSL configuration** blade, configure TLS/SSL certificates for Identity Key Store and Trust Key Store, which will be applied to WebLogic cluster.
+  - In the **TLS/SSL configuration** blade, configure TLS/SSL certificates for Identity Key Store and Trust Key Store, which will be applied to WebLogic cluster.
 
-  - **Networking** blade, configure Standard Load Balancer service and Application Gateway Ingress Controller.
+  - In the **Networking** blade, configure Standard Load Balancer service and Application Gateway Ingress Controller.
 
-  - **DNS configuration** blade, configure custom DNS alias for WebLogic Console portal and cluster.
+  - In the **DNS configuration** blade, configure custom DNS alias for WebLogic Console portal and cluster.
 
-  - **Database** blade, configure datasource connection. If you want to enable other database, select `Other` in **Choose database type** and finish the required inputs.
+  - In the **Database** blade, configure datasource connection. If you want to enable other database, select `Other` in **Choose database type** and finish the required inputs.
 
-- Click **Review+create**, the Azure UI Definition Sandbox will validate the inputs, you must resolve error if there is before going on. 
+- Select **Review+create**, the Azure UI Definition Sandbox will validate the inputs, you must resolve any errors before proceeding.
 
   You will find a message "Validation Passed".
 
-- Click **View outputs payload**, copy the payload and save it to a file named `parameters.json`
+- **Here is the most important step:** Select **View outputs payload**, copy the payload and save it to a file named `parameters.json`
 
 ### Configure advanced parameters
 
