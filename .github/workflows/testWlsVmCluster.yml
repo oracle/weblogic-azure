@@ -635,7 +635,7 @@ jobs:
         id: deploy-webapp
         run: |
           echo "Deploy WebLogic Cafe to server"          
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} 7001
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} ${adminConsolePort}
           bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh
 
       - name: Verify WebLogicCafe app is successfully deployed
