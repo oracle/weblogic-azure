@@ -312,8 +312,8 @@
     ],
     "resources": [
         {
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${dynamic.coherence.start}",
+            "apiVersion": "2020-06-01",
+            "name": "157ea604-12ae-11eb-adc1-0242ac120002",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
@@ -327,7 +327,7 @@
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(variables('name_vmMachine'),copyIndex(1),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -343,13 +343,13 @@
         },
         {
             "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(variables('name_virtualNetwork'), '/', variables('name_subnet'))]",
             "condition": "[and(empty(variables('name_virtualNetwork')), empty(variables('name_subnet')))]"
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(variables('name_vmMachine'), copyIndex(1), variables('name_nic'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -381,7 +381,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(variables('name_vmMachine'), copyIndex(1))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -425,7 +425,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '2021-06-01').primaryEndpoints.blob]"
                     }
                 }
             },
@@ -438,7 +438,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('name_vmMachine'), copyIndex(),'/newuserscript'))]",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "virtualMachineExtensionLoop",
@@ -459,13 +459,13 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',' ', parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersion2}').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'), ' ',parameters('enableELK'),' ',variables('const_singleQuote'),parameters('elasticsearchEndpoint'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchUserName'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchPassword'),variables('const_singleQuote'),' ',array.join(parameters('logsToIntegrate')),' ',variables('const_singleQuote'),parameters('logIndex'),variables('const_singleQuote'),' ',variables('name_wlsServerPrefix'),' ',copyIndex(),' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',' ', parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-06-01').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'), ' ',parameters('enableELK'),' ',variables('const_singleQuote'),parameters('elasticsearchEndpoint'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchUserName'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchPassword'),variables('const_singleQuote'),' ',array.join(parameters('logsToIntegrate')),' ',variables('const_singleQuote'),parameters('logIndex'),variables('const_singleQuote'),' ',variables('name_wlsServerPrefix'),' ',copyIndex(),' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },
         {
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${dynamic.coherence.end}",
+            "apiVersion": "2020-06-01",
+            "name": "157ea51e-12ae-11eb-adc1-0242ac120002",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "virtualMachineExtensionLoop"

@@ -1,0 +1,620 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.613.9944",
+      "templateHash": "5934608455332800721"
+    }
+  },
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/arm/"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "secureString",
+      "defaultValue": ""
+    },
+    "acrName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "aksClusterRGName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Resource group name of an existing AKS cluster."
+      }
+    },
+    "aksClusterName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Name of an existing AKS cluster."
+      }
+    },
+    "appPackageFromStorageBlob": {
+      "type": "object",
+      "defaultValue": {
+        "storageAccountName": "stg-contoso",
+        "containerName": "container-contoso"
+      },
+      "metadata": {
+        "description": "Download all the .war .jar and .ear packages from the specified storage blob. You can specify the applciation using \"appPackageUrls\" and \"appPackageFromStorageBlob\", please do not specify the same applciation in both parameters."
+      }
+    },
+    "appPackageUrls": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Url array of Java EE application locations."
+      }
+    },
+    "identity": {
+      "type": "object"
+    },
+    "ocrSSOPSW": {
+      "type": "secureString",
+      "defaultValue": "null",
+      "metadata": {
+        "description": "Password of Oracle SSO account."
+      }
+    },
+    "ocrSSOUser": {
+      "type": "string",
+      "defaultValue": "null",
+      "metadata": {
+        "description": "User name of Oracle SSO account."
+      }
+    },
+    "wlsDomainName": {
+      "type": "string",
+      "defaultValue": "domain1",
+      "metadata": {
+        "description": "Name of WebLogic domain to create."
+      }
+    },
+    "wlsDomainUID": {
+      "type": "string",
+      "defaultValue": "sample-domain1",
+      "metadata": {
+        "description": "UID of WebLogic domain, used in WebLogic Operator."
+      }
+    },
+    "wlsImageTag": {
+      "type": "string",
+      "defaultValue": "12.2.1.4",
+      "metadata": {
+        "description": "Docker tag that comes after \"container-registry.oracle.com/middleware/weblogic:\""
+      }
+    },
+    "userProvidedAcr": {
+      "type": "string",
+      "defaultValue": "null",
+      "metadata": {
+        "description": "User provided ACR for base image"
+      }
+    },
+    "userProvidedImagePath": {
+      "type": "string",
+      "defaultValue": "null",
+      "metadata": {
+        "description": "User provided base image path"
+      }
+    },
+    "useOracleImage": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Use Oracle images or user provided patched images"
+      }
+    }
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "initialization",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "8258182321365697446"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "defaultValue": "pid"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "condition": "[not(equals(parameters('name'), 'pid'))]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2019-10-01",
+              "name": "[parameters('name')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.4.613.9944",
+                      "templateHash": "11855874804898679700"
+                    }
+                  },
+                  "functions": [],
+                  "resources": []
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "appgwEnd": {
+              "type": "string",
+              "value": "47ea43a0-95cf-52c7-aee8-7ee6106fc1bf"
+            },
+            "appgwStart": {
+              "type": "string",
+              "value": "01288010-2672-5831-a66b-7b8b45cace1b"
+            },
+            "dbEnd": {
+              "type": "string",
+              "value": "d7a9c78e-39d9-5a47-928d-8645ed86dafd"
+            },
+            "dbStart": {
+              "type": "string",
+              "value": "0cc86800-37f4-5191-9368-2953394309ec"
+            },
+            "networkingEnd": {
+              "type": "string",
+              "value": "2798165c-49fa-5701-b608-b80ed3986176"
+            },
+            "networkingStart": {
+              "type": "string",
+              "value": "0793308f-de9d-5f0d-92f9-d9fc4b413b8b"
+            },
+            "wlsAKSEnd": {
+              "type": "string",
+              "value": "2571f846-2f66-5c22-9fe6-38ecea7889ac"
+            },
+            "wlsAKSStart": {
+              "type": "string",
+              "value": "3e6acde5-9a62-5488-9fd4-87c46f4105f4"
+            },
+            "wlsClusterAppEnd": {
+              "type": "string",
+              "value": "e6e33240-e5db-52fc-9154-7fc7b3b8b508"
+            },
+            "wlsClusterAppStart": {
+              "type": "string",
+              "value": "4570a81a-3f3a-53d5-b178-7f985d9c5ecf"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "wls-aks-update-app-start-pid-deployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'initialization'), '2019-10-01').outputs.wlsClusterAppStart.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "8258182321365697446"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "defaultValue": "pid"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "condition": "[not(equals(parameters('name'), 'pid'))]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2019-10-01",
+              "name": "[parameters('name')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.4.613.9944",
+                      "templateHash": "11855874804898679700"
+                    }
+                  },
+                  "functions": [],
+                  "resources": []
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "appgwEnd": {
+              "type": "string",
+              "value": "47ea43a0-95cf-52c7-aee8-7ee6106fc1bf"
+            },
+            "appgwStart": {
+              "type": "string",
+              "value": "01288010-2672-5831-a66b-7b8b45cace1b"
+            },
+            "dbEnd": {
+              "type": "string",
+              "value": "d7a9c78e-39d9-5a47-928d-8645ed86dafd"
+            },
+            "dbStart": {
+              "type": "string",
+              "value": "0cc86800-37f4-5191-9368-2953394309ec"
+            },
+            "networkingEnd": {
+              "type": "string",
+              "value": "2798165c-49fa-5701-b608-b80ed3986176"
+            },
+            "networkingStart": {
+              "type": "string",
+              "value": "0793308f-de9d-5f0d-92f9-d9fc4b413b8b"
+            },
+            "wlsAKSEnd": {
+              "type": "string",
+              "value": "2571f846-2f66-5c22-9fe6-38ecea7889ac"
+            },
+            "wlsAKSStart": {
+              "type": "string",
+              "value": "3e6acde5-9a62-5488-9fd4-87c46f4105f4"
+            },
+            "wlsClusterAppEnd": {
+              "type": "string",
+              "value": "e6e33240-e5db-52fc-9154-7fc7b3b8b508"
+            },
+            "wlsClusterAppStart": {
+              "type": "string",
+              "value": "4570a81a-3f3a-53d5-b178-7f985d9c5ecf"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'initialization')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "update-wls-applications",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "_artifactsLocation": {
+            "value": "[parameters('_artifactsLocation')]"
+          },
+          "_artifactsLocationSasToken": {
+            "value": "[parameters('_artifactsLocationSasToken')]"
+          },
+          "aksClusterRGName": {
+            "value": "[parameters('aksClusterRGName')]"
+          },
+          "aksClusterName": {
+            "value": "[parameters('aksClusterName')]"
+          },
+          "acrName": {
+            "value": "[if(parameters('useOracleImage'), parameters('acrName'), parameters('userProvidedAcr'))]"
+          },
+          "appPackageUrls": {
+            "value": "[parameters('appPackageUrls')]"
+          },
+          "appPackageFromStorageBlob": {
+            "value": "[parameters('appPackageFromStorageBlob')]"
+          },
+          "identity": {
+            "value": "[parameters('identity')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          },
+          "ocrSSOPSW": {
+            "value": "[parameters('ocrSSOPSW')]"
+          },
+          "ocrSSOUser": {
+            "value": "[parameters('ocrSSOUser')]"
+          },
+          "wlsDomainName": {
+            "value": "[parameters('wlsDomainName')]"
+          },
+          "wlsDomainUID": {
+            "value": "[parameters('wlsDomainUID')]"
+          },
+          "wlsImageTag": {
+            "value": "[parameters('wlsImageTag')]"
+          },
+          "userProvidedImagePath": {
+            "value": "[parameters('userProvidedImagePath')]"
+          },
+          "useOracleImage": {
+            "value": "[parameters('useOracleImage')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "1131659809796417266"
+            }
+          },
+          "parameters": {
+            "_artifactsLocation": {
+              "type": "string",
+              "defaultValue": "[deployment().properties.templateLink.uri]"
+            },
+            "_artifactsLocationSasToken": {
+              "type": "secureString",
+              "defaultValue": ""
+            },
+            "aksClusterRGName": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "aksClusterName": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "acrName": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "appPackageUrls": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "appPackageFromStorageBlob": {
+              "type": "object",
+              "defaultValue": {
+                "storageAccountName": "stg-contoso",
+                "containerName": "container-contoso"
+              }
+            },
+            "identity": {
+              "type": "object"
+            },
+            "location": {
+              "type": "string"
+            },
+            "ocrSSOPSW": {
+              "type": "secureString"
+            },
+            "ocrSSOUser": {
+              "type": "string"
+            },
+            "utcValue": {
+              "type": "string",
+              "defaultValue": "[utcNow()]"
+            },
+            "wlsDomainName": {
+              "type": "string",
+              "defaultValue": "domain1"
+            },
+            "wlsDomainUID": {
+              "type": "string",
+              "defaultValue": "sample-domain1"
+            },
+            "wlsImageTag": {
+              "type": "string",
+              "defaultValue": "12.2.1.4"
+            },
+            "userProvidedImagePath": {
+              "type": "string",
+              "defaultValue": "null"
+            },
+            "useOracleImage": {
+              "type": "bool",
+              "defaultValue": true
+            }
+          },
+          "functions": [],
+          "variables": {
+            "const_arguments": "[format('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} ', parameters('ocrSSOUser'), parameters('ocrSSOPSW'), parameters('aksClusterRGName'), parameters('aksClusterName'), parameters('wlsImageTag'), parameters('acrName'), parameters('wlsDomainName'), parameters('wlsDomainUID'), resourceGroup().name, string(parameters('appPackageUrls')), variables('const_scriptLocation'), parameters('appPackageFromStorageBlob').storageAccountName, parameters('appPackageFromStorageBlob').containerName, parameters('userProvidedImagePath'), parameters('useOracleImage'))]",
+            "const_azcliVersion": "2.15.0",
+            "const_buildDockerImageScript": "createVMAndBuildImage.sh",
+            "const_commonScript": "common.sh",
+            "const_invokeScript": "invokeUpdateApplications.sh",
+            "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
+            "const_updateAppScript": "updateApplications.sh",
+            "const_utilityScript": "utility.sh"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deploymentScripts",
+              "apiVersion": "2020-10-01",
+              "name": "ds-wls-update-applications",
+              "location": "[parameters('location')]",
+              "kind": "AzureCLI",
+              "identity": "[parameters('identity')]",
+              "properties": {
+                "azCliVersion": "[variables('const_azcliVersion')]",
+                "arguments": "[variables('const_arguments')]",
+                "primaryScriptUri": "[uri(variables('const_scriptLocation'), format('{0}{1}', variables('const_invokeScript'), parameters('_artifactsLocationSasToken')))]",
+                "supportingScriptUris": [
+                  "[uri(variables('const_scriptLocation'), format('{0}{1}', variables('const_updateAppScript'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(variables('const_scriptLocation'), format('{0}{1}', variables('const_commonScript'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(variables('const_scriptLocation'), format('{0}{1}', variables('const_utilityScript'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(variables('const_scriptLocation'), format('{0}{1}', variables('const_buildDockerImageScript'), parameters('_artifactsLocationSasToken')))]"
+                ],
+                "cleanupPreference": "OnSuccess",
+                "retentionInterval": "P1D",
+                "forceUpdateTag": "[parameters('utcValue')]"
+              }
+            }
+          ],
+          "outputs": {
+            "image": {
+              "type": "string",
+              "value": "[reference('ds-wls-update-applications').outputs.image]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'wls-aks-update-app-start-pid-deployment')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "wls-aks-update-app-end-pid-deployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'initialization'), '2019-10-01').outputs.wlsClusterAppEnd.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "8258182321365697446"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "defaultValue": "pid"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "condition": "[not(equals(parameters('name'), 'pid'))]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2019-10-01",
+              "name": "[parameters('name')]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.4.613.9944",
+                      "templateHash": "11855874804898679700"
+                    }
+                  },
+                  "functions": [],
+                  "resources": []
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "appgwEnd": {
+              "type": "string",
+              "value": "47ea43a0-95cf-52c7-aee8-7ee6106fc1bf"
+            },
+            "appgwStart": {
+              "type": "string",
+              "value": "01288010-2672-5831-a66b-7b8b45cace1b"
+            },
+            "dbEnd": {
+              "type": "string",
+              "value": "d7a9c78e-39d9-5a47-928d-8645ed86dafd"
+            },
+            "dbStart": {
+              "type": "string",
+              "value": "0cc86800-37f4-5191-9368-2953394309ec"
+            },
+            "networkingEnd": {
+              "type": "string",
+              "value": "2798165c-49fa-5701-b608-b80ed3986176"
+            },
+            "networkingStart": {
+              "type": "string",
+              "value": "0793308f-de9d-5f0d-92f9-d9fc4b413b8b"
+            },
+            "wlsAKSEnd": {
+              "type": "string",
+              "value": "2571f846-2f66-5c22-9fe6-38ecea7889ac"
+            },
+            "wlsAKSStart": {
+              "type": "string",
+              "value": "3e6acde5-9a62-5488-9fd4-87c46f4105f4"
+            },
+            "wlsClusterAppEnd": {
+              "type": "string",
+              "value": "e6e33240-e5db-52fc-9154-7fc7b3b8b508"
+            },
+            "wlsClusterAppStart": {
+              "type": "string",
+              "value": "4570a81a-3f3a-53d5-b178-7f985d9c5ecf"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'initialization')]",
+        "[resourceId('Microsoft.Resources/deployments', 'update-wls-applications')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "image": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'update-wls-applications'), '2019-10-01').outputs.image.value]"
+    }
+  }
+}
