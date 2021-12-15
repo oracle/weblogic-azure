@@ -154,6 +154,8 @@ topology:
                    ListenPort: $wlsAdminT3ChannelPort
                    Protocol: t3
                    Enabled: true
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
@@ -198,6 +200,8 @@ EOF
         '${dynamicServerTemplate}' :
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                 HostnameVerificationIgnored: true
                 HostnameVerifier: 'None'
@@ -263,6 +267,8 @@ topology:
         '${dynamicServerTemplate}':
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                 HostnameVerificationIgnored: true
                 HostnameVerifier: 'None'
@@ -817,6 +823,7 @@ read wlsDomainName wlsUserName wlsPassword managedServerPrefix indexValue vmName
 DOMAIN_PATH="/u01/domains"
 startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 

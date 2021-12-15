@@ -117,10 +117,12 @@ EOF
                ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
                ListenPort: $wlsSSLAdminPort
                Enabled: true
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             WebServer:
-                FrontendHost: '${adminPublicHostName}'
-                FrontendHTTPSPort: $wlsSSLAdminPort
-                FrontendHTTPPort: $wlsAdminPort
+               FrontendHost: '${adminPublicHostName}'
+               FrontendHTTPSPort: $wlsSSLAdminPort
+               FrontendHTTPPort: $wlsAdminPort
 EOF
     else
         cat <<EOF >>$DOMAIN_PATH/admin-domain.yaml
@@ -145,10 +147,12 @@ topology:
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             WebServer:
-                FrontendHost: '${adminPublicHostName}'
-                FrontendHTTPSPort: $wlsSSLAdminPort
-                FrontendHTTPPort: $wlsAdminPort
+               FrontendHost: '${adminPublicHostName}'
+               FrontendHTTPSPort: $wlsSSLAdminPort
+               FrontendHTTPPort: $wlsAdminPort
 EOF
   fi
 }
@@ -488,6 +492,7 @@ installUtilities
 
 mountFileShare
 
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
 samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 wlsAdminPort=7001
