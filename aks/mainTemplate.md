@@ -5,9 +5,9 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Create Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration
+# Advanced and post deployment actions with Oracle WebLogic Server cluster on {{ site.data.var.aksFullName }}
 
-This page documents how to create an Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration using the Azure CLI.
+This document describes how to create and/or update an Oracle WebLogic Server cluster on {{ site.data.var.aksFullName }} using the Azure CLI.
 
 ## Introduction
 
@@ -17,7 +17,7 @@ This document will guide you to create or update a WebLogic Server cluster in wa
 
 ## Prerequisites
 
-This section lists several prerequisites for activating the features in the guidance.  Optional prerequisites are marked as (optional)
+This section lists several prerequisites for activating the features as described in the guidance.  Optional prerequisites are marked as (optional)
 
 ### Environment for Setup
 

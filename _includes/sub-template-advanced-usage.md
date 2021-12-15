@@ -1,4 +1,4 @@
-We have an [Azure Marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks) that 
+Oracle and Microsoft maintain an [Azure Marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks) that 
 makes it easy to get started with WebLogic Server on Azure.  For complete documentation on the offer, see [the user guide](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/). 
 
 If you need to go beyond the capabilities of the Azure Marketplace offer, this guidance enables several advanced features.  The following features and more are possible.

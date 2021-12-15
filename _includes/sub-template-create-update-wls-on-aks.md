@@ -6,12 +6,7 @@ This section shows how to obtain the values for the required properties.
 
 ### Obtain parameter values from Azure portal
 
-The first step is to obtain the parameter values from Azure portal, as Azure portal eases the interface and validation. 
-You can define TLS/SSL configuration, Load Balancer setting, Application Gateway integration, custom DNS configuration and Database using the interface.
-
-If you prefer to edit a json file, you can also create the objects in your parameter file directly. 
-
-The following steps use the [Azure Create UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade) to obtain the values. The Azure UI Definition Sandbox provides controls to select resources and input your values easily.  **More importantly, this approach generates syntactically valid JSON, eliminating an important class of data entry error.**
+The following steps use the [Azure Create UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade) to obtain the values. If you prefer to edit a json file, you can also create the objects in your parameters file directly. The Azure UI Definition Sandbox provides controls to select resources and input your values easily.  **More importantly, this approach generates syntactically valid JSON, eliminating an important class of data entry error.**
 
 - Use your favourite browser and open the [Azure UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade).
 
@@ -39,18 +34,20 @@ The following steps use the [Azure Create UI Definition Sandbox](https://portal.
 
 - Select **Review+create**, the Azure UI Definition Sandbox will validate the inputs, you must resolve any errors before proceeding.
 
-  You will find a message "Validation Passed".
+  You will find a message "Validation Passed".  **You are now done with the Sandbox.**
 
-- **Here is the most important step:** Select **View outputs payload**, copy the payload and save it to a file named `parameters.json`
+- Select **View outputs payload**, copy the payload and save it to a file named `parameters.json`
 
 ### Configure advanced parameters
+
+Now that you have a syntactically and semantically correct `parameters.json`, you must add some additional parameters, depending on the features you want to configure.
 
 | Advanced parameter Name | Explanation |
 |----------------|-------------|
 | `_artifactsLocation`| Required. See below for details. |
-| `aciResourcePermissions`| Optinal. Boolean value. <br> The parameter activates when Azure Container Insight is enabled, `enableAzureMonitoring=true`. `false`: Set the workspace to workspace-context permissions. This is the default setting if the flag isn't set. `true`: Set the workspace to resource-context permissions. See [Azure Monitor access control mode](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/manage-access#configure-access-control-mode) |
+| `aciResourcePermissions`| Optinal. Boolean value. <br> The parameter activates when Azure Container Insights is enabled. If `false`: Set the workspace to workspace-context permissions. This is the default setting if the flag isn't set. If `true`: Set the workspace to resource-context permissions. See [Azure Monitor access control mode](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/manage-access#configure-access-control-mode) |
 | `aciRetentionInDays`| Optinal. Integer value. <br> Number of days to retain data in Azure Monitor workspace. |
-| `aciWorkspaceSku`| Optinal. Enum value. <br> Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.. |
+| `aciWorkspaceSku`| Optinal. Enum value. <br> For the set of valid values for this parameter, see the **sku** property in [Resource Manager template samples for Log Analytics workspaces in Azure Monitor](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/resource-manager-workspace#template-file) |
 | `aksAgentPoolName` | Optinal. String value. <br> The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters. |
 | `aksVersion`| Optinal. String value. <br> Version of Azure Kubernetes Service. Use default version if no specified value. |
 | `enableAdminT3Tunneling`| Optinal. Boolean value. <br> Configure a custom channel in Admin Server for the T3 protocol that enables HTTP tunneling. |
@@ -69,4 +66,4 @@ This value must be the following.
 {{ armTemplateBasePath }}
 ```
 
-Append the expected advanced parameter to `parameters.json`. And make sure `_artifactsLocation` is presenting in `parameters.json`.
+Append the expected advanced parameter to `parameters.json`. And make sure `_artifactsLocation` is present with the value shown above in `parameters.json`.
