@@ -5,11 +5,17 @@ on:
       tagname:
         description: 'Specify Tag name to create/update.'
         required: true
-        default: '2021-12-04-02-Q4'
+        default: '2021-12-10-01-Q4'
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
         default: 'refs/heads/main'
+  repository_dispatch:
+    types: [gh-pages-newtag]
+  # sample cURL
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
+  # sample <request_data>
+  # {"event_type": "gh-pages-newtag, "client_payload": {"tagname": "2021-12-09-02-Q4" }}
 
 env:
   tagbranch: "tagbranch"
@@ -24,6 +30,22 @@ jobs:
   newtag:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup environment variables
+        id: setup-env-variables-based-on-dispatch-event
+        run: |
+          if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+            tagname=${{ github.event.inputs.tagname }}
+            ref=${{ github.event.inputs.ref }}
+          else
+            tagname=${{ github.event.client_payload.tagname }}
+            ref=${{ github.event.client_payload.ref }}
+          fi
+
+          echo "##[set-output name=tagname;]${tagname}"
+          echo "##[set-output name=ref;]${ref}"
+          echo "tagname=${tagname}" >> $GITHUB_ENV
+          echo "ref=${ref}" >> $GITHUB_ENV
+
       - name: Checkout ${{ env.repoName }}
         uses: actions/checkout@v2
         with:
@@ -128,7 +150,6 @@ jobs:
           git push ${authGitPath} ${tagbranch} -f
 
           # remove existing tag
-          tagname=${{ github.event.inputs.tagname }}
           if [[ -n `git ls-remote --tags | grep "${tagname}"` ]]; then 
               git push ${authGitPath} --delete ${tagname} -f
           fi
@@ -136,4 +157,8 @@ jobs:
           # create new tag
           git tag ${tagname}
           git push ${authGitPath} ${tagname} -f
+          git remote add upstream $gitToken@github.com:oracle/weblogic-azure.git
+          # ignore the error if cannot push, but log it
+          push_upstream_ignore_failure () { echo "push upstream result: $?" return 0;  }
+          git push upstream ${tagname} -f || push_upstream_ignore_failure
           git push ${authGitPath} --delete ${tagbranch} -f
