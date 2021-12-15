@@ -189,6 +189,8 @@ topology:
         '${dynamicServerTemplate}' :
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                 HostnameVerificationIgnored: true
                 HostnameVerifier: 'None'
@@ -643,6 +645,7 @@ WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/
 username="oracle"
 groupname="oracle"
 KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 cleanup
 installUtilities

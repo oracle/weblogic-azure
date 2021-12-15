@@ -194,6 +194,8 @@ topology:
            Notes: "$wlsServerName managed server"
            Cluster: "$wlsClusterName"
            Machine: "$nmHost"
+           ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
        NodeManagerPasswordEncrypted: "$wlsPassword" 
@@ -259,8 +261,12 @@ if isCustomSSLEnabled == 'true' :
 
 cd('/Servers/$wlsServerName/ServerStart/$wlsServerName')
 arguments = '-Dweblogic.Name=$wlsServerName  -Dweblogic.security.SSL.ignoreHostnameVerification=true'
-cmo.setArguments(arguments)
-
+oldArgs = cmo.getArguments()
+  if oldArgs != None:
+    newArgs = oldArgs + ' ' + arguments;
+  else:
+    newArgs = arguments
+cmo.setArguments(newArgs)
 EOF
 
     if [ "$appGWHostName" != "null" ]; then
@@ -334,7 +340,12 @@ EOF
 
     cat <<EOF >>$wlsDomainPath/add-server.py
 cd('/Servers/$wlsServerName//ServerStart/$wlsServerName')
-cmo.setArguments(arguments)
+oldArgs = cmo.getArguments()
+  if oldArgs != None:
+    newArgs = oldArgs + ' ' + arguments;
+  else:
+    newArgs = arguments
+cmo.setArguments(newArgs)
 save()
 resolve()
 activate()
@@ -732,6 +743,7 @@ username="oracle"
 groupname="oracle"
 
 KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 chmod ugo+x ${SCRIPT_PWD}/elkIntegration.sh
 
