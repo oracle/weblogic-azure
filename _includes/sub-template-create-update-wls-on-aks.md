@@ -67,3 +67,77 @@ This value must be the following.
 ```
 
 Append the expected advanced parameter to `parameters.json`. And make sure `_artifactsLocation` is present with the value shown above in `parameters.json`.
+
+#### Example Parameters JSON
+
+This is a sample to create WebLogic cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
+The parameters using default value haven't been shown for brevity.
+
+```json
+{
+    "_artifactsLocation": {
+        "value": "{{ armTemplateBasePath }}"
+    },
+    "acrName": {
+      "value": "sampleacr"
+    },
+    "aksClusterName": {
+      "value": "sampleaks"
+    },
+    "aksClusterRGName": {
+      "value": "sampleaksgroup"
+    },
+    "createACR": {
+      "value": false
+    },
+    "createAKSCluster": {
+      "value": false
+    },
+    "enableAdminT3Tunneling": {
+      "value": true
+    },
+    "enableClusterT3Tunneling": {
+      "value": true
+    },
+    "identity": {
+      "value": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/subscription-id/resourceGroups/samples/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azure_wls_aks": {}
+        }
+      }
+    },
+    "lbSvcValues": {
+      "value": [
+        {
+          "colName": "domain1-admin-t3",
+          "colTarget": "adminServerT3",
+          "colPort": "7005"
+        },
+        {
+          "colName": "domain-cluster-t3",
+          "colTarget": "cluster1T3",
+          "colPort": "8011"
+        }
+      ]
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "ocrSSOPSW": {
+      "value": "Secret123!"
+    },
+    "ocrSSOUser": {
+      "value": "sample@foo.com"
+    },
+    "wdtRuntimePassword": {
+      "value": "Secret123!"
+    },
+    "wlsPassword": {
+      "value": "Secret123!"
+    },
+    "wlsUserName": {
+      "value": "weblogic"
+    }
+  }
+```

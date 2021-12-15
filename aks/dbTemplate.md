@@ -5,7 +5,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Apply Database ARM Template to {{ site.data.var.wlsFullBrandName }} that is running on AKS
+# Apply Database ARM Template to existing {{ site.data.var.wlsFullBrandName }}
 
 This page documents how to configure an existing deployment of {{ site.data.var.wlsFullBrandName }} with an existing Azure database using Azure CLI. 
 
@@ -23,18 +23,9 @@ You can invoke the database ARM template to:
 
 * [Azure CLI](https://docs.microsoft.com/en-us/cli/azure), use `az --version` to test if `az` works.
 
-### Azure Managed Indentify
+{% include sub-template-prerequisites-uami.md %}
 
-You are required to input the ID of a user-assigned managed identity. 
-
-Follow this [guide](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal) 
-to create a user-assigned managed identity.
-
-To obtain ID of the indentify: go to Azure Portal; open the identity **Overview** page; click **JSON View** and copy the **Resource ID**.
-
-### WebLogic Server Instance
-
-The database ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
+{% include sub-template-prerequisites-wls.md %}
 
 If you are using your own datasource driver, make sure the datasource driver is uploaded during the WebLogic Server instance provisioning. 
 

@@ -5,127 +5,23 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Advanced and post deployment actions with Oracle WebLogic Server cluster on {{ site.data.var.aksFullName }}
+# Advanced actions with Oracle WebLogic Server cluster on {{ site.data.var.aksFullName }}
 
-This document describes how to create and/or update an Oracle WebLogic Server cluster on {{ site.data.var.aksFullName }} using the Azure CLI.
+This document describes how to create an {{ site.data.var.wlsFullBrandName }} cluster on {{ site.data.var.aksFullName }} using the Azure CLI.
 
 ## Introduction
 
 {% include sub-template-advanced-usage.md %}
 
-This document will guide you to create or update a WebLogic Server cluster in ways that supplement and enhance the capabilities offered by the Azure Marketplace offer.
+This document will guide you to create a WebLogic Server cluster in ways that supplement and enhance the capabilities offered by the Azure Marketplace offer. The techniques described in this document go beyond what you can configure using the Azure Marketplace offer.
 
 ## Prerequisites
 
 This section lists several prerequisites for activating the features as described in the guidance.  Optional prerequisites are marked as (optional)
 
-### Environment for Setup
+{% include sub-template-prerequisites.md %}
 
-* [Azure CLI](https://docs.microsoft.com/en-us/cli/azure), use `az --version` to test if `az` works.
-
-### Azure Managed Indentify
-
-You are required to input the ID of a user-assigned managed identity. 
-
-To create a user-assigned managed identity, follow the steps in [Manage user-assigned managed identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal).
-
-You will need the resource ID of the identity. To obtain ID of the indentify: go to Azure Portal; open the identity **Overview** page; select **JSON View** and copy the **Resource ID**.
-
-### Azure Storage account 
-
-If you are deploying a Java EE application or using your own JDBC datasource driver, you are required to 
-have application packages and jdbc libraries uploaded to a blob storage container in an Azure Storage Account.
-
-To create Azure Storage Account and blobs, follow the steps in [Quickstart: Upload, download, and list blobs with the Azure portal](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal).
-
-Upload your application packages (.jar, .war, .ear files) to the blob.
-
-Upload your jdbc drivers (.jar files) to the blob.
-
-### Azure Service Principal (optional)
-
-If you are going to enable the Azure Application Gateway Ingress Controller, you are required to input a Base64 encoded JSON string for the service principal for the selected subscription.
-
-You can generate one with command `az ad sp create-for-rbac --sdk-auth | base64 -w0`.  **Note: on macOS, omit the `-w0` flag**.
-
-### Database Instance (optional)
-
-If you are going to apply a database with {{ site.data.var.wlsFullBrandName }},
-you must have an existing database instance to use.
-
-This template builds with datasource driver for three popular Azure databases: [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), 
-[Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/), [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal).  If you do not have an instance, please create one from the Azure portal. 
-
-If you want to use any other databse, you must provide a running database instance.
-Make sure the database is accessible from Azure. Specify a datasource driver url via `dbDriverLibrariesUrls `, datasource driver name via `dbDriverName` and test table name `dbTestTableName`, see [Database](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/#database) for more information.
-
-### Custom DNS (optional)
-
-{% include sub-template-dnszone.md %}
-
-{% include sub-template-create-update-wls-on-aks.md %} 
-
-#### Example Parameters JSON
-
-This is a sample to create WebLogic cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
-The parameters using default value haven't been shown for brevity.
-
-```json
-{
-    "_artifactsLocation": {
-        "value": "{{ armTemplateBasePath }}"
-    },
-    "createACR": {
-      "value": true
-    },
-    "enableAdminT3Tunneling": {
-      "value": true
-    },
-    "enableClusterT3Tunneling": {
-      "value": true
-    },
-    "identity": {
-      "value": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "/subscriptions/subscription-id/resourceGroups/samples/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azure_wls_aks": {}
-        }
-      }
-    },
-    "lbSvcValues": {
-      "value": [
-        {
-          "colName": "domain1-admin-t3",
-          "colTarget": "adminServerT3",
-          "colPort": "7005"
-        },
-        {
-          "colName": "domain-cluster-t3",
-          "colTarget": "cluster1T3",
-          "colPort": "8011"
-        }
-      ]
-    },
-    "location": {
-      "value": "eastus"
-    },
-    "ocrSSOPSW": {
-      "value": "Secret123!"
-    },
-    "ocrSSOUser": {
-      "value": "sample@foo.com"
-    },
-    "wdtRuntimePassword": {
-      "value": "Secret123!"
-    },
-    "wlsPassword": {
-      "value": "Secret123!"
-    },
-    "wlsUserName": {
-      "value": "weblogic"
-    }
-  }
-```
+{% include sub-template-create-update-wls-on-aks.md %}
 
 ## Invoke the ARM template
 

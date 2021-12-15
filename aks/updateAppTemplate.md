@@ -5,19 +5,19 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Apply Update Application ARM Template to {{ site.data.var.wlsFullBrandName }} that is running on AKS
+# Update the Java application in an existing {{ site.data.var.wlsFullBrandName }} 
 
-This page documents how to configure an existing deployment of {{ site.data.var.wlsFullBrandName }} with Java EE applications using Azure CLI. 
+This page documents how to update an existing deployment of {{ site.data.var.wlsFullBrandName }} with a Java EE applications using Azure CLI.
 
-You can invoke the ARM template to:
+You can invoke this ARM template to:
 
-  - Update a running Java EE application with new version.
+- Update a running Java EE application with new version.
 
-  - Remove a running Java EE application.
+- Remove a running Java EE application.
 
-  - Deploy a new Java EE application.
+- Deploy a new Java EE application.
 
-The template will only update the application deployments in WebLogic cluster, without any change to other configuration.
+The template will only update the application deployments in the {{ site.data.var.wlsFullBrandName }} cluster, without any change to other configuration.
 
 ## Prerequisites
 
@@ -25,26 +25,11 @@ The template will only update the application deployments in WebLogic cluster, w
 
 * [Azure CLI](https://docs.microsoft.com/en-us/cli/azure), use `az --version` to test if `az` works.
 
-### Azure Managed Indentify
+{% include sub-template-prerequisites-uami.md %}
 
-You are required to input the ID of a user-assigned managed identity. 
+{% include sub-template-prerequisites-wls.md %}
 
-Follow this [guide](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal) 
-to create a user-assigned managed identity.
-
-To obtain ID of the indentify: go to Azure Portal; open the identity **Overview** page; click **JSON View** and copy the **Resource ID**.
-
-### WebLogic Server Instance
-
-The database ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
-
-### Azure Storage account 
-
-You are required to upload the application packages to Azure Storage Account. 
-
-Follow this [guide](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal) to create Azure Storage Account and blobs.
-
-Upload your application packages (.jar, .war, .ear files) to the blob.
+{% include sub-template-prerequisites-storage.md %}
 
 ## Prepare the Parameters JSON file
 
