@@ -5,7 +5,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Update the Java application in an existing {{ site.data.var.wlsFullBrandName }} 
+# Update the Java application in an existing {{ site.data.var.wlsFullBrandName }} cluster
 
 This page documents how to update an existing deployment of {{ site.data.var.wlsFullBrandName }} with a Java EE applications using Azure CLI.
 
