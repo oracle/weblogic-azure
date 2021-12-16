@@ -101,7 +101,7 @@ This value must be the following.
 
 The parameter `dsConnectionURL` stands for JDBC connection string. The connection string is database specific.
 
-{% include sub-template-data source-connection-url.md %}
+{% include sub-template-datasource-connection-url.md %}
 
 #### Example Parameters JSON
 

@@ -51,7 +51,7 @@ You must construct a parameters JSON file containing the parameters to the datab
 | `dbPassword`| See below for details. |
 | `dbUser` | See below for details. |
 | `dsConnectionURL`| See below for details. |
-| `jdbcDataSourceName`| Must be the JNDI name for the JDBC DataSource. |
+| `jdbcDataSourceName`| Must be the JNDI name for the JDBC data source. |
 | `location` | Must be the same region into which the server was initially deployed. |
 | `wlsPassword` | Must be the same value provided at deployment time. |
 | `wlsUserName` | Must be the same value provided at deployment time. |
