@@ -26,7 +26,7 @@ This section lists several prerequisites for activating the features as describe
 ## Invoke the ARM template
 
 Assume your parameters file is available in the current directory and is named `parameters.json`. 
-This section shows the commands to create WebLogic cluster on AKS.
+This section shows the commands to create an {{ site.data.var.wlsFullBrandName }} cluster on AKS.
 
 Use the command to create a resoruce group.
 

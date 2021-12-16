@@ -5,9 +5,9 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 {% include variables.md %}
 
-# Post deployment actions for Oracle WebLogic Server cluster on {{ site.data.var.aksFullName }}
+# Post deployment actions for {{ site.data.var.wlsFullBrandName }} cluster on {{ site.data.var.aksFullName }}
 
-This page documents how to update Oracle WebLogic cluster on {{ site.data.var.aksFullName }} with advanced configuration using Azure CLI.
+This page documents how to update the {{ site.data.var.wlsFullBrandName }} cluster on {{ site.data.var.aksFullName }} with advanced configuration using Azure CLI.
 
 ## Introduction
 
@@ -15,21 +15,21 @@ This page documents how to update Oracle WebLogic cluster on {{ site.data.var.ak
 
 While, there are some limitations:
 
-- No support to update a WebLogic cluster using older weblogic version, for example, you can not downgrade a 14.1.1.0 cluster to 12.2.1.4.
+- No support to update an {{ site.data.var.wlsFullBrandName }} cluster using older weblogic version, for example, you can not downgrade a 14.1.1.0 cluster to 12.2.1.4.
 
-- If you have enabled Azure Application Gatway Ingress Controller, you can not update the WebLogic cluster with TLS/SSL enabled to a cluster without TLS/SSL, otherwise, ingress will fail, you have to create new ingress for HTTP access.
+- If you have enabled Azure Application Gatway Ingress Controller, you can not update the {{ site.data.var.wlsFullBrandName }} cluster with TLS/SSL enabled to a cluster without TLS/SSL, otherwise, ingress will fail, you have to create new ingress for HTTP access.
 
 - You have to specify all required parameters, even though you are not going to update some of them.
 
-This document will guide you to update a WebLogic cluster using the advanced configurations.
+This document will guide you to update an {{ site.data.var.wlsFullBrandName }} cluster using the advanced configurations.
 
 ## Prerequisites
 
 {% include sub-template-prerequisites.md %}
 
-## Updating the existing WebLogic Server cluster
+## Updating the existing {{ site.data.var.wlsFullBrandName }} cluster
 
-The template will apply the new configuration in `parameters.json` to the running WebLogic cluster, please double check that you have specified:
+The template will apply the new configuration in `parameters.json` to the running {{ site.data.var.wlsFullBrandName }} cluster, please double check that you have specified:
 
 - The same credentials for WebLogic
 - The same domain name and domain UID.
@@ -91,7 +91,7 @@ Parameters for domain should look like, ignore them if you used the default valu
 ## Invoke the ARM template
 
 Assume your parameters file is available in the current directory and is named `parameters.json`. 
-This section shows the commands to create WebLogic cluster on AKS.
+This section shows the commands to create an {{ site.data.var.wlsFullBrandName }} cluster on AKS.
 
 Set resource group name, should be the one running your AKS cluster.
 

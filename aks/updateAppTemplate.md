@@ -62,7 +62,7 @@ This value must be the following.
 
 ### Java EE application location
 
-The template supports two approach to specify the location of Java EE application. 
+The template supports two approaches to specify the location of Java EE application. 
 The template will update the cluter with applications specified in `appPackageUrls` and `appPackageFromStorageBlob`.
 
 #### SAS URLs
@@ -181,7 +181,7 @@ If you are bringing your own image, you must provide the following parameters:
 
 #### Example Parameters JSON
 
-This is an example to deploy Java EE application in `samplecontainer` to the WebLogic cluster, using Oracle base image.
+This is an example to deploy Java EE application in `samplecontainer` to the {{ site.data.var.wlsFullBrandName }} cluster, using Oracle base image.
 The parameters using default value haven't been shown for brevity.
 
 ```json

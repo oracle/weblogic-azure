@@ -209,7 +209,7 @@ Successful deployment provides Oracle HTTP Server access url in your output, sim
 
 Follow the steps to verify Oracle HTTP Server.
 * Visit the {{ site.data.var.wlsFullBrandName }} Admin console.
-* In the left navigator, expand the tree to select **Deployments**, install some sample application targeted to WebLogic Cluster and start the service.
+* In the left navigator, expand the tree to select **Deployments**, install some sample application targeted to the {{ site.data.var.wlsFullBrandName }} cluster and start the service.
 * Access your application using <code>ohsAccessURL/application</code> 
 * Access your application using <code>ohsSecureAccessURL/application</code> 
 

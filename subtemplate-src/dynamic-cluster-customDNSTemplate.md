@@ -67,7 +67,7 @@ We provide an automation shell script for DNS configuration. You must specify th
 | `--admin-vm-name`| Required. Name of vitual machine that hosts {{ site.data.var.wlsFullBrandName }} admin server. Must be the same value provided at initial deployment time.|
 | `--admin-console-label` | Required. Label for {{ site.data.var.wlsFullBrandName }} admin console. Used to generate subdomain of admin console. | 
 | `--artifact-location`| Required. See below for details. |
-| `--resource-group` | Required. Name of resource group that has WebLogic cluster deployed. |
+| `--resource-group` | Required. Name of resource group that has an {{ site.data.var.wlsFullBrandName }} cluster deployed. |
 | `--location` | Required. Must be the same region into which the server was initially deployed. |
 | `--zone-name` | Required. Azure DNS Zone name. |
 | `--ohs-vm-name` | Optional. Specify name of the VM that hosts the Oracle HTTP Server Load Balancer. |
@@ -89,7 +89,7 @@ This value must be the following.
 We provide an automation script to configure a custom DNS alias. The script lets you do the following:
 
   * If you have an Azure DNS Zone, it will create a DNS alias for the admin console and application gateway on the existing DNS Zone.
-  * If you don't have an Azure DNS Zone, it will create the DNS Zone in the same resource group as the WebLogic cluster, then create the DNS alias for the admin console and application gateway.
+  * If you don't have an Azure DNS Zone, it will create the DNS Zone in the same resource group as the {{ site.data.var.wlsFullBrandName }} cluster, then create the DNS alias for the admin console and application gateway.
 
 ### Configure DNS Alias on an Existing Azure DNS Zone
 

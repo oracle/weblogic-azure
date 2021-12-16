@@ -16,19 +16,19 @@ The following steps use the [Azure Create UI Definition Sandbox](https://portal.
 
 - Fill in the appropriate values. For guidance, see [running Oracle WebLogic Server on Azure Kuberneters Service document](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/).
 
-  - **Basics** blade, configure the credentials for WebLogic and select User assigned managed identity.
+  - In the **Basics** blade, configure the credentials for {{ site.data.var.wlsFullBrandName }} and select User assigned managed identity.
 
-    - If you are updating a WebLogic cluster, make sure you have right domain UID and domain name.
+    - If you are updating an {{ site.data.var.wlsFullBrandName }} cluster, make sure you have right domain UID and domain name.
 
   - In the **Configure AKS cluter** blade, configure the AKS cluster, image selection and Java EE application selection.
 
-    - If you are updating a WebLogic cluster, make sure you have selected the right AKS cluster and ACR.
+    - If you are updating an {{ site.data.var.wlsFullBrandName }} cluster, make sure you have selected the right AKS cluster and ACR.
 
-  - In the **TLS/SSL configuration** blade, configure TLS/SSL certificates for Identity Key Store and Trust Key Store, which will be applied to WebLogic cluster.
+  - In the **TLS/SSL configuration** blade, configure TLS/SSL certificates for Identity Key Store and Trust Key Store, which will be applied to the {{ site.data.var.wlsFullBrandName }} cluster.
 
   - In the **Networking** blade, configure Standard Load Balancer service and Application Gateway Ingress Controller.
 
-  - In the **DNS configuration** blade, configure custom DNS alias for WebLogic Console portal and cluster.
+  - In the **DNS configuration** blade, configure custom DNS alias for {{ site.data.var.wlsFullBrandName }} Administration Console portal and cluster.
 
   - In the **Database** blade, configure data source connection. If you want to enable other database, select `Other` in **Choose database type** and finish the required inputs.
 
@@ -51,9 +51,9 @@ Now that you have a syntactically and semantically correct `parameters.json`, yo
 | `aksAgentPoolName` | Optinal. String value. <br> The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters. |
 | `aksVersion`| Optinal. String value. <br> Version of Azure Kubernetes Service. Use default version if no specified value. |
 | `enableAdminT3Tunneling`| Optinal. Boolean value. <br> Configure a custom channel in Admin Server for the T3 protocol that enables HTTP tunneling. |
-| `enableClusterT3Tunneling` | Optinal. Boolean value. <br> Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling. |
+| `enableClusterT3Tunneling` | Optinal. Boolean value. <br> Configure a custom channel in the {{ site.data.var.wlsFullBrandName }} cluster for the T3 protocol that enables HTTP tunneling. |
 | `t3ChannelAdminPort` | Optinal. Integer value, 1-65535. <br> Sepcify cublic port of the custom T3 channel in admin server. |
-| `t3ChannelClusterPort` | Optinal. Integer value, 1-65535. <br> Specify public port of the custom T3 channel in WebLoigc cluster. |
+| `t3ChannelClusterPort` | Optinal. Integer value, 1-65535. <br> Specify public port of the custom T3 channel in the {{ site.data.var.wlsFullBrandName }} cluster. |
 | `wlsCPU` | Optinal. String value. <br> Sepcify CPU requests for admin server and managed server pods. See [Managing Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)|
 | `wlsMemory` | Optinal. String value. <br> Specify memory requests for admin server and managed server pods. See [Managing Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)|
 
@@ -70,7 +70,7 @@ Append the expected advanced parameter to `parameters.json`. And make sure `_art
 
 #### Example Parameters JSON
 
-This is a sample to create WebLogic cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
+This is a sample to create an {{ site.data.var.wlsFullBrandName }} cluster with custom T3 channel, and expose the T3 channel via Azure Load Balancer Service. 
 The parameters using default value haven't been shown for brevity.
 
 ```json

@@ -13,9 +13,9 @@ You can invoke the database ARM template to:
 
   - Create a new data source connection, you can have multiple data source connections in your cluster.
 
-  - Update an existing data source connection
+  - Update an existing data source connection.
 
-  - Delete an existing data source connection
+  - Delete an existing data source connection.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ You can invoke the database ARM template to:
 
 If you are using your own data source driver, make sure the data source driver is uploaded during the WebLogic Server instance provisioning. 
 
-You can create a WebLogic cluster with data source driver library with steps:
+You can create an {{ site.data.var.wlsFullBrandName }} cluster with data source driver library with steps:
 
   - Open [WebLogic on AKS marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks)
 
@@ -39,7 +39,7 @@ You can create a WebLogic cluster with data source driver library with steps:
 
   - Finish other inputs, create **Review + create** to provison a cluster.
 
-You will get a WebLogic cluster with your data source driver built in the image.
+You will get an {{ site.data.var.wlsFullBrandName }} cluster with your data source driver built in the image.
 
 ### Database Instance
 
@@ -57,7 +57,7 @@ Besides [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/
 
   - Create your database server, and make sure the database is accessible from Azure.
 
-  - Ship your database driver to WebLogic cluster. The only approach to upload a data source driver is using [marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks). The offer enables you to bring your own data source driver. See [WebLogic Server Instance](#webLogic-server-instance)
+  - Ship your database driver to the {{ site.data.var.wlsFullBrandName }} cluster. The only approach to upload a data source driver is using [marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks). The offer enables you to bring your own data source driver. See [WebLogic Server Instance](#webLogic-server-instance)
 
   - Invoke the dbTemplate to update an existing data source connection or create another new data source connection.
 
