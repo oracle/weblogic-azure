@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 azureFullBrandName: Microsoft Azure IaaS
+aksFullName: Azure Kubernetes Service
 wlsFullBrandName: Oracle WebLogic Server
 brandNameNumber: 12c
 partNumber: E48696-01
@@ -14,10 +15,11 @@ jdkVersionNumber: jdk1.8.0_131
 repoPrefix: /arm-oraclelinux-wls-
 artifactsLocationBase: https://raw.githubusercontent.com/oracle/weblogic-azure
 artifactsLocationSubPathForVM: weblogic-azure-vm/arm-oraclelinux-wls-
+artifactsLocationSubPathForAks: weblogic-azure-aks
 passwordInFileNote: |-3
    Some things to note:
 
    * We did not include values for parameters that have a default value.
    * Even though this parameters file has values for sensitive fields such as passwords, these values are not echoed on the command line, or repeated in the logs because they are passed directly as `secureString` type in ARM.  **Please ensure any occurrences of the parameters file in the filesystem are sufficiently secured.**
    
-artifactsLocationTag: 2021-10-13-01-Q4
+artifactsLocationTag: 2021-12-14-03-Q4
