@@ -42,7 +42,7 @@ The template will only update the application deployments in the {{ site.data.va
 | `identity` | Required. Object value. <br> Azure user managed identity used, make sure the identity has permission to create/update/delete Azure resources. It's recommended to assign "Contributor" role. |
 | `wlsDomainName` | Required. String value. <br> Password for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
 | `wlsDomainUID` | Required. String value. <br> User name for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
-| `appPackageUrls`| Optinal. Array. <br> String array of Java EE applciation location, which can be downloaded using "curl". Currently, only support urls of Azure Storage Account blob. |
+| `appPackageUrls`| Optinal. Array. <br> String array of Java EE applciation location, which can be downloaded using "curl". Currently, only support URLs of Azure Storage Account blob. |
 | `appPackageFromStorageBlob`| Optinal. Object value. <br> Key `storageAccountName` specify the storage account name, the template will download application package from this storage account. <br> Key `containerName` specify the container name that stores the Java EE application. |
 | `ocrSSOPSW` | Optional. String value. <br> Password for Oracle SSO account. |
 | `ocrSSOUser` | Optional. String value. <br> User name for Oracle SSO account. |
@@ -65,14 +65,14 @@ This value must be the following.
 The template supports two approach to specify the location of Java EE application. 
 The template will update the cluter with applications specified in `appPackageUrls` and `appPackageFromStorageBlob`.
 
-#### SAS Urls
+#### SAS URLs
 
-You can specify the application urls via `appPackageUrls`. The template only supports url from Azure Storage Account. 
-Make sure the urls are accessible from public network. 
-You may want to update one application, but you must include all the application SAS urls in the parameter.
+You can specify the application URLs via `appPackageUrls`. The template only supports url from Azure Storage Account. 
+Make sure the URLs are accessible from public network. 
+You may want to update one application, but you must include all the application SAS URLs in the parameter.
 If you are removing an application, do not include the application url.
 
-Steps to obtain SAS urls:
+Steps to obtain SAS URLs:
 
   * Open your Storage Account from Azure portal. If you don't have, please follow this [guide](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal) to create one.
   
@@ -100,7 +100,7 @@ Steps to obtain SAS urls:
 
   * Repeat step 4 for other applicatios.
 
-  * Now you have all the urls. `appPackageUrls` will be value like `["sasUrl1", "sasUrl2"]`.
+  * Now you have all the URLs. `appPackageUrls` will be value like `["sasUrl1", "sasUrl2"]`.
 
     It should present in parameters.json like: 
 

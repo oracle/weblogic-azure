@@ -29,7 +29,7 @@ This document will guide you to update a WebLogic cluster using the advanced con
 
 ## Updating the existing WebLogic Server cluster
 
-The template will apply the new configuration in `parameters.json` to the running WebLogic cluster, please double check you have specified:
+The template will apply the new configuration in `parameters.json` to the running WebLogic cluster, please double check that you have specified:
 
 - The same credentials for WebLogic
 - The same domain name and domain UID.

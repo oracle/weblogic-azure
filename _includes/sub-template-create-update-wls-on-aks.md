@@ -6,7 +6,7 @@ This section shows how to obtain the values for the required properties.
 
 ### Obtain parameter values from Azure portal
 
-The following steps use the [Azure Create UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade) to obtain the values. If you prefer to edit a json file, you can also create the objects in your parameters file directly. The Azure UI Definition Sandbox provides controls to select resources and input your values easily.  **More importantly, this approach generates syntactically valid JSON, eliminating an important class of data entry error.**
+The following steps use the [Azure Create UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade) to obtain the values. If you prefer to edit a JSON file, you can also create the objects in your parameters file directly. The Azure UI Definition Sandbox provides controls to select resources and input your values easily.  **More importantly, this approach generates syntactically valid JSON, eliminating an important class of data entry error.**
 
 - Use your favourite browser and open the [Azure UI Definition Sandbox](https://portal.azure.com/?feature.customPortal=false#blade/Microsoft_Azure_CreateUIDef/SandboxBlade).
 
@@ -30,7 +30,7 @@ The following steps use the [Azure Create UI Definition Sandbox](https://portal.
 
   - In the **DNS configuration** blade, configure custom DNS alias for WebLogic Console portal and cluster.
 
-  - In the **Database** blade, configure datasource connection. If you want to enable other database, select `Other` in **Choose database type** and finish the required inputs.
+  - In the **Database** blade, configure data source connection. If you want to enable other database, select `Other` in **Choose database type** and finish the required inputs.
 
 - Select **Review+create**, the Azure UI Definition Sandbox will validate the inputs, you must resolve any errors before proceeding.
 

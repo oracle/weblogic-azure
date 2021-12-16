@@ -11,11 +11,11 @@ This page documents how to configure an existing deployment of {{ site.data.var.
 
 You can invoke the database ARM template to:
 
-  - Create a new datasource connection, you can have multiple datasource connections in your cluster.
+  - Create a new data source connection, you can have multiple data source connections in your cluster.
 
-  - Update an existing datasource connection
+  - Update an existing data source connection
 
-  - Delete an existing datasource connection
+  - Delete an existing data source connection
 
 ## Prerequisites
 
@@ -27,49 +27,49 @@ You can invoke the database ARM template to:
 
 {% include sub-template-prerequisites-wls.md %}
 
-If you are using your own datasource driver, make sure the datasource driver is uploaded during the WebLogic Server instance provisioning. 
+If you are using your own data source driver, make sure the data source driver is uploaded during the WebLogic Server instance provisioning. 
 
-You can create a WebLogic cluster with datasource driver library with steps:
+You can create a WebLogic cluster with data source driver library with steps:
 
   - Open [WebLogic on AKS marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks)
 
   - Input values to **Basics** and **Config AKS cluster** blade
 
-  - In the Database blade, select **Yes** to connect to database. For **Choose databse type**, select **Other**, upload datasource driver in **Datasource driver**.
+  - In the Database blade, select **Yes** to connect to database. For **Choose databse type**, select **Other**, upload data source driver in **data source driver**.
 
   - Finish other inputs, create **Review + create** to provison a cluster.
 
-You will get a WebLogic cluster with your datasource driver built in the image.
+You will get a WebLogic cluster with your data source driver built in the image.
 
 ### Database Instance
 
 To apply a database with {{ site.data.var.wlsFullBrandName }},
 you must have an existing database instance to use.
 
-#### Work with built-in datasource driver
+#### Work with built-in data source driver
 
-The marketplace offer ships with database driver for [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal).  You can invoke the dbTemplate to create datasource connection for those database. 
+The marketplace offer ships with database driver for [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal).  You can invoke the dbTemplate to create data source connection for those database. 
 If you do not have an instance, please create one from Azure portal.
 
-#### Bring your own datasource driver
+#### Bring your own data source driver
 
-Besides [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal), you are able to create datasource connection using other databases, such as [IBM Informix](https://www.ibm.com/products/informix) and [MariaDB](https://mariadb.org/), but you have to follow those steps to achieve that:
+Besides [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal), you are able to create data source connection using other databases, such as [IBM Informix](https://www.ibm.com/products/informix) and [MariaDB](https://mariadb.org/), but you have to follow those steps to achieve that:
 
   - Create your database server, and make sure the database is accessible from Azure.
 
-  - Ship your database driver to WebLogic cluster. The only approach to upload a datasource driver is using [marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks). The offer enables you to bring your own datasource driver. See [WebLogic Server Instance](#webLogic-server-instance)
+  - Ship your database driver to WebLogic cluster. The only approach to upload a data source driver is using [marketplace offer](https://portal.azure.com/?feature.customPortal=false#create/oracle.20210620-wls-on-aks20210620-wls-on-aks). The offer enables you to bring your own data source driver. See [WebLogic Server Instance](#webLogic-server-instance)
 
-  - Invoke the dbTemplate to update an existing datasource connection or create another new datasource connection.
+  - Invoke the dbTemplate to update an existing data source connection or create another new data source connection.
 
-### Apply multiple datasource
+### Apply multiple data source
 
-You may want to enable multiple datasource in your cluster for the following usage:
-  - Create multiple datasource connections using the same database
-  - Create multiple datasource connections using different databases
+You may want to enable multiple data source in your cluster for the following usage:
+  - Create multiple data source connections using the same database
+  - Create multiple data source connections using different databases
 
-You can deploy different datasource connections using the database ARM template, by changing the ARM parameters file and invoking the template again with Azure CLI.
+You can deploy different data source connections using the database ARM template, by changing the ARM parameters file and invoking the template again with Azure CLI.
 
-To deploy datasource using your own datasource driver, we assume the datasource driver has been uploaded to the cluster. See [WebLogic Server Instance](#webLogic-server-instance)
+To deploy data source using your own data source driver, we assume the data source driver has been uploaded to the cluster. See [WebLogic Server Instance](#webLogic-server-instance)
 
 ## Prepare the Parameters JSON file
 
@@ -77,16 +77,16 @@ To deploy datasource using your own datasource driver, we assume the datasource 
 |----------------|-------------|
 | `_artifactsLocation`| Required. See below for details. |
 | `aksClusterName`| Required. String value. <br> Name of the AKS cluster. Must be the same value provided at deployment time. |
-| `dbPassword`| Required. String value. <br> Password for the datasource connection. |
-| `dbUser`| Required. String value. <br> User id for the datasource connection. |
+| `dbPassword`| Required. String value. <br> Password for the data source connection. |
+| `dbUser`| Required. String value. <br> User id for the data source connection. |
 | `dsConnectionURL` | Required. String value. <br> JDBC connection string. |
 | `identity` | Required. Object value. <br> Azure user managed identity used, make sure the identity has permission to create/update/delete Azure resources. It's recommended to assign "Contributor" role. |
-| `jdbcDataSourceName` | Required. String value. <br> JDBC name for the datasource connection. |
+| `jdbcDataSourceName` | Required. String value. <br> JDBC name for the data source connection. |
 | `wlsDomainUID` | Required. String value. <br> UID of the domain that you are going to update. Make sure it's the same with the initial cluster deployment. |
 | `wlsPassword` | Required. String value. <br> Password for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
 | `wlsUserName` | Required. String value. <br> User name for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
-| `databaseType`| Optinal. Enum value. <br> Defaults by `oracle`. <br> `oracle`: will provision a [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database) datasoruce connection. <br> `postgresql`: will provision a [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) datasource connection.<br> `sqlserver`: will provision a [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) datasource connection. |
-| `dbConfigurationType`| Optinal. Enum value. <br> Defaults by `createOrUpdate`. <br> `createOrUpdate`: the deployment will create a new datasource connection if there is no  datasource has the same name with `jdbcDataSourceName`, otherwise, will update the expected datasource with new inputs. <br> `delete`: the deployment will delete a datasource connection that has name `jdbcDataSourceName` |
+| `databaseType`| Optinal. Enum value. <br> Defaults by `oracle`. <br> `oracle`: will provision a [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database) datasoruce connection. <br> `postgresql`: will provision a [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) data source connection.<br> `sqlserver`: will provision a [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) data source connection. |
+| `dbConfigurationType`| Optinal. Enum value. <br> Defaults by `createOrUpdate`. <br> `createOrUpdate`: the deployment will create a new data source connection if there is no  data source has the same name with `jdbcDataSourceName`, otherwise, will update the expected data source with new inputs. <br> `delete`: the deployment will delete a data source connection that has name `jdbcDataSourceName` |
 | `dbGlobalTranPro` | Optinal. Enum value. <br> Defaults by `OnePhaseCommit`. The transaction protocol (global transaction processing behavior) for the data source. You may use one from: `["TwoPhaseCommit", "LoggingLastResource", "OnePhaseCommit", "None"]`|
 
 ### `_artifactsLocation`
@@ -101,7 +101,7 @@ This value must be the following.
 
 The parameter `dsConnectionURL` stands for JDBC connection string. The connection string is database specific.
 
-{% include sub-template-datasource-connection-url.md %}
+{% include sub-template-data source-connection-url.md %}
 
 #### Example Parameters JSON
 
