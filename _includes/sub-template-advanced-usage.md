@@ -7,10 +7,5 @@ If you need to go beyond the capabilities of the Azure Marketplace offer, this g
 
 - Customize Azure Kubernetes Service version and Agent Pool name.
 
-<<<<<<< HEAD
-- Create custom T3 channel for WebLogic Server Administration Server and cluster and expose the T3 channel via Azure Standard Load Balancer service.
-=======
-- Create custom T3 channel for {{ site.data.var.wlsFullBrandName }} Administration Server and cluster and expose the T3 channel via Azure Standard Load Balancer service.
->>>>>>> Start to apply Rosemary edits
-
+- Create custom T3 channel for {{ site.data.var.wlsFullBrandName }} Administration Server and cluster and expose the T3 channel via Azure Standard Load Balancer
 - Customize the CPU and memory resources for server pod. This enables you to go beyond the default values of 200m and 1.5Gi.
