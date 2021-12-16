@@ -17,7 +17,7 @@ This page documents how to configure an existing deployment of {{ site.data.var.
 
 ### WebLogic Server Instance
 
-The DNS Configuraton ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
+The DNS Configuration ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
 
 ### Registered Domain Name
 
@@ -25,7 +25,7 @@ You need to buy a domain name to create a custom DNS alias.
 
 ### Azure DNS Zone
 
-If you create the DNS alias on an existing [Azure DNS Zone](https://docs.microsoft.com/en-us/azure/dns/dns-overview), make sure you have perfomed the [Azure DNS Delegation](https://docs.microsoft.com/en-us/azure/dns/dns-domain-delegation).  Once you have completed the delegation, you can verify it with `nslookup`.  For example, assuming your domain name is **contoso.com**, this output shows a correct delegation.
+If you create the DNS alias on an existing [Azure DNS Zone](https://docs.microsoft.com/en-us/azure/dns/dns-overview), make sure you have performed the [Azure DNS Delegation](https://docs.microsoft.com/en-us/azure/dns/dns-domain-delegation).  After you have completed the delegation, you can verify it with `nslookup`.  For example, assuming your domain name is **contoso.com**, this output shows a correct delegation.
 
 ```bash
 $ nslookup -type=SOA contoso.com
@@ -47,9 +47,9 @@ Name:   ns1-01.azure-dns.com
 Address: 2603:1061::1
 ```
 
-We strongly recommand you create an Azure DNS Zone for domain management and reuse it for other perpose. Follow the [guide](https://docs.microsoft.com/en-us/azure/dns/dns-getstarted-portal) to create an Azure DNS Zone.
+We strongly recommend you create an Azure DNS Zone for domain management and reuse it for other purpose. Follow the [guide](https://docs.microsoft.com/en-us/azure/dns/dns-getstarted-portal) to create an Azure DNS Zone.
 
-### Azure Managed Indentify
+### Azure Managed Identity
 
 If you are going to configure DNS alias based on an existing DNS Zone, you are required to input the ID of a user-assigned managed identity. 
 
@@ -64,7 +64,7 @@ We provide an automation shell script for DNS configuration. You must specify th
 
 | Parameter&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Explanation |
 |----------------|-------------|
-| `--admin-vm-name`| Required. Name of vitual machine that hosts {{ site.data.var.wlsFullBrandName }} admin server. Must be the same value provided at initial deployment time.|
+| `--admin-vm-name`| Required. Name of virtual machine that hosts {{ site.data.var.wlsFullBrandName }} admin server. Must be the same value provided at initial deployment time.|
 | `--admin-console-label` | Required. Label for {{ site.data.var.wlsFullBrandName }} admin console. Used to generate subdomain of admin console. | 
 | `--artifact-location`| Required. See below for details. |
 | `--resource-group` | Required. Name of resource group that has WebLogic cluster deployed. |
@@ -104,7 +104,7 @@ $ curl -fsSL {{ site.data.var.artifactsLocationBase }}{{ pageDir }}/{{ site.data
   --artifact-location {{ armTemplateBasePath }} \
   --location eastus \
   --zone-name contoso.com \
-  --identity-id `yourIndentityID` \
+  --identity-id `yourIdentityID` \
   --zone-resource-group `yourDNSZoneResourceGroup`
 ```
 
@@ -114,7 +114,7 @@ An example output:
 Done!
 
 Custom DNS alias:
-    Resource group: haiche-dns-doc
+    Resource group: contoso-dns-doc
     WebLogic Server Administration Console URL: http://admin.contoso.com:7001/console
     WebLogic Server Administration Console secured URL: https://admin.contoso.com:7002/console
 
@@ -156,7 +156,7 @@ Action required:
   ]
 
 Custom DNS alias:
-    Resource group: haiche-dns-doc
+    Resource group: contoso-dns-doc
     WebLogic Server Administration Console URL: http://admin.contoso.com:7001/console
     WebLogic Server Administration Console secured URL: https://admin.contoso.com:7002/console
 ```
