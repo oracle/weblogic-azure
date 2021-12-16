@@ -45,7 +45,7 @@ env:
 
 jobs:
   preflight:
-    runs-on: gurucicdrunner
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout azure-javaee-iaas
         uses: actions/checkout@v2
