@@ -182,7 +182,7 @@ while [ $index -lt ${envLength} ]; do
     index=$((index+1))
 
     if [[ "${envItemName}" == "JAVA_OPTIONS" ]];then
-      envItemValue="\"-Dweblogic.StdoutDebugEnabled=false ${javaOptions}\""
+      envItemValue="\"${constDefaultJavaOptions} ${javaOptions}\""
     fi
 
     # do not copy value from SSL_ env
