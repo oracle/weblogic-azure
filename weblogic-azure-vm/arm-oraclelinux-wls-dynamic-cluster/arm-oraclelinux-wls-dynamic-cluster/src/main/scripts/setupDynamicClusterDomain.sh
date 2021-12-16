@@ -200,8 +200,6 @@ EOF
         '${dynamicServerTemplate}' :
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
-            ServerStart:
-               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                 HostnameVerificationIgnored: true
                 HostnameVerifier: 'None'
@@ -267,8 +265,6 @@ topology:
         '${dynamicServerTemplate}':
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
-            ServerStart:
-               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                 HostnameVerificationIgnored: true
                 HostnameVerifier: 'None'
@@ -346,6 +342,38 @@ cmo.setListenAddress('$nmHost')
 cmo.setNMType('ssl')
 save()
 activate()
+disconnect()
+EOF
+}
+
+
+#This function sets the server startup arguments to dynamic server template
+function createServerStartArgumentPyScript()
+{
+
+# Exclusive lock is used for startEdit, without that intermittently it is noticed that deployment fails
+# Refer issue https://github.com/wls-eng/arm-oraclelinux-wls/issues/280
+
+    echo "setting server startup arguments for Dynamic Server Template: ${wlsServerTemplate}"
+    cat <<EOF >$DOMAIN_PATH/setServerStartArgs.py
+connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+
+try:
+    edit()
+    startEdit(60000,60000,'true')
+    cd('/ServerTemplates/${wlsServerTemplate}/ServerStart/${wlsServerTemplate}')
+    arguments = cmo.getArguments()
+    if(str(arguments) == 'None'):
+        arguments = '${SERVER_STARTUP_ARGS}'
+    elif ( '${SERVER_STARTUP_ARGS}' not in str(arguments)):
+        arguments = str(arguments) + ' ' + '${SERVER_STARTUP_ARGS}'
+    
+    cmo.setArguments(arguments)
+    save()
+    activate()
+except Exception, e:
+    print e
+
 disconnect()
 EOF
 }
@@ -490,6 +518,7 @@ function create_managedSetup(){
 
     echo "Creating managed server model files"
     create_managed_model
+    createServerStartArgumentPyScript
     createMachinePyScript
     createEnrollServerPyScript
     echo "Completed managed server model files"
@@ -515,6 +544,14 @@ function create_managedSetup(){
          echo "Error : Adding server $wlsServerName failed"
          exit 1
     fi
+
+    echo "Setting Server Startup Arguments for Dynamic Server Template: ${wlsServerTemplate} "
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/setServerStartArgs.py"
+    if [[ $? != 0 ]]; then
+         echo "Error : Adding server startup arguments to Server Template: ${wlsServerTemplate} failed"
+         exit 1
+    fi
+
 }
 
 # Create systemctl service for nodemanager
@@ -558,6 +595,7 @@ Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
 WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$DOMAIN_PATH/$wlsDomainName/bin/stopNodeManager.sh"
 User=oracle
@@ -586,6 +624,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="${startWebLogicScript}"
 ExecStop="${stopWebLogicScript}"
 User=oracle
@@ -841,6 +880,9 @@ wlsManagedPort=8001
 wlsAdminURL="$adminVMName:$wlsAdminT3ChannelPort"
 SERVER_START_URL="http://$wlsAdminURL"
 KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
+wlsServerTemplate="myServerTemplate"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
+
 
 if [ "${isCustomSSLEnabled}" == "true" ];
 then

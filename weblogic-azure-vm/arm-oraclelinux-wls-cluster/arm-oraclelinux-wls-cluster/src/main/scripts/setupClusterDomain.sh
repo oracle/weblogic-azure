@@ -313,12 +313,12 @@ set('ServerPrivateKeyPassPhrase', '$serverPrivateKeyPassPhrase')
 cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName//ServerStart/$wlsServerName')
-arguments = '-Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL} -Dweblogic.security.SSL.ignoreHostnameVerification=true'
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL} -Dweblogic.security.SSL.ignoreHostnameVerification=true'
 oldArgs = cmo.getArguments()
-  if oldArgs != None:
-    newArgs = oldArgs + ' ' + arguments;
-  else:
-    newArgs = arguments
+if oldArgs != None:
+  newArgs = oldArgs + ' ' + arguments
+else:
+  newArgs = arguments
 cmo.setArguments(newArgs)
 save()
 resolve()
@@ -438,6 +438,7 @@ Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
 WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$DOMAIN_PATH/$wlsDomainName/bin/stopNodeManager.sh"
 User=oracle
@@ -466,6 +467,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="${startWebLogicScript}"
 ExecStop="${stopWebLogicScript}"
 User=oracle

@@ -127,12 +127,12 @@ if isCustomSSLEnabled == 'true' :
     cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName/ServerStart/$wlsServerName')
-arguments = '-Dweblogic.Name=$wlsServerName  -Dweblogic.security.SSL.ignoreHostnameVerification=true'
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.security.SSL.ignoreHostnameVerification=true'
 oldArgs = cmo.getArguments()
-  if oldArgs != None:
-    newArgs = oldArgs + ' ' + arguments;
-  else:
-    newArgs = arguments
+if oldArgs != None:
+  newArgs = oldArgs + ' ' + arguments
+else:
+  newArgs = arguments
 cmo.setArguments(newArgs)
 save()
 resolve()
@@ -305,6 +305,7 @@ username="oracle"
 groupname="oracle"
 
 KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 validateInput
 cleanup
