@@ -189,6 +189,8 @@ topology:
         '${dynamicServerTemplate}' :
             ListenPort: ${wlsManagedPort}
             Cluster: '${wlsClusterName}'
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
             SSL:
                 HostnameVerificationIgnored: true
                 HostnameVerifier: 'None'
@@ -399,6 +401,7 @@ Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
 WorkingDirectory="$wlsDomainPath/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$wlsDomainPath/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$wlsDomainPath/$wlsDomainName/bin/stopNodeManager.sh"
 User=oracle
@@ -643,6 +646,7 @@ WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/
 username="oracle"
 groupname="oracle"
 KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 cleanup
 installUtilities

@@ -208,7 +208,10 @@ EOF
         print "Enable TLSv1.2 in " + server.getName()
         cd('/Servers/'+server.getName()+'//ServerStart/'+server.getName())
         arguments = cmo.getArguments()
-        arguments = arguments + ' ' + '${JAVA_OPTIONS_TLS_V12}'
+        if(str(arguments) == 'None'):
+           arguments = '${JAVA_OPTIONS_TLS_V12}'
+        else:
+           arguments = str(arguments) + ' ' + '${JAVA_OPTIONS_TLS_V12}'
         cmo.setArguments(arguments)
 EOF
     fi

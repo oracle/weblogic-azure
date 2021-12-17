@@ -153,6 +153,8 @@ topology:
                     Enabled: true
             ListenPortEnabled: ${isHTTPAdminListenPortEnabled}
             RestartDelaySeconds: 10
+            ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
 EOF
 
         if [ "${isCustomSSLEnabled}" == "true" ];
@@ -217,6 +219,8 @@ topology:
            Notes: "$wlsServerName managed server"
            Cluster: "$wlsClusterName"
            Machine: "$nmHost"
+           ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
 EOF
     
 if [ "${isCustomSSLEnabled}" == "true" ];
@@ -309,8 +313,13 @@ set('ServerPrivateKeyPassPhrase', '$serverPrivateKeyPassPhrase')
 cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName//ServerStart/$wlsServerName')
-arguments = '-Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL} -Dweblogic.security.SSL.ignoreHostnameVerification=true'
-cmo.setArguments(arguments)
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL} -Dweblogic.security.SSL.ignoreHostnameVerification=true'
+oldArgs = cmo.getArguments()
+if oldArgs != None:
+  newArgs = oldArgs + ' ' + arguments
+else:
+  newArgs = arguments
+cmo.setArguments(newArgs)
 save()
 resolve()
 activate()
@@ -429,6 +438,7 @@ Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
 WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$DOMAIN_PATH/$wlsDomainName/bin/stopNodeManager.sh"
 User=oracle
@@ -457,6 +467,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="${startWebLogicScript}"
 ExecStop="${stopWebLogicScript}"
 User=oracle
@@ -763,6 +774,7 @@ wlsManagedPort=8001
 DOMAIN_PATH="/u01/domains"
 startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
 SERVER_START_URL="http://$wlsAdminURL"

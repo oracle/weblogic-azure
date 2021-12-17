@@ -208,6 +208,8 @@ topology:
            Notes: "$wlsServerName managed server"
            Cluster: "$storageClusterName"
            Machine: "$nmHost"
+           ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
 EOF
 
         if [ "${isCustomSSLEnabled}" == "true" ];
@@ -298,8 +300,13 @@ set('ServerPrivateKeyPassPhrase', '$serverPrivateKeyPassPhrase')
 cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName/ServerStart/$wlsServerName')
-arguments = '-Dweblogic.Name=$wlsServerName -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.management.server=http://$wlsAdminURL ${wlsCoherenceArgs}'
-cmo.setArguments(arguments)
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.management.server=http://$wlsAdminURL ${wlsCoherenceArgs}'
+oldArgs = cmo.getArguments()
+if oldArgs != None:
+  newArgs = oldArgs + ' ' + arguments
+else:
+  newArgs = arguments
+cmo.setArguments(newArgs)
 save()
 resolve()
 activate()
@@ -370,6 +377,7 @@ Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
 WorkingDirectory="$wlsDomainPath/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$wlsDomainPath/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$wlsDomainPath/$wlsDomainName/bin/stopNodeManager.sh"
 User=oracle
@@ -667,6 +675,7 @@ username="oracle"
 wlsAdminServerName="admin"
 wlsCoherenceArgs="-Dcoherence.localport=$coherenceLocalport -Dcoherence.localport.adjust=$coherenceLocalportAdjust"
 KEYSTORE_PATH="${wlsDomainPath}/${wlsDomainName}/keystores"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 if [ ${serverIndex} -eq 0 ]; then
     wlsServerName="admin"

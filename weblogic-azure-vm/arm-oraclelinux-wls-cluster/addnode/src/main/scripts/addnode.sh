@@ -194,6 +194,8 @@ topology:
            Notes: "$wlsServerName managed server"
            Cluster: "$wlsClusterName"
            Machine: "$nmHost"
+           ServerStart:
+               Arguments: '${SERVER_STARTUP_ARGS}'
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
        NodeManagerPasswordEncrypted: "$wlsPassword" 
@@ -258,9 +260,13 @@ if isCustomSSLEnabled == 'true' :
     cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName/ServerStart/$wlsServerName')
-arguments = '-Dweblogic.Name=$wlsServerName  -Dweblogic.security.SSL.ignoreHostnameVerification=true'
-cmo.setArguments(arguments)
-
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.security.SSL.ignoreHostnameVerification=true'
+oldArgs = cmo.getArguments()
+if oldArgs != None:
+  newArgs = oldArgs + ' ' + arguments
+else:
+  newArgs = arguments
+cmo.setArguments(newArgs)
 EOF
 
     if [ "$appGWHostName" != "null" ]; then
@@ -334,7 +340,12 @@ EOF
 
     cat <<EOF >>$wlsDomainPath/add-server.py
 cd('/Servers/$wlsServerName//ServerStart/$wlsServerName')
-cmo.setArguments(arguments)
+oldArgs = cmo.getArguments()
+if oldArgs != None:
+  newArgs = oldArgs + ' ' + arguments
+else:
+  newArgs = arguments
+cmo.setArguments(newArgs)
 save()
 resolve()
 activate()
@@ -408,6 +419,7 @@ Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
 WorkingDirectory="$wlsDomainPath/$wlsDomainName"
+Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$wlsDomainPath/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$wlsDomainPath/$wlsDomainName/bin/stopNodeManager.sh"
 User=oracle
@@ -732,6 +744,7 @@ username="oracle"
 groupname="oracle"
 
 KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
+SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 
 chmod ugo+x ${SCRIPT_PWD}/elkIntegration.sh
 
