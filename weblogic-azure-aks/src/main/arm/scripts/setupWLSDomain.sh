@@ -662,7 +662,7 @@ function setup_wls_domain() {
     if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
         # for remote t3/t3s access.
         # refer to https://oracle.github.io/weblogic-kubernetes-operator/faq/external-clients/#enabling-unknown-host-access
-        javaOptions="-Dweblogic.rjvm.allowUnknownHost=true ${javaOptions}"
+        javaOptions="-Dlog4j2.formatMsgNoLookups=true -Dweblogic.rjvm.allowUnknownHost=true ${javaOptions}"
     fi
     
     # create namespace
