@@ -88,7 +88,7 @@ spec:
     - name: CUSTOM_DOMAIN_NAME
       value: "${wlsDomainName}"
     - name: JAVA_OPTIONS
-      value: "-Dweblogic.StdoutDebugEnabled=false ${javaOptions}"
+      value: "${constDefaultJavaOptions} ${javaOptions}"
     - name: USER_MEM_ARGS
       value: "-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 "
     - name: MANAGED_SERVER_PREFIX
