@@ -474,6 +474,60 @@ function mountFileShare()
   fi
 }
 
+#this function set the umask 027 (chmod 740) as required by WebLogic security checks
+function setUMaskForSecurityDir()
+{
+   echo "setting umask 027 (chmod 740) for domain/admin security directory"
+
+   if [ -f "$DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security/boot.properties" ];
+   then
+      runuser -l oracle -c "chmod 740 $DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security/boot.properties"
+   fi
+
+   if [ -d "$DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security" ];
+   then
+       runuser -l oracle -c "chmod 740 $DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security"
+   fi
+
+}
+
+#this function disables remote anonymous requests as required by Weblogic security checks
+function disableRemoteAnonymousRequests()
+{
+    echo "DisableRemoteAnonymousRequests for domain  $wlsDomainName"
+    cat <<EOF >$DOMAIN_PATH/disableAnonymousRequests.py
+connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+try:
+    edit("$wlsServerName")
+    startEdit()
+    cd("SecurityConfiguration/$wlsDomainName")
+
+    if hasattr(cmo,'setRemoteAnonymousRMIIIOPEnabled'):
+      cmo.setRemoteAnonymousRMIIIOPEnabled(false)
+    else:
+       print 'no attribute: SecurityConfiguration/$wlsDomainName: cmo.setRemoteAnonymousRMIIIOPEnabled'
+
+    if hasattr(cmo,'setRemoteAnonymousRMIT3Enabled'):
+      cmo.setRemoteAnonymousRMIT3Enabled(false)
+    else:
+      print 'no attribute: SecurityConfiguration/$wlsDomainName: setRemoteAnonymousRMIT3Enabled'
+
+    save()
+    activate()
+except Exception,e:
+    print e
+    print "Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
+    dumpStack()
+disconnect()
+EOF
+sudo chown -R $username:$groupname $DOMAIN_PATH
+runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/disableAnonymousRequests.py"
+if [[ $? != 0 ]]; then
+  echo "Error : Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
+  exit 1
+fi
+
+}
 
 #main script starts here
 
@@ -483,6 +537,7 @@ BASE_DIR="$(readlink -f ${CURR_DIR})"
 #read arguments from stdin
 read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
+wlsServerName="admin"
 DOMAIN_PATH="/u01/domains"
 startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
@@ -526,8 +581,13 @@ create_adminserver_service
 
 admin_boot_setup
 
+setUMaskForSecurityDir
+
 enableAndStartAdminServerService
 
 echo "Waiting for admin server to be available"
 wait_for_admin
 echo "Weblogic admin server is up and running"
+
+disableRemoteAnonymousRequests
+
