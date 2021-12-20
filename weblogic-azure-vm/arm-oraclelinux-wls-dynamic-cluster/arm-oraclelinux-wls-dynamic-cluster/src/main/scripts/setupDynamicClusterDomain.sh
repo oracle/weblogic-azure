@@ -840,6 +840,61 @@ function storeCustomSSLCerts()
     fi
 }
 
+#this function set the umask 027 (chmod 740) as required by WebLogic security checks
+function setUMaskForSecurityDir()
+{
+   echo "setting umask 027 (chmod 740) for domain/$wlsServerName security directory"
+
+   if [ -f "$DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security/boot.properties" ];
+   then
+      runuser -l oracle -c "chmod 740 $DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security/boot.properties"
+   fi
+
+   if [ -d "$DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security" ];
+   then
+       runuser -l oracle -c "chmod 740 $DOMAIN_PATH/$wlsDomainName/servers/$wlsServerName/security"
+   fi
+
+}
+
+#this function disables remote anonymous requests as required by Weblogic security checks
+function disableRemoteAnonymousRequests()
+{
+    echo "DisableRemoteAnonymousRequests for domain  $wlsDomainName"
+    cat <<EOF >$DOMAIN_PATH/disableAnonymousRequests.py
+connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+try:
+    edit("$wlsServerName")
+    startEdit()
+    cd("SecurityConfiguration/$wlsDomainName")
+
+    if hasattr(cmo,'setRemoteAnonymousRMIIIOPEnabled'):
+      cmo.setRemoteAnonymousRMIIIOPEnabled(false)
+    else:
+       print 'no attribute: SecurityConfiguration/$wlsDomainName: cmo.setRemoteAnonymousRMIIIOPEnabled'
+
+    if hasattr(cmo,'setRemoteAnonymousRMIT3Enabled'):
+      cmo.setRemoteAnonymousRMIT3Enabled(false)
+    else:
+      print 'no attribute: SecurityConfiguration/$wlsDomainName: setRemoteAnonymousRMIT3Enabled'
+
+    save()
+    activate()
+except Exception,e:
+    print e
+    print "Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
+    dumpStack()
+disconnect()
+EOF
+sudo chown -R $username:$groupname $DOMAIN_PATH
+runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/disableAnonymousRequests.py"
+if [[ $? != 0 ]]; then
+  echo "Error : Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
+  exit 1
+fi
+
+}
+
 
 #main script starts here
 
@@ -923,14 +978,17 @@ then
   create_adminSetup
   createStopWebLogicScript
   admin_boot_setup
+  setUMaskForSecurityDir
   create_adminserver_service
   create_nodemanager_service
   enableAndStartAdminServerService
   enabledAndStartNodeManagerService
-  wait_for_admin  
+  wait_for_admin
+  disableRemoteAnonymousRequests
 else
   updateNetworkRules "managed"
   create_managedSetup
+  setUMaskForSecurityDir
   create_nodemanager_service
   enabledAndStartNodeManagerService
   start_cluster  
