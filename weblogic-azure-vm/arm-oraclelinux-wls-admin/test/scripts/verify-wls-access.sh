@@ -7,34 +7,21 @@
 #read arguments from stdin
 read adminPublicIP adminPort
 
-isSuccess=false
-maxAttempt=5
-attempt=1
-echo "Verifying http://${adminPublicIP}:${adminPort}/weblogic/ready"
-while [ $attempt -le $maxAttempt ]
-do
-  echo "Attempt $attempt :- Checking WebLogic admin server is accessible"
-  curl http://${adminPublicIP}:${adminPort}/weblogic/ready 
-  if [ $? == 0 ]; then
-     isSuccess=true
-     break
-  fi
-  attempt=`expr $attempt + 1`
-  sleep 2m
-done
+CURL_PARMS="--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180  --retry-connrefused"
 
-if [[ $isSuccess == "false" ]]; then
+echo "Verifying http://${adminPublicIP}:${adminPort}/weblogic/ready"
+curl ${CURL_PARMS} http://${adminPublicIP}:${adminPort}/weblogic/ready
+
+if [[ $? != 0 ]]; then
         echo "Failed : WebLogic admin server is not accessible"
         exit 1
 else
         echo "WebLogic admin server is accessible"
 fi
 
-sleep 1m
-
 # Verifying whether admin console is accessible
 echo "Checking WebLogic admin console is acessible"
-curl http://${adminPublicIP}:${adminPort}/console/
+curl ${CURL_PARMS} http://${adminPublicIP}:${adminPort}/console/
 if [[ $? != 0 ]]; then
    echo "WebLogic admin console is not accessible"
    exit 1

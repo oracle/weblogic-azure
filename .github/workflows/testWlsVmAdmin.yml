@@ -330,7 +330,7 @@ jobs:
                   --destination-port-ranges 443 22
               fi
 
-              echo "Allow access to 7005"
+              echo "Allow access to ${adminConsolePort}"
               az network nsg rule update \
                 --resource-group $resourceGroup \
                 --nsg-name ${nsg} \
@@ -388,7 +388,7 @@ jobs:
         run: |
           echo "Verifying Weblogic Server Access"
           echo ${wlsPublicIP}
-          bash ${{ env.adminOfferPath }}/test/scripts/verify-wls-access.sh  <<< "${wlsPublicIP} 7005"
+          bash ${{ env.adminOfferPath }}/test/scripts/verify-wls-access.sh  <<< "${wlsPublicIP} ${adminConsolePort}"
 
       - name: Deploy DB Template to Connect to Azure Postgresql Database
         id: enable-postgresql-db
