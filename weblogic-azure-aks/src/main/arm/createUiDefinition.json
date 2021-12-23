@@ -400,9 +400,9 @@
                             {
                                 "name": "useOracleImage",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use a pre-existing, unpatched, WebLogic Server Docker image from Oracle Container Registry?",
+                                "label": "Use a pre-existing, WebLogic Server Docker image from Oracle Container Registry?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing, unpatched, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set patches (PSUs).",
+                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -505,7 +505,7 @@
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Select the link to create Oracle SSO account.",
+                                    "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Select the link to create an Oracle SSO account.",
                                     "uri": "https://aka.ms/wls-aks-create-sso-account"
                                 }
                             },
@@ -541,29 +541,64 @@
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
                             },
                             {
-                                "name": "fromImageText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
-                                "options": {
-                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM clause."
+                                "name": "isSSOSupportEntitled",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Is the specified SSO account associated with an active Oracle support contract?",
+                                "defaultValue": "Yes",
+                                "toolTip": "Select 'Yes' to confirm the specified SSO account is associated with an active Oracle support contract.  Select 'No' otherwise.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
                                 }
-                            },
+                            },                            
                             {
                                 "name": "fromImageInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
-                                    "icon": "Info",
-                                    "text": "In the Oracle Container Registry, the Oracle Standard Terms and Restrictions must be accepted. Select this link the following link to make sure you have agreed to the terms for the desired WebLogic Server Docker image and check the valid tags. The deployment will fail if you have not accepted the terms.",
-                                    "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                                    "icon": "Warning",
+                                    "text": "The Oracle Standard Terms and Restrictions for the selected WebLogic Server version must be accepted in the Oracle Container Registry."
                                 }
                             },
                             {
+                                "name": "SSOSupportIsEntitledYes",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "You must select this link and accept the Oracle Standard Terms and Restrictions in the Oracle Container Registry.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-ga-registry"
+                                    }
+                                }
+                            },                            
+                            {
+                                "name": "SSOSupportIsEntitledNo",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "You must select this link and accept the Oracle Standard Terms and Restrictions in the Oracle Container Registry.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-cpu-registry"
+                                    }
+                                }
+                            },                            
+                            {
                                 "name": "oracleImageSelector",
                                 "type": "Microsoft.Common.DropDown",
-                                "label": "Select WebLogic Server Docker tag",
+                                "label": "Select desired combination of WebLogic Server, JDK and Operating System or fully qualified Docker tag",
                                 "defaultValue": "14.1.1.0-11",
-                                "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromOracleImage option to 'imagetool'.",
+                                "toolTip": "",
                                 "constraints": {
                                     "allowedValues": [
                                         {
