@@ -647,6 +647,27 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
 }
 
 /*
+* Apply resource limits to WebLogic Server 14c.
+* The script will check the WebLogic Server version, and apply resource limits to 14c.
+* The resource limits will be the same with requests.
+*/
+module applyGuaranteedQos 'modules/_deployment-scripts/_ds-apply-guaranteed-qos.bicep' = {
+  name: 'apply-resources-limits-to-wls14'
+  params:{
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    identity: identity
+    location: location
+    wlsDomainUID: wlsDomainUID
+  }
+  dependsOn: [
+    datasourceDeployment
+  ]
+}
+
+/*
 * To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
 * This should be the last step.
 */
@@ -664,7 +685,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
     wlsUserName: wlsUserName
   }
   dependsOn: [
-    datasourceDeployment
+    applyGuaranteedQos
   ]
 }
 
