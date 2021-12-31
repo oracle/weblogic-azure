@@ -2,7 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 /* This script is to apply Guaranteed Qos by specifying resources.limits
-*  To solve pod evicted issue in Oracle WebLogic 14c.
+*  To solve pod evicted issue in Oracle WebLogic 14.1.1.0.
 *  The script will promote CPU request and limit to 500m if the CPU request is less than 500m.
 */
 

@@ -647,8 +647,8 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
 }
 
 /*
-* Apply resource limits to WebLogic Server 14c.
-* The script will check the WebLogic Server version, and apply resource limits to 14c.
+* Apply resource limits to WebLogic Server 14.1.1.0.
+* The script will check the WebLogic Server version, and apply resource limits to 14.1.1.0.
 * The resource limits will be the same with requests.
 */
 module applyGuaranteedQos 'modules/_deployment-scripts/_ds-apply-guaranteed-qos.bicep' = {
