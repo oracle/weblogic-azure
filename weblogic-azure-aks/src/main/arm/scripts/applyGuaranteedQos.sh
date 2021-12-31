@@ -43,7 +43,7 @@ fi
 # Use 'weblogic.version -verbose' to get subsystem information
 # Use 'weblogic.utils.Versions' to get version information for all modules
 rawOutput=$(kubectl exec -it ${adminPodName} -n ${wlsDomainNS} -c ${wlsContainerName} \
-    -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version | grep "WebLogic Server"'))
+    -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version | grep "WebLogic Server"')
 
 # get version from string like "WebLogic Server 12.2.1.4.0 Thu Sep 12 04:04:29 GMT 2019 1974621"
 stringArray=($rawOutput)
