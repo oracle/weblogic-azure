@@ -100,7 +100,7 @@ spec:
     introspectorJobActiveDeadlineSeconds: ${constIntrospectorJobActiveDeadlineSeconds}
   restartVersion: "${restartVersion}"
 EOF
-    echo_stdout "New resrouces configurations: "
+    echo_stdout "New resource configurations: "
     echo_stdout $(cat patch-resource-limits.yaml)
     # patch the domain with resource limits
     kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
@@ -110,7 +110,7 @@ EOF
     # make sure all of the pods are running correctly.
     replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json |
         jq '. | .spec.clusters[] | .replicas')
-    # pod provision will be slower as the resources is limited, set larger max attemp.
+    # pod provision will be slower, set larger max attemp.
     maxAttemps=$((checkPodStatusMaxAttemps * 2))
     interval=$((checkPodStatusInterval * 2))
 
