@@ -14,18 +14,18 @@ source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
 qualityofService="BestEffort"
-wlsContainerName="weblogic-server"
 wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 
 echo_stdout "install kubectl"
 install_kubectl
 
-echo_stdout "Connect AKS"
+echo_stdout "Connect to AKS"
 az aks get-credentials \
     --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
     --name ${AKS_CLUSTER_NAME} \
     --overwrite-existing
 
+# get name of the running admin pod
 adminPodName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json |
     jq '.items[0] | .metadata.name' |
     tr -d "\"")
@@ -34,27 +34,23 @@ if [ -z "${adminPodName}" ]; then
     exit 1
 fi
 
-wlstQueryVersionScript=queryVersion.py
-cat <<EOF >${wlstQueryVersionScript}
-print '#version#:' + version
-EOF
+# run `source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version` to get the version.
+# the command will print three lines, with WLS version in the first line.
+# use `grep "WebLogic Server" to get the first line.
 
-echo_stdout "copy WLST script ${wlstQueryVersionScript} to ${adminPodName}:/tmp/${wlstQueryVersionScript}"
-targetPyFilePath=/tmp/${wlstQueryVersionScript}
-kubectl cp ${wlstQueryVersionScript} -n ${wlsDomainNS} ${adminPodName}:${targetPyFilePath}
-version=$(kubectl exec -it ${adminPodName} -n ${wlsDomainNS} -c ${wlsContainerName} -- bash -c "wlst.sh ${targetPyFilePath}")
-# output sample:
-# Initializing WebLogic Scripting Tool (WLST) ...
+# $ source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version
+# WebLogic Server 12.2.1.4.0 Thu Sep 12 04:04:29 GMT 2019 1974621
+# Use 'weblogic.version -verbose' to get subsystem information
+# Use 'weblogic.utils.Versions' to get version information for all modules
+rawOutput=$(kubectl exec -it ${adminPodName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+    -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version | grep "WebLogic Server"'))
 
-# Welcome to WebLogic Server Administration Scripting Shell
+# get version from string like "WebLogic Server 12.2.1.4.0 Thu Sep 12 04:04:29 GMT 2019 1974621"
+stringArray=($rawOutput)
+version=${stringArray[2]}
+echo_stdout "WebLogic Server version: ${version}"
 
-# Type help() for help on available commands
-
-# #version#:WebLogic Server 14.1.1.0.0
-version="${version##*\#version\#\:}" # match #version#:, this is a special mark for the version output, please do not change it.
-echo_stdout ${version}
-
-if [ "${version#*WebLogic Server 14.1.1.0}" != "$version" ]; then
+if [ "${version#*14.1.1.0}" != "$version" ]; then
     timestampBeforePatchingDomain=$(date +%s)
     echo  "timestampBeforePatchingDomain=${timestampBeforePatchingDomain}"
     
