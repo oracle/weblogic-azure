@@ -598,43 +598,53 @@
                                 "type": "Microsoft.Common.DropDown",
                                 "label": "Select desired combination of WebLogic Server, JDK and Operating System or fully qualified Docker tag",
                                 "defaultValue": "14.1.1.0-11",
+                                "multiLine": true,
                                 "toolTip": "",
                                 "constraints": {
                                     "allowedValues": [
                                         {
                                             "label": "14.1.1.0-8",
+                                            "description": "14c on JDK 8 on Oracle Linux 7",
                                             "value": "14.1.1.0-8"
                                         },
                                         {
                                             "label": "14.1.1.0-11",
+                                            "description": "14c on JDK 11 on Oracle Linux 7",
                                             "value": "14.1.1.0-11"
                                         },
                                         {
                                             "label": "12.2.1.4",
+                                            "description": "12cR2 (12.2.1.4) on JDK 8 on Oracle Linux 7",
                                             "value": "12.2.1.4"
                                         },
                                         {
                                             "label": "12.2.1.3",
+                                            "description": "12cR2 (12.2.1.3) on JDK 8 on Oracle Linux 7",
                                             "value": "12.2.1.3"
                                         },
                                         {
                                             "label": "14.1.1.0-8-ol8",
+                                            "description": "14c on JDK 8 on Oracle Linux 8",
                                             "value": "14.1.1.0-8-ol8"
                                         },
                                         {
                                             "label": "14.1.1.0-11-ol8",
+                                            "description": "14c on JDK 11 on Oracle Linux 8",
                                             "value": "14.1.1.0-11-ol8"
                                         },
                                         {
                                             "label": "12.2.1.4-ol8",
+                                            "description": "12cR2 (12.2.1.4) on JDK 8 on Oracle Linux 8",
                                             "value": "12.2.1.4-ol8"
                                         },
                                         {
                                             "label": "12.2.1.3-ol8",
+                                            "description": "12cR2 (12.2.1.3) on JDK 8 on Oracle Linux 8",
                                             "value": "12.2.1.3-ol8"
                                         },
                                         {
                                             "label": "Others",
+                                            "description": "Specify fully qualified Oracle Container Registry tag",
                                             "value": "others"
                                         }
                                     ],
@@ -2027,6 +2037,7 @@
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
             "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
+            "isSSOSupportEntitled": "[steps('section_aks').imageInfo.isSSOSupportEntitled]",
             "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",
             "location": "[location()]",
             "keyVaultName": "[steps('section_appGateway').appgwIngress.keyVaultName]",
