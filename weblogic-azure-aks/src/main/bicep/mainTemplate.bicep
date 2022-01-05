@@ -135,6 +135,8 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
+@description('Is the specified SSO account associated with an active Oracle support contract?')
+param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
 @description('Existing Key Vault Name')
@@ -269,6 +271,7 @@ var const_hasTags = contains(resourceGroup(), 'tags')
 // * generate selfsigned certificate for gateway frontend TLS/SSL.
 var const_bCreateNewKeyVault = (!const_hasTags || !contains(resourceGroup().tags, name_tagNameForKeyVault) || empty(resourceGroup().tags.wlsKeyVault)) && ((enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) || (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)))
 var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
+var const_createNewAcr = useOracleImage && createACR
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
 var const_enablePV = enableCustomSSL || enableAzureFileShare
@@ -308,10 +311,23 @@ module partnerCenterPid './modules/_pids/_empty.bicep' = {
   name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
 }
 
+/*
+* Deploy ACR
+*/
+module acrDeployment './modules/_azure-resoruces/_acr.bicep' = if (const_createNewAcr) {
+  name: 'acr-deployment'
+  params: {
+    location: location
+  }
+  dependsOn: [
+    partnerCenterPid
+  ]
+}
+
 module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep' = {
   name: 'validate-parameters-and-fail-fast'
   params: {
-    acrName: acrName
+    acrName: const_createNewAcr ? acrDeployment.outputs.acrName : acrName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolVMSize: aksAgentPoolVMSize
     aksClusterRGName: aksClusterRGName
@@ -319,7 +335,6 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewaySSLCertData: appGatewaySSLCertData
     appGatewaySSLCertPassword: appGatewaySSLCertPassword
-    createACR: createACR
     createAKSCluster: createAKSCluster
     createDNSZone: createDNSZone
     dnszoneName: dnszoneName
@@ -332,6 +347,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     keyVaultSSLCertDataSecretName: keyVaultSSLCertDataSecretName
     keyVaultSSLCertPasswordSecretName: keyVaultSSLCertPasswordSecretName
     identity: identity
+    isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
@@ -355,13 +371,14 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     sslUploadedCustomTrustKeyStoreType: sslUploadedCustomTrustKeyStoreType
     sslUploadedPrivateKeyAlias: sslUploadedPrivateKeyAlias
     sslUploadedPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
-    userProvidedAcr: userProvidedAcr
+    userProvidedAcr: userProvidedAcr // used in use provided images
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
     wlsImageTag: wlsImageTag
   }
   dependsOn: [
     pids
+    acrDeployment
   ]
 }
 
@@ -427,7 +444,6 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aksVersion: aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
-    createACR: createACR
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
@@ -492,7 +508,6 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aksVersion: aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
-    createACR: createACR
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
