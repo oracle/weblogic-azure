@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 #
+# Temporary workaround for https://github.com/oracle/weblogic-kubernetes-operator/issues/2693
 # env inputs:
 # AKS_CLUSTER_NAME
 # AKS_CLUSTER_RESOURCEGROUP_NAME

@@ -647,6 +647,7 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
 }
 
 /*
+* Temporary workaround for https://github.com/oracle/weblogic-kubernetes-operator/issues/2693
 * Apply resource limits to WebLogic Server 14.1.1.0.
 * The script will check the WebLogic Server version, and apply resource limits to 14.1.1.0.
 * The resource limits will be the same with requests.
