@@ -194,9 +194,11 @@ function validate_ocr_image() {
   local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${wlsImageTag}"
 
   if [[ "${ORACLE_ACCOUNT_ENTITLED,,}" == "true" ]]; then
+
+    # download the ga cpu image mapping file.
     local cpuImagesListFile=weblogic_cpu_images.json
     curl -L ${gitUrl4CpuImages} -o ${cpuImagesListFile}
-    local cpuTag = $(cat ${cpuImagesListFile} | jq '.[] | select(.gaTag=='"${wlsImageTag}"') | .cpuTag' | tr -d "\"")
+    local cpuTag = $(cat ${cpuImagesListFile} | jq '.items[] | select(.gaTag=='"${wlsImageTag}"') | .cpuTag' | tr -d "\"")
     # if we can not find a matched image, keep the tag name the same as GA tag.
     if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
       cpuTag=${wlsImageTag}
@@ -206,7 +208,7 @@ function validate_ocr_image() {
   fi
 
   # validate the image by importing it to ACR.
-  # if failure happen, the image path should be unavailable
+  # if failure happens, the image should be unavailable
   local tmpImagePath="tmp/validate_webLogic_images:${wlsImageTag}"
   az acr import --name ${ACR_NAME} \
     --source ${ocrImageFullPath} \
