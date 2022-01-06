@@ -2037,7 +2037,7 @@
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
             "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "isSSOSupportEntitled": "[steps('section_aks').imageInfo.isSSOSupportEntitled]",
+            "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
             "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",
             "location": "[location()]",
             "keyVaultName": "[steps('section_appGateway').appgwIngress.keyVaultName]",
