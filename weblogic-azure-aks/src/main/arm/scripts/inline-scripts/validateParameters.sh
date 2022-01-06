@@ -198,7 +198,8 @@ function validate_ocr_image() {
     # download the ga cpu image mapping file.
     local cpuImagesListFile=weblogic_cpu_images.json
     curl -L ${gitUrl4CpuImages} -o ${cpuImagesListFile}
-    local cpuTag = $(cat ${cpuImagesListFile} | jq '.items[] | select(.gaTag=='"${wlsImageTag}"') | .cpuTag' | tr -d "\"")
+    local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag == \"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
+    echo_stdout "cpu tag: ${cpuTag}"
     # if we can not find a matched image, keep the tag name the same as GA tag.
     if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
       cpuTag=${wlsImageTag}
@@ -207,24 +208,36 @@ function validate_ocr_image() {
     ocrImageFullPath="${ocrLoginServer}/${ocrCpuImagePath}:${cpuTag}"
   fi
 
+  echo_stdout "image path: ${ocrImageFullPath}"
+
   # validate the image by importing it to ACR.
   # if failure happens, the image should be unavailable
-  local tmpImagePath="tmp/validate_webLogic_images:${wlsImageTag}"
+  local tmpImagePath="tmp$(date +%s):${wlsImageTag}"
   az acr import --name ${ACR_NAME} \
     --source ${ocrImageFullPath} \
     -u ${ORACLE_ACCOUNT_NAME} \
     -p ${ORACLE_ACCOUNT_PASSWORD} \
-    --image ${tmpImagePath}
+    --image ${tmpImagePath} \
+    --only-show-errors
 
-  if [ $? -eq 0 ]; then
+  # echo $? equals 0 even though failure happens.
+  # check if the image is imported successfully.
+  local ret=$(az acr repository show --name $ACR_NAME --image ${tmpImagePath})
+  if [ -n "${ret}" ]; then
     # delete the image from ACR.
     az acr repository delete --name ${ACR_NAME} --image ${tmpImagePath} --yes
   else
+    echo_stderr $ret
+    echo_stderr ""
     echo_stderr "Image ${ocrImageFullPath} is not available! Please make sure you have accepted the Oracle Standard Terms and Restrictions and the image exists in https://container-registry.oracle.com/ "
     if [[ "${ORACLE_ACCOUNT_ENTITLED,,}" == "true" ]]; then
       echo_stderr "Make sure you are entitled to access middleware/weblogic_cpu repository."
     fi
+
+    exit 1
   fi
+
+  echo_stdout "Check OCR image ${ocrImageFullPath}: passed!"
 }
 
 function check_acr_admin_enabled() {

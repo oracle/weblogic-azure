@@ -314,9 +314,11 @@ module partnerCenterPid './modules/_pids/_empty.bicep' = {
 /*
 * Deploy ACR
 */
-module acrDeployment './modules/_azure-resoruces/_acr.bicep' = if (const_createNewAcr) {
-  name: 'acr-deployment'
+module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' = {
+  name: 'pre-azure-resources-deployment'
   params: {
+    acrName: acrName
+    createNewAcr: const_createNewAcr
     location: location
   }
   dependsOn: [
@@ -327,7 +329,7 @@ module acrDeployment './modules/_azure-resoruces/_acr.bicep' = if (const_createN
 module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep' = {
   name: 'validate-parameters-and-fail-fast'
   params: {
-    acrName: const_createNewAcr ? acrDeployment.outputs.acrName : acrName
+    acrName: preAzureResourceDeployment.outputs.acrName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolVMSize: aksAgentPoolVMSize
     aksClusterRGName: aksClusterRGName
@@ -378,7 +380,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
   }
   dependsOn: [
     pids
-    acrDeployment
+    preAzureResourceDeployment
   ]
 }
 
@@ -434,7 +436,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aciResourcePermissions: aciResourcePermissions
     aciRetentionInDays: aciRetentionInDays
     aciWorkspaceSku: aciWorkspaceSku
-    acrName: acrName
+    acrName: preAzureResourceDeployment.outputs.acrName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolVMSize: aksAgentPoolVMSize
@@ -453,6 +455,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: const_enablePV
     identity: identity
+    isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     managedServerPrefix: managedServerPrefix
     ocrSSOPSW: ocrSSOPSW
@@ -498,7 +501,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aciResourcePermissions: aciResourcePermissions
     aciRetentionInDays: aciRetentionInDays
     aciWorkspaceSku: aciWorkspaceSku
-    acrName: acrName
+    acrName: preAzureResourceDeployment.outputs.acrName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolVMSize: aksAgentPoolVMSize
@@ -517,6 +520,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: const_enablePV
     identity: identity
+    isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     managedServerPrefix: managedServerPrefix
     ocrSSOPSW: ocrSSOPSW

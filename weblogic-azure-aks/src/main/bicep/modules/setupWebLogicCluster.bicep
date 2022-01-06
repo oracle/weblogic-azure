@@ -61,6 +61,7 @@ param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
+param isSSOSupportEntitled bool
 param location string
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
@@ -180,6 +181,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: enablePV
     identity: identity
+    isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     managedServerPrefix: managedServerPrefix
     ocrSSOUser: ocrSSOUser
