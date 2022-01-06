@@ -10,7 +10,7 @@ export constAdminServerName='admin-server'
 export constClusterName='cluster-1'
 export constClusterT3AddressEnvName="T3_TUNNELING_CLUSTER_ADDRESS"
 export constDefaultJavaOptions="-Dlog4j2.formatMsgNoLookups=true -Dweblogic.StdoutDebugEnabled=false" # the java options will be applied to the cluster
-export constDefaultJVMArgs="-Djava.security.egd=file:/dev/./urandom -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 " # the JVM options will be applied to the cluster
+export constDefaultJVMArgs="-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 " # the JVM options will be applied to the cluster
 export constFalse="false"
 export constTrue="true"
 export constIntrospectorJobActiveDeadlineSeconds=300  # for Guaranteed Qos
