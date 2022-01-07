@@ -5,9 +5,12 @@
 # env inputs:
 # AKS_CLUSTER_NAME
 # AKS_CLUSTER_RESOURCEGROUP_NAME
+# WLS_CLUSTER_NAME
 # WLS_DOMAIN_UID
 
 # Main script
+wlsContainerName="weblogic-server"
+
 echo "install kubectl"
 az aks install-cli
 
@@ -23,41 +26,56 @@ domainConfigurationYaml=/tmp/domain.yaml
 rm -f ${domainConfigurationYaml}
 kubectl get domain ${WLS_DOMAIN_UID} -n ${wlsDomainNS} -o yaml >${domainConfigurationYaml}
 
-adminPodName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json |
-    jq '.items[0] | .metadata.name' |
-    tr -d "\"")
+# we should not run the script in admin pod, as there is no admin pod for slim image.
+podNum=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${WLS_CLUSTER_NAME} -o json | jq '.items| length')
+    if [ ${podNum} -le 0 ]; then
+        echo_stderr "Ensure your cluster has at least one pod."
+        exit 1
+    fi
 
-if [ -z "${adminPodName}" ]; then
-    echo >&2 "Fail to get admin server pod."
-    exit 1
-fi
+podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${WLS_CLUSTER_NAME} -o json \
+    | jq '.items[0] | .metadata.name' \
+    | tr -d "\"")
 
 echo "Copy model.yaml from /u01/wdt/models"
 targetModelYaml=/tmp/model.yaml
 rm -f ${targetModelYaml}
-kubectl cp -n ${wlsDomainNS} -c weblogic-server ${adminPodName}:/u01/wdt/models/model.yaml ${targetModelYaml}
+kubectl cp -n ${wlsDomainNS} -c ${wlsContainerName} ${podName}:/u01/wdt/models/model.yaml ${targetModelYaml}
 if [ $? != 0 ]; then
-    echo >&2 "Fail to copy ${adminPodName}:/u01/wdt/models/model.yaml."
+    echo >&2 "Fail to copy ${podName}:/u01/wdt/models/model.yaml."
     exit 1
 fi
 
 echo "Copy model.properties from from /u01/wdt/models"
 targetModelProperties=/tmp/model.properties
 rm -f ${targetModelProperties}
-kubectl cp -n ${wlsDomainNS} -c weblogic-server ${adminPodName}:/u01/wdt/models/model.properties ${targetModelProperties}
+kubectl cp -n ${wlsDomainNS} -c ${wlsContainerName} ${podName}:/u01/wdt/models/model.properties ${targetModelProperties}
 if [ $? != 0 ]; then
-    echo >&2 "Fail to copy ${adminPodName}:/u01/wdt/models/model.properties."
+    echo >&2 "Fail to copy ${podName}:/u01/wdt/models/model.properties."
     exit 1
 fi
+
+echo "Query WebLogic version and patch numbers"
+versionDetails=$(kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+    -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version')
+if [ $? != 0 ]; then
+    echo >&2 "Fail to run java weblogic.version."
+    exit 1
+fi
+
+echo "Get patches"
+
 
 base64ofDomainYaml=$(cat ${domainConfigurationYaml} | base64)
 base64ofModelYaml=$(cat ${targetModelYaml} | base64)
 base64ofModelProperties=$(cat ${targetModelProperties} | base64)
+base64ofWLSVersionDetails=$(echo ${versionDetails} | base64)
 
 result=$(jq -n -c \
     --arg domainDeploymentYaml "$base64ofDomainYaml" \
     --arg wlsImageModelYaml "$base64ofModelYaml" \
     --arg wlsImageProperties "$base64ofModelProperties" \
-    '{domainDeploymentYaml: $domainDeploymentYaml, wlsImageModelYaml: $wlsImageModelYaml, wlsImageProperties: $wlsImageProperties}')
+    --arg wlsVersionDetails "${base64ofWLSVersionDetails}" \
+    '{domainDeploymentYaml: $domainDeploymentYaml, wlsImageModelYaml: $wlsImageModelYaml, wlsImageProperties: $wlsImageProperties, wlsVersionDetails: $wlsVersionDetails}')
 echo "result is: $result"
 echo $result >$AZ_SCRIPTS_OUTPUT_PATH

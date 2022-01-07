@@ -724,6 +724,7 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     identity: identity
     location: location
+    wlsClusterName: const_wlsClusterName
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
@@ -749,3 +750,4 @@ output shellCmdtoConnectAks string = format('az account set --subscription {0}; 
 output shellCmdtoOutputWlsDomainYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsDomainYaml
 output shellCmdtoOutputWlsImageModelYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageModelYaml
 output shellCmdtoOutputWlsImageProperties string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageProperties
+output shellCmdtoOutputWlsVersionsandPatches string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsVersions
