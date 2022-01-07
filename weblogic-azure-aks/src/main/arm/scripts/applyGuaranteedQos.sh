@@ -6,6 +6,7 @@
 # env inputs:
 # AKS_CLUSTER_NAME
 # AKS_CLUSTER_RESOURCEGROUP_NAME
+# WLS_CLUSTER_NAME
 # WLS_DOMAIN_UID
 
 # Main script
@@ -26,14 +27,16 @@ az aks get-credentials \
     --name ${AKS_CLUSTER_NAME} \
     --overwrite-existing
 
-# get name of the running admin pod
-adminPodName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json |
-    jq '.items[0] | .metadata.name' |
-    tr -d "\"")
-if [ -z "${adminPodName}" ]; then
-    echo_stderr "Fail to get admin server pod."
-    exit 1
-fi
+# we should not run the script in admin pod, as there is no admin pod for slim image.
+podNum=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${WLS_CLUSTER_NAME} -o json | jq '.items| length')
+    if [ ${podNum} -le 0 ]; then
+        echo_stderr "Ensure your cluster has at least one pod."
+        exit 1
+    fi
+
+podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${WLS_CLUSTER_NAME} -o json \
+    | jq '.items[0] | .metadata.name' \
+    | tr -d "\"")
 
 # run `source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version` to get the version.
 # the command will print three lines, with WLS version in the first line.
@@ -43,7 +46,7 @@ fi
 # WebLogic Server 12.2.1.4.0 Thu Sep 12 04:04:29 GMT 2019 1974621
 # Use 'weblogic.version -verbose' to get subsystem information
 # Use 'weblogic.utils.Versions' to get version information for all modules
-rawOutput=$(kubectl exec -it ${adminPodName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+rawOutput=$(kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
     -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version | grep "WebLogic Server"')
 
 # get version from string like "WebLogic Server 12.2.1.4.0 Thu Sep 12 04:04:29 GMT 2019 1974621"

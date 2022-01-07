@@ -276,6 +276,7 @@ var const_hasStorageAccount = !createAKSCluster && reference('query-existing-sto
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
 var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
+var const_wlsClusterName = 'cluster-1'
 var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
 var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_defaultPidDeployment = 'pid'
@@ -661,6 +662,7 @@ module applyGuaranteedQos 'modules/_deployment-scripts/_ds-apply-guaranteed-qos.
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     identity: identity
     location: location
+    wlsClusterName: const_wlsClusterName
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [

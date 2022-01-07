@@ -16,7 +16,7 @@ param aksClusterRGName string = ''
 param identity object
 param location string
 param utcValue string = utcNow()
-
+param wlsClusterName string = 'cluster-1'
 param wlsDomainUID string = 'sample-domain1'
 
 var const_azcliVersion = '2.15.0'
@@ -41,6 +41,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       {
         name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
         value: aksClusterRGName
+      }
+      {
+        name: 'WLS_CLUSTER_NAME'
+        value: wlsClusterName
       }
       {
         name: 'WLS_DOMAIN_UID'
