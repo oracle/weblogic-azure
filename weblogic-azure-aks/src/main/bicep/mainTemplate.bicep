@@ -276,6 +276,7 @@ var const_hasStorageAccount = !createAKSCluster && reference('query-existing-sto
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
 var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
+var const_wlsClusterName = 'cluster-1'
 var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
 var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_defaultPidDeployment = 'pid'
@@ -647,6 +648,29 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
 }
 
 /*
+* Temporary workaround for https://github.com/oracle/weblogic-kubernetes-operator/issues/2693
+* Apply resource limits to WebLogic Server 14.1.1.0.
+* The script will check the WebLogic Server version, and apply resource limits to 14.1.1.0.
+* The resource limits will be the same with requests.
+*/
+module applyGuaranteedQos 'modules/_deployment-scripts/_ds-apply-guaranteed-qos.bicep' = {
+  name: 'apply-resources-limits-to-wls14'
+  params:{
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    identity: identity
+    location: location
+    wlsClusterName: const_wlsClusterName
+    wlsDomainUID: wlsDomainUID
+  }
+  dependsOn: [
+    datasourceDeployment
+  ]
+}
+
+/*
 * To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
 * This should be the last step.
 */
@@ -664,7 +688,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
     wlsUserName: wlsUserName
   }
   dependsOn: [
-    datasourceDeployment
+    applyGuaranteedQos
   ]
 }
 
