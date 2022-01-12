@@ -373,7 +373,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     sslUploadedCustomTrustKeyStoreType: sslUploadedCustomTrustKeyStoreType
     sslUploadedPrivateKeyAlias: sslUploadedPrivateKeyAlias
     sslUploadedPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
-    userProvidedAcr: userProvidedAcr // used in use provided images
+    userProvidedAcr: userProvidedAcr // used in user provided images
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
     wlsImageTag: wlsImageTag

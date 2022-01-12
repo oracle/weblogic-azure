@@ -26,7 +26,6 @@ domainConfigurationYaml=/tmp/domain.yaml
 rm -f ${domainConfigurationYaml}
 kubectl get domain ${WLS_DOMAIN_UID} -n ${wlsDomainNS} -o yaml >${domainConfigurationYaml}
 
-# we should not run the script in admin pod, as there is no admin pod for slim image.
 podNum=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${WLS_CLUSTER_NAME} -o json | jq '.items| length')
     if [ ${podNum} -le 0 ]; then
         echo_stderr "Ensure your cluster has at least one pod."
@@ -70,7 +69,6 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-echo "Get patches"
 base64ofDomainYaml=$(cat ${domainConfigurationYaml} | base64)
 base64ofModelYaml=$(cat ${targetModelYaml} | base64)
 base64ofModelProperties=$(cat ${targetModelProperties} | base64)

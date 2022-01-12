@@ -200,7 +200,7 @@ function validate_ocr_image() {
     curl -L "${gitUrl4CpuImages}" -o ${cpuImagesListFile}
     local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag == \"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
     echo_stdout "cpu tag: ${cpuTag}"
-    # if we can not find a matched image, keep the tag name the same as GA tag.
+    # if we can not find a matched image, keep the input tag.
     if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
       cpuTag=${wlsImageTag}
     fi
@@ -220,7 +220,7 @@ function validate_ocr_image() {
     --image ${tmpImagePath} \
     --only-show-errors
 
-  # echo $? equals 0 even though failure happens.
+  # $? equals 0 even though failure happens.
   # check if the image is imported successfully.
   local ret=$(az acr repository show --name $ACR_NAME --image ${tmpImagePath})
   if [ -n "${ret}" ]; then
