@@ -576,7 +576,7 @@
                                 "label": "Select desired combination of WebLogic Server, JDK and Operating System or fully qualified Docker tag",
                                 "defaultValue": "14.1.1.0-11",
                                 "multiLine": true,
-                                "toolTip": "",
+                                "toolTip": "Select image",
                                 "constraints": {
                                     "allowedValues": [
                                         {
