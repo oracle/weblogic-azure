@@ -19,7 +19,7 @@ export curlMaxTime=120 # seconds
 export ocrLoginServer="container-registry.oracle.com"
 export ocrGaImagePath="middleware/weblogic"
 export ocrCpuImagePath="middleware/weblogic_cpu"
-export gitUrl4CpuImages="https://raw.githubusercontent.com/galiacheng/weblogic-azure/galia-cpu_registry-user-experience/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
+export gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
 export optUninstallInterval=10
 

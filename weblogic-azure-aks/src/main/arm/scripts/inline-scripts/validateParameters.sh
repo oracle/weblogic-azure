@@ -197,7 +197,7 @@ function validate_ocr_image() {
 
     # download the ga cpu image mapping file.
     local cpuImagesListFile=weblogic_cpu_images.json
-    curl -L ${gitUrl4CpuImages} -o ${cpuImagesListFile}
+    curl -L "${gitUrl4CpuImages}" -o ${cpuImagesListFile}
     local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag == \"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
     echo_stdout "cpu tag: ${cpuTag}"
     # if we can not find a matched image, keep the tag name the same as GA tag.
@@ -557,7 +557,7 @@ ocrGaImagePath="middleware/weblogic"
 ocrCpuImagePath="middleware/weblogic_cpu"
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
-gitUrl4CpuImages="https://raw.githubusercontent.com/galiacheng/weblogic-azure/galia-cpu_registry-user-experience/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
+gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
 
 validate_user_assigned_managed_identity
 
