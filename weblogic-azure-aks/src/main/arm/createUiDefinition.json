@@ -558,41 +558,18 @@
                                         }
                                     ],
                                     "required": true
-                                }
-                            },                            
+                                },
+                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
+                            },
                             {
                                 "name": "fromImageInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
                                     "icon": "Warning",
-                                    "text": "The Oracle Standard Terms and Restrictions for the selected WebLogic Server version must be accepted in the Oracle Container Registry."
+                                    "text": "The Oracle Standard Terms and Restrictions for the WebLogic Server images must be accepted in the Oracle Container Registry.<br><br>To accept the license agreement of available <b>Patched WebLogic Server Images</b>:<li>Log on to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a></li><li>Navigate to <b>middleware/weblogic_cpu</b></li><li>Accept license agreement</li><br>To accept the license agreement of available <b>General WebLogic Server Images</b>:<li>Log on to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a></li><li>Navigate to <b>middleware/weblogic</b></li><li>Accept license agreement</li>"
                                 }
                             },
-                            {
-                                "name": "SSOSupportIsEntitledYes",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "text": "You must select this link and accept the Oracle Standard Terms and Restrictions in the Oracle Container Registry.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-ga-registry"
-                                    }
-                                }
-                            },                            
-                            {
-                                "name": "SSOSupportIsEntitledNo",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "text": "You must select this link and accept the Oracle Standard Terms and Restrictions in the Oracle Container Registry.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-cpu-registry"
-                                    }
-                                }
-                            },                            
                             {
                                 "name": "oracleImageSelector",
                                 "type": "Microsoft.Common.DropDown",
