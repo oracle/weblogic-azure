@@ -56,20 +56,25 @@ if [ $? != 0 ]; then
 fi
 
 echo "Query WebLogic version and patch numbers"
-versionDetails=$(kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
-    -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version')
+targetFile4Versions=/tmp/version.info
+kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+    -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version -verbose >"'${targetFile4Versions}'"'
 if [ $? != 0 ]; then
     echo >&2 "Fail to run java weblogic.version."
     exit 1
 fi
+rm -f ${targetFile4Versions}
+kubectl cp -n ${wlsDomainNS} -c ${wlsContainerName} ${podName}:${targetFile4Versions} ${targetFile4Versions}
+if [ $? != 0 ]; then
+    echo >&2 "Fail to copy ${podName}:${targetFile4Versions}."
+    exit 1
+fi
 
 echo "Get patches"
-
-
 base64ofDomainYaml=$(cat ${domainConfigurationYaml} | base64)
 base64ofModelYaml=$(cat ${targetModelYaml} | base64)
 base64ofModelProperties=$(cat ${targetModelProperties} | base64)
-base64ofWLSVersionDetails=$(echo ${versionDetails} | base64)
+base64ofWLSVersionDetails=$(cat ${targetFile4Versions} | base64)
 
 result=$(jq -n -c \
     --arg domainDeploymentYaml "$base64ofDomainYaml" \
