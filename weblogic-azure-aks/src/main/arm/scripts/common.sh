@@ -1,3 +1,7 @@
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+# This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
+
 export checkPodStatusInterval=20 # interval of checking pod status.
 export checkPodStatusMaxAttemps=30 # max attempt to check pod status.
 export checkPVStateInterval=5 # interval of checking pvc status.

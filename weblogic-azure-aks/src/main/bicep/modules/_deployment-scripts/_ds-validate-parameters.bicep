@@ -208,7 +208,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: dnszoneRGName
       }
     ]
-    scriptContent: loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh')
+    scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue

@@ -552,12 +552,8 @@ appGatewayCertificateOption=${10}
 enableAppGWIngress=${11}
 checkDNSZone=${12}
 
-ocrLoginServer="container-registry.oracle.com"
-ocrGaImagePath="middleware/weblogic"
-ocrCpuImagePath="middleware/weblogic_cpu"
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
-gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
 
 validate_user_assigned_managed_identity
 
