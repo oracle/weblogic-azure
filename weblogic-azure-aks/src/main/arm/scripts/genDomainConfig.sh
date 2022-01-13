@@ -90,7 +90,7 @@ spec:
     - name: JAVA_OPTIONS
       value: "${constDefaultJavaOptions} ${javaOptions}"
     - name: USER_MEM_ARGS
-      value: "-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 "
+      value: "${constDefaultJVMArgs}"
     - name: MANAGED_SERVER_PREFIX
       value: "${wlsManagedPrefix}"
 EOF
