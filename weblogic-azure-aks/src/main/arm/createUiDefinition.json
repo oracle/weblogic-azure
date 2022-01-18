@@ -2015,7 +2015,7 @@
             "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
-            "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",
+            "lbSvcValues": "[if(not(empty(first(if(empty(steps('section_appGateway').lbSVCInfo.lbSVC),parse('[{\"colName\":\"\"}]'), steps('section_appGateway').lbSVCInfo.lbSVC)).colName)),steps('section_appGateway').lbSVCInfo.lbSVC, parse('[]'))]",
             "location": "[location()]",
             "keyVaultName": "[steps('section_appGateway').appgwIngress.keyVaultName]",
             "keyVaultResourceGroup": "[steps('section_appGateway').appgwIngress.keyVaultResourceGroup]",
