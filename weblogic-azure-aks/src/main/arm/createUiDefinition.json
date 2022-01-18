@@ -1194,6 +1194,15 @@
                                 "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]"
                             },
                             {
+                                "name": "infoBoxForLbSvc",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "options": {
+                                    "icon": "info",
+                                    "text": "There must be at least one and at most two entries."
+                                }
+                            },
+                            {
                                 "name": "lbSVC",
                                 "type": "Microsoft.Common.EditableGrid",
                                 "ariaLabel": "Enter information",
@@ -1215,8 +1224,8 @@
                                             "width": "2fr",
                                             "element": {
                                                 "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "domain1-admin-server",
-                                                "toolTip": "Service name",
+                                                "placeholder": "Input a prefix...",
+                                                "toolTip": "Input a prefix for service name. For example, inputing 'domain1-admin-server' will cause provisioning a Load Balancer service named with 'domain1-admin-server*' and exposing the Oracle WebLogic Administration Server to Internet.",
                                                 "constraints": {
                                                     "required": true,
                                                     "validations": [
@@ -1238,8 +1247,8 @@
                                             "width": "2fr",
                                             "element": {
                                                 "type": "Microsoft.Common.DropDown",
-                                                "placeholder": "admin-server",
-                                                "toolTip": "Select targets for load balancer",
+                                                "placeholder": "Select a target...",
+                                                "toolTip": "Create Azure Standard Load Balancer Servicer for the selected target.",
                                                 "constraints": {
                                                     "allowedValues": [
                                                         {
@@ -1261,8 +1270,8 @@
                                             "width": "1fr",
                                             "element": {
                                                 "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "7001",
-                                                "toolTip": "Select port for target",
+                                                "placeholder": "Input a port...",
+                                                "toolTip": "Public port for the target service, it's suggested to use 7001 for Oracle WebLogic Administration Server, and 8001 for cluster.",
                                                 "constraints": {
                                                     "required": true,
                                                     "validations": [
