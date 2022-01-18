@@ -545,7 +545,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Is the specified SSO account associated with an active Oracle support contract?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to confirm the specified SSO account is associated with an active Oracle support contract.  Select 'No' otherwise.  If 'Yes' is selected, the deployment process will pull from the patched CPU WebLogic Server image repository.  If 'No' is selected, the deployment process will pull from the unpatched WebLogic Server image repository.",
+                                "toolTip": "If 'Yes' is selected, the deployment process will pull from the CPU WebLogic Server image repository in the Oracle Container Registry (OCR). If 'No' is selected the deployment process will pull from the WebLogic Server image repository in OCR.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
