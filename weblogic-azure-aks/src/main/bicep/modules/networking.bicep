@@ -4,10 +4,14 @@
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _pidNetworkingEnd string = 'pid-networking-end'
-param _pidNetworkingStart string = 'pid-networking-start'
 param _pidAppgwEnd string = 'pid-networking-appgateway-end'
 param _pidAppgwStart string = 'pid-networking-appgateway-start'
+param _pidDnsEnd string = 'pid-networking-dns-end'
+param _pidDnsStart string = 'pid-networking-dns-start'
+param _pidLbEnd string = 'pid-networking-lb-end'
+param _pidLbStart string = 'pid-networking-lb-start'
+param _pidNetworkingEnd string = 'pid-networking-end'
+param _pidNetworkingStart string = 'pid-networking-start'
 @description('Resource group name of an existing AKS cluster.')
 param aksClusterRGName string = 'aks-contoso-rg'
 @description('Name of an existing AKS cluster.')
@@ -32,7 +36,7 @@ param dnsNameforApplicationGateway string = 'wlsgw'
 @description('Azure DNS Zone name.')
 param dnszoneName string = 'contoso.xyz'
 param dnszoneAdminConsoleLabel string = 'admin'
-param dnszoneAdminT3ChannelLabel string ='admin-t3'
+param dnszoneAdminT3ChannelLabel string = 'admin-t3'
 @description('Specify a label used to generate subdomain of WebLogic cluster. The final subdomain name will be label.dnszoneName, e.g. applications.contoso.xyz')
 param dnszoneClusterLabel string = 'www'
 param dnszoneClusterT3ChannelLabel string = 'cluster-t3'
@@ -67,7 +71,8 @@ param wlsDomainUID string = 'sample-domain1'
 var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_appgwSSLCertOptionGenerateCert = 'generateCert'
-var name_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? 'ds-networking-deployment-1': 'ds-networking-deployment') : 'ds-networking-deployment-2'
+var const_enableLbService = length(lbSvcValues) > 0
+var name_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? 'ds-networking-deployment-1' : 'ds-networking-deployment') : 'ds-networking-deployment-2'
 var ref_networkDeployment = reference(name_networkDeployment)
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
@@ -81,6 +86,20 @@ module pidAppgwStart './_pids/_pid.bicep' = if (enableAppGWIngress) {
   name: 'pid-app-gateway-start-deployment'
   params: {
     name: _pidAppgwStart
+  }
+}
+
+module pidLbStart './_pids/_pid.bicep' = if (const_enableLbService) {
+  name: 'pid-loadbalancer-service-start-deployment'
+  params: {
+    name: _pidLbStart
+  }
+}
+
+module pidDnsStart './_pids/_pid.bicep' = if (enableDNSConfiguration) {
+  name: 'pid-dns-start-deployment'
+  params: {
+    name: _pidDnsStart
   }
 }
 
@@ -99,6 +118,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
   }
   dependsOn: [
     pidAppgwStart
+    pidLbStart
   ]
 }
 
@@ -120,8 +140,6 @@ module appgwBackendCertDeployment '_deployment-scripts/_ds-appgw-upload-trusted-
   ]
 }
 
-
-
 module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfiguration && createDNSZone) {
   name: 'dnszone-deployment'
   params: {
@@ -129,6 +147,7 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
   }
   dependsOn: [
     pidNetworkingStart
+    pidDnsStart
   ]
 }
 
@@ -259,15 +278,38 @@ module pidAppgwEnd './_pids/_pid.bicep' = if (enableAppGWIngress) {
   ]
 }
 
+module pidLbEnd './_pids/_pid.bicep' = if (const_enableLbService) {
+  name: 'pid-loadbalancer-service-end-deployment'
+  params: {
+    name: _pidLbEnd
+  }
+  dependsOn: [
+    networkingDeployment
+    networkingDeployment2
+    networkingDeployment3
+  ]
+}
+
+module pidDnsEnd './_pids/_pid.bicep' = if (enableDNSConfiguration) {
+  name: 'pid-dns-end-deployment'
+  params: {
+    name: _pidDnsEnd
+  }
+  dependsOn: [
+    networkingDeployment
+    networkingDeployment2
+    networkingDeployment3
+  ]
+}
+
 module pidNetworkingEnd './_pids/_pid.bicep' = {
   name: 'pid-networking-end-deployment'
   params: {
     name: _pidNetworkingEnd
   }
   dependsOn: [
-    networkingDeployment
-    networkingDeployment2
-    networkingDeployment3
+    pidLbEnd
+    pidDnsEnd
   ]
 }
 

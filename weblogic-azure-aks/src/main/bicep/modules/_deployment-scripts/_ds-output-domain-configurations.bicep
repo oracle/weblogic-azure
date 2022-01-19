@@ -6,6 +6,7 @@ param aksClusterName string = ''
 param identity object
 param location string
 param utcValue string = utcNow()
+param wlsClusterName string = 'cluster-1'
 param wlsDomainUID string = 'sample-domain1'
 
 var const_azcliVersion='2.15.0'
@@ -28,6 +29,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: aksClusterName
       }
       {
+        name: 'WLS_CLUSTER_NAME'
+        value: wlsClusterName
+      }
+      {
         name: 'WLS_DOMAIN_UID'
         value: wlsDomainUID
       }
@@ -42,3 +47,4 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
 output shellCmdtoOutputWlsDomainYaml string = format('echo -e {0} | base64 -d > domain.yaml', reference(const_deploymentName).outputs.domainDeploymentYaml)
 output shellCmdtoOutputWlsImageModelYaml string = format('echo -e {0} | base64 -d > model.yaml', reference(const_deploymentName).outputs.wlsImageModelYaml)
 output shellCmdtoOutputWlsImageProperties string = format('echo -e {0} | base64 -d > model.properties', reference(const_deploymentName).outputs.wlsImageProperties)
+output shellCmdtoOutputWlsVersions string = format('echo -e {0} | base64 -d > version.info', reference(const_deploymentName).outputs.wlsVersionDetails)

@@ -190,28 +190,79 @@ function validate_ocr_account() {
   echo_stdout "Check OCR account: passed!"
 }
 
+function validate_ocr_image() {
+  local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${wlsImageTag}"
+
+  if [[ "${ORACLE_ACCOUNT_ENTITLED,,}" == "true" ]]; then
+
+    # download the ga cpu image mapping file.
+    local cpuImagesListFile=weblogic_cpu_images.json
+    curl -L "${gitUrl4CpuImages}" -o ${cpuImagesListFile}
+    local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag == \"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
+    echo_stdout "cpu tag: ${cpuTag}"
+    # if we can not find a matched image, keep the input tag.
+    if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
+      cpuTag=${wlsImageTag}
+    fi
+
+    ocrImageFullPath="${ocrLoginServer}/${ocrCpuImagePath}:${cpuTag}"
+  fi
+
+  echo_stdout "image path: ${ocrImageFullPath}"
+
+  # validate the image by importing it to ACR.
+  # if failure happens, the image should be unavailable
+  local tmpImagePath="tmp$(date +%s):${wlsImageTag}"
+  az acr import --name ${ACR_NAME} \
+    --source ${ocrImageFullPath} \
+    -u ${ORACLE_ACCOUNT_NAME} \
+    -p ${ORACLE_ACCOUNT_PASSWORD} \
+    --image ${tmpImagePath} \
+    --only-show-errors
+
+  # $? equals 0 even though failure happens.
+  # check if the image is imported successfully.
+  local ret=$(az acr repository show --name $ACR_NAME --image ${tmpImagePath})
+  if [ -n "${ret}" ]; then
+    # delete the image from ACR.
+    az acr repository delete --name ${ACR_NAME} --image ${tmpImagePath} --yes
+  else
+    echo_stderr $ret
+    echo_stderr ""
+    echo_stderr "Image ${ocrImageFullPath} is not available! Please make sure you have accepted the Oracle Standard Terms and Restrictions and the image exists in https://container-registry.oracle.com/ "
+    if [[ "${ORACLE_ACCOUNT_ENTITLED,,}" == "true" ]]; then
+      echo_stderr "Make sure you are entitled to access middleware/weblogic_cpu repository."
+    fi
+
+    exit 1
+  fi
+
+  echo_stdout "Check OCR image ${ocrImageFullPath}: passed!"
+}
+
 function check_acr_admin_enabled() {
-  echo_stdout "check if admin user enabled in ACR $ACR_NAME "
-  local adminUserEnabled=$(az acr show --name $ACR_NAME --query "adminUserEnabled")
-  validate_status "query 'adminUserEnabled' property of ACR ${ACR_NAME}" "Invalid ACR: ${ACR_NAME}"
+  local acrName = $1
+  echo_stdout "check if admin user enabled in ACR $acrName "
+  local adminUserEnabled=$(az acr show --name $acrName --query "adminUserEnabled")
+  validate_status "query 'adminUserEnabled' property of ACR ${acrName}" "Invalid ACR: ${acrName}"
 
   if [[ "${adminUserEnabled}" == "false" ]]; then
-    echo_stderr "Make sure admin user is enabled in ACR $ACR_NAME. Please find steps in https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef&tabs=azure-cli#admin-account"
+    echo_stderr "Make sure admin user is enabled in ACR $acrName. Please find steps in https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef&tabs=azure-cli#admin-account"
     exit 1
   fi
 }
 
 function validate_acr_image() {
-  echo_stdout "use ACR: $ACR_NAME"
+  echo_stdout "user provided ACR: $ACR_NAME_FOR_USER_PROVIDED_IMAGE"
 
   local pathWithoutTag=${userProvidedImagePath%\:*}
   local repository=${pathWithoutTag#*\/}
   local tag="${userProvidedImagePath##*:}"
 
-  local tagIndex=$(az acr repository show-tags --name $ACR_NAME --repository ${repository} | jq 'index("'${tag}'")')
+  local tagIndex=$(az acr repository show-tags --name $ACR_NAME_FOR_USER_PROVIDED_IMAGE --repository ${repository} | jq 'index("'${tag}'")')
   validate_status "check if tag ${tag} exists." "Invalid image path ${userProvidedImagePath}"
   if [[ "${tagIndex}" == "null" ]]; then
-    echo_stderr "Tag ${tag} does not exist in ${repository}."
+    echo_stderr "Image ${tag} does not exist in ${repository}."
     exit 1
   fi
 
@@ -221,8 +272,18 @@ function validate_acr_image() {
 function validate_base_image_path() {
   if [[ "${useOracleImage,,}" == "true" ]]; then
     validate_ocr_account
+    validate_ocr_image
   else
     validate_acr_image
+  fi
+}
+
+function validate_acr_admin_enabled()
+{
+  if [[ "${useOracleImage,,}" == "true" ]]; then
+    check_acr_admin_enabled ${ACR_NAME}
+  else
+    check_acr_admin_enabled ${ACR_NAME_FOR_USER_PROVIDED_IMAGE}
   fi
 }
 
@@ -490,9 +551,7 @@ sslConfigurationAccessOption=$9
 appGatewayCertificateOption=${10}
 enableAppGWIngress=${11}
 checkDNSZone=${12}
-checkACR=${13}
 
-ocrLoginServer="container-registry.oracle.com"
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
 
@@ -502,11 +561,9 @@ validate_compute_resources
 
 validate_base_image_path
 
-validate_aks_network_plugin
+validate_acr_admin_enabled
 
-if [[ "${checkACR,,}" == "true" ]]; then
-  check_acr_admin_enabled
-fi
+validate_aks_network_plugin
 
 if [[ "${enableCustomSSL,,}" == "true" ]]; then
   validate_wls_ssl_certificates

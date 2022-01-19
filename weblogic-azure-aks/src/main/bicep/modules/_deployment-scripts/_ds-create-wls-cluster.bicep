@@ -16,6 +16,7 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 param identity object
+param isSSOSupportEntitled bool
 param location string
 param managedServerPrefix string = 'managed-server'
 @secure()
@@ -83,6 +84,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       {
         name: 'URL_3RD_DATASOURCE'
         value:  '${string(dbDriverLibrariesUrls)}'
+      }
+      {
+        name: 'ORACLE_ACCOUNT_ENTITLED'
+        value: string(isSSOSupportEntitled)
       }
     ]
     primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetUpDomainScript}${_artifactsLocationSasToken}')

@@ -400,9 +400,9 @@
                             {
                                 "name": "useOracleImage",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use a pre-existing, unpatched, WebLogic Server Docker image from Oracle Container Registry?",
+                                "label": "Use a pre-existing, WebLogic Server Docker image from Oracle Container Registry?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing, unpatched, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set patches (PSUs).",
+                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -505,7 +505,7 @@
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Select the link to create Oracle SSO account.",
+                                    "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Select the link to create an Oracle SSO account.",
                                     "uri": "https://aka.ms/wls-aks-create-sso-account"
                                 }
                             },
@@ -541,65 +541,87 @@
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
                             },
                             {
-                                "name": "fromImageText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
-                                "options": {
-                                    "text": "This value is appended to 'container-registry.oracle.com/middleware/weblogic:' and used in the Dockerfile FROM clause."
-                                }
+                                "name": "isSSOSupportEntitled",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Is the specified SSO account associated with an active Oracle support contract?",
+                                "defaultValue": "Yes",
+                                "toolTip": "If 'Yes' is selected, the deployment process will pull from the CPU WebLogic Server image repository in the Oracle Container Registry (OCR). If 'No' is selected the deployment process will pull from the WebLogic Server image repository in OCR.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "true"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "false"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
                             },
                             {
                                 "name": "fromImageInfo",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
                                 "options": {
-                                    "icon": "Info",
-                                    "text": "In the Oracle Container Registry, the Oracle Standard Terms and Restrictions must be accepted. Select this link the following link to make sure you have agreed to the terms for the desired WebLogic Server Docker image and check the valid tags. The deployment will fail if you have not accepted the terms.",
-                                    "uri": "https://aka.ms/wls-aks-fromImage-tag"
+                                    "icon": "Warning",
+                                    "text": "The Oracle Standard Terms and Restrictions for the WebLogic Server images must be accepted in the Oracle Container Registry.<br><br>To accept the license agreement of available <b>Patched WebLogic Server Images</b>:<li>Log on to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a></li><li>Navigate to <b>middleware/weblogic_cpu</b></li><li>Accept license agreement</li><br>To accept the license agreement of available <b>General WebLogic Server Images</b>:<li>Log on to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a></li><li>Navigate to <b>middleware/weblogic</b></li><li>Accept license agreement</li>"
                                 }
                             },
                             {
                                 "name": "oracleImageSelector",
                                 "type": "Microsoft.Common.DropDown",
-                                "label": "Select WebLogic Server Docker tag",
+                                "label": "Select desired combination of WebLogic Server, JDK and Operating System or fully qualified Docker tag",
                                 "defaultValue": "14.1.1.0-11",
-                                "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromOracleImage option to 'imagetool'.",
+                                "multiLine": true,
+                                "toolTip": "Select image",
                                 "constraints": {
                                     "allowedValues": [
                                         {
                                             "label": "14.1.1.0-8",
+                                            "description": "14c on JDK 8 on Oracle Linux 7",
                                             "value": "14.1.1.0-8"
                                         },
                                         {
                                             "label": "14.1.1.0-11",
+                                            "description": "14c on JDK 11 on Oracle Linux 7",
                                             "value": "14.1.1.0-11"
                                         },
                                         {
                                             "label": "12.2.1.4",
+                                            "description": "12cR2 (12.2.1.4) on JDK 8 on Oracle Linux 7",
                                             "value": "12.2.1.4"
                                         },
                                         {
                                             "label": "12.2.1.3",
+                                            "description": "12cR2 (12.2.1.3) on JDK 8 on Oracle Linux 7",
                                             "value": "12.2.1.3"
                                         },
                                         {
                                             "label": "14.1.1.0-8-ol8",
+                                            "description": "14c on JDK 8 on Oracle Linux 8",
                                             "value": "14.1.1.0-8-ol8"
                                         },
                                         {
                                             "label": "14.1.1.0-11-ol8",
+                                            "description": "14c on JDK 11 on Oracle Linux 8",
                                             "value": "14.1.1.0-11-ol8"
                                         },
                                         {
                                             "label": "12.2.1.4-ol8",
+                                            "description": "12cR2 (12.2.1.4) on JDK 8 on Oracle Linux 8",
                                             "value": "12.2.1.4-ol8"
                                         },
                                         {
                                             "label": "12.2.1.3-ol8",
+                                            "description": "12cR2 (12.2.1.3) on JDK 8 on Oracle Linux 8",
                                             "value": "12.2.1.3-ol8"
                                         },
                                         {
                                             "label": "Others",
+                                            "description": "Specify fully qualified Oracle Container Registry tag",
                                             "value": "others"
                                         }
                                     ],
@@ -1172,6 +1194,15 @@
                                 "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]"
                             },
                             {
+                                "name": "infoBoxForLbSvc",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "options": {
+                                    "icon": "info",
+                                    "text": "There must be at least one and at most two entries."
+                                }
+                            },
+                            {
                                 "name": "lbSVC",
                                 "type": "Microsoft.Common.EditableGrid",
                                 "ariaLabel": "Enter information",
@@ -1193,8 +1224,8 @@
                                             "width": "2fr",
                                             "element": {
                                                 "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "domain1-admin-server",
-                                                "toolTip": "Service name",
+                                                "placeholder": "Input a prefix...",
+                                                "toolTip": "Input a prefix for service name. For example, inputing 'domain1-admin-server' will cause provisioning a Load Balancer service named with 'domain1-admin-server*' and exposing the Oracle WebLogic Administration Server to Internet.",
                                                 "constraints": {
                                                     "required": true,
                                                     "validations": [
@@ -1216,8 +1247,8 @@
                                             "width": "2fr",
                                             "element": {
                                                 "type": "Microsoft.Common.DropDown",
-                                                "placeholder": "admin-server",
-                                                "toolTip": "Select targets for load balancer",
+                                                "placeholder": "Select a target...",
+                                                "toolTip": "Create Azure Standard Load Balancer Servicer for the selected target.",
                                                 "constraints": {
                                                     "allowedValues": [
                                                         {
@@ -1239,8 +1270,8 @@
                                             "width": "1fr",
                                             "element": {
                                                 "type": "Microsoft.Common.TextBox",
-                                                "placeholder": "7001",
-                                                "toolTip": "Select port for target",
+                                                "placeholder": "Input a port...",
+                                                "toolTip": "Public port for the target service, it's suggested to use 7001 for Oracle WebLogic Administration Server, and 8001 for cluster.",
                                                 "constraints": {
                                                     "required": true,
                                                     "validations": [
@@ -1992,7 +2023,8 @@
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
             "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "lbSvcValues": "[steps('section_appGateway').lbSVCInfo.lbSVC]",
+            "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
+            "lbSvcValues": "[if(not(empty(first(if(empty(steps('section_appGateway').lbSVCInfo.lbSVC),parse('[{\"colName\":\"\"}]'), steps('section_appGateway').lbSVCInfo.lbSVC)).colName)),steps('section_appGateway').lbSVCInfo.lbSVC, parse('[]'))]",
             "location": "[location()]",
             "keyVaultName": "[steps('section_appGateway').appgwIngress.keyVaultName]",
             "keyVaultResourceGroup": "[steps('section_appGateway').appgwIngress.keyVaultResourceGroup]",
