@@ -115,6 +115,7 @@ function cleanup()
     rm -rf $DOMAIN_PATH/deploy-app.yaml
     rm -rf $DOMAIN_PATH/shoppingcart.zip
     rm -rf $DOMAIN_PATH/*.py
+    rm -rf ${CUSTOM_HOSTNAME_VERIFIER_HOME}
     echo "Cleanup completed."
 }
 
@@ -174,8 +175,6 @@ cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
-               HostnameVerificationIgnored: true
-               HostnameVerifier: 'None'
 EOF
 
         if [ "${isCustomSSLEnabled}" == "true" ];
@@ -236,15 +235,10 @@ cat <<EOF>>$DOMAIN_PATH/managed-domain.yaml
 EOF
         fi
 
-cat <<EOF>>$DOMAIN_PATH/managed-domain.yaml
-           SSL:
-                HostnameVerificationIgnored: true
-                HostnameVerifier: 'None'
-EOF
-
         if [ "${isCustomSSLEnabled}" == "true" ];
         then
 cat <<EOF>>$DOMAIN_PATH/managed-domain.yaml
+           SSL:
                 ServerPrivateKeyAlias: "$serverPrivateKeyAlias"
                 ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
 EOF
@@ -310,10 +304,9 @@ if isCustomSSLEnabled == 'true' :
 cd('/Servers/$wlsServerName/SSL/$wlsServerName')
 cmo.setServerPrivateKeyAlias('$serverPrivateKeyAlias')
 set('ServerPrivateKeyPassPhrase', '$serverPrivateKeyPassPhrase')
-cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName//ServerStart/$wlsServerName')
-arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL} -Dweblogic.security.SSL.ignoreHostnameVerification=true'
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL}'
 oldArgs = cmo.getArguments()
 if oldArgs != None:
   newArgs = oldArgs + ' ' + arguments
@@ -799,13 +792,81 @@ fi
 
 }
 
+function generateCustomHostNameVerifier()
+{
+   mkdir -p ${CUSTOM_HOSTNAME_VERIFIER_HOME}
+   mkdir -p ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/main/java
+   mkdir -p ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/test/java
+   cp ${BASE_DIR}/generateCustomHostNameVerifier.sh ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh
+   cp ${BASE_DIR}/WebLogicCustomHostNameVerifier.java ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/main/java/WebLogicCustomHostNameVerifier.java
+   cp ${BASE_DIR}/HostNameValuesTemplate.txt ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/main/java/HostNameValuesTemplate.txt
+   cp ${BASE_DIR}/WebLogicCustomHostNameVerifierTest.java ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/test/java/WebLogicCustomHostNameVerifierTest.java
+   chown -R $username:$groupname ${CUSTOM_HOSTNAME_VERIFIER_HOME}
+   chmod +x ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh
+
+   runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh ${wlsAdminHost} ${customDNSNameForAdminServer} ${customDNSNameForAdminServer} ${dnsLabelPrefix} ${wlsDomainName} ${location}"
+}
+
+function copyCustomHostNameVerifierJarsToWebLogicClasspath()
+{
+   runuser -l oracle -c "cp ${CUSTOM_HOSTNAME_VERIFIER_HOME}/output/*.jar $oracleHome/wlserver/server/lib/;"
+
+   echo "Modify WLS CLASSPATH to include hostname verifier jars...."
+   sed -i 's;^WEBLOGIC_CLASSPATH="${WL_HOME}/server/lib/postgresql-42.2.8.jar.*;&\nWEBLOGIC_CLASSPATH="${WL_HOME}/server/lib/hostnamevalues.jar:${WL_HOME}/server/lib/weblogicustomhostnameverifier.jar:${WEBLOGIC_CLASSPATH}";' $oracleHome/oracle_common/common/bin/commExtEnv.sh
+
+   echo "Modified WLS CLASSPATH to include hostname verifier jars."
+}
+
+
+function configureCustomHostNameVerifier()
+{
+    echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
+    cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifier.py
+connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+try:
+    edit("$wlsServerName")
+    startEdit()
+
+    cd('/Servers/$wlsServerName/SSL/$wlsServerName')
+    cmo.setHostnameVerifier('com.oracle.azure.weblogic.security.util.WebLogicCustomHostNameVerifier')
+    cmo.setHostnameVerificationIgnored(false)
+    cmo.setTwoWaySSLEnabled(false)
+    cmo.setClientCertificateEnforced(false)
+
+    save()
+    activate()
+except Exception,e:
+    print e
+    print "Failed to configureCustomHostNameVerifier for domain  $wlsDomainName"
+    dumpStack()
+    raise Exception('Failed to configureCustomHostNameVerifier for domain  $wlsDomainName')
+disconnect()
+EOF
+sudo chown -R $username:$groupname $DOMAIN_PATH
+runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/configureCustomHostNameVerifier.py"
+if [[ $? != 0 ]]; then
+  echo "Error : Failed to configureCustomHostNameVerifier for domain $wlsDomainName"
+  exit 1
+fi
+
+}
+
+function restartAdminServer()
+{
+   echo "Stopping WebLogic Admin Server..."
+   systemctl stop wls_admin
+   sleep 2m
+   systemctl start wls_admin
+   echo "Starting WebLogic Admin Server..."
+}
+
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword wlsServerName wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword wlsServerName wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customDNSNameForAdminServer dnsLabelPrefix location customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
@@ -826,6 +887,7 @@ wlsAdminT3ChannelPort=7005
 wlsManagedPort=8001
 
 DOMAIN_PATH="/u01/domains"
+CUSTOM_HOSTNAME_VERIFIER_HOME="/u01/app/custom-hostname-verifier"
 startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
 SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
@@ -863,19 +925,26 @@ then
   createStopWebLogicScript
   create_nodemanager_service
   admin_boot_setup
+  generateCustomHostNameVerifier
+  copyCustomHostNameVerifierJarsToWebLogicClasspath
   setUMaskForSecurityDir
   create_adminserver_service
   enabledAndStartNodeManagerService
   enableAndStartAdminServerService
   wait_for_admin
   disableRemoteAnonymousRequests
+  configureCustomHostNameVerifier
 else
+  wait_for_admin
   updateNetworkRules "managed"
   create_managedSetup
+  generateCustomHostNameVerifier
+  copyCustomHostNameVerifierJarsToWebLogicClasspath
   setUMaskForSecurityDir
   create_nodemanager_service
   enabledAndStartNodeManagerService
   wait_for_admin
+  configureCustomHostNameVerifier
   start_managed
 fi
 

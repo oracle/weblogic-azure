@@ -137,9 +137,10 @@ function createCoherenceCluster() {
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
     edit()
-    startEdit()
+    startEdit(60000,60000,'true')
     cd('/')
     cmo.createCoherenceClusterSystemResource('${coherenceClusterName}')
+    Thread.sleep(100)
 
     cd('/CoherenceClusterSystemResources/${coherenceClusterName}/CoherenceClusterResource/${coherenceClusterName}/CoherenceClusterParams/${coherenceClusterName}')
     cmo.setClusteringMode('unicast')
@@ -147,6 +148,7 @@ try:
 
     cd('/')
     cmo.createCluster('${storageClusterName}')
+    Thread.sleep(100)
 
     cd('/Clusters/${storageClusterName}')
     cmo.setClusterMessagingMode('unicast')
@@ -169,6 +171,8 @@ try:
     save()
     activate()
 except:
+    print e
+    dumpStack()
     stopEdit('y')
     sys.exit(1)
 
@@ -252,9 +256,10 @@ function create_machine_model() {
     cat <<EOF >$wlsDomainPath/add-machine.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 edit("$wlsServerName")
-startEdit()
+startEdit(60000,60000,'true')
 cd('/')
 cmo.createMachine('$nmHost')
+Thread.sleep(100)
 cd('/Machines/$nmHost/NodeManager/$nmHost')
 cmo.setListenPort(int($nmPort))
 cmo.setListenAddress('$nmHost')
@@ -275,9 +280,10 @@ function create_ms_server_model() {
 isCustomSSLEnabled='${isCustomSSLEnabled}'
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 edit("$wlsServerName")
-startEdit()
+startEdit(60000,60000,'true')
 cd('/')
 cmo.createServer('$wlsServerName')
+Thread.sleep(100)
 cd('/Servers/$wlsServerName')
 cmo.setMachine(getMBean('/Machines/$nmHost'))
 cmo.setCluster(getMBean('/Clusters/$storageClusterName'))
@@ -300,7 +306,7 @@ set('ServerPrivateKeyPassPhrase', '$serverPrivateKeyPassPhrase')
 cmo.setHostnameVerificationIgnored(true)
 
 cd('/Servers/$wlsServerName/ServerStart/$wlsServerName')
-arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.management.server=http://$wlsAdminURL ${wlsCoherenceArgs}'
+arguments = '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName -Dweblogic.management.server=http://$wlsAdminURL ${wlsCoherenceArgs}'
 oldArgs = cmo.getArguments()
 if oldArgs != None:
   newArgs = oldArgs + ' ' + arguments
@@ -419,7 +425,7 @@ connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 servers=cmo.getServers()
 try:
     edit("$nmHost")
-    startEdit()
+    startEdit(60000,60000,'true')
     for server in servers:
         if (server.getCluster()!=None and server.getCluster().getName()=='${clientClusterName}'):
             cd('/Servers/'+server.getName()+'//ServerStart/'+server.getName())
@@ -623,20 +629,22 @@ function storeCustomSSLCerts()
         customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
         customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
 
+        if [ "${addnodeFlag}" == "false" ];
+        then
+          echo "decode cert data once again as it would get base64 encoded while  storing in azure keyvault"
         customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
-        customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
-        customIdentityKeyStoreType=$(echo "$customIdentityKeyStoreType" | base64 --decode)
+          customTrustKeyStoreData=$(echo "$customTrustKeyStoreData" | base64 --decode)
+        fi
 
-        customTrustKeyStoreData=$(echo "$customTrustKeyStoreData" | base64 --decode)
-        customTrustKeyStorePassPhrase=$(echo "$customTrustKeyStorePassPhrase" | base64 --decode)
-        customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
-
-        serverPrivateKeyAlias=$(echo "$serverPrivateKeyAlias" | base64 --decode)
-        serverPrivateKeyPassPhrase=$(echo "$serverPrivateKeyPassPhrase" | base64 --decode)
-
-        #decode cert data once again as it would got base64 encoded while  storing in azure keyvault
         echo "$customIdentityKeyStoreData" | base64 --decode > $customIdentityKeyStoreFileName
         echo "$customTrustKeyStoreData" | base64 --decode > $customTrustKeyStoreFileName
+
+        customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
+        customIdentityKeyStoreType=$(echo "$customIdentityKeyStoreType" | base64 --decode)
+        customTrustKeyStorePassPhrase=$(echo "$customTrustKeyStorePassPhrase" | base64 --decode)
+        customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
+        serverPrivateKeyAlias=$(echo "$serverPrivateKeyAlias" | base64 --decode)
+        serverPrivateKeyPassPhrase=$(echo "$serverPrivateKeyPassPhrase" | base64 --decode)
 
         validateSSLKeyStores
 
@@ -645,11 +653,74 @@ function storeCustomSSLCerts()
     fi
 }
 
+function generateCustomHostNameVerifier()
+{
+   mkdir -p ${CUSTOM_HOSTNAME_VERIFIER_HOME}
+   mkdir -p ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/main/java
+   mkdir -p ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/test/java
+   cp ${BASE_DIR}/generateCustomHostNameVerifier.sh ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh
+   cp ${BASE_DIR}/WebLogicCustomHostNameVerifier.java ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/main/java/WebLogicCustomHostNameVerifier.java
+   cp ${BASE_DIR}/HostNameValuesTemplate.txt ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/main/java/HostNameValuesTemplate.txt
+   cp ${BASE_DIR}/WebLogicCustomHostNameVerifierTest.java ${CUSTOM_HOSTNAME_VERIFIER_HOME}/src/test/java/WebLogicCustomHostNameVerifierTest.java
+   chown -R $username:$groupname ${CUSTOM_HOSTNAME_VERIFIER_HOME}
+   chmod +x ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh
+
+   runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh ${adminVMName} ${customDNSNameForAdminServer} ${customDNSNameForAdminServer} ${dnsLabelPrefix} ${wlsDomainName} ${location}"
+}
+
+function copyCustomHostNameVerifierJarsToWebLogicClasspath()
+{
+   runuser -l oracle -c "cp ${CUSTOM_HOSTNAME_VERIFIER_HOME}/output/*.jar $oracleHome/wlserver/server/lib/;"
+
+   echo "Modify WLS CLASSPATH to include hostname verifier jars...."
+   sed -i 's;^WEBLOGIC_CLASSPATH="${WL_HOME}/server/lib/postgresql-42.2.8.jar.*;&\nWEBLOGIC_CLASSPATH="${WL_HOME}/server/lib/hostnamevalues.jar:${WL_HOME}/server/lib/weblogicustomhostnameverifier.jar:${WEBLOGIC_CLASSPATH}";' $oracleHome/oracle_common/common/bin/commExtEnv.sh
+
+   echo "Modified WLS CLASSPATH to include hostname verifier jars."
+}
+
+
+function configureCustomHostNameVerifier()
+{
+    echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
+    cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifier.py
+connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+try:
+    edit("$wlsServerName")
+    startEdit()
+
+    cd('/Servers/$wlsServerName/SSL/$wlsServerName')
+    cmo.setHostnameVerifier('com.oracle.azure.weblogic.security.util.WebLogicCustomHostNameVerifier')
+    cmo.setHostnameVerificationIgnored(false)
+    cmo.setTwoWaySSLEnabled(false)
+    cmo.setClientCertificateEnforced(false)
+
+    save()
+    activate()
+except Exception,e:
+    print e
+    print "Failed to configureCustomHostNameVerifier for domain  $wlsDomainName"
+    dumpStack()
+    raise Exception('Failed to configureCustomHostNameVerifier for domain  $wlsDomainName')
+disconnect()
+EOF
+sudo chown -R $username:$groupname $DOMAIN_PATH
+runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/configureCustomHostNameVerifier.py"
+if [[ $? != 0 ]]; then
+  echo "Error : Failed to configureCustomHostNameVerifier for domain $wlsDomainName"
+  exit 1
+fi
+
+}
+
 # main script starts from here
 
 SCRIPT_PWD=$(pwd)
+CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-read wlsDomainName wlsUserName wlsPassword adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex managedServerPrefix serverIndex isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location addnodeFlag isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+
+echo "$wlsDomainName $wlsUserName $wlsPassword $adminVMName $oracleHome $wlsDomainPath $storageAccountName $storageAccountKey $mountpointPath $enableWebLocalStorage $enableELK $elasticURI $elasticUserName $elasticPassword $logsToIntegrate $logIndex $managedServerPrefix $serverIndex $customDNSNameForAdminServer $dnsLabelPrefix $location $addnodeFlag $isCustomSSLEnabled $customIdentityKeyStoreData $customIdentityKeyStorePassPhrase $customIdentityKeyStoreType $customTrustKeyStoreData $customTrustKeyStorePassPhrase $customTrustKeyStoreType $serverPrivateKeyAlias $serverPrivateKeyPassPhrase"
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
@@ -665,7 +736,9 @@ coherenceListenPort=7574
 coherenceLocalport=42000
 coherenceLocalportAdjust=42200
 clientClusterName="cluster1"
+CUSTOM_HOSTNAME_VERIFIER_HOME="/u01/app/custom-hostname-verifier"
 groupname="oracle"
+thisHost=$(hostname)
 nmHost=$(hostname)
 nmPort=5556
 storageClusterName="storage1"
@@ -676,6 +749,13 @@ wlsAdminServerName="admin"
 wlsCoherenceArgs="-Dcoherence.localport=$coherenceLocalport -Dcoherence.localport.adjust=$coherenceLocalportAdjust"
 KEYSTORE_PATH="${wlsDomainPath}/${wlsDomainName}/keystores"
 SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
+
+if [ -z "$addnodeFlag" ];
+then
+   addnodeFlag="false"
+fi
+
+addnodeFlag="${addnodeFlag,,}"
 
 if [ ${serverIndex} -eq 0 ]; then
     wlsServerName="admin"
@@ -695,8 +775,11 @@ else
     openManagedServerPorts
     storeCustomSSLCerts
     createManagedSetup
+    generateCustomHostNameVerifier
+    copyCustomHostNameVerifierJarsToWebLogicClasspath
     createNodeManagerService
     enabledAndStartNodeManagerService
+    configureCustomHostNameVerifier
     startManagedServer
 
     echo "enable ELK? ${enableELK}"

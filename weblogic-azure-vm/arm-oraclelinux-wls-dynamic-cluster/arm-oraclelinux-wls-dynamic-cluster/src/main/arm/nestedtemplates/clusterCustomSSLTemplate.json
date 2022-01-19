@@ -166,6 +166,20 @@
                "description": "Boolean value indicating, if custom SSL is enabled or not"
             }
         },
+        "enableDNSConfiguration": {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "Boolean value indicating, if DNS Zone Configuration is enabled or not"
+            }
+        },
+        "customDNSNameForAdminServer": {
+            "type": "string",
+            "defaultValue": "none",
+            "metadata": {
+                "description": "Custom DNS Name for WebLogic Admin Server"
+            }
+        },
         "keyVaultCustomIdentityKeyStoreData": {
             "type": "securestring",
             "metadata": {
@@ -256,7 +270,11 @@
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
         "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
-        "t3AdminPort": "[if(not(parameters('enableHTTPAdminListenPort')),'7005','7001')]"
+        "t3AdminPort": "[if(not(parameters('enableHTTPAdminListenPort')),'7005','7001')]",
+        "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
+        "name_customHostnameVerifierJavaFile": "src/main/java/WebLogicCustomHostNameVerifier.java",
+        "name_customHostnameValuesTemplate": "src/main/java/HostNameValuesTemplate.txt",
+        "name_customHostnameVerifierTest" : "src/test/java/WebLogicCustomHostNameVerifierTest.java"
     },
     "resources": [
         {
@@ -511,11 +529,15 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[uri(parameters('_artifactsLocationClusterTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
+                        "[uri(parameters('_artifactsLocationClusterTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]",
+                        "[uri(parameters('_artifactsLocationClusterTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameGeneratorscriptFile'), parameters('_artifactsLocationSasToken')))]",
+                        "[uri(parameters('_artifactsLocationClusterTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameVerifierJavaFile'), parameters('_artifactsLocationSasToken')))]",
+                        "[uri(parameters('_artifactsLocationClusterTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameValuesTemplate'), parameters('_artifactsLocationSasToken')))]",
+                        "[uri(parameters('_artifactsLocationClusterTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameVerifierTest'), parameters('_artifactsLocationSasToken')))]"
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('const_managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('const_managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },

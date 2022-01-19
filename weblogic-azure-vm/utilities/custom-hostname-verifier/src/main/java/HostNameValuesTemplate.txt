@@ -1,0 +1,50 @@
+package com.oracle.azure.weblogic;
+
+public class HostNameValues
+{
+    public static final String azureVMExternalDomainName="cloudapp.azure.com";
+    
+    private static boolean debugEnabled=false;
+    private static String adminInternalHostName="";
+    private static String adminExternalHostName="";
+    private static String adminDNSZoneName="";
+    private static String dnsLabelPrefix="";
+    private static String wlsDomainName="";
+    private static String azureResourceGroupRegion="";
+
+    public static boolean isDebugEnabled()
+    {
+      return debugEnabled;
+    }
+
+    public static String getAdminInternalHostName()
+    {
+      return adminInternalHostName;
+    }
+
+    public static String getAdminExternalHostName()
+    {
+      return adminExternalHostName;
+    }
+
+    public static String getAdminDNSZoneName()
+    {
+      return adminDNSZoneName;
+    }
+
+    public static String getDnsLabelPrefix()
+    {
+      return dnsLabelPrefix;
+    }
+
+    public static String getWlsDomainName()
+    {
+      return wlsDomainName;
+    }
+
+    public static String getAzureResourceGroupRegion()
+    {
+      return azureResourceGroupRegion;
+    }
+}
+

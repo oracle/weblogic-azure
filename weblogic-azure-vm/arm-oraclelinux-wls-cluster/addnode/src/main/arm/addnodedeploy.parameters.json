@@ -19,6 +19,9 @@
     "adminURL": {
       "value": "GEN-UNIQUE"
     },
+    "adminVMName": {
+      "value": "GEN-UNIQUE"
+    },
     "adminUsername": {
       "value": "GEN-UNIQUE"
     },
@@ -64,6 +67,12 @@
       "value": "GEN-UNIQUE"
     },
     "wlsPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "enableDNSConfiguration": {
+      "value": false
+    },
+    "customDNSNameForAdminServer" : {
       "value": "GEN-UNIQUE"
     },
     "customSSLSettings": {
