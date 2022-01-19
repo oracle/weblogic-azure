@@ -9,7 +9,7 @@
 
   <!-- mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests -->
   <!-- Build with development profile
-       If using azure-javaee-iaas-parent less than 1.0.13, use:
+       If using azure-javaee-iaas-parent earlier than 1.0.13, use:
          mvn -Pbicep -Passembly -Ddev clean install
        Otherwise, use
          mvn -Pbicep-dev -Passembly clean install
@@ -17,7 +17,7 @@
 
   <groupId>com.oracle.weblogic.azure</groupId>
   <artifactId>wls-on-aks-azure-marketplace</artifactId>
-  <version>1.0.30</version>
+  <version>1.0.31</version>
 
   <parent>
     <groupId>com.microsoft.azure.iaas</groupId>

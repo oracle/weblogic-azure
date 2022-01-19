@@ -27,7 +27,6 @@ az aks get-credentials \
     --name ${AKS_CLUSTER_NAME} \
     --overwrite-existing
 
-# we should not run the script in admin pod, as there is no admin pod for slim image.
 podNum=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.clusterName=${WLS_CLUSTER_NAME} -o json | jq '.items| length')
     if [ ${podNum} -le 0 ]; then
         echo_stderr "Ensure your cluster has at least one pod."

@@ -1,5 +1,8 @@
 # Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+# env inputs:
+# URL_3RD_DATASOURCE
+# ORACLE_ACCOUNT_ENTITLED
 
 # read <azureACRPassword> and <ocrSSOPSW> from stdin
 function read_sensitive_parameters_from_stdin() {
@@ -69,6 +72,27 @@ function cleanup_vm() {
     az resource delete --verbose --ids ${vmResourceIdS}
 }
 
+# generate image full path based on the oracle account
+function get_ocr_image_full_path() {
+  local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${wlsImageTag}"
+
+  if [[ "${ORACLE_ACCOUNT_ENTITLED,,}" == "true" ]]; then
+
+    # download the ga cpu image mapping file.
+    local cpuImagesListFile=weblogic_cpu_images.json
+    curl -L ${gitUrl4CpuImages} -o ${cpuImagesListFile}
+    local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag==\"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
+    # if we can not find a matched image, keep the tag name the same as GA tag.
+    if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
+      cpuTag=${wlsImageTag}
+    fi
+
+    ocrImageFullPath="${ocrLoginServer}/${ocrCpuImagePath}:${cpuTag}"
+  fi
+
+  wlsImagePath=${ocrImageFullPath}
+}
+
 # Build docker image
 #  * Create Ubuntu machine VM-UBUNTU
 #  * Running vm extension to run buildWLSDockerImage.sh, the script will:
@@ -94,7 +118,7 @@ function build_docker_image() {
     --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
     if [[ "${useOracleImage,,}" == "${constTrue}" ]]; then
-        wlsImagePath="${ocrLoginServer}/middleware/weblogic:${wlsImageTag}"
+        get_ocr_image_full_path
     else
         wlsImagePath="${userProvidedImagePath}"
     fi

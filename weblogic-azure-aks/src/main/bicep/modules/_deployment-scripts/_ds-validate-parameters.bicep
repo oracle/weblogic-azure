@@ -10,7 +10,6 @@ param appGatewayCertificateOption string
 param appGatewaySSLCertData string
 @secure()
 param appGatewaySSLCertPassword string
-param createACR bool
 param createAKSCluster bool
 param createDNSZone bool
 param dnszoneName string
@@ -23,6 +22,7 @@ param keyVaultResourceGroup string
 param keyVaultSSLCertDataSecretName string
 param keyVaultSSLCertPasswordSecretName string
 param identity object
+param isSSOSupportEntitled bool
 param location string
 @secure()
 param ocrSSOPSW string
@@ -57,11 +57,9 @@ param useOracleImage bool
 param utcValue string = utcNow()
 param wlsImageTag string
 
-var const_acrName= useOracleImage ? acrName: userProvidedAcr
-var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone} ${const_checkACRAdminEnabled}'
+var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone}'
 var const_azcliVersion = '2.15.0'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
-var const_checkACRAdminEnabled= useOracleImage || !createACR
 var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -82,8 +80,16 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         secureValue: ocrSSOPSW
       }
       {
+        name: 'ORACLE_ACCOUNT_ENTITLED'
+        value: string(isSSOSupportEntitled)
+      }
+      {
         name: 'ACR_NAME'
-        value: const_acrName
+        value: acrName
+      }
+      {
+        name: 'ACR_NAME_FOR_USER_PROVIDED_IMAGE'
+        value: userProvidedAcr
       }
       {
         name: 'AKS_CLUSTER_NAME'
@@ -202,7 +208,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: dnszoneRGName
       }
     ]
-    scriptContent: loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh')
+    scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue

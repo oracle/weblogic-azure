@@ -48,8 +48,6 @@ param aksVersion string = 'default'
 param appPackageUrls array = []
 @description('The number of managed server to start.')
 param appReplicas int = 2
-@description('true to create a new Azure Container Registry.')
-param createACR bool = false
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
@@ -63,6 +61,7 @@ param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object
+param isSSOSupportEntitled bool
 param location string
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
@@ -151,19 +150,6 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
   ]
 }
 
-/*
-* Deploy ACR
-*/
-module acrDeployment './_azure-resoruces/_acr.bicep' = if (useOracleImage && createACR) {
-  name: 'acr-deployment'
-  params: {
-    location: location
-  }
-  dependsOn: [
-    pidStart
-  ]
-}
-
 // enableAppGWIngress: if true, will create storage for certificates.
 module storageDeployment './_azure-resoruces/_storage.bicep' = if (createStorageAccount) {
   name: 'storage-deployment'
@@ -186,7 +172,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
     aksClusterName: createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
-    acrName: useOracleImage ? (createACR ? acrDeployment.outputs.acrName : acrName) : userProvidedAcr
+    acrName: useOracleImage ? acrName : userProvidedAcr
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
@@ -195,6 +181,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: enablePV
     identity: identity
+    isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     managedServerPrefix: managedServerPrefix
     ocrSSOUser: ocrSSOUser
@@ -225,7 +212,6 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
   }
   dependsOn: [
     aksClusterDeployment
-    acrDeployment
     storageDeployment
   ]
 }
