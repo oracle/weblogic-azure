@@ -59,7 +59,7 @@ cat <<EOF > ${parametersPath}
             "value": 4
         },
         "vmSizeSelect": {
-            "value": "Standard_D2as_v4"
+            "value": "Standard_B2ms"
         },
         "wlsLDAPGroupBaseDN": {
             "value": "GEN-UNIQUE"
