@@ -289,13 +289,6 @@ jobs:
           sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
           ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
 
-          sed -i "s/#adminVMName#/$adminVMName/g; \
-          s/#adminPasswordOrKey#/$wlsPassword/g; \
-          s/#managedServers#/$managedServers/g; \
-          s/#wlsUserName#/$wlsUserName/g; \
-          s/#wlspassword#/$wlsPassword/g" \
-          ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh
-
       - name: Accept Image Terms
         id: accept-terms
         run: |
@@ -403,6 +396,15 @@ jobs:
         id: env-managedserver-vm1-ip
         run: echo "ms1PublicIP=${{steps.query-wls-managed-ip.outputs.publicIP}}" >> $GITHUB_ENV
 
+
+      # Fix failure that caused by remote server closed.
+      - name: Restart remote SSH agent
+        run: |
+            echo "Restart remote SSH agent"
+            az vm user reset-ssh \
+              --resource-group $resourceGroup \
+              --name ${{ env.adminVMName }}
+
       - name: Verify WebLogic Server Installation
         id: verify-wls
         run: |
@@ -412,14 +414,6 @@ jobs:
           echo install sshpass
           sudo apt-get install -y sshpass
           sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
-
-      # Fix failure that caused by remote server closed.
-      - name: Restart remote SSH agent
-        run: |
-            echo "Restart remote SSH agent"
-            az vm user reset-ssh \
-              --resource-group $resourceGroup \
-              --name ${{ env.adminVMName }}
 
       - name: Verify wls admin services
         id: veriy-admin-service
@@ -451,21 +445,13 @@ jobs:
           echo "Verifying Weblogic Server Access"
           bash ${{ env.offerPath }}/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
 
-      # Fix failure that caused by remote server closed.
-      - name: Restart remote SSH agent
-        run: |
-            echo "Restart remote SSH agent"
-            az vm user reset-ssh \
-              --resource-group $resourceGroup \
-              --name ${{ env.adminVMName }}
-
       - name: Verify WebLogic Managed Server LifeCycle check
         id: verify-server-lifecycle
         run: |
           echo "wait for port 22"
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying Weblogic managed server lifecycle"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh
+          bash ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName $wlsPassword ${wlsPublicIP} ${adminConsolePort} ${managedServers}"
 
       - name: Deploy DB Template to Connect to Azure Postgresql Database
         id: enable-postgresql-db
@@ -570,19 +556,6 @@ jobs:
           echo "adminVMDNS=${{steps.query-adminvmdns.outputs.adminVMDNS}}" >> $GITHUB_ENV
           echo ${adminVMDNS}
 
-      - name: Prepare the webapp deployment script
-        id: prepare-webapp-deployement-script
-        run: |
-          echo ${adminVMDNS} ${wlsUserName}
-          sed -i "s/#adminVMDNS#/${adminVMDNS}/g; \
-              s/#wlsUserName#/$wlsUserName/g; \
-              s/#wlsPassword#/$wlsPassword/g" \
-              ${{ env.offerPath }}/test/scripts/deploy-webapp.sh
-
-          echo ${appGatewayURL}
-          sed -i "s|#appGatewayURL#|${appGatewayURL}|g;" \
-              ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh
-
       - name: Add ip address to security rule to access the wls machine
         id: add-ip-to-security-rule-105
         run: |
@@ -636,13 +609,13 @@ jobs:
         run: |
           echo "Deploy WebLogic Cafe to server"          
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} ${adminConsolePort}
-          bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh
+          bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh <<< "$wlsUserName $wlsPassword ${adminVMDNS} ${adminConsolePort} "
 
       - name: Verify WebLogicCafe app is successfully deployed
         id: verify-webapp-deployment
         run: |
           echo "Verify WebLogicCafe app is successfully deployed"
-          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh
+          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh <<< "${appGatewayURL}"
 
       - name: Set up ELK by deploying sub template
         id: enable-elk
@@ -877,9 +850,9 @@ jobs:
         run: |
           curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-cluster-${{ github.run_id }}${{ github.run_number }}
 
-  cleanup-github-resoruce:
+  cleanup-github-resource:
     needs: deploy-weblogic-cluster
-    if: success()
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ${{ env.repoName }}
