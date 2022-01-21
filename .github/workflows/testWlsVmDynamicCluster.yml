@@ -276,14 +276,9 @@ jobs:
         id: prepare-deployed-parameters-and-test-script
         run: |
           imageUrn="${{ matrix.images }}"
+
           sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-          ${offerPath}/test/scripts/verify-wls-path.sh
-          sed -i "s/#adminVMName#/$adminVMName/g; \
-          s/#adminPasswordOrKey#/$wlsPassword/g; \
-          s/#managedServers#/$managedServers/g; \
-          s/#wlsUserName#/$wlsUserName/g; \
-          s/#wlspassword#/$wlsPassword/g" \
-          ${offerPath}/test/scripts/verify-servers-lifecycle.sh
+          ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
 
           echo "Generate deployment parameters..."
           bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
@@ -390,6 +385,7 @@ jobs:
               --name $adminVMName -d \
               --query publicIps -o tsv)
             echo "##[set-output name=publicIP;]${publicIP}"
+            
       - name: Create environment variable for AdminServer IP
         id: env-admin-ip
         run: echo "wlsPublicIP=${{steps.query-wls-admin-ip.outputs.publicIP}}" >> $GITHUB_ENV
@@ -407,6 +403,14 @@ jobs:
         id: env-managedserver-vm1-ip
         run: echo "ms1PublicIP=${{steps.query-wls-managed-ip.outputs.publicIP}}" >> $GITHUB_ENV
 
+      # Fix failure that caused by remote server closed.
+      - name: Restart remote SSH agent
+        run: |
+            echo "Restart remote SSH agent"
+            az vm user reset-ssh \
+              --resource-group $resourceGroup \
+              --name ${{ env.adminVMName }}
+
       - name: Verify WebLogic Server Installation
         id: verify-wls
         run: |
@@ -416,14 +420,6 @@ jobs:
           echo install sshpass
           sudo apt-get install -y sshpass
           sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-wls-path.sh
-
-      # Fix failure that caused by remote server closed.
-      - name: Restart remote SSH agent
-        run: |
-            echo "Restart remote SSH agent"
-            az vm user reset-ssh \
-              --resource-group $resourceGroup \
-              --name ${{ env.adminVMName }}
 
       - name: Verify wls admin services
         id: veriy-admin-service
@@ -455,21 +451,12 @@ jobs:
           echo "Verifying Weblogic Server Access"
           bash ${offerPath}/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
 
-      # Fix failure that caused by remote server closed.
-      - name: Restart remote SSH agent
-        run: |
-            echo "Restart remote SSH agent"
-            az vm user reset-ssh \
-              --resource-group $resourceGroup \
-              --name ${{ env.adminVMName }}
-
       - name: Verify WebLogic Managed Server LifeCycle check
         id: verify-server-lifecycle
         run: |
           echo "wait for port 22"
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying Weblogic managed server lifecycle"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-servers-lifecycle.sh
+          bash ${offerPath}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName $wlsPassword ${wlsPublicIP} ${adminConsolePort} ${managedServers}"
 
       - name: Deploy DB Template to Connect to Azure Postgresql Database
         id: enable-postgresql-db
