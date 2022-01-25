@@ -6,40 +6,82 @@
 # This script is to test application deployment on WebLogic cluster domain.
 
 # Verifying admin server is accessible
-isSuccess=false
-maxAttempt=5
-attempt=1
-echo "Verifying http://#adminVMDNS#:7001/weblogic/ready"
-while [ $attempt -le $maxAttempt ]
-do
-  echo "Attempt $attempt :- Checking WebLogic admin server is accessible"
-  curl http://#adminVMDNS#:7001/weblogic/ready 
-  if [ $? == 0 ]; then
-     isSuccess=true
-     break
-  fi
-  attempt=`expr $attempt + 1`
-  sleep 2m
-done
 
-if [[ $isSuccess == "false" ]]; then
-        echo "Failed : WebLogic admin server is not accessible"
-        exit 1
-else
-        echo "WebLogic admin server is accessible"
-fi
+read wlsUserName wlspassword adminVMDNS adminPort
+
+CURL_REQD_PARMS="--user ${wlsUserName}:${wlspassword} -H X-Requested-By:MyClient  -H Accept:application/json -s -v"
+CURL_RETRY_PARMS="--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180 --retry-connrefused"
+
+echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form-data  \
+-F \"model={
+  name:    'weblogic-cafe',
+  targets: [ { identity: [ 'clusters', 'cluster1' ] } ]
+}\" \
+-F \"sourcePath=@weblogic-on-azure/javaee/weblogic-cafe/target/weblogic-cafe.war\" \
+-X Prefer:respond-async \
+-X POST http://${adminVMDNS}:${adminPort}/management/weblogic/latest/edit/appDeployments"
 
 # Deploy webapp to weblogic server
-curl -v \
---user #wlsUserName#:#wlsPassword# \
--H X-Requested-By:MyClient \
--H Accept:application/json \
--H Content-Type:multipart/form-data \
+curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form-data  \
 -F "model={
   name:    'weblogic-cafe',
   targets: [ { identity: [ 'clusters', 'cluster1' ] } ]
 }" \
 -F "sourcePath=@weblogic-on-azure/javaee/weblogic-cafe/target/weblogic-cafe.war" \
--X Prefer:respond-async \
--X POST http://#adminVMDNS#:7001/management/weblogic/latest/edit/appDeployments
-exit 0
+-H "Prefer:respond-async" \
+-X POST http://${adminVMDNS}:${adminPort}/management/weblogic/latest/edit/appDeployments > out
+
+echo "Deployment response received"
+cat out
+
+attempt=0
+while [ $attempt -le 10 ]
+do
+	curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} \
+		-X GET -i "http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/deploymentProgressObjects/weblogic-cafe?links=none" > out
+	echo "Checking deployment operation is completed"
+	cat out | grep "\"state\": \"STATE_COMPLETED\""
+	if [ $? == 0 ]; then
+		echo "Deployment operation is completed"
+		cat out
+		break
+	fi
+	attempt=$((attempt+1))
+	sleep 10s
+done
+
+echo "Verifying the deployed application status"
+sleep 1m
+
+attempt=0
+while [ $attempt -le 5 ]
+do
+	echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json -d {target='cluster1'} -X POST  -i http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/getState" 
+	curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json \
+	-d "{target='cluster1'}" \
+		-X POST  -i "http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/getState" > out
+	
+	echo "Deployment state received"
+	cat out
+	cat out | grep "\"return\": \"STATE_ACTIVE\""
+	if [ $? == 0 ]; then
+	  echo "Application is deployed successfully and in active state"
+	  exit 0
+	elif [[ $? != 0 ]] && [[ $attempt -ge 5 ]]; then
+	  echo "Application deployment is unsuccessful"
+	  exit 1
+	fi
+	
+	cat out | grep "\"return\": \"STATE_PREPARED\""
+	if [[ $? == 0 ]]; then
+	  # Ideally this is not required but noticed only for 122130 OL7.4 it is required	
+	  echo "Starting the service explicitly"
+	  echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json -d {} -X POST  -i http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/start" 
+	  curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json \
+	     -d "{}" \
+	     -X POST  -i "http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/start" 
+	fi 
+	
+	attempt=$((attempt+1))
+	sleep 1m	
+done
