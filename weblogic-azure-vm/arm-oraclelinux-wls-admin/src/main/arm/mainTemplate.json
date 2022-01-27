@@ -86,6 +86,13 @@
             "description": "One of the supported database types"
          }
       },
+      "dbGlobalTranPro": {
+         "defaultValue": "OnePhaseCommit",
+         "type": "string",
+         "metadata": {
+            "description": "Determines the transaction protocol (global transaction processing behavior) for the data source."
+         }
+      },
       "dbPassword": {
          "defaultValue": "",
          "type": "securestring",
@@ -862,6 +869,9 @@
                },
                "databaseType": {
                   "value": "[parameters('databaseType')]"
+               },
+               "dbGlobalTranPro": {
+                  "value": "[parameters('dbGlobalTranPro')]"
                },
                "dbPassword": {
                   "value": "[parameters('dbPassword')]"
