@@ -92,7 +92,7 @@ function validate_user_assigned_managed_identity() {
 
   echo_stdout "check if the user assigned managed identity has Contributor or Owner role."
   local roleLength=$(az role assignment list --assignee ${principalId} |
-    jq '.[] | [select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
+    jq '[.[] | select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
   if [ ${roleLength} -lt 1 ]; then
     echo_stderr "You must grant the User Assigned Managed Identity with at least Contributor role. Please check ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}"
   fi
