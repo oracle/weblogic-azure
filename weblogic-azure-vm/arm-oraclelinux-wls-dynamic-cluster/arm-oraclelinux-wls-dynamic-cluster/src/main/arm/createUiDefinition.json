@@ -404,6 +404,34 @@
                         }
                     },
                     {
+                        "name": "sslText00",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+                        "options": {
+                            "text": "Choose an option for providing the TLS/SSL KeyStore and enter the values for the required fields:"
+                        }
+                    },
+                    {
+                        "name": "sslText01",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+                        "options": {
+                            "text": "    ⁃ Upload existing KeyStores."
+                        }
+                    },
+                    {
+                        "name": "sslText02",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+                        "options": {
+                            "text": "    ⁃ Use KeyStores stored in Azure Key Vault.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/wls-vm-tls-ssl-dynamic-cluster"
+                            }
+                        }
+                    },
+                    {
                         "name": "sslConfigurationAccessOption",
                         "type": "Microsoft.Common.OptionsGroup",
                         "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
