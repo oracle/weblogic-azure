@@ -48,6 +48,7 @@ You must construct a parameters JSON file containing the parameters to the datab
 | `_artifactsLocation`| See below for details. |
 | `adminVMName`| At deployment time, if this value was changed from its default value, the value used at deployment time must be used.  Otherwise, this parameter should be omitted. |
 | `databaseType`| Must be one of `postgresql`, `oracle` or `sqlserver` |
+| `dbGlobalTranPro` | Determines the transaction protocol (global transaction processing behavior) for the data source. Must be one of `TwoPhaseCommit`, `LoggingLastResource`, `EmulateTwoPhaseCommit`, `OnePhaseCommit` or `None`. |
 | `dbPassword`| See below for details. |
 | `dbUser` | See below for details. |
 | `dsConnectionURL`| See below for details. |
