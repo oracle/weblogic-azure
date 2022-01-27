@@ -388,7 +388,7 @@
                             "text": "    ⁃ Use KeyStores stored in Azure Key Vault.",
                             "link": {
                                 "label": "Learn more",
-                                "uri": "https://aka.ms/wls-vm-tls-ssl"
+                                "uri": "https://aka.ms/wls-vm-tls-ssl-admin"
                             }
                         }
                     },
