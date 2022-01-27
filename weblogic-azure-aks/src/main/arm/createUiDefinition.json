@@ -734,7 +734,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the offer to configure WebLogic Server Administration Console, Remote Console, cluster and custom T3 channel to use HTTPS (Secure) ports, with your own TLS/SSL certificate.",
+                            "text": "Selecting 'Yes' here will cause the offer to configure WebLogic Server Administration Console, Remote Console and cluster to use HTTPS (Secure) ports, with your own TLS/SSL certificate.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
@@ -1175,7 +1175,7 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
-                                    "text": "Selecting 'Yes' here will cause the offer to provision the Azure Load Balancer as a Kubernetes load balancer service. Note, you must select 'Yes' and provide further configuration when T3 tunneling is enabled on the Basics blade.",
+                                    "text": "Selecting 'Yes' here will cause the offer to provision the Azure Load Balancer service to expose WebLogic Server Administration Console and cluster.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/wls-aks-standard-load-balancer"
@@ -1185,9 +1185,9 @@
                             {
                                 "name": "enableLBSVC",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Create Standard Load Balancer services for the cluster?",
+                                "label": "Create Standard Load Balancer services for Oracle WebLogic Server?",
                                 "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to create Standard Load Balancer services for the cluster.",
+                                "toolTip": "Select 'Yes' to create Standard Load Balancer services for Oracle WebLogic Server.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -1612,7 +1612,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the offer to provision Oracle WebLogic Server Administration Console, cluster, Remote Console and custom T3 channel using custom DNS Name (example: admin.contoso.com)",
+                            "text": "Selecting 'Yes' here will cause the offer to provision Oracle WebLogic Server Administration Console, cluster, and Remote Console using custom DNS Name (example: admin.contoso.com)",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
