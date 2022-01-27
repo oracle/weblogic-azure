@@ -1297,6 +1297,45 @@
                                 "visible": true
                             },
                             {
+                                "name": "dbGlobalTranPro",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Global transactions protocol",
+                                "defaultValue": "OnePhaseCommit",
+                                "multiLine": true,
+                                "toolTip": "Determines the transaction protocol (global transaction processing behavior) for the data source.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "TwoPhaseCommit",
+                                            "description": "Standard XA transaction processing. Requires an XA driver.",
+                                            "value": "TwoPhaseCommit"
+                                        },
+                                        {
+                                            "label": "LoggingLastResource",
+                                            "description": "A performance enhancement for one non-XA resource.",
+                                            "value": "LoggingLastResource"
+                                        },
+                                        {
+                                            "label": "EmulateTwoPhaseCommit",
+                                            "description": "Enables one non-XA resource to participate in a global transaction, but has some risk to data.",
+                                            "value": "EmulateTwoPhaseCommit"
+                                        },
+                                        {
+                                            "label": "OnePhaseCommit",
+                                            "description": "One-phase XA transaction processing using a non-XA driver. This is the default setting.",
+                                            "value": "OnePhaseCommit"
+                                        },
+                                        {
+                                            "label": "None",
+                                            "description": "Support for local transactions only.",
+                                            "value": "None"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
                                 "name": "dbUser",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Database username",
@@ -1785,6 +1824,7 @@
             "dnszoneAdminConsoleLabel": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
             "dnszoneAppGatewayLabel": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneGatewayLabel]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+            "dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "elasticsearchEndpoint": "[steps('section_elk').elkInfo.elasticsearchEndpoint]",

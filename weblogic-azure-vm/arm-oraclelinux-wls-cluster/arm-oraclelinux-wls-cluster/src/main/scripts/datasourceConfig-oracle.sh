@@ -72,6 +72,12 @@ function validateInput()
        exit 1
    fi
 
+   if [ -z "$dbGlobalTranPro" ];
+   then
+       echo _stderr "Please provide Global transactions protocol"
+       exit 1
+   fi
+
    if [ -z "$wlsClusterName" ];
    then
        echo _stderr "Please provide Weblogic target cluster name"
@@ -107,7 +113,7 @@ try:
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName/Properties/$jdbcDataSourceName/Properties/user')
   cmo.setValue('$dsUser')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDataSourceParams/$jdbcDataSourceName')
-  cmo.setGlobalTransactionsProtocol('EmulateTwoPhaseCommit')
+  cmo.setGlobalTransactionsProtocol('${dbGlobalTranPro}')
   cd('/JDBCSystemResources/$jdbcDataSourceName')
   set('Targets',jarray.array([ObjectName('com.bea:Name=$wlsClusterName,Type=Cluster')], ObjectName))
   save()
@@ -136,7 +142,7 @@ function createTempFolder()
 #main
 
 #read arguments from stdin
-read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword wlsClusterName
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro wlsClusterName
 
 if [ -z "$wlsClusterName" ];
 then
