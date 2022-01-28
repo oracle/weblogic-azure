@@ -357,7 +357,8 @@
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
-                                    "text": "If checked, configure the necessary settings to integrate with Container insights.",
+                                    "icon": "Info",
+                                    "text": "If checked, configure the necessary settings to integrate with Container insights. Container insights gives you performance visibility by collecting memory and processor metrics from controllers, nodes, and containers that are available in Kubernetes through the Metrics API. Container logs are also collected. Metrics are written to the metrics store and log data is written to the logs store associated with your Log Analytics workspace.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/wls-aks-container-insights"
@@ -373,14 +374,11 @@
                             },
                             {
                                 "name": "enableAzureFileShareTextBlock",
-                                "type": "Microsoft.Common.TextBlock",
+                                "type": "Microsoft.Common.InfoBox",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
-                                    "text": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-persistent-storage"
-                                    }
+                                    "icon": "Info",
+                                    "text": "If checked,  an Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted the nodes of the AKS cluster. <br>You can find more information from <a href='https://docs.microsoft.com/azure/aks/azure-files-volume' target='_blank'>persistent volume with Azure Files share on AKS</a> and <a href='https://aka.ms/wls-aks-persistent-storage' target='_blank'>Oracle WebLogic persistent storage</a>."
                                 }
                             },
                             {
