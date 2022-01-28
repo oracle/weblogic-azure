@@ -675,6 +675,15 @@
                                 }
                             },
                             {
+                                "name": "appInfoBox",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "You must select the application files from <b>Azure Storage Account</b>.<br>Follow the steps to upload your applications to an Azure Storage Account: <br><li><a href='https://docs.microsoft.com/azure/storage/common/storage-account-create?tabs=azure-portal' target='_blank'>Create a Storage Account</a></li><li><a href='https://docs.microsoft.com/azure/storage/blobs/storage-quickstart-blobs-portal' target='_blank'>Create a container and upload application files</a></li>"
+                                },
+                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
+                            },
+                            {
                                 "name": "appPackageUrl",
                                 "type": "Microsoft.Common.FileUpload",
                                 "label": "Application package (.war,.ear,.jar)",
