@@ -10,7 +10,7 @@ The [Azure Marketplace WebLogic Server Offering](https://azuremarketplace.micros
 
 ## Documentation
 
-Please refer to the documentation sample [Oracle WebLogic Server Azure Applications](https://oracle.github.io/weblogic-kubernetes-operator/samples/simple/azure-kubernetes-service/)
+Please refer to the documentation sample [Oracle WebLogic Server Azure Applications](https://aka.ms/wls-aks-docs-sample)
 
 ## Examples
 
