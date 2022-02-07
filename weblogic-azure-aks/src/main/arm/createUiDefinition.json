@@ -1512,7 +1512,7 @@
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "You must input an Active Directory Service Principal that is encoded with base64 to create the Application Gateway Ingress Controller. See this <a href=https://aka.ms/wls-aks-agic-sp-doc target='_blank'>document</a> for more information.</br>You can generate one with command <b>az ad sp create-for-rbac --role Contributor --sdk-auth | base64 -w0</b>"
+                                    "text": "You must input an Active Directory Service Principal that is encoded with base64 to create the Application Gateway Ingress Controller. See this <a href=https://aka.ms/wls-aks-agic-sp-doc target='_blank'>document</a> for more information.</br>You can generate one with command <b>az ad sp create-for-rbac --role Contributor --sdk-auth | base64 -w0</b>. On macOS omit the <b>-w0</b>."
                                 }
                             },
                             {
@@ -1522,7 +1522,7 @@
                                     "password": "Service Principal",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --role Contributor --sdk-auth | base64 -w0'",
+                                "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --role Contributor --sdk-auth | base64 -w0' On macOS omit the -w0.",
                                 "constraints": {
                                     "required": true
                                 },
