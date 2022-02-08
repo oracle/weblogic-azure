@@ -509,11 +509,25 @@ function validate_gateway_frontend_certificates() {
 }
 
 function validate_service_principal() {
-  spObject=$(echo "${BASE64_FOR_SERVICE_PRINCIPAL}" | base64 -d)
+  local spObject=$(echo "${BASE64_FOR_SERVICE_PRINCIPAL}" | base64 -d)
   validate_status "decode the service principal base64 string." "Invalid service principal."
 
+  # for sdk format string
+  # {
+  #   "clientId": "3082055e-dd40-452d-9190-xxxxxxx",
+  #   "clientSecret": "uh0sZPoNsLKyUU3iOO1~xxxxxxx",
+  #   "subscriptionId": "260524c9-7a4d-4483-8d85-xxxxxxx",
+  #   "tenantId": "814a03f9-f7c3-41a4-8ecc-xxxxxxx",
+  #   "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  #   "resourceManagerEndpointUrl": "https://management.azure.com/",
+  #   "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+  #   "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+  #   "galleryEndpointUrl": "https://gallery.azure.com/",
+  #   "managementEndpointUrl": "https://management.core.windows.net/"
+  # }
   local principalId=$(echo ${spObject} | jq '.clientId')
   validate_status "get client id from the service principal." "Invalid service principal."
+
   if [[ "${principalId}" == "null" ]] || [[ "${principalId}" == "" ]]; then
     echo_stderr "the service principal is invalid."
     exit 1
@@ -521,7 +535,16 @@ function validate_service_principal() {
 
   echo_stdout "check if the service principal has Contributor or Owner role."
   local roleLength=$(az role assignment list --assignee ${principalId} |
-    jq '.[] | [select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
+    jq '[.[] | select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
+  
+  # skip error like: 
+  #    Cannot find user or service principal in graph database for '"3082055e-dd40-452d-9190-xxxxxxx"'. 
+  #    If the assignee is an appId, make sure the corresponding service principal is created with 'az ad sp create --id "3082055e-dd40-452d-9190-xxxxxxx"'.
+  local re='^[0-9]+$'
+  if ! [[ $roleLength =~ $re ]] ; then
+    echo_stderr "You must grant the service principal with at least Contributor role."
+  fi
+
   if [ ${roleLength} -lt 1 ]; then
     echo_stderr "You must grant the service principal with at least Contributor role."
   fi
