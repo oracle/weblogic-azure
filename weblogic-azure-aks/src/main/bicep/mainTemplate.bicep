@@ -666,28 +666,6 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
   ]
 }
 
-/*
-* Temporary workaround for https://github.com/oracle/weblogic-kubernetes-operator/issues/2693
-* Apply resource limits to WebLogic Server 14.1.1.0.
-* The script will check the WebLogic Server version, and apply resource limits to 14.1.1.0.
-* The resource limits will be the same with requests.
-*/
-module applyGuaranteedQos 'modules/_deployment-scripts/_ds-apply-guaranteed-qos.bicep' = {
-  name: 'apply-resources-limits-to-wls14'
-  params:{
-    _artifactsLocation: _artifactsLocation
-    _artifactsLocationSasToken: _artifactsLocationSasToken
-    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
-    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
-    identity: identity
-    location: location
-    wlsClusterName: const_wlsClusterName
-    wlsDomainUID: wlsDomainUID
-  }
-  dependsOn: [
-    datasourceDeployment
-  ]
-}
 
 /*
 * To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
@@ -707,7 +685,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
     wlsUserName: wlsUserName
   }
   dependsOn: [
-    applyGuaranteedQos
+    datasourceDeployment
   ]
 }
 

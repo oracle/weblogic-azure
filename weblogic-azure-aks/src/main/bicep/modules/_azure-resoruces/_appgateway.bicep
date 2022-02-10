@@ -187,6 +187,13 @@ resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
         }
       }
     ]
+    webApplicationFirewallConfiguration: {
+      enabled: true
+      firewallMode: 'Prevention'
+      ruleSetType: 'OWASP'
+      ruleSetVersion: '3.0'
+      disabledRuleGroups: []
+    }
     enableHttp2: false
     autoscaleConfiguration: {
       minCapacity: 2

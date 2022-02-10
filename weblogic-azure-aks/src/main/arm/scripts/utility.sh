@@ -213,7 +213,7 @@ function utility_wait_for_pod_completed() {
     done
 
     if [ ${attempt} -gt ${checkPodStatusMaxAttemps} ]; then
-        echo_stderr "It takes too long to wait for all the pods to reach running state, please refer to https://aka.ms/wls-aks-troubleshooting .
+        echo_stderr "It takes too long to wait for all the pods to reach running state, please refer to https://aka.ms/wls-aks-troubleshooting."
         exit 1
     fi
 }
