@@ -12,7 +12,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls</artifactId>
-    <version>1.0.21</version>
+    <version>1.0.22</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>

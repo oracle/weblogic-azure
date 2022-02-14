@@ -371,6 +371,13 @@
 						"type": "Microsoft.Network/applicationGateways/probes"
 					}
 				],
+				"webApplicationFirewallConfiguration": {
+					"enabled": true,
+					"firewallMode": "Prevention",
+					"ruleSetType": "OWASP",
+					"ruleSetVersion": "3.0",
+					"disabledRuleGroups": []
+				},
 				"enableHttp2": false,
 				"autoscaleConfiguration": {
 					"minCapacity": 2,
