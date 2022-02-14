@@ -753,6 +753,12 @@
                     },
                     "enableHTTPAdminListenPort":{
                         "value": "[parameters('enableHTTPAdminListenPort')]"
+                    },
+                    "enableDNSConfiguration": {
+                      "value": "[parameters('enableDNSConfiguration')]"
+                    },
+                    "customDNSNameForAdminServer": {
+                      "value": "[if(parameters('enableDNSConfiguration'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
                     }
                 }
             }
@@ -870,6 +876,12 @@
                     },
                     "enableHTTPAdminListenPort":{
                         "value": "[parameters('enableHTTPAdminListenPort')]"
+                    },
+                    "enableDNSConfiguration": {
+                      "value": "[parameters('enableDNSConfiguration')]"
+                    },
+                    "customDNSNameForAdminServer": {
+                      "value": "[if(parameters('enableDNSConfiguration'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
                     },
                     "enableCustomSSL":{
                        "value": "[parameters('enableCustomSSL')]"
@@ -1507,6 +1519,12 @@
                     "wlsUserName": {
                         "value": "[parameters('wlsUserName')]"
                     },
+                    "enableDNSConfiguration": {
+                      "value": "[parameters('enableDNSConfiguration')]"
+                    },
+                    "customDNSNameForAdminServer": {
+                      "value": "[if(parameters('enableDNSConfiguration'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
+                    },
                     "enableCustomSSL": {
                         "value": "[parameters('enableCustomSSL')]"
                     }
@@ -1599,6 +1617,12 @@
                     },
                     "wlsUserName": {
                         "value": "[parameters('wlsUserName')]"
+                    },
+                    "enableDNSConfiguration": {
+                      "value": "[parameters('enableDNSConfiguration')]"
+                    },
+                    "customDNSNameForAdminServer": {
+                      "value": "[if(parameters('enableDNSConfiguration'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
                     },
                     "enableCustomSSL": {
                         "value": "[parameters('enableCustomSSL')]"

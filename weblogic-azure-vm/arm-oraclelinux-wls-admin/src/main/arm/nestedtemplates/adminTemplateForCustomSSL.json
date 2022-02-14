@@ -246,7 +246,11 @@
       "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
       "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
       "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
-      "ref_fileShare": "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('name_storageAccount'), 'default',variables('name_share'))]"
+      "ref_fileShare": "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('name_storageAccount'), 'default',variables('name_share'))]",
+      "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
+      "name_customHostnameVerifierJavaFile": "src/main/java/WebLogicCustomHostNameVerifier.java",
+      "name_customHostnameValuesTemplate": "src/main/java/HostNameValuesTemplate.txt",
+      "name_customHostnameVerifierTest" : "src/test/java/WebLogicCustomHostNameVerifierTest.java"
    },
    "resources": [
       {
@@ -490,11 +494,15 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
                "fileUris": [
-                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
+                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameGeneratorscriptFile'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameVerifierJavaFile'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameValuesTemplate'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameVerifierTest'), parameters('_artifactsLocationSasToken')))]"
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAlias')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhrase')),''),'\"')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAlias')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhrase')),''),'\"')]"
             }
          }
       },

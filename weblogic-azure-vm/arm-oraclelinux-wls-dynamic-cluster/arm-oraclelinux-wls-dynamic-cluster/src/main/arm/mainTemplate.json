@@ -861,6 +861,12 @@
 					},
 					"enableHTTPAdminListenPort": {
 						"value": "[parameters('enableHTTPAdminListenPort')]"
+					},
+					"enableDNSConfiguration": {
+						"value": "[parameters('enableCustomDNS')]"
+					},
+					"customDNSNameForAdminServer": {
+						"value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
 					}
 				}
 			}
@@ -937,6 +943,12 @@
 					"enableHTTPAdminListenPort": {
 						"value": "[parameters('enableHTTPAdminListenPort')]"
 					},
+                    "enableDNSConfiguration": {
+                      "value": "[parameters('enableCustomDNS')]"
+                    },
+                    "customDNSNameForAdminServer": {
+                      "value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
+                    },
 					"enableCustomSSL": {
 						"value": "[parameters('enableCustomSSL')]"
 					},
@@ -1426,6 +1438,12 @@
 					},
 					"enableCustomSSL": {
 						"value": "[parameters('enableCustomSSL')]"
+					},
+					"enableDNSConfiguration": {
+						"value": "[parameters('enableCustomDNS')]"
+					},
+					"customDNSNameForAdminServer": {
+						"value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
 					}
 				}
 			}
@@ -1516,6 +1534,12 @@
 					},
 					"wlsUserName": {
 						"value": "[parameters('wlsUserName')]"
+					},
+					"enableDNSConfiguration": {
+						"value": "[parameters('enableCustomDNS')]"
+					},
+					"customDNSNameForAdminServer": {
+						"value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
 					},
 					"enableCustomSSL": {
 						"value": "[parameters('enableCustomSSL')]"

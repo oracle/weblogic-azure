@@ -40,6 +40,12 @@
     },
     "wlsUserName": {
       "value": "GEN-UNIQUE"
+    },
+    "enableDNSConfiguration": {
+      "value": false
+    },
+    "customDNSNameForAdminServer" : {
+      "value": "GEN-UNIQUE"
     }
   }
 }
