@@ -42,6 +42,7 @@
       },
       "adminVMName": {
          "type": "string",
+         "defaultValue": "adminVM",
          "metadata": {
             "description": "Provide admin VM Name ex: adminVM"
          }
