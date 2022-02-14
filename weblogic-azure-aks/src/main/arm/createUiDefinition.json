@@ -1577,7 +1577,7 @@
                                 "name": "appgwForAdminServer",
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
-                                "defaultValue": "Yes",
+                                "defaultValue": "No",
                                 "toolTip": "Select 'Yes' to Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
                                 "constraints": {
                                     "allowedValues": [
@@ -1597,7 +1597,7 @@
                                 "name": "appgwForAdminRemote",
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
-                                "defaultValue": "Yes",
+                                "defaultValue": "No",
                                 "toolTip": "Select 'Yes' to Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
                                 "constraints": {
                                     "allowedValues": [
