@@ -342,7 +342,9 @@ jobs:
         id: restart-wls-wm
         run: |
             echo "restart vm to make sure security rule work."
-            az vm restart -g $resourceGroup -n $adminVMName
+            az vm restart --force --no-wait -g $resourceGroup -n $adminVMName
+            echo "Wait for few minutes to restart"
+            sleep 3m
 
       - name: Query public IP of AdminServer VM
         id: query-wls-admin-ip
@@ -365,7 +367,7 @@ jobs:
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo install sshpass
           sudo apt-get install -y sshpass
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${adminOfferPath}/test/scripts/verify-wls-path.sh
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${adminOfferPath}/test/scripts/verify-wls-path.sh
 
       - name: Restart remote SSH agent
         id: restart-remote-ssh
@@ -374,6 +376,7 @@ jobs:
             az vm user reset-ssh \
               --resource-group $resourceGroup \
               --name ${{ env.adminVMName }}
+            sleep 1m             
 
       - name: Verify system services at admin server
         id: veriy-admin-service
@@ -381,7 +384,7 @@ jobs:
           echo "wait for 22 port"
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
           echo "Verifying WebLogic services at admin server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.adminOfferPath }}/test/scripts/verify-services.sh
+          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.adminOfferPath }}/test/scripts/verify-services.sh
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
