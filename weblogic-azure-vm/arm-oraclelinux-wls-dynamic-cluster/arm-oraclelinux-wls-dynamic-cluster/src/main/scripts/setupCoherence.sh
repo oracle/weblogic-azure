@@ -433,12 +433,14 @@ EOF
 function createManagedSetup() {
     echo "Creating Managed Server Setup"
     cd $wlsDomainPath
-    wget -q $weblogicDeployTool
-    if [[ $? != 0 ]]; then
-        echo "Error : Downloading weblogic-deploy-tool failed"
+    
+    # WebLogic base images are already having weblogic-deploy, hence no need to download
+    if [ ! -d "$wlsDomainPath/weblogic-deploy" ];
+    then
+        echo "weblogic-deploy tool not found in path $wlsDomainPath"
         exit 1
     fi
-    sudo unzip -o weblogic-deploy.zip -d $wlsDomainPath
+    
     echo "Creating managed server model files"
     create_managed_model
     create_machine_model
@@ -489,8 +491,6 @@ function enabledAndStartNodeManagerService() {
 function cleanup() {
     echo "Cleaning up temporary files..."
     rm -rf $wlsDomainPath/managed-domain.yaml
-    rm -rf $wlsDomainPath/weblogic-deploy.zip
-    rm -rf $wlsDomainPath/weblogic-deploy
     rm -rf $wlsDomainPath/*.py
     rm -rf ${CUSTOM_HOSTNAME_VERIFIER_HOME}
     echo "Cleanup completed."
@@ -701,7 +701,6 @@ nmHost=$(hostname)
 nmPort=5556
 storageClusterName="storage1"
 storageListenPort=7501
-weblogicDeployTool=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
 username="oracle"
 wlsAdminT3ChannelPort=7005
 wlsAdminURL="${adminVMName}:${wlsAdminT3ChannelPort}"
