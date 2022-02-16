@@ -375,8 +375,7 @@
 					"enabled": true,
 					"firewallMode": "Prevention",
 					"ruleSetType": "OWASP",
-					"ruleSetVersion": "3.0",
-					"disabledRuleGroups": []
+					"ruleSetVersion": "3.0"
 				},
 				"enableHttp2": false,
 				"autoscaleConfiguration": {
