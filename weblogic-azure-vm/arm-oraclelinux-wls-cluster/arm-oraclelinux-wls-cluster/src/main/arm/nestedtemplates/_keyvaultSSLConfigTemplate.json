@@ -76,7 +76,7 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[parameters('keyVaultName')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.KeyVault/vaults",
@@ -92,7 +92,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customIdentityKeyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -104,7 +104,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customIdentityKeyStorePassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -116,7 +116,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customTrustKeyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -128,7 +128,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customTrustKeyStorePassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -140,7 +140,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_privateKeyAliasSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -152,7 +152,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_privateKeyPassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [

@@ -7,7 +7,7 @@
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
             },
-            "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-cluster/deletenode/src/main/"
+            "defaultValue": "https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-vm/arm-oraclelinux-wls-cluster/deletenode/src/main/"
         },
         "_artifactsLocationSasToken": {
             "type": "securestring",
@@ -95,8 +95,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.deletenode.start}",
+            "apiVersion": "2020-06-01",
+            "name": "7d4ae6d6-17c5-5168-b7d2-e0bf33a1e878",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -109,7 +109,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2020-06-01",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -129,8 +129,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.deletenode.end}",
+            "apiVersion": "2020-06-01",
+            "name": "4b263220-3cc6-53b9-aef3-23ad10c45d52",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],

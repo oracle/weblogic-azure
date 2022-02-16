@@ -171,8 +171,8 @@
 	"resources": [
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersion}",
-			"name": "${cluster.appgateway.start}",
+			"apiVersion": "2020-06-01",
+			"name": "4f85ce49-6de4-5925-b77c-3eb15ba97921",
 			"properties": {
 				"mode": "Incremental",
 				"template": {
@@ -185,7 +185,7 @@
 		},
 		{
 			"type": "Microsoft.Network/publicIPAddresses",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"name": "[parameters('gatewayPublicIPAddressName')]",
 			"sku": {
 				"name": "Standard"
@@ -200,7 +200,7 @@
 		},
 		{
 			"type": "Microsoft.Network/applicationGateways",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"name": "[variables('name_appGateway')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -386,7 +386,7 @@
 		},
 		{
 			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"name": "[concat(parameters('adminVMName'),'/newuserscript')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -403,14 +403,14 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
+					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '2020-06-01').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
 				}
 			}
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersion}",
-			"name": "${cluster.appgateway.end}",
+			"apiVersion": "2020-06-01",
+			"name": "b626bee4-b322-5418-990f-6463a799be3c",
 			"dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],
@@ -428,15 +428,15 @@
 	"outputs": {
 		"appGatewayAlias": {
 			"type": "string",
-			"value": "[reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn]"
+			"value": "[reference(variables('ref_appGatewayPublicIP'), '2020-06-01').dnsSettings.fqdn]"
 		},
 		"appGatewayURL": {
 			"type": "string",
-			"value": "[concat('http://',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn)]"
+			"value": "[concat('http://',reference(variables('ref_appGatewayPublicIP'), '2020-06-01').dnsSettings.fqdn)]"
 		},
 		"appGatewaySecuredURL": {
 			"type": "string",
-			"value": "[concat('https://',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn)]"
+			"value": "[concat('https://',reference(variables('ref_appGatewayPublicIP'), '2020-06-01').dnsSettings.fqdn)]"
 		}
 	}
 }

@@ -29,7 +29,7 @@
 			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
 			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogicAdminPortsAllowed')]",
 			"condition": "[not(parameters('denyPublicTrafficForAdminServer'))]",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"properties": {
 				"protocol": "TCP",
 				"sourcePortRange": "*",
@@ -48,7 +48,7 @@
 			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
 			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogicAdminPortsDenied')]",
 			"condition": "[parameters('denyPublicTrafficForAdminServer')]",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"properties": {
 				"protocol": "*",
 				"sourcePortRange": "*",
@@ -67,7 +67,7 @@
 			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
 			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogiManagedPortsAllowed')]",
 			"condition": "[and(not(parameters('denyPublicTrafficForManagedServer')), parameters('enableOHS'))]",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"properties": {
 				"protocol": "*",
 				"sourcePortRange": "*",
@@ -85,7 +85,7 @@
 			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
 			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogiManagedPortsDenied')]",
 			"condition": "[and(parameters('denyPublicTrafficForManagedServer'), parameters('enableOHS'))]",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2020-06-01",
 			"properties": {
 				"protocol": "*",
 				"sourcePortRange": "*",

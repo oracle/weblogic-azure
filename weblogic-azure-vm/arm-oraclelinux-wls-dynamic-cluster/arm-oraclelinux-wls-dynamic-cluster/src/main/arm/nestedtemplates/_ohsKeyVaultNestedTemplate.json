@@ -48,7 +48,7 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[parameters('keyVaultName')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.KeyVault/vaults",
@@ -64,7 +64,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_keyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -76,7 +76,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2019-09-01",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_keyStorePwdSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [

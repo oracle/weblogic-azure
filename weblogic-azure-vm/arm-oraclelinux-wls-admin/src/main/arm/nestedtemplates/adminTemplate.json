@@ -198,8 +198,8 @@
    "resources": [
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${admin.admin.start}",
+         "apiVersion": "2020-06-01",
+         "name": "47c1a398-7527-53f0-abc7-13a206844885",
          "properties": {
             "mode": "Incremental",
             "template": {
@@ -212,7 +212,7 @@
       },
       {
          "type": "Microsoft.Network/networkSecurityGroups",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "[variables('name_networkSecurityGroup')]",
          "location": "[parameters('location')]",
          "properties": {
@@ -261,7 +261,7 @@
       },
       {
          "type": "Microsoft.Storage/storageAccounts",
-         "apiVersion": "${azure.apiVersion2}",
+         "apiVersion": "2021-06-01",
          "name": "[variables('name_storageAccount')]",
          "location": "[parameters('location')]",
          "sku": {
@@ -277,7 +277,7 @@
       },
       {
          "type": "Microsoft.Storage/storageAccounts/fileServices",
-         "apiVersion": "${azure.apiVersion2}",
+         "apiVersion": "2021-06-01",
          "name": "[concat(variables('name_storageAccount'), '/default')]",
          "dependsOn": [
             "[variables('ref_storage')]"
@@ -289,7 +289,7 @@
       },
       {
          "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-         "apiVersion": "${azure.apiVersion2}",
+         "apiVersion": "2021-06-01",
          "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
          "dependsOn": [
             "[variables('ref_fileService')]",
@@ -301,7 +301,7 @@
       },
       {
          "type": "Microsoft.Network/publicIPAddresses",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "[variables('name_publicIPAddress')]",
          "location": "[parameters('location')]",
          "properties": {
@@ -313,7 +313,7 @@
       },
       {
          "type": "Microsoft.Network/virtualNetworks",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "[variables('name_virtualNetwork')]",
          "location": "[parameters('location')]",
          "dependsOn": [
@@ -340,7 +340,7 @@
       },
       {
          "type": "Microsoft.Network/networkInterfaces",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "[variables('name_nic')]",
          "location": "[parameters('location')]",
          "dependsOn": [
@@ -369,7 +369,7 @@
       },
       {
          "type": "Microsoft.Compute/virtualMachines",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "[parameters('adminVMName')]",
          "location": "[parameters('location')]",
          "dependsOn": [
@@ -411,7 +411,7 @@
             "diagnosticsProfile": {
                "bootDiagnostics": {
                   "enabled": true,
-                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '2021-06-01').primaryEndpoints.blob]"
                }
             }
          },
@@ -424,7 +424,7 @@
       {
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
          "type": "Microsoft.Compute/virtualMachines/extensions",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "location": "[parameters('location')]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
@@ -445,14 +445,14 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',parameters('dnsLabelPrefix'),' ',parameters('location'), '\"')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2021-06-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',parameters('dnsLabelPrefix'),' ',parameters('location'), '\"')]"
             }
          }
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${admin.admin.end}",
+         "apiVersion": "2020-06-01",
+         "name": "1176aa69-c0c4-5651-8c66-25cbfd8de483",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -468,8 +468,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122130-jdk8-ol74}",
+         "apiVersion": "2020-06-01",
+         "name": "40fe0044-5739-466c-96aa-0c82ab465d0b",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122130-jdk8-ol74'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -486,8 +486,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122130-jdk8-ol73}",
+         "apiVersion": "2020-06-01",
+         "name": "799fc764-af80-45c3-aea1-599f55901e73",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122130-jdk8-ol73'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -504,8 +504,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122140-jdk8-ol76}",
+         "apiVersion": "2020-06-01",
+         "name": "6637154a-06d2-4ac0-82ab-2a1d7e391eab",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-jdk8-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -522,8 +522,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-141100-jdk8-ol76}",
+         "apiVersion": "2020-06-01",
+         "name": "060d9c3f-cc20-4380-a383-fd20594e5b2a",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -540,8 +540,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-141100-jdk11-ol76}",
+         "apiVersion": "2020-06-01",
+         "name": "3220431f-33d4-416a-8df7-a0fcc23a25e4",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -558,8 +558,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122140-jdk8-rhel76}",
+         "apiVersion": "2020-06-01",
+         "name": "0a52f317-8b40-4a77-9f3c-7607fc3ebfb7wls",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122140-jdk8-rhel76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -576,8 +576,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-141100-jdk8-rhel76}",
+         "apiVersion": "2020-06-01",
+         "name": "26ec5cf5-dd84-4764-97cf-4f830facbf66wls",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-rhel76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -594,8 +594,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-141100-jdk11-rhel76}",
+         "apiVersion": "2020-06-01",
+         "name": "ada2e3e6-faef-4339-aaac-40bcdc4484ecwls",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-rhel76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"

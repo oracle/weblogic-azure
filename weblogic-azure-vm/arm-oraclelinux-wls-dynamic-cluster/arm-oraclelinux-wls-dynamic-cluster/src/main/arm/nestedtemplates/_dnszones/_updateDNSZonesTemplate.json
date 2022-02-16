@@ -110,7 +110,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "2020-10-01",
             "name": "script-createDNSRecords",
             "location": "[parameters('location')]",
             "identity": "[parameters('identity')]",
