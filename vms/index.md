@@ -8,9 +8,9 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 
 This page lists the collections of templates for working with existing deployments.
 
-* [Oracle WebLogic Server with Admin Server](../admin/index.md)
+* [Oracle WebLogic Server with Admin Server](../admin/)
 
-* [Oracle WebLogic Server Cluster](../cluster/index.md)
+* [Oracle WebLogic Server Cluster](../cluster/)
 
-* [Oracle WebLogic Server Dynamic Cluster](../dynamic-cluster/index.md)
+* [Oracle WebLogic Server Dynamic Cluster](../dynamic-cluster/)
 
