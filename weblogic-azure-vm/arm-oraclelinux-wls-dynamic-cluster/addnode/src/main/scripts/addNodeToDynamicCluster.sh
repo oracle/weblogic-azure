@@ -151,8 +151,6 @@ function cleanup()
     rm -rf $wlsDomainPath/managed-domain.yaml
     rm -rf $wlsDomainPath/weblogic-deploy.zip
     rm -rf $wlsDomainPath/weblogic-deploy
-    rm -rf $wlsDomainPath/deploy-app.yaml
-    rm -rf $wlsDomainPath/shoppingcart.zip
     rm -rf $wlsDomainPath/*.py
     rm -rf ${CUSTOM_HOSTNAME_VERIFIER_HOME}
     echo "Cleanup completed."

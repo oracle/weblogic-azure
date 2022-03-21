@@ -117,8 +117,6 @@ function cleanup()
     echo "Cleaning up temporary files..."
     rm -rf $DOMAIN_PATH/admin-domain.yaml
     rm -rf $DOMAIN_PATH/managed-domain.yaml
-    rm -rf $DOMAIN_PATH/deploy-app.yaml
-    rm -rf $DOMAIN_PATH/shoppingcart.zip
     rm -rf $DOMAIN_PATH/*.py
     rm -rf ${CUSTOM_HOSTNAME_VERIFIER_HOME}
     echo "Cleanup completed."
@@ -271,25 +269,6 @@ cat <<EOF>>$DOMAIN_PATH/managed-domain.yaml
    SecurityConfiguration:
         NodeManagerUsername: "$wlsUserName"
         NodeManagerPasswordEncrypted: "$wlsPassword"
-EOF
-}
-
-# This function to create model for sample application deployment 
-function create_app_deploy_model()
-{
-
-    echo "Creating deploying applicaton model"
-    cat <<EOF >$DOMAIN_PATH/deploy-app.yaml
-domainInfo:
-   AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
-   ServerStartMode: prod
-appDeployments:
-   Application:
-     shoppingcart :
-          SourcePath: "$DOMAIN_PATH/shoppingcart.war"
-          Target: '${wlsClusterName}'
-          ModuleType: war
 EOF
 }
 
