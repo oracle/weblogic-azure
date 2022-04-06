@@ -267,7 +267,7 @@
 									"name": "BackendAddresses",
 									"count": "[sub(int(parameters('numberOfInstances')),1)]",
 									"input": {
-										"fqdn": "[concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1))]"
+										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), 'NIC')),'${azure.apiVersion}').ipConfigurations[0].properties.privateIPAddress]"
 									}
 								}
 							]
