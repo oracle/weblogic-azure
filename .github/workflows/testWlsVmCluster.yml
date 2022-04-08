@@ -37,7 +37,7 @@ env:
   offerName: arm-oraclelinux-wls-cluster
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
   refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
-  refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
+  refJavaee: 062fe0eb4e72012ead98c23e1a1b2c6259e7e7c4
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}

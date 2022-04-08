@@ -15,7 +15,7 @@ on:
         default: 'refs/heads/main'
 env:
   refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
-  refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
+  refJavaee: 062fe0eb4e72012ead98c23e1a1b2c6259e7e7c4
   offerName: "arm-oraclelinux-wls-admin"
   repoName: "weblogic-azure"
 
@@ -46,7 +46,10 @@ jobs:
           java-version: 1.8
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
-
+      - name: Update utilities path location
+        run:  |
+           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
+           find . -name "*.json" | xargs sed -i 's|../../../../utilities|../utilities|g' $1
       - name: Build and test ${{ env.offerName }} using ${{ github.event.inputs.pidType }} pids
         run: |
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
