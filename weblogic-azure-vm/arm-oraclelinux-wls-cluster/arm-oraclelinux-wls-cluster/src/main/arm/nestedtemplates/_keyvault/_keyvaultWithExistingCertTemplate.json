@@ -15,7 +15,7 @@
             }
         },
         "certificatePasswordName": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Secret name of certificate password."
             }
@@ -52,7 +52,9 @@
             }
         }
     },
-    "variables": {},
+    "variables": {
+        "name_certificatePasswordName": "[parameters('certificatePasswordName')]"
+    },
     "resources": [
         {
             "apiVersion": "${azure.apiVersionForKeyVault}",
@@ -105,7 +107,7 @@
         },
         "sslCertPwdSecretName": {
             "type": "string",
-            "value": "[parameters('certificatePasswordName')]"
+            "value": "[variables('name_certificatePasswordName')]"
         }
     }
 }
