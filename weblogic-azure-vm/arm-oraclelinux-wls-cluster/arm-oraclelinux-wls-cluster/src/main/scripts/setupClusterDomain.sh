@@ -112,8 +112,6 @@ function cleanup()
 
     rm -rf $DOMAIN_PATH/admin-domain.yaml
     rm -rf $DOMAIN_PATH/managed-domain.yaml
-    rm -rf $DOMAIN_PATH/deploy-app.yaml
-    rm -rf $DOMAIN_PATH/shoppingcart.zip
     rm -rf $DOMAIN_PATH/*.py
     rm -rf ${CUSTOM_HOSTNAME_VERIFIER_HOME}
     echo "Cleanup completed."
