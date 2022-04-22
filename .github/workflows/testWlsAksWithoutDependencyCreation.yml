@@ -33,7 +33,7 @@ on:
   # {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false", "disambiguationSuffix": "1397121054", "storageAccountName": "wlsdsa13971210545", "storageContainerName": "wlsdcon13971210545", "dbName": "wlsdb13971210545"}}
   # the request data can be get from setupWlsAksDependency pipeline, please checkout the summary page and download the generated artifact name 'integration-test-data'
   repository_dispatch:
-    types: [aks-integration-test-without-dependency-creation]
+    types: [aks-integration-test-without-dependency-creation,integration-test-all]
 
 env:
     refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
