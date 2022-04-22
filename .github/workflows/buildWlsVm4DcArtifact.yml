@@ -4,6 +4,8 @@
 
 name: Build Dynamic Cluster VM artifact
 on:
+  repository_dispatch:
+    types: [vms-dynamic-cluster-package]
   workflow_dispatch:
     inputs:
       pidType:

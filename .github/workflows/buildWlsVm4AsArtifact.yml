@@ -3,6 +3,8 @@
 
 name: Build Admin Server VM artifact
 on:
+  repository_dispatch:
+    types: [vms-admin-package]
   workflow_dispatch:
     inputs:
       pidType:

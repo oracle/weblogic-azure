@@ -4,6 +4,8 @@
 
 name: Build Configured Cluster VM artifact
 on:
+  repository_dispatch:
+    types: [vms-configured-cluster-package]
   workflow_dispatch:
     inputs:
       pidType:

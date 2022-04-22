@@ -18,7 +18,7 @@ on:
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
   repository_dispatch:
-    types: [aks-integration-test-with-dependency-creation]
+    types: [aks-integration-test-with-dependency-creation,integration-test-all]
 
 env:
     refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
