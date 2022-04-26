@@ -69,10 +69,7 @@ function cleanup()
     echo "Cleaning up temporary files..."
 
     rm -rf $DOMAIN_PATH/admin-domain.yaml
-    rm -rf $DOMAIN_PATH/deploy-app.yaml
-    rm -rf $DOMAIN_PATH/shoppingcart.zip
     rm -rf $DOMAIN_PATH/*.py
-    rm -rf $DOMAIN_PATH/shoppingcart.war
     rm -rf ${CUSTOM_HOSTNAME_VERIFIER_HOME}
  
     echo "Cleanup completed."
@@ -158,25 +155,6 @@ topology:
                FrontendHTTPPort: $wlsAdminPort
 EOF
   fi
-}
-
-# This function to create model for sample application deployment 
-function create_app_deploy_model()
-{
-
-    echo "Creating deploying applicaton model"
-    cat <<EOF >$DOMAIN_PATH/deploy-app.yaml
-domainInfo:
-   AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
-   ServerStartMode: prod
-appDeployments:
-   Application:
-     shoppingcart :
-          SourcePath: $DOMAIN_PATH/shoppingcart.war
-          Target: admin
-          ModuleType: war
-EOF
 }
 
 #Function to create Admin Only Domain
@@ -270,22 +248,6 @@ do
      break
   fi
 done  
-}
-
-#Function to deploy application in offline mode
-#Sample shopping cart 
-function deploy_sampleApp()
-{
-    create_app_deploy_model
-	echo "Downloading and Deploying Sample Application"
-	wget -q $samplApp
-	sudo unzip -o shoppingcart.zip -d $DOMAIN_PATH
-    sudo chown -R $username:$groupname $DOMAIN_PATH/shoppingcart.*
-    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/deployApps.sh -oracle_home $oracleHome -archive_file $DOMAIN_PATH/shoppingcart.war -domain_home $DOMAIN_PATH/$wlsDomainName -model_file  $DOMAIN_PATH/deploy-app.yaml"
-	if [[ $? != 0 ]]; then
-       echo "Error : Deploying application failed"
-       exit 1
-    fi
 }
 
 function validateInput()
@@ -614,7 +576,6 @@ mountFileShare
 
 SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
-samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 wlsAdminPort=7001
 wlsSSLAdminPort=7002
 wlsAdminT3ChannelPort=7005
@@ -632,8 +593,6 @@ groupname="oracle"
 create_adminDomain
 
 createStopWebLogicScript
-
-deploy_sampleApp
 
 cleanup
 
