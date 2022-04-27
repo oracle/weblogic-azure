@@ -165,8 +165,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -185,8 +185,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -212,8 +212,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('const_managedCacheVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {

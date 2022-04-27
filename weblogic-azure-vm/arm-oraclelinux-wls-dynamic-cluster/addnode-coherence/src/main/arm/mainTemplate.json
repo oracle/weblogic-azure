@@ -272,8 +272,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_vmMachine'),copyIndex(variables('const_cacheServerIndexOffset')),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -288,14 +288,14 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualNetworks}",
             "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_virtualNetwork'), '/', variables('name_subnet'))]",
             "condition": "[and(empty(variables('name_virtualNetwork')), empty(variables('name_subnet')))]"
         },
         {
+            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')), variables('name_nic'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -326,8 +326,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -382,9 +382,9 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_cacheServerIndexOffset')),'/newuserscript')]",
-            "apiVersion": "${azure.apiVersion}",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "virtualMachineExtensionLoop",
