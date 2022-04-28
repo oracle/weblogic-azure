@@ -310,6 +310,17 @@ function validateInput()
             exit 1
         fi
     fi
+
+    if [ -z "$virtualNetworkNewOrExisting" ];
+    then
+        echo_stderr "virtualNetworkNewOrExisting is required. "
+        exit 1
+    else
+        if [ "${virtualNetworkNewOrExisting,,}" != "existing" ];
+        then
+            wlsAdminHost=${adminPublicHostName}
+        fi
+    fi
 }
 
 function enableAndStartAdminServerService()
@@ -561,7 +572,7 @@ CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location virtualNetworkNewOrExisting isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 wlsServerName="admin"
 DOMAIN_PATH="/u01/domains"
