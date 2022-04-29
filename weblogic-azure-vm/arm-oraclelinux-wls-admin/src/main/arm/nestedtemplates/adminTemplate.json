@@ -328,7 +328,7 @@
          ]
       },
       {
-         "apiVersion": "2019-04-01",
+         "apiVersion": "${azure.apiVersionForPrivateEndpoint}",
          "name": "[variables('name_privateSaEndpoint')]",
          "type": "Microsoft.Network/privateEndpoints",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
@@ -409,8 +409,7 @@
                   "properties": {
                      "addressPrefix": "[variables('const_subnetPrefix')]",
                      "networkSecurityGroup": {
-                        "id": "[variables('ref_networkSecurityGroup')]",
-                        "privateEndpointNetworkPolicies": "Disabled"
+                        "id": "[variables('ref_networkSecurityGroup')]"
                      }
                   }
                }
