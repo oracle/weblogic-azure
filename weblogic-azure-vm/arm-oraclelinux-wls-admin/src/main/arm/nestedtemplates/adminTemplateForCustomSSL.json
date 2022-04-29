@@ -287,6 +287,7 @@
       "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
       "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
       "name_publicIPAddress": "adminServerVM_PublicIP",
+      "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
       "name_scriptFile": "setupAdminDomain.sh",
       "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
       "name_subnet": "[parameters('subnetName')]",
@@ -375,12 +376,38 @@
          "sku": {
             "name": "[variables('const_storageAccountType')]"
          },
-         "kind": "Storage",
+         "kind": "StorageV2",
          "properties": {
             "supportsHttpsTrafficOnly": false
          },
          "dependsOn": [
             "[variables('name_networkSecurityGroup')]"
+         ]
+      },
+      {
+         "apiVersion": "2019-04-01",
+         "name": "[variables('name_privateSaEndpoint')]",
+         "type": "Microsoft.Network/privateEndpoints",
+         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+         "location": "[parameters('location')]",
+         "properties": {
+               "privateLinkServiceConnections": [
+                  {
+                     "name": "[variables('name_privateSaEndpoint')]",
+                     "properties": {
+                           "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount'))]",
+                           "groupIds": [
+                              "file"
+                           ]
+                     }
+                  }
+               ],
+               "subnet": {
+                  "id": "[variables('ref_subnet')]"
+               }
+         },
+         "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]"
          ]
       },
       {
@@ -557,7 +584,8 @@
          "location": "[parameters('location')]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
-            "[variables('ref_fileShare')]"
+            "[variables('ref_fileShare')]",
+            "[variables('name_privateSaEndpoint')]"
          ],
          "properties": {
             "publisher": "Microsoft.Azure.Extensions",
@@ -574,7 +602,7 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn), reference(variables('name_nic_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',parameters('virtualNetworkNewOrExisting'),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAlias')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhrase')),''),'\"')]"            }
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn), reference(variables('name_nic_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',parameters('virtualNetworkNewOrExisting'),' ',reference(resourceId('Microsoft.Network/privateEndpoints/', variables('name_privateSaEndpoint')), '2021-05-01').customDnsConfigs[0].ipAddresses[0],' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAlias')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhrase')),''),'\"')]"            }
          }
       },
       {
