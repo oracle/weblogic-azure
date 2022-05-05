@@ -281,6 +281,18 @@
                 "bladeTitle": "Configure AKS cluster",
                 "elements": [
                     {
+                        "name": "domainHomeSourceTypeExplainer",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "This offer always deploys WebLogic using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked.  For more information on domain home source types, follow the link below",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/wls-aks-docs-domain-home-source-type"
+                            }
+                        }
+                    },
+                    {
                         "name": "clusterInfo",
                         "type": "Microsoft.Common.Section",
                         "label": "Azure Kubernetes Service",
@@ -374,11 +386,15 @@
                             },
                             {
                                 "name": "enableAzureFileShareTextBlock",
-                                "type": "Microsoft.Common.InfoBox",
+                                "type": "Microsoft.Common.TextBlock",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "If checked,  an Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted the nodes of the AKS cluster. <br>You can find more information from <a href='https://docs.microsoft.com/azure/aks/azure-files-volume' target='_blank'>persistent volume with Azure Files share on AKS</a> and <a href='https://aka.ms/wls-aks-persistent-storage' target='_blank'>Oracle WebLogic persistent storage</a>."
+                                    "text": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster. This can be useful for storing log files outside of the AKS cluster, among other possible uses. An Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted to the nodes of the AKS cluster.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-persistent-storage"
+                                    }
                                 }
                             },
                             {
