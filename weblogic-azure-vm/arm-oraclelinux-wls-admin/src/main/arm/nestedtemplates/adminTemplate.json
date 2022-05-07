@@ -331,7 +331,6 @@
          "apiVersion": "${azure.apiVersionForPrivateEndpoint}",
          "name": "[variables('name_privateSaEndpoint')]",
          "type": "Microsoft.Network/privateEndpoints",
-         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
          "location": "[parameters('location')]",
          "properties": {
                "privateLinkServiceConnections": [
