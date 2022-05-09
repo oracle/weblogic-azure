@@ -35,6 +35,8 @@
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD
 # DNA_ZONE_NAME
 # DNA_ZONE_RESOURCEGROUP_NAME
+# AKS_VERSION
+# USE_AKS_WELL_TESTED_VERSION
 
 function echo_stderr() {
   echo "$@" 1>&2
@@ -561,6 +563,43 @@ function validate_dns_zone() {
   fi
 }
 
+function validate_aks_version() {
+  if [[ "${USE_AKS_WELL_TESTED_VERSION,,}" == "true" ]]; then
+    local aksWellTestedVersionFile=aks_well_tested_version.json
+    curl -L "${gitUrl4AksWellTestedVersionJsonFile}" -o ${aksWellTestedVersionFile}
+    local aksWellTestedVersion=$(cat ${aksWellTestedVersionFile} | jq  ".value" | tr -d "\"")
+    echo "AKS well-tested version: ${aksWellTestedVersion}"
+    local ret=$(az aks get-versions --location eastus \
+      | jq ".orchestrators[] | select(.orchestratorVersion == \"${aksWellTestedVersion}\") | .orchestratorVersion" \
+      | tr -d "\"")
+    if [[ "${ret}" ==  "${aksWellTestedVersion}" ]]; then
+      outputAksVersion=${aksWellTestedVersion}
+    else
+      # if the well-tested version is invalid, use default version.
+      outputAksVersion="default"
+    fi
+  else
+    local ret=$(az aks get-versions --location eastus \
+      | jq ".orchestrators[] | select(.orchestratorVersion == \"${AKS_VERSION}\") | .orchestratorVersion" \
+      | tr -d "\"")
+    if [[ "${ret}" ==  "${AKS_VERSION}" ]]; then
+      outputAksVersion=${AKS_VERSION}
+    else
+      echo_stderr "the aks version is invalid."
+      exit 1
+    fi
+  fi
+}
+
+function output_result() {
+  echo "AKS version: ${outputAksVersion}"
+  result=$(jq -n -c \
+    --arg aksVersion "$outputAksVersion" \
+    '{aksVersion: $aksVersion}')
+  echo "result is: $result"
+  echo $result >$AZ_SCRIPTS_OUTPUT_PATH
+}
+
 # main
 location=$1
 createAKSCluster=$2
@@ -575,6 +614,7 @@ appGatewayCertificateOption=${10}
 enableAppGWIngress=${11}
 checkDNSZone=${12}
 
+gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/aks-well-tested-version/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
 
@@ -599,4 +639,7 @@ fi
 
 validate_dns_zone
 
+validate_aks_version
+
+output_result
 
