@@ -1,0 +1,5 @@
+{
+    "name": "Well tested version of Azure Kubernetes Service",
+    "description": "This version works fine for all the features of Azure WebLogic on AKS offer.",
+    "value": "1.21.9"
+}
