@@ -614,7 +614,6 @@ appGatewayCertificateOption=${10}
 enableAppGWIngress=${11}
 checkDNSZone=${12}
 
-gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
 
