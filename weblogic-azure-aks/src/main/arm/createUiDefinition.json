@@ -337,7 +337,7 @@
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "This application is tested with specified version of Kubernetes; click 'Learn more' to the find the version information. You are also able to input a desired version, if you run into problem with that version, please report an issue.",
+                                    "text": "This offer is tested with specified version of Kubernetes; click 'Learn more' to the find the version information. You are also able to input a desired version, if you run into problem with that version, please report an issue.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/wls-aks-well-tested-version"
