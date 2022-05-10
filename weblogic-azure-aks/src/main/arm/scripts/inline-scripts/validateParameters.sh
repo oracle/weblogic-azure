@@ -566,26 +566,29 @@ function validate_dns_zone() {
 function validate_aks_version() {
   if [[ "${USE_AKS_WELL_TESTED_VERSION,,}" == "true" ]]; then
     local aksWellTestedVersionFile=aks_well_tested_version.json
+    # download the json file that has well-tested version from weblogic-azure repo.
     curl -L "${gitUrl4AksWellTestedVersionJsonFile}" -o ${aksWellTestedVersionFile}
     local aksWellTestedVersion=$(cat ${aksWellTestedVersionFile} | jq  ".value" | tr -d "\"")
     echo "AKS well-tested version: ${aksWellTestedVersion}"
-    local ret=$(az aks get-versions --location eastus \
+    # check if the well-tested version is supported in the location
+    local ret=$(az aks get-versions --location ${location} \
       | jq ".orchestrators[] | select(.orchestratorVersion == \"${aksWellTestedVersion}\") | .orchestratorVersion" \
       | tr -d "\"")
     if [[ "${ret}" ==  "${aksWellTestedVersion}" ]]; then
       outputAksVersion=${aksWellTestedVersion}
     else
       # if the well-tested version is invalid, use default version.
-      outputAksVersion="default"
+      outputAksVersion=${constDefaultAKSVersion}
     fi
   else
-    local ret=$(az aks get-versions --location eastus \
+    # check if the input version is supported in the location
+    local ret=$(az aks get-versions --location ${location} \
       | jq ".orchestrators[] | select(.orchestratorVersion == \"${AKS_VERSION}\") | .orchestratorVersion" \
       | tr -d "\"")
     if [[ "${ret}" ==  "${AKS_VERSION}" ]]; then
       outputAksVersion=${AKS_VERSION}
     else
-      echo_stderr "the aks version is invalid."
+      echo_stderr "ERROR: invalid aks version ${AKS_VERSION} in ${location}."
       exit 1
     fi
   fi
@@ -614,6 +617,7 @@ appGatewayCertificateOption=${10}
 enableAppGWIngress=${11}
 checkDNSZone=${12}
 
+outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
 
@@ -638,7 +642,9 @@ fi
 
 validate_dns_zone
 
-validate_aks_version
+if [[ "${createAKSCluster,,}" == "true" ]]; then
+  validate_aks_version
+fi
 
 output_result
 
