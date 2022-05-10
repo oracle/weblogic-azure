@@ -741,21 +741,21 @@
                         },
                         "defaultValue": {
                             "name": "VirtualNetwork",
-                            "addressPrefixSize": "/16"
+                            "addressPrefixSize": "/28"
                         },
                         "constraints": {
-                            "minAddressPrefixSize": "/16"
+                            "minAddressPrefixSize": "/28"
                         },
                         "subnets": {
                             "subnet1": {
                                 "label": "Subnet",
                                 "defaultValue": {
                                     "name": "Subnet-1",
-                                    "addressPrefixSize": "/24"
+                                    "addressPrefixSize": "/29"
                                 },
                                 "constraints": {
-                                    "minAddressPrefixSize": "/24",
-                                    "minAddressCount": 12,
+                                    "minAddressPrefixSize": "/29",
+                                    "minAddressCount": 2,
                                     "requireContiguousAddresses": false
                                 }
                             }
