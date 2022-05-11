@@ -229,8 +229,8 @@ param sslUploadedPrivateKeyPassPhrase string = newGuid()
 param t3ChannelAdminPort int = 7005
 @description('Public port of the custom T3 channel in WebLoigc cluster')
 param t3ChannelClusterPort int = 8011
-@description('True to use well-tesed Kubernetes version.')
-param useAksWellTestedVersion bool = true
+@description('True to use latest supported Kubernetes version.')
+param useLatestSupportedAksVersion bool = true
 @description('True to set up internal load balancer service.')
 param useInternalLB bool = false
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
@@ -376,7 +376,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     sslUploadedCustomTrustKeyStoreType: sslUploadedCustomTrustKeyStoreType
     sslUploadedPrivateKeyAlias: sslUploadedPrivateKeyAlias
     sslUploadedPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
-    useAksWellTestedVersion: useAksWellTestedVersion
+    useAksWellTestedVersion: useLatestSupportedAksVersion
     userProvidedAcr: userProvidedAcr // used in user provided images
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
