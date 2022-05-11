@@ -46,7 +46,7 @@ param aksClusterRGName string = 'aks-contoso-rg'
 @description('Name of an existing AKS cluster.')
 param aksClusterName string = 'aks-contoso'
 @description('The AKS version.')
-param aksVersion string = '1.21.9'
+param aksVersion string = 'default'
 @allowed([
   'haveCert'
   'haveKeyVault'
