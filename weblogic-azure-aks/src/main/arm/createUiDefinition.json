@@ -332,12 +332,12 @@
                                 "visible": "[not(bool(steps('section_aks').clusterInfo.createAKSCluster))]"
                             },
                             {
-                                "name": "aksWellTestedVersionTextBlock",
+                                "name": "aksSupportedVersionTextBlock",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "This offer is tested with specified version of Kubernetes; click 'Learn more' to the find the version information. You are also able to input a desired version, if you run into problem with that version, please report an issue.",
+                                    "text": "AKS supports a range of Kubernetes versions.  This offer is tested with with a specific Kubernetes version known to work with WebLogic server on AKS; click 'Learn more' to the find the version information.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/wls-aks-well-tested-version"
@@ -345,11 +345,11 @@
                                 }
                             },
                             {
-                                "name": "useAksWellTestedVersion",
+                                "name": "useLatestSupportedAksVersion",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use well-tested Kubernetes version",
+                                "label": "Use latest supported AKS Kubernetes version",
                                 "defaultValue": "Yes",
-                                "toolTip": "If yes, use a well-tested Kubernetes version; if no, input your desired version.",
+                                "toolTip": "If yes, use the latest supported AKS Kubernetes version; if no, input a version using the known supported versions listed in the document linked above.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -375,7 +375,7 @@
                                     "regex": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[a-zA-Z\\d][-a-zA-Z.\\d]*)?(\\+[a-zA-Z\\d][-a-zA-Z.\\d]*)?$",
                                     "validationMessage": "Use semantic versioning (Major.Minor.Patch)."
                                 },
-                                "visible": "[and(bool(steps('section_aks').clusterInfo.createAKSCluster),not(bool(steps('section_aks').clusterInfo.useAksWellTestedVersion)))]"
+                                "visible": "[and(bool(steps('section_aks').clusterInfo.createAKSCluster),not(bool(steps('section_aks').clusterInfo.useLatestSupportedAksVersion)))]"
                             },
                             {
                                 "name": "aksNodeCount",
@@ -2161,7 +2161,7 @@
             "sslUploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
             "sslUploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
             "sslUploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
-            "useAksWellTestedVersion": "[bool(steps('section_aks').clusterInfo.useAksWellTestedVersion)]",
+            "useLatestSupportedAksVersion": "[bool(steps('section_aks').clusterInfo.useLatestSupportedAksVersion)]",
             "useInternalLB": "[bool(steps('section_appGateway').lbSVCInfo.enableInternalLB)]",
             "useOracleImage": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
             "userProvidedAcr": "[last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/'))]",
