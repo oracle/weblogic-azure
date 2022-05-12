@@ -345,39 +345,6 @@
                                 }
                             },
                             {
-                                "name": "useLatestSupportedAksVersion",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use latest supported AKS Kubernetes version",
-                                "defaultValue": "Yes",
-                                "toolTip": "If yes, use the latest supported AKS Kubernetes version; if no, input a version using the known supported versions listed in the document linked above.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": "true"
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": "false"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
-                            },
-                            {
-                                "name": "aksVersion",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Input Kubernetes version",
-                                "toolTip": "Use semantic versioning (Major.Minor.Patch)",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[a-zA-Z\\d][-a-zA-Z.\\d]*)?(\\+[a-zA-Z\\d][-a-zA-Z.\\d]*)?$",
-                                    "validationMessage": "Use semantic versioning (Major.Minor.Patch)."
-                                },
-                                "visible": "[and(bool(steps('section_aks').clusterInfo.createAKSCluster),not(bool(steps('section_aks').clusterInfo.useLatestSupportedAksVersion)))]"
-                            },
-                            {
                                 "name": "aksNodeCount",
                                 "type": "Microsoft.Common.Slider",
                                 "min": 1,
@@ -2093,7 +2060,6 @@
             "aksAgentPoolVMSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
-            "aksVersion": "[steps('section_aks').clusterInfo.aksVersion]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
             "appGatewaySSLBackendRootCertData": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertData]",
             "appGatewaySSLCertData": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertData]",
@@ -2161,7 +2127,6 @@
             "sslUploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
             "sslUploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
             "sslUploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
-            "useLatestSupportedAksVersion": "[bool(steps('section_aks').clusterInfo.useLatestSupportedAksVersion)]",
             "useInternalLB": "[bool(steps('section_appGateway').lbSVCInfo.enableInternalLB)]",
             "useOracleImage": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
             "userProvidedAcr": "[last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/'))]",
