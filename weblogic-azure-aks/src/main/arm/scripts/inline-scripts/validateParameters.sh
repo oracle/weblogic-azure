@@ -574,7 +574,7 @@ function validate_aks_version() {
     local ret=$(az aks get-versions --location ${location} \
       | jq ".orchestrators[] | select(.orchestratorVersion == \"${aksWellTestedVersion}\") | .orchestratorVersion" \
       | tr -d "\"")
-    if [[ "${ret}" ==  "${aksWellTestedVersion}" ]]; then
+    if [[ "${aksWellTestedVersion}" !=  "" ]] && [[ "${ret}" ==  "${aksWellTestedVersion}" ]]; then
       outputAksVersion=${aksWellTestedVersion}
     else
       # if the well-tested version is invalid, use default version.
