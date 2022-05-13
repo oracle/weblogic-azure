@@ -429,7 +429,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Use a pre-existing, WebLogic Server Docker image from Oracle Container Registry?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
+                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic Server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
                                 "constraints": {
                                     "allowedValues": [
                                         {
