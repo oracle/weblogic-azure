@@ -6,6 +6,7 @@ param aksAgentPoolNodeCount int
 param aksAgentPoolVMSize string
 param aksClusterRGName string
 param aksClusterName string
+param aksVersion string
 param appGatewayCertificateOption string
 param appGatewaySSLCertData string
 @secure()
@@ -51,6 +52,7 @@ param sslUploadedCustomTrustKeyStoreType string
 param sslUploadedPrivateKeyAlias string
 @secure()
 param sslUploadedPrivateKeyPassPhrase string
+param useAksWellTestedVersion bool
 param userProvidedAcr string
 param userProvidedImagePath string
 param useOracleImage bool
@@ -98,6 +100,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       {
         name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
         value: aksClusterRGName
+      }
+      {
+        name: 'AKS_VERSION'
+        value: aksVersion
       }
       {
         name: 'BASE64_FOR_SERVICE_PRINCIPAL'
@@ -207,6 +213,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         name: 'DNA_ZONE_RESOURCEGROUP_NAME'
         value: dnszoneRGName
       }
+      {
+        name: 'USE_AKS_WELL_TESTED_VERSION'
+        value: string(useAksWellTestedVersion)
+      }
     ]
     scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
     cleanupPreference: 'OnSuccess'
@@ -214,3 +224,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     forceUpdateTag: utcValue
   }
 }
+
+
+output aksVersion string = reference(const_deploymentName).outputs.aksVersion

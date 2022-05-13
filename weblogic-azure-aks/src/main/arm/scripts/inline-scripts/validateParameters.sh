@@ -35,6 +35,8 @@
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD
 # DNA_ZONE_NAME
 # DNA_ZONE_RESOURCEGROUP_NAME
+# AKS_VERSION
+# USE_AKS_WELL_TESTED_VERSION
 
 function echo_stderr() {
   echo "$@" 1>&2
@@ -561,6 +563,46 @@ function validate_dns_zone() {
   fi
 }
 
+function validate_aks_version() {
+  if [[ "${USE_AKS_WELL_TESTED_VERSION,,}" == "true" ]]; then
+    local aksWellTestedVersionFile=aks_well_tested_version.json
+    # download the json file that has well-tested version from weblogic-azure repo.
+    curl -L "${gitUrl4AksWellTestedVersionJsonFile}" -o ${aksWellTestedVersionFile}
+    local aksWellTestedVersion=$(cat ${aksWellTestedVersionFile} | jq  ".value" | tr -d "\"")
+    echo "AKS well-tested version: ${aksWellTestedVersion}"
+    # check if the well-tested version is supported in the location
+    local ret=$(az aks get-versions --location ${location} \
+      | jq ".orchestrators[] | select(.orchestratorVersion == \"${aksWellTestedVersion}\") | .orchestratorVersion" \
+      | tr -d "\"")
+    if [[ "${aksWellTestedVersion}" !=  "" ]] && [[ "${ret}" ==  "${aksWellTestedVersion}" ]]; then
+      outputAksVersion=${aksWellTestedVersion}
+    else
+      # if the well-tested version is invalid, use default version.
+      outputAksVersion=${constDefaultAKSVersion}
+    fi
+  else
+    # check if the input version is supported in the location
+    local ret=$(az aks get-versions --location ${location} \
+      | jq ".orchestrators[] | select(.orchestratorVersion == \"${AKS_VERSION}\") | .orchestratorVersion" \
+      | tr -d "\"")
+    if [[ "${ret}" ==  "${AKS_VERSION}" ]]; then
+      outputAksVersion=${AKS_VERSION}
+    else
+      echo_stderr "ERROR: invalid aks version ${AKS_VERSION} in ${location}."
+      exit 1
+    fi
+  fi
+}
+
+function output_result() {
+  echo "AKS version: ${outputAksVersion}"
+  result=$(jq -n -c \
+    --arg aksVersion "$outputAksVersion" \
+    '{aksVersion: $aksVersion}')
+  echo "result is: $result"
+  echo $result >$AZ_SCRIPTS_OUTPUT_PATH
+}
+
 # main
 location=$1
 createAKSCluster=$2
@@ -575,6 +617,7 @@ appGatewayCertificateOption=${10}
 enableAppGWIngress=${11}
 checkDNSZone=${12}
 
+outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
 
@@ -599,4 +642,9 @@ fi
 
 validate_dns_zone
 
+if [[ "${createAKSCluster,,}" == "true" ]]; then
+  validate_aks_version
+fi
+
+output_result
 

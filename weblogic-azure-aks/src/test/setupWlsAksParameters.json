@@ -59,7 +59,7 @@
             "value": false
         },
         "enableAzureFileShare": {
-            "value": false
+            "value": true
         },
         "enableCookieBasedAffinity": {
             "value": true

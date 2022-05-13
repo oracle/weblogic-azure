@@ -281,6 +281,18 @@
                 "bladeTitle": "Configure AKS cluster",
                 "elements": [
                     {
+                        "name": "domainHomeSourceTypeExplainer",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "This offer always deploys WebLogic using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked.  For more information on domain home source types, follow the link below",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/wls-aks-docs-domain-home-source-type"
+                            }
+                        }
+                    },
+                    {
                         "name": "clusterInfo",
                         "type": "Microsoft.Common.Section",
                         "label": "Azure Kubernetes Service",
@@ -318,6 +330,19 @@
                                     }
                                 },
                                 "visible": "[not(bool(steps('section_aks').clusterInfo.createAKSCluster))]"
+                            },
+                            {
+                                "name": "aksSupportedVersionTextBlock",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "AKS supports a range of Kubernetes versions.  This offer is tested with a specific Kubernetes version known to work with WebLogic Server on AKS; click 'Learn more' to the find the version information.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-well-tested-version"
+                                    }
+                                }
                             },
                             {
                                 "name": "aksNodeCount",
@@ -374,11 +399,15 @@
                             },
                             {
                                 "name": "enableAzureFileShareTextBlock",
-                                "type": "Microsoft.Common.InfoBox",
+                                "type": "Microsoft.Common.TextBlock",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "If checked,  an Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted the nodes of the AKS cluster. <br>You can find more information from <a href='https://docs.microsoft.com/azure/aks/azure-files-volume' target='_blank'>persistent volume with Azure Files share on AKS</a> and <a href='https://aka.ms/wls-aks-persistent-storage' target='_blank'>Oracle WebLogic persistent storage</a>."
+                                    "text": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster. This can be useful for storing log files outside of the AKS cluster, among other possible uses. An Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted to the nodes of the AKS cluster.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-persistent-storage"
+                                    }
                                 }
                             },
                             {
@@ -400,7 +429,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Use a pre-existing, WebLogic Server Docker image from Oracle Container Registry?",
                                 "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
+                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic Server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
                                 "constraints": {
                                     "allowedValues": [
                                         {

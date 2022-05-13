@@ -15,6 +15,7 @@ export constClusterName='cluster-1'
 export constClusterT3AddressEnvName="T3_TUNNELING_CLUSTER_ADDRESS"
 export constDefaultJavaOptions="-Dlog4j2.formatMsgNoLookups=true -Dweblogic.StdoutDebugEnabled=false" # the java options will be applied to the cluster
 export constDefaultJVMArgs="-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 " # the JVM options will be applied to the cluster
+export constDefaultAKSVersion="default"
 export constFalse="false"
 export constTrue="true"
 export constIntrospectorJobActiveDeadlineSeconds=300  # for Guaranteed Qos
@@ -24,6 +25,8 @@ export ocrLoginServer="container-registry.oracle.com"
 export ocrGaImagePath="middleware/weblogic"
 export ocrCpuImagePath="middleware/weblogic_cpu"
 export gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
+export gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
+
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
 export optUninstallInterval=10
 
