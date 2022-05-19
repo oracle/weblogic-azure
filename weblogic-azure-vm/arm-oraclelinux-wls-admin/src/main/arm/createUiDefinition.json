@@ -709,11 +709,11 @@
                 "label": "Networking",
                 "elements": [
                     {
-                        "name": "denyPublicTrafficForAdminServer",
+                        "name": "customVnet",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Deny public traffic for admin server?",
+                        "label": "Customize the virtual network for this deployment",
                         "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
+                        "toolTip": "If yes, you can customize the virtual network into which the offer will deploy the WebLogic Server VM. If no, the offer will create a new virtual network.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -731,6 +731,7 @@
                     {
                         "name": "virtualNetwork",
                         "type": "Microsoft.Network.VirtualNetworkCombo",
+                        "visible": "[steps('section_networkingConfiguration').customVnet]",
                         "label": {
                             "virtualNetwork": "Virtual network",
                             "subnets": "Subnets"
@@ -759,6 +760,27 @@
                                     "requireContiguousAddresses": false
                                 }
                             }
+                        }
+                    },
+                    {
+                        "name": "denyPublicTrafficForAdminServer",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
+                        "label": "Deny public traffic for admin server?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "No",
+                                    "value": false
+                                },
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                }
+                            ],
+                            "required": true
                         }
                     },
                     {

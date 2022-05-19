@@ -196,7 +196,7 @@
       },
       "virtualNetworkName": {
          "type": "string",
-         "defaultValue": "jbosseap-vnet",
+         "defaultValue": "wls-vnet",
          "metadata": {
             "description": "Name of the existing or new VNET"
          }
