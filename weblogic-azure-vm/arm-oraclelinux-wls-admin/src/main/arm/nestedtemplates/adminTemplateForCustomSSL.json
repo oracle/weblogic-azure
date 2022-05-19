@@ -211,7 +211,7 @@
       "addressPrefixes": {
          "type": "array",
          "defaultValue": [
-            "10.0.0.0/16"
+            "10.0.0.0/28"
          ],
          "metadata": {
             "description": "Address prefix of the VNET."
@@ -226,7 +226,7 @@
       },
       "subnetPrefix": {
          "type": "string",
-         "defaultValue": "10.0.0.0/24",
+         "defaultValue": "10.0.0.0/29",
          "metadata": {
             "description": "Address prefix of the subnet"
          }
