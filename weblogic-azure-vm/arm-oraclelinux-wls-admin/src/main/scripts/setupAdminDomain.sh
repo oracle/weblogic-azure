@@ -310,6 +310,24 @@ function validateInput()
             exit 1
         fi
     fi
+
+    if [ -z "$virtualNetworkNewOrExisting" ];
+    then
+        echo_stderr "virtualNetworkNewOrExisting is required. "
+        exit 1
+    else
+        if [ "${virtualNetworkNewOrExisting,,}" != "existing" ];
+        then
+            # If deploying to an existing VNET, using private IP instead of hostname
+            wlsAdminHost=${adminPublicHostName}
+        fi
+    fi
+
+    if [ -z "$storageAccountPrivateIp" ];
+    then
+        echo_stderr "storageAccountPrivateIp is required. "
+        exit 1
+    fi
 }
 
 function enableAndStartAdminServerService()
@@ -428,13 +446,13 @@ function mountFileShare()
   fi
   echo "chmod 600 /etc/smbcredentials/${storageAccountName}.cred"
   sudo chmod 600 /etc/smbcredentials/${storageAccountName}.cred
-  echo "//${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
-  sudo bash -c "echo \"//${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
-  echo "mount -t cifs //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
-  sudo mount -t cifs //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
+  echo "//${storageAccountPrivateIp}/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo bash -c "echo \"//${storageAccountPrivateIp}/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
+  echo "mount -t cifs //${storageAccountPrivateIp}/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo mount -t cifs //${storageAccountPrivateIp}/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
   if [[ $? != 0 ]];
   then
-         echo "Failed to mount //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath"
+         echo "Failed to mount //${storageAccountPrivateIp}/wlsshare $mountpointPath"
 	 exit 1
   fi
 }
@@ -555,12 +573,13 @@ fi
 
 #main script starts here
 
+
 SCRIPT_PWD=`pwd`
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 wlsServerName="admin"
 DOMAIN_PATH="/u01/domains"

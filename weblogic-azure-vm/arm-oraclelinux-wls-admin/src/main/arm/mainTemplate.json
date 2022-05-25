@@ -432,6 +432,54 @@
             "description": "Select appropriate VM Size as per requirement"
          }
       },
+      "virtualNetworkNewOrExisting": {
+         "type": "string",
+         "defaultValue": "new",
+         "allowedValues": [
+            "new",
+            "existing"
+         ],
+         "metadata": {
+            "description": "Specify whether to create a new or existing virtual network for the VM."
+         }
+      },
+      "virtualNetworkName": {
+         "type": "string",
+         "defaultValue": "wls-vnet",
+         "metadata": {
+            "description": "Name of the existing or new VNET"
+         }
+      },
+      "virtualNetworkResourceGroupName": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().name]",
+         "metadata": {
+            "description": "Resource group of Virtual network"
+         }
+      },
+      "addressPrefixes": {
+         "type": "array",
+         "defaultValue": [
+            "10.0.0.0/28"
+         ],
+         "metadata": {
+            "description": "Address prefix of the VNET."
+         }
+      },
+      "subnetName": {
+         "type": "string",
+         "defaultValue": "wls-subnet",
+         "metadata": {
+            "description": "Name of the existing or new Subnet"
+         }
+      },
+      "subnetPrefix": {
+         "type": "string",
+         "defaultValue": "10.0.0.0/29",
+         "metadata": {
+            "description": "Address prefix of the subnet"
+         }
+      },
       "wlsDomainName": {
          "defaultValue": "adminDomain",
          "type": "string",
@@ -554,6 +602,9 @@
                "authenticationType": {
                   "value": "[parameters('authenticationType')]"
                },
+               "addressPrefixes": {
+                  "value": "[parameters('addressPrefixes')]"
+               },
                "customDNSName": {
                   "value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
                },
@@ -575,6 +626,12 @@
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"
                },
+               "subnetName": {
+                  "value": "[parameters('subnetName')]"
+               },
+               "subnetPrefix": {
+                  "value": "[parameters('subnetPrefix')]"
+               },
                "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
@@ -583,6 +640,15 @@
                },
                "vmSizeSelect": {
                   "value": "[parameters('vmSizeSelect')]"
+               },
+               "virtualNetworkNewOrExisting": {
+                  "value": "[parameters('virtualNetworkNewOrExisting')]"
+               },
+               "virtualNetworkName": {
+                  "value": "[parameters('virtualNetworkName')]"
+               },
+               "virtualNetworkResourceGroupName": {
+                  "value": "[parameters('virtualNetworkResourceGroupName')]"
                },
                "wlsDomainName": {
                   "value": "[parameters('wlsDomainName')]"
@@ -668,6 +734,9 @@
                "authenticationType": {
                   "value": "[parameters('authenticationType')]"
                },
+               "addressPrefixes": {
+                  "value": "[parameters('addressPrefixes')]"
+               },
                "customDNSName": {
                   "value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
                },
@@ -746,6 +815,12 @@
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"
                },
+               "subnetName": {
+                  "value": "[parameters('subnetName')]"
+               },
+               "subnetPrefix": {
+                  "value": "[parameters('subnetPrefix')]"
+               },
                "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
@@ -754,6 +829,15 @@
                },
                "vmSizeSelect": {
                   "value": "[parameters('vmSizeSelect')]"
+               },
+               "virtualNetworkNewOrExisting": {
+                  "value": "[parameters('virtualNetworkNewOrExisting')]"
+               },
+               "virtualNetworkName": {
+                  "value": "[parameters('virtualNetworkName')]"
+               },
+               "virtualNetworkResourceGroupName": {
+                  "value": "[parameters('virtualNetworkResourceGroupName')]"
                },
                "wlsDomainName": {
                   "value": "[parameters('wlsDomainName')]"
@@ -773,6 +857,7 @@
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
+         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "networkSecurityLinkedTemplate",
          "properties": {
             "mode": "Incremental",
@@ -798,7 +883,7 @@
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "dnszonesLinkedTemplate",
-         "condition": "[parameters('enableCustomDNS')]",
+         "condition": "[and(parameters('enableCustomDNS'), equals(parameters('virtualNetworkNewOrExisting'), 'new'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
          ],
