@@ -5,6 +5,18 @@
     "parameters": {
         "basics": [
             {
+                "name": "domainHomeSourceTypeExplainer",
+                "type": "Microsoft.Common.TextBlock",
+                "visible": true,
+                "options": {
+                    "text": "This offer always deploys WebLogic Server using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked in 'Configure AKS cluster' blade.  For more information on domain home source types, follow the link below",
+                    "link": {
+                        "label": "Learn more",
+                        "uri": "https://aka.ms/wls-aks-docs-domain-home-source-type"
+                    }
+                }
+            },
+            {
                 "name": "basicsRequired",
                 "type": "Microsoft.Common.Section",
                 "label": "Credentials for WebLogic",
@@ -280,18 +292,6 @@
                 },
                 "bladeTitle": "Configure AKS cluster",
                 "elements": [
-                    {
-                        "name": "domainHomeSourceTypeExplainer",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "This offer always deploys WebLogic using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked.  For more information on domain home source types, follow the link below",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/wls-aks-docs-domain-home-source-type"
-                            }
-                        }
-                    },
                     {
                         "name": "clusterInfo",
                         "type": "Microsoft.Common.Section",
