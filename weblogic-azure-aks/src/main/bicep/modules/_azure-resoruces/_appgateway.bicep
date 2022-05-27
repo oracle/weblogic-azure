@@ -5,92 +5,27 @@
 param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
 @description('Public IP Name for the Application Gateway')
 param gatewayPublicIPAddressName string = 'gwip'
+param gatewaySubnetId string
 param location string
+param usePrivateIP bool = false
 param utcValue string = utcNow()
 
-var const_subnetAddressPrefix = '172.16.0.0/28'
-var const_virtualNetworkAddressPrefix = '172.16.0.0/24'
-var name_appGateway = 'appgw${uniqueString(utcValue)}'
-var name_appGatewaySubnet = 'appGatewaySubnet'
+// usedto mitigate ARM template error: defined multiple times in a template
+var name_appGateway1 = 'appgw1${uniqueString(utcValue)}'
+var name_appGateway2 = 'appgw2${uniqueString(utcValue)}'
+var name_appGateway = usePrivateIP ? name_appGateway1 : name_appGateway2
 var name_backendAddressPool = 'myGatewayBackendPool'
 var name_frontEndIPConfig = 'appGwPublicFrontendIp'
 var name_httpListener = 'HTTPListener'
 var name_httpPort = 'httpport'
 var name_httpSetting = 'myHTTPSetting'
-var name_nsg = 'nsg${uniqueString(utcValue)}'
-var name_virtualNetwork = 'vnet${uniqueString(utcValue)}'
-var ref_appGatewaySubnet = resourceId('Microsoft.Network/virtualNetworks/subnets', name_virtualNetwork, name_appGatewaySubnet)
 var ref_backendAddressPool = resourceId('Microsoft.Network/applicationGateways/backendAddressPools', name_appGateway, name_backendAddressPool)
 var ref_backendHttpSettings = resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', name_appGateway, name_httpSetting)
 var ref_frontendHTTPPort = resourceId('Microsoft.Network/applicationGateways/frontendPorts', name_appGateway, name_httpPort)
 var ref_frontendIPConfiguration = resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', name_appGateway, name_frontEndIPConfig)
 var ref_httpListener = resourceId('Microsoft.Network/applicationGateways/httpListeners', name_appGateway, name_httpListener)
 
-resource nsg 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
-  name: name_nsg
-  location: location
-  properties: {
-    securityRules: [
-      {
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '65200-65535'
-          sourceAddressPrefix: 'GatewayManager'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 500
-          direction: 'Inbound'
-        }
-        name: 'ALLOW_APPGW'
-      }
-      {
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          sourceAddressPrefix: 'Internet'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 510
-          direction: 'Inbound'
-          destinationPortRanges: [
-            '80'
-            '443'
-          ]
-        }
-        name: 'ALLOW_HTTP_ACCESS'
-      }
-    ]
-  }
-}
-
-resource vnet 'Microsoft.Network/virtualNetworks@2020-07-01' = {
-  name: name_virtualNetwork
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        const_virtualNetworkAddressPrefix
-      ]
-    }
-    subnets: [
-      {
-        name: name_appGatewaySubnet
-        properties: {
-          addressPrefix: const_subnetAddressPrefix
-          networkSecurityGroup: {
-            id: nsg.id
-          }
-        }
-      }
-    ]
-  }
-  dependsOn: [
-    nsg
-  ]
-}
-
-resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
+resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = if (!usePrivateIP){
   name: gatewayPublicIPAddressName
   sku: {
     name: 'Standard'
@@ -104,8 +39,101 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
   }
 }
 
-resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
-  name: name_appGateway
+// https://docs.microsoft.com/en-us/azure/application-gateway/configure-application-gateway-with-private-frontend-ip
+resource privateAppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if (usePrivateIP) {
+  name: name_appGateway1
+  location: location
+  tags: {
+    'managed-by-k8s-ingress': 'true'
+  }
+  properties: {
+    sku: {
+      name: 'Standard_Medium'
+      tier: 'Standard'
+    }
+    gatewayIPConfigurations: [
+      {
+        name: 'appGatewayIpConfig'
+        properties: {
+          subnet: {
+            id: gatewaySubnetId
+          }
+        }
+      }
+    ]
+    frontendIPConfigurations: [
+      {
+        name: name_frontEndIPConfig
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+        }
+      }
+    ]
+    frontendPorts: [
+      {
+        name: name_httpPort
+        properties: {
+          port: 80
+        }
+      }
+    ]
+    backendAddressPools: [
+      {
+        name: 'myGatewayBackendPool'
+      }
+    ]
+    httpListeners: [
+      {
+        name: name_httpListener
+        properties: {
+          protocol: 'Http'
+          frontendIPConfiguration: {
+            id: ref_frontendIPConfiguration
+          }
+          frontendPort: {
+            id: ref_frontendHTTPPort
+          }
+        }
+      }
+    ]
+    backendHttpSettingsCollection: [
+      {
+        name: name_httpSetting
+        properties: {
+          port: 80
+          protocol: 'Http'
+        }
+      }
+    ]
+    requestRoutingRules: [
+      {
+        name: 'HTTPRoutingRule'
+        properties: {
+          httpListener: {
+            id: ref_httpListener
+          }
+          backendAddressPool: {
+            id: ref_backendAddressPool
+          }
+          backendHttpSettings: {
+            id: ref_backendHttpSettings
+          }
+        }
+      }
+    ]
+    enableHttp2: false
+    autoscaleConfiguration: {
+      minCapacity: 2
+      maxCapacity: 3
+    }
+  }
+  dependsOn: [
+    gatewayPublicIP
+  ]
+}
+
+resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if (!usePrivateIP) {
+  name: name_appGateway2
   location: location
   tags: {
     'managed-by-k8s-ingress': 'true'
@@ -120,7 +148,7 @@ resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
         name: 'appGatewayIpConfig'
         properties: {
           subnet: {
-            id: ref_appGatewaySubnet
+            id: gatewaySubnetId
           }
         }
       }
@@ -200,7 +228,7 @@ resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
     }
   }
   dependsOn: [
-    vnet
+    gatewayPublicIP
   ]
 }
 
@@ -208,4 +236,3 @@ output appGatewayAlias string = reference(gatewayPublicIP.id).dnsSettings.fqdn
 output appGatewayName string = name_appGateway
 output appGatewayURL string = 'http://${reference(gatewayPublicIP.id).dnsSettings.fqdn}/'
 output appGatewaySecuredURL string = 'https://${reference(gatewayPublicIP.id).dnsSettings.fqdn}/'
-output vnetName string = name_virtualNetwork

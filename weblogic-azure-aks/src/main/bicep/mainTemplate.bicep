@@ -242,6 +242,23 @@ param userProvidedImagePath string = 'null'
 @description('Use Oracle images or user provided patched images')
 param useOracleImage bool = true
 param validateApplications bool = false
+@description('VNET for Application Gateway.')
+param vnetForApplicationGateway object = {
+  name: 'wlsaks-app-gateway-vnet'
+  resourceGroup: resourceGroup().name
+  addressPrefixes: [
+    '172.16.0.0/28'
+  ]
+  addressPrefix: '172.16.0.0/28'
+  newOrExisting: 'new'
+  subnets: {
+    gatewaySubnet: {
+      name: 'gatewaySubnet'
+      addressPrefix: '172.16.0.0/29'
+      startAddress: '172.16.0.4'
+    }
+  }
+}
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -427,6 +444,15 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
     aksClusterRGName: aksClusterRGName
     identity: identity
     location: location
+  }
+}
+
+// To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
+module vnetForAppgateway 'modules/_azure-resoruces/__vnetAppGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+  name: 'vnet-application-gateway'
+  params: {
+    location: location
+    vnetForApplicationGateway: vnetForApplicationGateway
   }
 }
 
