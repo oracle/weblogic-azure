@@ -10,10 +10,14 @@ on:
         description: "Specify whether to enable ELK depoyment or not."
         required: true
         default: "false"
+      ref:
+        description: 'Specify Git Ref if needed.'
+        required: false
+        default: 'refs/heads/main'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
-  # REPO_NAME=mriccell/arm-oraclelinux-wls-admin
-  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-admin"}'
+  # REPO_NAME=mriccell/weblogic-azure
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-admin", "client_payload": {"enableELK": "false", "ref": "refs/heads/main"}}'
   repository_dispatch:
     types: [test-vm-admin,integration-test-all]
 
@@ -45,8 +49,33 @@ env:
 
 jobs:
   preflight:
+    outputs:
+      enableELK: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.enableELK }}
     runs-on: ubuntu-latest
     steps:
+      - name: Setup environment variables
+        id: setup-env-variables-based-on-dispatch-event
+        run: |
+          if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+            enableELK=${{ github.event.inputs.enableELK }}
+            ref=${{ github.event.inputs.ref }}
+          else
+            enableELK=${{ github.event.client_payload.enableELK }}
+            ref=${{ github.event.client_payload.ref }}
+          fi
+
+          if [ -z "$enableELK" ]; then
+            enableELK='false'
+          fi
+
+          if [ -z "$ref" ]; then
+            ref='refs/heads/main'
+          fi
+
+          echo "##[set-output name=enableELK;]${enableELK}"
+          echo "##[set-output name=ref;]${ref}"
+          echo "enableELK=${enableELK}" >> $GITHUB_ENV
+          echo "ref=${ref}" >> $GITHUB_ENV
       - name: Checkout azure-javaee-iaas
         uses: actions/checkout@v2
         with:
@@ -63,6 +92,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
+          ref: ${{ env.ref }}
           path: ${{env.repoName}}
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
@@ -73,7 +103,7 @@ jobs:
       - name: Build and test ${{ env.offerName }}
         run: |
           ls
-          mvn -Ptemplate-validation-tests clean install --file ${adminOfferPath}/pom.xml
+          mvn -Ptemplate-validation-tests clean install -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }} --file ${adminOfferPath}/pom.xml
 
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}} for test
         uses: actions/checkout@v2
@@ -417,7 +447,7 @@ jobs:
 
       - name: Set up ELK by deploying sub template
         id: enable-elk
-        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
+        if: ${{ needs.preflight.outputs.enableELK == 'true' }}
         run: |
             # Generate parameters for ELK template deployment
             bash ${{ env.adminOfferPath }}/test/scripts/gen-parameters-deploy-elk.sh \
@@ -442,13 +472,12 @@ jobs:
             --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
       - name: Delete Resource Group
         id: delete-resource-group
-        if: always()
         run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
       - name: Delete ELK index
         id: delete-elk-index
-        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
+        if: ${{ needs.preflight.outputs.enableELK == 'true' }}
         run: |
           curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-admin-${{ github.run_id }}${{ github.run_number }}
 

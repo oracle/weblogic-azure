@@ -315,12 +315,6 @@ function validateInput()
     then
         echo_stderr "virtualNetworkNewOrExisting is required. "
         exit 1
-    else
-        if [ "${virtualNetworkNewOrExisting,,}" != "existing" ];
-        then
-            # If deploying to an existing VNET, using private IP instead of hostname
-            wlsAdminHost=${adminPublicHostName}
-        fi
     fi
 
     if [ -z "$storageAccountPrivateIp" ];
