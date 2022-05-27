@@ -52,10 +52,10 @@
                         "name": "wdtRuntimePassword",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                            "password": "Password for WebLogic Deploy Tooling runtime encrytion",
+                            "password": "Password for WebLogic Model encryption",
                             "confirmPassword": "Confirm password"
                         },
-                        "toolTip": "The model WebLogic Deploy Tooling runtime encrytion secret.",
+                        "toolTip": "Model in Image requires a runtime encryption secret with a secure `password` key. This secret is used by the operator to encrypt model and domain home artifacts before it adds them to a runtime ConfigMap or log. See https://aka.ms/wls-aks-model-runtime-encryption-secret.",
                         "constraints": {
                             "required": true,
                             "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
