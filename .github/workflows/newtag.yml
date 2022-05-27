@@ -15,7 +15,7 @@ on:
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
   # sample <request_data>
-  # {"event_type": "gh-pages-newtag, "client_payload": {"tagname": "2021-12-09-02-Q4" }}
+  # {"event_type": "gh-pages-newtag", "client_payload": {"tagname": "2021-12-09-02-Q4", "ref": "refs/heads/main" }}
 
 env:
   tagbranch: "tagbranch"
@@ -40,6 +40,14 @@ jobs:
           else
             tagname=${{ github.event.client_payload.tagname }}
             ref=${{ github.event.client_payload.ref }}
+          fi
+
+          if [ -z "$tagname" ]; then
+            tagname=${userName}`date +%m%d`
+          fi
+
+          if [ -z "$ref" ]; then
+            ref='refs/heads/main'
           fi
 
           echo "##[set-output name=tagname;]${tagname}"

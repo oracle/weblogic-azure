@@ -31,7 +31,6 @@ jobs:
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
-          ref='refs/heads/main'
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
             pidType=${{ github.event.inputs.pidType }}
             ref=${{ github.event.inputs.ref }}
@@ -39,6 +38,15 @@ jobs:
             pidType=${{ github.event.client_payload.pidType }}
             ref=${{ github.event.client_payload.ref }}
           fi
+
+          if [ -z "$pidType" ]; then
+            pidType='microsoft'
+          fi
+
+          if [ -z "$ref" ]; then
+            ref='refs/heads/main'
+          fi
+
           echo "##[set-output name=pidType;]${pidType}"
           echo "##[set-output name=ref;]${ref}"
           echo "pidType=${pidType}" >> $GITHUB_ENV

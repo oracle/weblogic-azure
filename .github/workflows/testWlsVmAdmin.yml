@@ -56,7 +56,6 @@ jobs:
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
-          ref='refs/heads/main'
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
             enableELK=${{ github.event.inputs.enableELK }}
             ref=${{ github.event.inputs.ref }}
@@ -64,6 +63,15 @@ jobs:
             enableELK=${{ github.event.client_payload.enableELK }}
             ref=${{ github.event.client_payload.ref }}
           fi
+
+          if [ -z "$enableELK" ]; then
+            enableELK='false'
+          fi
+
+          if [ -z "$ref" ]; then
+            ref='refs/heads/main'
+          fi
+
           echo "##[set-output name=enableELK;]${enableELK}"
           echo "##[set-output name=ref;]${ref}"
           echo "enableELK=${enableELK}" >> $GITHUB_ENV
