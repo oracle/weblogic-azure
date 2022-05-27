@@ -1395,6 +1395,43 @@
                                 }
                             },
                             {
+                                "name": "vnetForApplicationGateway",
+                                "type": "Microsoft.Network.VirtualNetworkCombo",
+                                "label": {
+                                    "virtualNetwork": "Virtual network",
+                                    "subnets": "Subnets"
+                                },
+                                "toolTip": {
+                                    "virtualNetwork": "",
+                                    "subnets": ""
+                                },
+                                "defaultValue": {
+                                    "name": "wlsaks-vnet",
+                                    "addressPrefixSize": "/28"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/29"
+                                },
+                                "options": {
+                                    "hideExisting": false
+                                },
+                                "subnets": {
+                                    "gatewaySubnet": {
+                                        "label": "Subnet",
+                                        "defaultValue": {
+                                            "name": "gatewaySubnet",
+                                            "addressPrefixSize": "/29"
+                                        },
+                                        "constraints": {
+                                            "minAddressPrefixSize": "/29",
+                                            "minAddressCount": 2,
+                                            "requireContiguousAddresses": false
+                                        }
+                                    }
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
                                 "name": "keyVaultText00",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
@@ -2132,6 +2169,7 @@
             "userProvidedAcr": "[last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/'))]",
             "userProvidedImagePath": "[steps('section_aks').imageInfo.userProvidedImagePath]",
             "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
+            "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
