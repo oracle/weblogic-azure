@@ -37,7 +37,7 @@ echo <spBase64String> <appgwFrontendSSLCertPsw> |
     <subID>
     <curRGName>
     <appgwName>
-    <vnetName>
+    <appgwUsePrivateIP>
     <appgwForAdminServer>
     <enableCustomDNSAlias>
     <dnsRGName>
@@ -99,8 +99,8 @@ function validate_input() {
     usage 1
   fi
 
-  if [ -z "$vnetName" ]; then
-    echo_stderr "vnetName is required. "
+  if [ -z "$appgwUsePrivateIP" ]; then
+    echo_stderr "appgwUsePrivateIP is required. "
     usage 1
   fi
 
@@ -210,7 +210,7 @@ function create_appgw_ingress() {
         ${subID} \
         ${curRGName} \
         ${appgwName} \
-        ${vnetName} \
+        ${appgwUsePrivateIP} \
         ${appgwForAdminServer} \
         ${enableCustomDNSAlias} \
         ${dnsRGName} \
@@ -242,7 +242,7 @@ export enableAppGWIngress=$6
 export subID=$7
 export curRGName=${8}
 export appgwName=${9}
-export vnetName=${10}
+export appgwUsePrivateIP=${10}
 export appgwForAdminServer=${11}
 export enableCustomDNSAlias=${12}
 export dnsRGName=${13}

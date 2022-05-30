@@ -28,7 +28,7 @@ var name_subnet = vnetForApplicationGateway.subnets.gatewaySubnet.name
 var name_vnet = vnetForApplicationGateway.name
 
 // Get existing VNET.
-resource existingVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing  = if (!const_newVnet) {
+resource existingVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = if (!const_newVnet) {
   name: name_vnet
   scope: resourceGroup(vnetForApplicationGateway.resourceGroup)
 }
@@ -103,5 +103,4 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = if (const_newV
   ]
 }
 
-output subIdForApplicationGateway string = const_newVnet ? resourceId('Microsoft.Network/virtualNetworks/subnets', name_vnet, name_subnet): existingSubnet.id
-output newOrExistingVnet string = vnetForApplicationGateway.newOrExisting
+output subIdForApplicationGateway string = const_newVnet ? resourceId('Microsoft.Network/virtualNetworks/subnets', name_vnet, name_subnet) : existingSubnet.id

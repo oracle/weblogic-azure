@@ -16,7 +16,7 @@ Usage:
     <subID>
     <curRGName>
     <appgwName>
-    <vnetName>
+    <appgwUsePrivateIP>
     <spBase64String>
     <appgwForAdminServer>
     <enableCustomDNSAlias>
@@ -58,7 +58,7 @@ export enableAppGWIngress=$6
 export subID=$7
 export curRGName=${8}
 export appgwName=${9}
-export vnetName=${10}
+export appgwUsePrivateIP=${10}
 spBase64String=${11}
 export appgwForAdminServer=${12}
 export enableCustomDNSAlias=${13}
@@ -89,7 +89,7 @@ echo ${spBase64String} \
     ${subID} \
     ${curRGName} \
     ${appgwName} \
-    ${vnetName} \
+    ${appgwUsePrivateIP} \
     ${appgwForAdminServer} \
     ${enableCustomDNSAlias} \
     ${dnsRGName} \

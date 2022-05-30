@@ -67,6 +67,8 @@ param appGatewaySSLCertPassword string = newGuid()
 param appgwForAdminServer bool = true
 @description('Create Application Gateway ingress for remote console.')
 param appgwForRemoteConsole bool = true
+@description('If true, configure Azure Application Gateway frontend IP with private IP.')
+param appgwUsePrivateIP bool = false
 @description('Urls of Java EE application packages.')
 param appPackageUrls array = []
 @description('The number of managed server to start.')
@@ -448,7 +450,7 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
 }
 
 // To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
-module vnetForAppgateway 'modules/_azure-resoruces/__vnetAppGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+module vnetForAppgateway 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
   name: 'vnet-application-gateway'
   params: {
     location: location
@@ -635,6 +637,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
+    appGatewaySubnetId: vnetForAppgateway.outputs.subIdForApplicationGateway
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
     createDNSZone: createDNSZone
@@ -659,6 +662,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     lbSvcValues: lbSvcValues
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
+    appgwUsePrivateIP: appgwUsePrivateIP
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }

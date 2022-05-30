@@ -10,12 +10,13 @@ param location string
 param usePrivateIP bool = false
 param utcValue string = utcNow()
 
+var const_capability = 2
 // usedto mitigate ARM template error: defined multiple times in a template
 var name_appGateway1 = 'appgw1${uniqueString(utcValue)}'
 var name_appGateway2 = 'appgw2${uniqueString(utcValue)}'
 var name_appGateway = usePrivateIP ? name_appGateway1 : name_appGateway2
 var name_backendAddressPool = 'myGatewayBackendPool'
-var name_frontEndIPConfig = 'appGwPublicFrontendIp'
+var name_frontEndIPConfig = 'appGwFrontendIp'
 var name_httpListener = 'HTTPListener'
 var name_httpPort = 'httpport'
 var name_httpSetting = 'myHTTPSetting'
@@ -50,6 +51,7 @@ resource privateAppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = 
     sku: {
       name: 'Standard_Medium'
       tier: 'Standard'
+      capacity: const_capability
     }
     gatewayIPConfigurations: [
       {
@@ -65,8 +67,10 @@ resource privateAppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = 
       {
         name: name_frontEndIPConfig
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
-        }
+          subnet: {
+              id: gatewaySubnetId
+          }
+      }
       }
     ]
     frontendPorts: [
@@ -122,10 +126,6 @@ resource privateAppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = 
       }
     ]
     enableHttp2: false
-    autoscaleConfiguration: {
-      minCapacity: 2
-      maxCapacity: 3
-    }
   }
   dependsOn: [
     gatewayPublicIP
@@ -232,7 +232,7 @@ resource appGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if (!us
   ]
 }
 
-output appGatewayAlias string = reference(gatewayPublicIP.id).dnsSettings.fqdn
+output appGatewayAlias string = usePrivateIP ? privateAppGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress : reference(gatewayPublicIP.id).dnsSettings.fqdn
 output appGatewayName string = name_appGateway
-output appGatewayURL string = 'http://${reference(gatewayPublicIP.id).dnsSettings.fqdn}/'
-output appGatewaySecuredURL string = 'https://${reference(gatewayPublicIP.id).dnsSettings.fqdn}/'
+output appGatewayURL string = format('http://{0}', usePrivateIP ? privateAppGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress : reference(gatewayPublicIP.id).dnsSettings.fqdn)
+output appGatewaySecuredURL string = format('https://{0}', usePrivateIP ? privateAppGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress : reference(gatewayPublicIP.id).dnsSettings.fqdn)
