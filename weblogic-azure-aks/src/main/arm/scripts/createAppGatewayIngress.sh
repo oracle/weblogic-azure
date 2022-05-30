@@ -392,8 +392,8 @@ function network_peers_aks_appgw() {
 
     aksNetWorkId=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].id')
     aksNetworkName=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].name')
-    appGatewaySubnetId=$(az network application-gateway show -g ${curRGName} --name ${appgwName} --query "gatewayIpConfigurations[0].subnet.id")
-    appGatewayVnetResourceGroup=$(az network application-gateway show -g ${curRGName} --name ${appgwName} --query "gatewayIpConfigurations[0].subnet.resourceGroup")
+    appGatewaySubnetId=$(az network application-gateway show -g ${curRGName} --name ${appgwName} -o tsv --query "gatewayIpConfigurations[0].subnet.id")
+    appGatewayVnetResourceGroup=$(az network application-gateway show -g ${curRGName} --name ${appgwName} -o tsv --query "gatewayIpConfigurations[0].subnet.resourceGroup")
     appGatewaySubnetName=$(az resource show --ids ${appGatewaySubnetId} --query "name" -o tsv)
     appgwNetworkId=$(echo $appGatewaySubnetId | sed s/"\/subnets\/${appGatewaySubnetName}"//)
     appgwVnetName=$(az resource show --ids ${appgwNetworkId} --query "name" -o tsv)
