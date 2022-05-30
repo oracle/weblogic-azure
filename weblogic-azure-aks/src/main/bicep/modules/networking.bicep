@@ -25,10 +25,12 @@ param aksClusterName string = 'aks-contoso'
 param appGatewayCertificateOption string = 'haveCert'
 @description('Public IP Name for the Application Gateway')
 param appGatewayPublicIPAddressName string = 'gwip'
+param appGatewaySubnetId string
 @description('Create Application Gateway ingress for admin console.')
 param appgwForAdminServer bool = true
 @description('Create Application Gateway ingress for remote console.')
 param appgwForRemoteConsole bool = true
+param appgwUsePrivateIP bool = false
 @description('If true, the template will update records to the existing DNS Zone. If false, the template will create a new DNS Zone.')
 param createDNSZone bool = false
 @description('DNS prefix for ApplicationGateway')
@@ -114,7 +116,9 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
   params: {
     dnsNameforApplicationGateway: dnsNameforApplicationGateway
     gatewayPublicIPAddressName: appGatewayPublicIPAddressName
+    gatewaySubnetId: appGatewaySubnetId
     location: location
+    usePrivateIP: appgwUsePrivateIP
   }
   dependsOn: [
     pidAppgwStart
@@ -163,6 +167,7 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     appgwForRemoteConsole: appgwForRemoteConsole
     appgwFrontendSSLCertData: existingKeyvault.getSecret(keyVaultSSLCertDataSecretName)
     appgwFrontendSSLCertPsw: existingKeyvault.getSecret(keyVaultSSLCertPasswordSecretName)
+    appgwUsePrivateIP: appgwUsePrivateIP
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
@@ -180,7 +185,6 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
     location: location
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
-    vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
@@ -203,6 +207,7 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
     appgwForRemoteConsole: appgwForRemoteConsole
     appgwFrontendSSLCertData: existingKeyvault.getSecret(keyVaultSSLCertDataSecretName)
     appgwFrontendSSLCertPsw: 'null'
+    appgwUsePrivateIP: appgwUsePrivateIP
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
@@ -220,7 +225,6 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
     location: location
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
-    vnetName: enableAppGWIngress ? appgwDeployment.outputs.vnetName : 'null'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
@@ -242,6 +246,7 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     appgwForRemoteConsole: appgwForRemoteConsole
     appgwFrontendSSLCertData: 'null'
     appgwFrontendSSLCertPsw: 'null'
+    appgwUsePrivateIP: appgwUsePrivateIP
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
@@ -259,7 +264,6 @@ module networkingDeployment3 '_deployment-scripts/_ds-create-networking.bicep' =
     location: location
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
-    vnetName: 'null'
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }

@@ -1432,6 +1432,13 @@
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
                             },
                             {
+                                "name": "appgwUsePrivateIP",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Configure frontend IP with private IP address",
+                                "toolTip": "If checked, configure frontend IP with private IP address.",
+                                "visible": false
+                            },
+                            {
                                 "name": "keyVaultText00",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
@@ -2103,6 +2110,7 @@
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
             "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
             "appgwForRemoteConsole": "[steps('section_appGateway').appgwIngress.appgwForAdminRemote]",
+            "appgwUsePrivateIP": "[steps('section_appGateway').appgwIngress.appgwUsePrivateIP]",
             "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
             "createACR": "[bool(steps('section_aks').imageInfo.oracleCreateACR)]",

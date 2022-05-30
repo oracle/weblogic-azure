@@ -20,6 +20,7 @@ param appgwForRemoteConsole bool = true
 param appgwFrontendSSLCertData string = newGuid()
 @secure()
 param appgwFrontendSSLCertPsw string = newGuid()
+param appgwUsePrivateIP bool = false
 param aksClusterRGName string = 'aks-contoso-rg'
 param aksClusterName string = 'aks-contoso'
 param dnszoneAdminConsoleLabel string = 'admin'
@@ -39,13 +40,12 @@ param location string
 param servicePrincipal string = newGuid()
 param useInternalLB bool = false
 param utcValue string = utcNow()
-param vnetName string = 'vnet-contoso'
 param wlsDomainName string = 'domain1' 
 param wlsDomainUID string = 'sample-domain1'
 
 var const_appgwHelmConfigTemplate='appgw-helm-config.yaml.template'
 var const_appgwSARoleBindingFile='appgw-ingress-clusterAdmin-roleBinding.yaml'
-var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneClusterLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole} ${dnszoneAdminT3ChannelLabel} ${dnszoneClusterT3ChannelLabel}'
+var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${appgwUsePrivateIP} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneClusterLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole} ${dnszoneAdminT3ChannelLabel} ${dnszoneClusterT3ChannelLabel}'
 var const_commonScript = 'common.sh'
 var const_createDnsRecordScript = 'createDnsRecord.sh'
 var const_createLbSvcScript = 'createLbSvc.sh'
