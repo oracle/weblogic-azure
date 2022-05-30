@@ -255,7 +255,7 @@ param vnetForApplicationGateway object = {
   newOrExisting: 'new'
   subnets: {
     gatewaySubnet: {
-      name: 'gatewaySubnet'
+      name: 'wlsaks-gateway-subnet'
       addressPrefix: '172.16.0.0/29'
       startAddress: '172.16.0.4'
     }
