@@ -299,6 +299,9 @@ var const_enablePV = enableCustomSSL || enableAzureFileShare
 var const_hasStorageAccount = !createAKSCluster && reference('query-existing-storage-account').outputs.storageAccount.value != 'null'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
+var const_showAdminConsoleExUrl = (length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForAdminServer)
+var const_showRemoteAdminConsoleExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && !enableCustomSSL
+var const_showRemoteAdminConsoleSecuredExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && enableCustomSSL
 var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
 var const_wlsClusterName = 'cluster-1'
 var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
@@ -747,11 +750,11 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
 
 output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.value
 output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerUrl.value
-output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
-output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalSecuredUrl : ''
+output adminConsoleExternalUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
+output adminConsoleExternalSecuredUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalSecuredUrl : ''
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
-output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl : ''
-output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl : ''
+output adminRemoteConsoleUrl string = const_showRemoteAdminConsoleExUrl ? networkingDeployment.outputs.adminRemoteConsoleUrl : ''
+output adminRemoteConsoleSecuredUrl string = const_showRemoteAdminConsoleSecuredExUrl ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl : ''
 output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalUrl.value
 output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.adminServerT3ChannelUrl) : ''
 output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value
