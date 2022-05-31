@@ -1402,8 +1402,8 @@
                                     "subnets": "Subnets"
                                 },
                                 "toolTip": {
-                                    "virtualNetwork": "",
-                                    "subnets": ""
+                                    "virtualNetwork": "Select a virtual network for Application Gateway.",
+                                    "subnets": "Ensure the subnet is only for Application Gateway."
                                 },
                                 "defaultValue": {
                                     "name": "wlsaks-vnet",
@@ -1419,7 +1419,7 @@
                                     "gatewaySubnet": {
                                         "label": "Subnet",
                                         "defaultValue": {
-                                            "name": "gatewaySubnet",
+                                            "name": "wls-aks-gateway-subnet",
                                             "addressPrefixSize": "/29"
                                         },
                                         "constraints": {
@@ -1436,7 +1436,7 @@
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Configure frontend IP with private IP address",
                                 "toolTip": "If checked, configure frontend IP with private IP address.",
-                                "visible": false
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
                             },
                             {
                                 "name": "keyVaultText00",
