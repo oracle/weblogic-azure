@@ -399,6 +399,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     userProvidedAcr: userProvidedAcr // used in user provided images
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
+    vnetForApplicationGateway: vnetForApplicationGateway
     wlsImageTag: wlsImageTag
   }
   dependsOn: [
