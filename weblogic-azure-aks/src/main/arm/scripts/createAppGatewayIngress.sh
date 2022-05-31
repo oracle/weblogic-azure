@@ -474,6 +474,7 @@ function install_azure_ingress() {
     sed -i -e "s:@APPGW_NAME@:${appgwName}:g" ${customAppgwHelmConfig}
     sed -i -e "s:@WATCH_NAMESPACE@:${wlsDomainNS}:g" ${customAppgwHelmConfig}
     sed -i -e "s:@SP_ENCODING_CREDENTIALS@:${spBase64String}:g" ${customAppgwHelmConfig}
+    sed -i -e "s:@USE_PRIVATE_IP@:${appgwUsePrivateIP,,}:g" ${customAppgwHelmConfig}
 
     helm install ingress-azure \
         -f ${customAppgwHelmConfig} \

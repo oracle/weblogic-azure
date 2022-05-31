@@ -15,7 +15,7 @@ appgw:
     subscriptionId: @SUB_ID@
     resourceGroup: @APPGW_RG_NAME@
     name: @APPGW_NAME@
-    usePrivateIP: false
+    usePrivateIP: @USE_PRIVATE_IP@
 
     # Setting appgw.shared to "true" will create an AzureIngressProhibitedTarget CRD.
     # This prohibits AGIC from applying config for any host/path.
