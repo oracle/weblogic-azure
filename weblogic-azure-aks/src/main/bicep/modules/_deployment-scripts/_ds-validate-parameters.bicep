@@ -56,6 +56,7 @@ param useAksWellTestedVersion bool
 param userProvidedAcr string
 param userProvidedImagePath string
 param useOracleImage bool
+param vnetForApplicationGateway object
 param utcValue string = utcNow()
 param wlsImageTag string
 
@@ -206,16 +207,20 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: appGatewaySSLCertPassword
       }
       {
-        name: 'DNA_ZONE_NAME'
+        name: 'DNS_ZONE_NAME'
         value: dnszoneName
       }
       {
-        name: 'DNA_ZONE_RESOURCEGROUP_NAME'
+        name: 'DNS_ZONE_RESOURCEGROUP_NAME'
         value: dnszoneRGName
       }
       {
         name: 'USE_AKS_WELL_TESTED_VERSION'
         value: string(useAksWellTestedVersion)
+      }
+      {
+        name: 'VNET_FOR_APPLICATIONGATEWAY'
+        value: string(vnetForApplicationGateway)
       }
     ]
     scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
