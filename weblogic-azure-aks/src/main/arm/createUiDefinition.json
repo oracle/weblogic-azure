@@ -1406,7 +1406,7 @@
                                     "subnets": "Ensure the subnet is only for Application Gateway."
                                 },
                                 "defaultValue": {
-                                    "name": "wlsaks-vnet",
+                                    "name": "[concat('wlsaks-vnet',take(guid(), 8))]",
                                     "addressPrefixSize": "/24"
                                 },
                                 "constraints": {
