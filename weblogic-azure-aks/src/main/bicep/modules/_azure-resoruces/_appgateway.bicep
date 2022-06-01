@@ -7,15 +7,11 @@ param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}
 param gatewayPublicIPAddressName string = 'gwip'
 param gatewaySubnetId string
 param location string
+param staticPrivateFrontentIP string
 param usePrivateIP bool = false
 param utcValue string = utcNow()
 
-var const_capability = 2
-// usedto mitigate ARM template error: defined multiple times in a template
-var name_appGateway1 = 'appgw1${uniqueString(utcValue)}'
-var name_appGateway2 = 'appgw2${uniqueString(utcValue)}'
-var name_appGateway = usePrivateIP ? name_appGateway1 : name_appGateway2
-var name_appGatewayPublicBaisc = format('{0}{1}', gatewayPublicIPAddressName, 'basic')
+var name_appGateway = 'appgw${uniqueString(utcValue)}'
 var name_backendAddressPool = 'myGatewayBackendPool'
 var name_frontEndIPConfig = 'appGwPublicFrontendIp'
 var name_frontEndPrivateIPConfig = 'appGwPrivateFrontendIp'
@@ -27,8 +23,39 @@ var ref_backendHttpSettings = resourceId('Microsoft.Network/applicationGateways/
 var ref_frontendHTTPPort = resourceId('Microsoft.Network/applicationGateways/frontendPorts', name_appGateway, name_httpPort)
 var ref_frontendIPConfiguration = resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', name_appGateway, name_frontEndIPConfig)
 var ref_httpListener = resourceId('Microsoft.Network/applicationGateways/httpListeners', name_appGateway, name_httpListener)
+var ref_publicIPAddress = resourceId('Microsoft.Network/publicIPAddresses', gatewayPublicIPAddressName)
+var obj_frontendIPConfigurations1 = [
+  {
+    name: name_frontEndIPConfig
+    properties: {
+      publicIPAddress: {
+        id: ref_publicIPAddress
+      }
+    }
+  }
+]
+var obj_frontendIPConfigurations2 = [
+  {
+    name: name_frontEndIPConfig
+    properties: {
+      publicIPAddress: {
+        id: ref_publicIPAddress
+      }
+    }
+  }
+  {
+    name: name_frontEndPrivateIPConfig
+    properties: {
+      privateIPAllocationMethod: 'Static'
+      privateIPAddress: staticPrivateFrontentIP
+      subnet: {
+        id: gatewaySubnetId
+      }
+    }
+  }
+]
 
-resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = if (!usePrivateIP) {
+resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
   name: gatewayPublicIPAddressName
   sku: {
     name: 'Standard'
@@ -42,122 +69,8 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = if (
   }
 }
 
-resource gatewayPublicIP2 'Microsoft.Network/publicIPAddresses@2020-07-01' = if (usePrivateIP) {
-  name: name_appGatewayPublicBaisc
-  sku: {
-    name: 'Basic'
-  }
-  location: location
-  properties: {
-    publicIPAllocationMethod: 'Dynamic'
-    dnsSettings: {
-      domainNameLabel: dnsNameforApplicationGateway
-    }
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/application-gateway/configure-application-gateway-with-private-frontend-ip
-resource standardAppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if (usePrivateIP) {
-  name: name_appGateway1
-  location: location
-  tags: {
-    'managed-by-k8s-ingress': 'true'
-  }
-  properties: {
-    sku: {
-      name: 'Standard_Medium'
-      tier: 'Standard'
-      capacity: const_capability
-    }
-    gatewayIPConfigurations: [
-      {
-        name: 'appGatewayIpConfig'
-        properties: {
-          subnet: {
-            id: gatewaySubnetId
-          }
-        }
-      }
-    ]
-    frontendIPConfigurations: [
-      {
-        name: name_frontEndPrivateIPConfig
-        properties: {
-          subnet: {
-            id: gatewaySubnetId
-          }
-        }
-      }
-      {
-        name: name_frontEndIPConfig
-        properties: {
-          publicIPAddress: {
-            id: gatewayPublicIP2.id
-          }
-        }
-      }
-    ]
-    frontendPorts: [
-      {
-        name: name_httpPort
-        properties: {
-          port: 80
-        }
-      }
-    ]
-    backendAddressPools: [
-      {
-        name: 'myGatewayBackendPool'
-      }
-    ]
-    httpListeners: [
-      {
-        name: name_httpListener
-        properties: {
-          protocol: 'Http'
-          frontendIPConfiguration: {
-            id: ref_frontendIPConfiguration
-          }
-          frontendPort: {
-            id: ref_frontendHTTPPort
-          }
-        }
-      }
-    ]
-    backendHttpSettingsCollection: [
-      {
-        name: name_httpSetting
-        properties: {
-          port: 80
-          protocol: 'Http'
-        }
-      }
-    ]
-    requestRoutingRules: [
-      {
-        name: 'HTTPRoutingRule'
-        properties: {
-          httpListener: {
-            id: ref_httpListener
-          }
-          backendAddressPool: {
-            id: ref_backendAddressPool
-          }
-          backendHttpSettings: {
-            id: ref_backendHttpSettings
-          }
-        }
-      }
-    ]
-    enableHttp2: false
-  }
-  dependsOn: [
-    gatewayPublicIP2
-  ]
-}
-
-resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if (!usePrivateIP) {
-  name: name_appGateway2
+resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
+  name: name_appGateway
   location: location
   tags: {
     'managed-by-k8s-ingress': 'true'
@@ -177,16 +90,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if
         }
       }
     ]
-    frontendIPConfigurations: [
-      {
-        name: name_frontEndIPConfig
-        properties: {
-          publicIPAddress: {
-            id: gatewayPublicIP.id
-          }
-        }
-      }
-    ]
+    frontendIPConfigurations: usePrivateIP ? obj_frontendIPConfigurations2 : obj_frontendIPConfigurations1
     frontendPorts: [
       {
         name: name_httpPort
@@ -256,7 +160,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = if
   ]
 }
 
-output appGatewayAlias string = usePrivateIP ? standardAppGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress : reference(gatewayPublicIP.id).dnsSettings.fqdn
+output appGatewayAlias string = usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn
 output appGatewayName string = name_appGateway
-output appGatewayURL string = format('http://{0}', usePrivateIP ? standardAppGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress : reference(gatewayPublicIP.id).dnsSettings.fqdn)
-output appGatewaySecuredURL string = format('https://{0}', usePrivateIP ? standardAppGateway.properties.frontendIPConfigurations[0].properties.privateIPAddress : reference(gatewayPublicIP.id).dnsSettings.fqdn)
+output appGatewayURL string = format('http://{0}', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn)
+output appGatewaySecuredURL string = format('https://{0}', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn)

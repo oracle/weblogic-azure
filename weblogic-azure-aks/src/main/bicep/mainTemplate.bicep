@@ -454,7 +454,7 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
 }
 
 // To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
-module vnetForAppgateway 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
   name: 'vnet-application-gateway'
   params: {
     location: location
@@ -641,7 +641,8 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
-    appGatewaySubnetId: vnetForAppgateway.outputs.subIdForApplicationGateway
+    appGatewaySubnetId: vnetForAppgatewayDeployment.outputs.subIdForApplicationGateway
+    appGatewaySubnetStartAddress:vnetForApplicationGateway.subnets.gatewaySubnet.startAddress
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
     createDNSZone: createDNSZone

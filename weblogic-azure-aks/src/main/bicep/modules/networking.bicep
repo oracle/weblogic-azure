@@ -26,6 +26,7 @@ param appGatewayCertificateOption string = 'haveCert'
 @description('Public IP Name for the Application Gateway')
 param appGatewayPublicIPAddressName string = 'gwip'
 param appGatewaySubnetId string
+param appGatewaySubnetStartAddress string
 @description('Create Application Gateway ingress for admin console.')
 param appgwForAdminServer bool = true
 @description('Create Application Gateway ingress for remote console.')
@@ -111,6 +112,16 @@ resource existingKeyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' existin
   scope: resourceGroup(keyVaultResourceGroup)
 }
 
+module queryPrivateIPFromSubnet '_deployment-scripts/_ds_query_available_private_ip_from_subnet.bicep' = if (appgwUsePrivateIP) {
+  name: 'query-available-private-ip-for-app-gateway'
+  params: {
+    identity: identity
+    location: location
+    subnetId: appGatewaySubnetId
+    knownIP: appGatewaySubnetStartAddress
+  }
+}
+
 module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIngress) {
   name: 'app-gateway-deployment'
   params: {
@@ -118,6 +129,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
     gatewayPublicIPAddressName: appGatewayPublicIPAddressName
     gatewaySubnetId: appGatewaySubnetId
     location: location
+    staticPrivateFrontentIP: appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
     usePrivateIP: appgwUsePrivateIP
   }
   dependsOn: [
