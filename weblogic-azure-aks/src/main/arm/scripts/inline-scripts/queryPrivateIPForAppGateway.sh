@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2022, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 #
@@ -6,7 +6,7 @@
 # SUBNET_ID
 # KNOWN_IP
 
-function queryIP() {
+function query_ip() {
     echo_stdout "Subnet Id: ${SUBNET_ID}"
 
     # select a available private IP
@@ -39,6 +39,6 @@ function output_result() {
 # main script
 outputPrivateIP="10.0.0.1"
 
-queryIP
+query_ip
 
 output_result
