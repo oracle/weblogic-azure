@@ -36,12 +36,6 @@ EOF
 EOF
     fi
 
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
-EOF
-    fi
-
     cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
 spec:
   tls:
@@ -79,12 +73,6 @@ EOF
     if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
         cat <<EOF >>${clusterAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
 EOF
     fi
 
@@ -137,12 +125,6 @@ EOF
 EOF
     fi
 
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
-EOF
-    fi
-
     cat <<EOF >>${clusterAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
 
@@ -185,12 +167,6 @@ EOF
 EOF
     fi
 
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
-EOF
-    fi
-
     cat <<EOF >>${adminAppgwIngressYamlPath}
 spec:
   rules:
@@ -225,12 +201,6 @@ EOF
     if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
         cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
 EOF
     fi
 
@@ -281,12 +251,6 @@ EOF
     if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
         cat <<EOF >>${adminAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
 EOF
     fi
 
@@ -341,12 +305,6 @@ EOF
     if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
         cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
     appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    if [[ "${appgwUsePrivateIP,,}" == "true" ]]; then
-    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
 EOF
     fi
 
@@ -606,7 +564,7 @@ function appgw_ingress_svc_for_admin_server() {
     generate_appgw_admin_config_file
     kubectl apply -f ${adminAppgwIngressYamlPath}
     utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_lb_svc_completed \
+    utility_waitfor_ingress_completed \
         ${adminIngressName} \
         ${wlsDomainNS} \
         ${checkSVCStateMaxAttempt} \
@@ -620,7 +578,7 @@ function appgw_ingress_svc_for_remote_console() {
 
     kubectl apply -f ${adminRemoteAppgwIngressYamlPath}
     utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_lb_svc_completed \
+    utility_waitfor_ingress_completed \
         ${adminRemoteIngressName} \
         ${wlsDomainNS} \
         ${checkSVCStateMaxAttempt} \

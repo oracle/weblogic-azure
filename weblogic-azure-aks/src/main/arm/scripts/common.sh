@@ -6,7 +6,7 @@ export checkPodStatusInterval=20 # interval of checking pod status.
 export checkPodStatusMaxAttemps=30 # max attempt to check pod status.
 export checkPVStateInterval=5 # interval of checking pvc status.
 export checkPVStateMaxAttempt=10 # max attempt to check pvc status.
-export checkSVCStateMaxAttempt=10
+export checkSVCStateMaxAttempt=50
 export checkSVCInterval=30 #seconds
 
 export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
