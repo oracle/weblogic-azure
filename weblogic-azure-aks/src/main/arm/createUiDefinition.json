@@ -1407,10 +1407,10 @@
                                 },
                                 "defaultValue": {
                                     "name": "wlsaks-vnet",
-                                    "addressPrefixSize": "/28"
+                                    "addressPrefixSize": "/24"
                                 },
                                 "constraints": {
-                                    "minAddressPrefixSize": "/29"
+                                    "minAddressPrefixSize": "/24"
                                 },
                                 "options": {
                                     "hideExisting": false
@@ -1420,11 +1420,11 @@
                                         "label": "Subnet",
                                         "defaultValue": {
                                             "name": "wls-aks-gateway-subnet",
-                                            "addressPrefixSize": "/29"
+                                            "addressPrefixSize": "/24"
                                         },
                                         "constraints": {
-                                            "minAddressPrefixSize": "/29",
-                                            "minAddressCount": 2,
+                                            "minAddressPrefixSize": "/24",
+                                            "minAddressCount": 38,
                                             "requireContiguousAddresses": false
                                         }
                                     }
@@ -1435,7 +1435,7 @@
                                 "name": "appgwUsePrivateIP",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Configure frontend IP with private IP address",
-                                "toolTip": "If checked, configure frontend IP with private IP address.",
+                                "toolTip": "If checked, expose WebLogic Server with private IP address.",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
                             },
                             {
