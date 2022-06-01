@@ -6,14 +6,14 @@ param vnetForApplicationGateway object = {
   name: 'wlsaks-app-gateway-vnet'
   resourceGroup: resourceGroup().name
   addressPrefixes: [
-    '172.16.0.0/28'
+    '172.16.0.0/24'
   ]
-  addressPrefix: '172.16.0.0/28'
+  addressPrefix: '172.16.0.0/24'
   newOrExisting: 'new'
   subnets: {
     gatewaySubnet: {
       name: 'wlsaks-gateway-subnet'
-      addressPrefix: '172.16.0.0/29'
+      addressPrefix: '172.16.0.0/24'
       startAddress: '172.16.0.4'
     }
   }
