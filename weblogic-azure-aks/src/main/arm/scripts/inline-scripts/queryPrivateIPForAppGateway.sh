@@ -11,14 +11,20 @@ function queryIP() {
 
     # select a available private IP
     # azure reserves the first 3 private IPs.
-    local privateIPAddress=$(az network vnet check-ip-address \
+    local ret=$(az network vnet check-ip-address \
         --ids ${SUBNET_ID} \
-        --ip-address ${KNOWN_IP} | jq -r .availableIpAddresses[0])
-    if [[ -z "${privateIPAddress}" ]]; then
+        --ip-address ${KNOWN_IP})
+    local available=$(echo ${ret} | jq -r .available)
+    if [[ "${available,,}" == "true" ]]; then
+      outputPrivateIP=${KNOWN_IP}
+    else
+      local privateIPAddress=$(echo ${ret} | jq -r .availableIpAddresses[0])
+      if [[ -z "${privateIPAddress}" ]] || [[ "${privateIPAddress}"=="null" ]]; then
         echo_stderr "ERROR: make sure there is available IP for application gateway in your subnet."
-    fi
+      fi
 
-    outputPrivateIP=${privateIPAddress}
+      outputPrivateIP=${privateIPAddress}
+    fi
 }
 
 function output_result() {

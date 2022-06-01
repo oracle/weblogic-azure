@@ -18,7 +18,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: const_azcliVersion
-    scriptContent: loadTextContent('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh')
+    scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh'))
     environmentVariables: [
       {
         name: 'SUBNET_ID'
