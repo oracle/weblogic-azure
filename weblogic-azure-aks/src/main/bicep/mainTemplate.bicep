@@ -454,12 +454,15 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
 }
 
 // To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
-module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress) {
   name: 'vnet-application-gateway'
   params: {
     location: location
     vnetForApplicationGateway: vnetForApplicationGateway
   }
+  dependsOn: [
+    validateInputs
+  ]
 }
 
 module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCustomSSL) {
@@ -524,6 +527,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
   dependsOn: [
     validateInputs
     queryStorageAccount
+    vnetForAppgatewayDeployment
   ]
 }
 
@@ -589,6 +593,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   dependsOn: [
     wlsSSLCertSecretsDeployment
     queryStorageAccount
+    vnetForAppgatewayDeployment
   ]
 }
 
@@ -641,7 +646,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
-    appGatewaySubnetId: vnetForAppgatewayDeployment.outputs.subIdForApplicationGateway
+    appGatewaySubnetId: enableAppGWIngress ? vnetForAppgatewayDeployment.outputs.subIdForApplicationGateway : ''
     appGatewaySubnetStartAddress:vnetForApplicationGateway.subnets.gatewaySubnet.startAddress
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
