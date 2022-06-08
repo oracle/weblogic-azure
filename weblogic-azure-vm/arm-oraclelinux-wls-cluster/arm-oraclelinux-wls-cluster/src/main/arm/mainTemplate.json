@@ -1731,11 +1731,11 @@
         },
         "appGatewayURL": {
             "type": "string",
-            "value": "[if(parameters('enableAppGateway'), if(parameters('enableDNSConfiguration'), format('http://{0}.{1}', parameters('dnszoneAppGatewayLabel'),parameters('dnszoneName')), reference('keyVaultLinkedAppGatewayTemplate', '${azure.apiVersion}').outputs.appGatewayURL.value),'')]"
+            "value": "[if(parameters('enableAppGateway'), if(parameters('enableDNSConfiguration'), uri(concat('http://',parameters('dnszoneAppGatewayLabel'),'.',parameters('dnszoneName')),''), reference('keyVaultLinkedAppGatewayTemplate', '${azure.apiVersion}').outputs.appGatewayURL.value),'')]"
         },
         "appGatewaySecuredURL": {
             "type": "string",
-            "value": "[if(parameters('enableAppGateway'), if(parameters('enableDNSConfiguration'), format('https://{0}.{1}', parameters('dnszoneAppGatewayLabel'),parameters('dnszoneName')), reference('keyVaultLinkedAppGatewayTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value),'')]"
+            "value": "[if(parameters('enableAppGateway'), if(parameters('enableDNSConfiguration'), uri('https://{0}.{1}', parameters('dnszoneAppGatewayLabel'),parameters('dnszoneName')), reference('keyVaultLinkedAppGatewayTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value),'')]"
         },
         "logIndex": {
             "type": "string",

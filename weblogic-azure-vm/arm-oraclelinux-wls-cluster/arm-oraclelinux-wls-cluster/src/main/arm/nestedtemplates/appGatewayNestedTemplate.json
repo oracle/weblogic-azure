@@ -184,8 +184,8 @@
 			}
 		},
 		{
-			"type": "Microsoft.Network/publicIPAddresses",
-			"apiVersion": "${azure.apiVersion}",
+                        "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+                        "type": "Microsoft.Network/publicIPAddresses",
 			"name": "[parameters('gatewayPublicIPAddressName')]",
 			"sku": {
 				"name": "Standard"
@@ -267,7 +267,7 @@
 									"name": "BackendAddresses",
 									"count": "[sub(int(parameters('numberOfInstances')),1)]",
 									"input": {
-										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), '_NIC')),'${azure.apiVersion}').ipConfigurations[0].properties.privateIPAddress]"
+										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), '_NIC')),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
 									}
 								}
 							]
@@ -385,8 +385,8 @@
 			}
 		},
 		{
-			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"apiVersion": "${azure.apiVersion}",
+                        "apiVersion": "${azure.apiVersionForVirtualMachines}",
+                        "type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(parameters('adminVMName'),'/newuserscript')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -432,11 +432,11 @@
 		},
 		"appGatewayURL": {
 			"type": "string",
-			"value": "[concat('http://',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn)]"
+			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn),'')]"
 		},
 		"appGatewaySecuredURL": {
 			"type": "string",
-			"value": "[concat('https://',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn)]"
+			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn),'')]"
 		}
 	}
 }

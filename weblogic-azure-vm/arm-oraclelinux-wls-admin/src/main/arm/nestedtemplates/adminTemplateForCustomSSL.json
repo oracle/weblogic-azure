@@ -319,8 +319,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
          "type": "Microsoft.Network/networkSecurityGroups",
-         "apiVersion": "${azure.apiVersion}",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "[variables('name_networkSecurityGroup')]",
          "location": "[parameters('location')]",
@@ -434,8 +434,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
          "type": "Microsoft.Network/publicIPAddresses",
-         "apiVersion": "${azure.apiVersion}",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "[variables('name_publicIPAddress')]",
          "location": "[parameters('location')]",
@@ -447,8 +447,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForVirtualNetworks}",
          "type": "Microsoft.Network/virtualNetworks",
-         "apiVersion": "${azure.apiVersion}",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "[variables('name_virtualNetwork')]",
          "location": "[parameters('location')]",
@@ -473,8 +473,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
          "type": "Microsoft.Network/networkInterfaces",
-         "apiVersion": "${azure.apiVersion}",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "[variables('name_nic_with_pub_ip')]",
          "location": "[parameters('location')]",
@@ -503,8 +503,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
          "type": "Microsoft.Network/networkInterfaces",
-         "apiVersion": "${azure.apiVersion}",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
          "name": "[variables('name_nic_without_pub_ip')]",
          "location": "[parameters('location')]",
@@ -523,8 +523,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForVirtualMachines}",
          "type": "Microsoft.Compute/virtualMachines",
-         "apiVersion": "${azure.apiVersion}",
          "name": "[parameters('adminVMName')]",
          "location": "[parameters('location')]",
          "dependsOn": [
@@ -577,9 +577,9 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForVirtualMachines}",
          "type": "Microsoft.Compute/virtualMachines/extensions",
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
-         "apiVersion": "${azure.apiVersion}",
          "location": "[parameters('location')]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",

@@ -144,7 +144,7 @@
       },
       {
          "type": "Microsoft.Network/networkSecurityGroups",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
          "name": "[variables('name_networkSecurityGroup')]",
          "location": "[parameters('location')]",
          "properties": {
@@ -177,8 +177,8 @@
          "properties": {}
       },
       {
+         "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
          "type": "Microsoft.Network/publicIPAddresses",
-         "apiVersion": "${azure.apiVersion}",
          "name": "[variables('name_publicIPAddress')]",
          "location": "[parameters('location')]",
          "properties": {
@@ -189,8 +189,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForVirtualNetworks}",
          "type": "Microsoft.Network/virtualNetworks",
-         "apiVersion": "${azure.apiVersion}",
          "name": "[variables('name_virtualNetwork')]",
          "location": "[parameters('location')]",
          "dependsOn": [
@@ -216,8 +216,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
          "type": "Microsoft.Network/networkInterfaces",
-         "apiVersion": "${azure.apiVersion}",
          "name": "[variables('name_nic')]",
          "location": "[parameters('location')]",
          "dependsOn": [
@@ -245,8 +245,8 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForVirtualMachines}",
          "type": "Microsoft.Compute/virtualMachines",
-         "apiVersion": "${azure.apiVersion}",
          "name": "[parameters('vmName')]",
          "location": "[parameters('location')]",
          "dependsOn": [

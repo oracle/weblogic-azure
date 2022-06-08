@@ -201,6 +201,18 @@
                 "label": "Report issues, get help, and share feedback",
                 "elements": [
                     {
+                        "name": "help",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "See the documentation for this offer.",
+                            "link": {
+                                "label": "Offer documentation",
+                                "uri": "https://aka.ms/wls-vm-docs"
+                            }
+                        }
+                    },
+                    {
                         "name": "howToReportIssueText",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,

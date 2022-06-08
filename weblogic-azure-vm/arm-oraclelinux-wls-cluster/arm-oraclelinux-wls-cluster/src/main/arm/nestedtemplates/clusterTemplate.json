@@ -235,8 +235,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -339,8 +339,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -358,8 +358,8 @@
             ]
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualNetworks}",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_virtualNetwork')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -397,8 +397,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -446,8 +446,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('const_managedVMPrefix'), copyIndex()))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -507,8 +507,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('const_managedVMPrefix'), copyIndex(),'/newuserscript'))]",
             "location": "[parameters('location')]",
             "copy": {

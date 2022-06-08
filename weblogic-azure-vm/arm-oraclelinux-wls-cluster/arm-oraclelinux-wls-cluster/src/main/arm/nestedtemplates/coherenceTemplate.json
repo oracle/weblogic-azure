@@ -344,8 +344,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_vmMachine'),copyIndex(1),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -360,14 +360,14 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualNetworks}",
             "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_virtualNetwork'), '/', variables('name_subnet'))]",
             "condition": "[and(empty(variables('name_virtualNetwork')), empty(variables('name_subnet')))]"
         },
         {
+            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_vmMachine'), copyIndex(1), variables('name_nic'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -398,8 +398,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_vmMachine'), copyIndex(1))]",
             "location": "[parameters('location')]",
             "copy": {

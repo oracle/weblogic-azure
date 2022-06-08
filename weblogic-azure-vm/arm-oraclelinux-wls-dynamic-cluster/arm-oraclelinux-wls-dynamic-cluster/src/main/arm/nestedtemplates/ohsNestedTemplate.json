@@ -226,8 +226,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(parameters('ohsVMName'),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
             "properties": {
@@ -238,14 +238,14 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualNetworks}",
             "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(parameters('virtualNetworkName'), '/', variables('name_subnet'))]",
             "condition": "[and(empty(parameters('virtualNetworkName')), empty(variables('name_subnet')))]"
         },
         {
+            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(parameters('ohsVMName'), variables('name_nic'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -272,8 +272,8 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "${azure.apiVersion}",
             "name": "[parameters('ohsVMName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -334,9 +334,9 @@
             }
         },
         {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('ohsVMName'),'/newuserscript')]",
-            "apiVersion": "${azure.apiVersion}",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/', parameters('ohsVMName'))]"
@@ -368,11 +368,11 @@
         },
         "ohsAccessURL": {
             "type": "string",
-            "value": "[concat('http://',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,':',parameters('ohshttpPort'))]"
+            "value": "[uri(format('http://{0}:{1}',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,parameters('ohshttpPort')),'')]"
         },
         "ohsSecureAccessURL": {
             "type": "string",
-            "value": "[concat('https://',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,':',parameters('ohshttpsPort'))]"
+            "value": "[uri(format('https://{0}:{1}',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,parameters('ohshttpsPort')),'')]"
         }
     }
 }

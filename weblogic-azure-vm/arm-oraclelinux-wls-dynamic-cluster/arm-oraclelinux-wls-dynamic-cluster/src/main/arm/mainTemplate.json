@@ -1806,12 +1806,12 @@
 		"ohsAccessURL": {
 			"type": "string",
 			"condition": "[parameters('enableOHS')]",
-			"value": "[if(parameters('enableCustomDNS'), format('http://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'), parameters('ohshttpPort')),reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsAccessURL.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'), parameters('ohshttpPort')),''),reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsAccessURL.value)]"
 		},
 		"ohsSecureAccessURL": {
 			"type": "string",
 			"condition": "[parameters('enableOHS')]",
-			"value": "[if(parameters('enableCustomDNS'), format('https://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'),parameters('ohshttpsPort')), reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsSecureAccessURL.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'),parameters('ohshttpsPort'))), reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsSecureAccessURL.value)]"
 		}
 	}
 }
