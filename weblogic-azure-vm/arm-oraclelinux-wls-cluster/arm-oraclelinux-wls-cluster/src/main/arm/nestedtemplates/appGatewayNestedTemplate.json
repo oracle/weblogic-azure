@@ -171,8 +171,8 @@
 	"resources": [
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersion}",
-			"name": "${cluster.appgateway.start}",
+			"apiVersion": "2021-04-01",
+			"name": "4f85ce49-6de4-5925-b77c-3eb15ba97921",
 			"properties": {
 				"mode": "Incremental",
 				"template": {
@@ -184,7 +184,7 @@
 			}
 		},
 		{
-                        "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+                        "apiVersion": "2021-08-01",
                         "type": "Microsoft.Network/publicIPAddresses",
 			"name": "[parameters('gatewayPublicIPAddressName')]",
 			"sku": {
@@ -200,7 +200,7 @@
 		},
 		{
 			"type": "Microsoft.Network/applicationGateways",
-			"apiVersion": "${azure.apiVersion}",
+			"apiVersion": "2021-04-01",
 			"name": "[variables('name_appGateway')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -267,7 +267,7 @@
 									"name": "BackendAddresses",
 									"count": "[sub(int(parameters('numberOfInstances')),1)]",
 									"input": {
-										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), '_NIC')),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
+										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), '_NIC')),'2021-08-01').ipConfigurations[0].properties.privateIPAddress]"
 									}
 								}
 							]
@@ -385,7 +385,7 @@
 			}
 		},
 		{
-                        "apiVersion": "${azure.apiVersionForVirtualMachines}",
+                        "apiVersion": "2021-11-01",
                         "type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(parameters('adminVMName'),'/newuserscript')]",
 			"location": "[parameters('location')]",
@@ -403,14 +403,14 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
+					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '2021-04-01').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
 				}
 			}
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersion}",
-			"name": "${cluster.appgateway.end}",
+			"apiVersion": "2021-04-01",
+			"name": "b626bee4-b322-5418-990f-6463a799be3c",
 			"dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],
@@ -428,15 +428,15 @@
 	"outputs": {
 		"appGatewayAlias": {
 			"type": "string",
-			"value": "[reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn]"
+			"value": "[reference(variables('ref_appGatewayPublicIP'), '2021-04-01').dnsSettings.fqdn]"
 		},
 		"appGatewayURL": {
 			"type": "string",
-			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn),'')]"
+			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '2021-04-01').dnsSettings.fqdn),'')]"
 		},
 		"appGatewaySecuredURL": {
 			"type": "string",
-			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersion}').dnsSettings.fqdn),'')]"
+			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '2021-04-01').dnsSettings.fqdn),'')]"
 		}
 	}
 }
