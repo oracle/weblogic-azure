@@ -326,8 +326,8 @@ export dbDriverPaths=""
 export ocrLoginServer="container-registry.oracle.com"
 export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.17/weblogic-deploy.zip"
 export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.16/imagetool.zip"
-export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.2.8.jar"
-export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar"
+export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.3.6.jar"
+export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/10.2.1.jre8/mssql-jdbc-10.2.1.jre8.jar"
 
 read_sensitive_parameters_from_stdin
 
