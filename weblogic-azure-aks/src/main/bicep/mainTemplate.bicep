@@ -162,7 +162,7 @@ param ocrSSOPSW string = newGuid()
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string = 'null'
 @secure()
-@description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth | base64 -w0')
+@description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/<AZURE_SUBSCRIPTION_ID> | base64 -w0')
 param servicePrincipal string = newGuid()
 @allowed([
   'uploadConfig'
