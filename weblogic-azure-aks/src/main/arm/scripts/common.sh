@@ -3,7 +3,7 @@
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
 export checkPodStatusInterval=20 # interval of checking pod status.
-export checkPodStatusMaxAttemps=30 # max attempt to check pod status.
+export checkPodStatusMaxAttemps=50 # max attempt to check pod status.
 export checkPVStateInterval=5 # interval of checking pvc status.
 export checkPVStateMaxAttempt=10 # max attempt to check pvc status.
 export checkSVCStateMaxAttempt=50
