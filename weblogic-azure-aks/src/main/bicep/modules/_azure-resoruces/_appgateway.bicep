@@ -162,5 +162,5 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
 
 output appGatewayAlias string = usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn
 output appGatewayName string = name_appGateway
-output appGatewayURL string = format('http://{0}/', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn)
-output appGatewaySecuredURL string = format('https://{0}/', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn)
+output appGatewayURL string = uri(format('http://{0}/', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn), '')
+output appGatewaySecuredURL string = uri(format('https://{0}/', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn), '')

@@ -6,7 +6,7 @@ param aksAgentPoolNodeCount int
 param aksAgentPoolVMSize string
 param aksClusterRGName string
 param aksClusterName string
-param aksVersion string
+param aksVersion string = 'default'
 param appGatewayCertificateOption string
 param appGatewaySSLCertData string
 @secure()
@@ -41,14 +41,17 @@ param sslKeyVaultName string
 param sslKeyVaultPrivateKeyAliasSecretName string
 param sslKeyVaultPrivateKeyPassPhraseSecretName string
 param sslKeyVaultResourceGroup string
+@secure()
 param sslUploadedCustomIdentityKeyStoreData string
 @secure()
 param sslUploadedCustomIdentityKeyStorePassphrase string
 param sslUploadedCustomIdentityKeyStoreType string
+@secure()
 param sslUploadedCustomTrustKeyStoreData string
 @secure()
 param sslUploadedCustomTrustKeyStorePassPhrase string
 param sslUploadedCustomTrustKeyStoreType string
+@secure()
 param sslUploadedPrivateKeyAlias string
 @secure()
 param sslUploadedPrivateKeyPassPhrase string
