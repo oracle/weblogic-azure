@@ -1402,8 +1402,8 @@
                                     "subnets": "Subnets"
                                 },
                                 "toolTip": {
-                                    "virtualNetwork": "Select a virtual network for Application Gateway.",
-                                    "subnets": "Ensure the subnet is only for Application Gateway."
+                                    "virtualNetwork": "Select a virtual network in which to place the Application Gateway.",
+                                    "subnets": "The subnet must be dedicated only for use by the Application Gateway."
                                 },
                                 "defaultValue": {
                                     "name": "[concat('wlsaks-vnet',take(guid(), 8))]",
