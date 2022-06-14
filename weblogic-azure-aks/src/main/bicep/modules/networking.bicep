@@ -71,11 +71,14 @@ param wlsDomainName string = 'domain1'
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 
+// To mitigate arm-ttk error: Type Mismatch: Parameter in nested template is defined as string, but the parent template defines it as bool.
+var _enableAppGWIngress = enableAppGWIngress
+var _appgwUsePrivateIP = appgwUsePrivateIP
 var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_appgwSSLCertOptionGenerateCert = 'generateCert'
 var const_enableLbService = length(lbSvcValues) > 0
-var name_networkDeployment = enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? 'ds-networking-deployment-1' : 'ds-networking-deployment') : 'ds-networking-deployment-2'
+var name_networkDeployment = _enableAppGWIngress ? (appGatewayCertificateOption == const_appgwSSLCertOptionGenerateCert ? 'ds-networking-deployment-1' : 'ds-networking-deployment') : 'ds-networking-deployment-2'
 var ref_networkDeployment = reference(name_networkDeployment)
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
@@ -129,7 +132,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
     gatewayPublicIPAddressName: appGatewayPublicIPAddressName
     gatewaySubnetId: appGatewaySubnetId
     location: location
-    staticPrivateFrontentIP: appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
+    staticPrivateFrontentIP: _appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
     usePrivateIP: appgwUsePrivateIP
   }
   dependsOn: [
@@ -146,7 +149,7 @@ module appgwDeployment '_azure-resoruces/_appgateway.bicep' = if (enableAppGWIng
 module appgwBackendCertDeployment '_deployment-scripts/_ds-appgw-upload-trusted-root-certificate.bicep' = if (enableAppGWIngress && enableCustomSSL) {
   name: 'app-gateway-backend-cert-deployment'
   params: {
-    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
+    appgwName: _enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
     sslBackendRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
     identity: identity
     location: location
@@ -172,8 +175,8 @@ module networkingDeployment '_deployment-scripts/_ds-create-networking.bicep' = 
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
-    appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwName: _enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
+    appgwAlias: _enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
@@ -212,8 +215,8 @@ module networkingDeployment2 '_deployment-scripts/_ds-create-networking.bicep' =
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    appgwName: enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
-    appgwAlias: enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
+    appgwName: _enableAppGWIngress ? appgwDeployment.outputs.appGatewayName : 'null'
+    appgwAlias: _enableAppGWIngress ? appgwDeployment.outputs.appGatewayAlias : 'null'
     appgwCertificateOption: appGatewayCertificateOption
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
@@ -329,11 +332,11 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
   ]
 }
 
-output adminConsoleExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : ref_networkDeployment.outputs.adminConsoleLBUrl.value
-output adminConsoleExternalSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminConsoleLBSecuredUrl.value
-output adminRemoteConsoleUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : ref_networkDeployment.outputs.adminRemoteUrl.value
-output adminRemoteConsoleSecuredUrl string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminRemoteSecuredUrl.value
-output adminServerT3ChannelUrl string = ref_networkDeployment.outputs.adminServerT3LBUrl.value
-output clusterExternalUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : ref_networkDeployment.outputs.clusterLBUrl.value
-output clusterExternalSecuredUrl string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ref_networkDeployment.outputs.clusterLBSecuredUrl.value
-output clusterT3ChannelUrl string = ref_networkDeployment.outputs.clusterT3LBUrl.value
+output adminConsoleExternalEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appgwDeployment.outputs.appGatewayAlias)) : ref_networkDeployment.outputs.adminConsoleLBEndpoint.value
+output adminConsoleExternalSecuredEndpoint string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminConsoleLBSecuredEndpoint.value
+output adminRemoteConsoleEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appgwDeployment.outputs.appGatewayAlias)) : ref_networkDeployment.outputs.adminRemoteEndpoint.value
+output adminRemoteConsoleSecuredEndpoint string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminRemoteSecuredEndpoint.value
+output adminServerT3ChannelEndpoint string = format('{0}://{1}', enableCustomSSL ? 't3s': 't3', ref_networkDeployment.outputs.adminServerT3LBEndpoint.value)
+output clusterExternalEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewayURL) : ref_networkDeployment.outputs.clusterLBEndpoint.value
+output clusterExternalSecuredEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appgwDeployment.outputs.appGatewaySecuredURL) : ref_networkDeployment.outputs.clusterLBSecuredEndpoint.value
+output clusterT3ChannelEndpoint string = format('{0}://{1}', enableCustomSSL ? 't3s': 't3', ref_networkDeployment.outputs.clusterT3LBEndpoint.value)

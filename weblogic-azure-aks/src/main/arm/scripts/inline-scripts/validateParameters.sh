@@ -523,12 +523,12 @@ function validate_service_principal() {
   #   "clientSecret": "uh0sZPoNsLKyUU3iOO1~xxxxxxx",
   #   "subscriptionId": "260524c9-7a4d-4483-8d85-xxxxxxx",
   #   "tenantId": "814a03f9-f7c3-41a4-8ecc-xxxxxxx",
-  #   "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-  #   "resourceManagerEndpointUrl": "https://management.azure.com/",
-  #   "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-  #   "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-  #   "galleryEndpointUrl": "https://gallery.azure.com/",
-  #   "managementEndpointUrl": "https://management.core.windows.net/"
+  #   "activeDirectoryEndpointUrl": "https://xxxxx.com",
+  #   "resourceManagerEndpointUrl": "https://xxxxx.com/",
+  #   "activeDirectoryGraphResourceId": "https://xxxxx.net/",
+  #   "sqlManagementEndpointUrl": "https://xxxxx.net:8443/",
+  #   "galleryEndpointUrl": "https://xxxxx.com/",
+  #   "managementEndpointUrl": "https://xxxxx.net/"
   # }
   local principalId=$(echo ${spObject} | jq '.clientId')
   validate_status "get client id from the service principal." "Invalid service principal."
