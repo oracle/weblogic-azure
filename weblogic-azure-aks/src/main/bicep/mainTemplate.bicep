@@ -158,6 +158,8 @@ param location string
 param lbSvcValues array = []
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
+@description('To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the newOrExisting property when hideExisting is false')
+param newOrExistingVnetForApplicationGateway string = 'new'
 @secure()
 @description('Password of Oracle SSO account.')
 param ocrSSOPSW string = newGuid()
@@ -460,6 +462,7 @@ module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bic
   name: 'vnet-application-gateway'
   params: {
     location: location
+    newOrExistingVnetForApplicationGateway: newOrExistingVnetForApplicationGateway
     vnetForApplicationGateway: vnetForApplicationGateway
     vnetRGNameForApplicationGateway: vnetRGNameForApplicationGateway
   }

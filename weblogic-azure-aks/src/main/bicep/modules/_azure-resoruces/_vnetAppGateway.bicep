@@ -2,6 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param location string
+param newOrExistingVnetForApplicationGateway string
 param vnetForApplicationGateway object = {
   name: 'wlsaks-app-gateway-vnet'
   resourceGroup: resourceGroup().name
@@ -107,3 +108,5 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = if (const_newV
 output subIdForApplicationGateway string = const_newVnet ? resourceId('Microsoft.Network/virtualNetworks/subnets', name_vnet, name_subnet) : existingSubnet.id
 // To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the resourceGroup property when hideExisting is false
 output vnetResourceGroupName string = vnetRGNameForApplicationGateway
+// To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the newOrExisting property when hideExisting is false
+output newOrExisting string = newOrExistingVnetForApplicationGateway
