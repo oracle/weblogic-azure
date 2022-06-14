@@ -18,6 +18,7 @@ param vnetForApplicationGateway object = {
     }
   }
 }
+param vnetRGNameForApplicationGateway string
 param utcValue string = utcNow()
 
 var const_subnetAddressPrefixes = vnetForApplicationGateway.subnets.gatewaySubnet.addressPrefix
@@ -104,3 +105,5 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = if (const_newV
 }
 
 output subIdForApplicationGateway string = const_newVnet ? resourceId('Microsoft.Network/virtualNetworks/subnets', name_vnet, name_subnet) : existingSubnet.id
+// To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the resourceGroup property when hideExisting is false
+output vnetResourceGroupName string = vnetRGNameForApplicationGateway

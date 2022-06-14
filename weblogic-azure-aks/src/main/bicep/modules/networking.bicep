@@ -25,8 +25,8 @@ param aksClusterName string = 'aks-contoso'
 param appGatewayCertificateOption string = 'haveCert'
 @description('Public IP Name for the Application Gateway')
 param appGatewayPublicIPAddressName string = 'gwip'
-param appGatewaySubnetId string
-param appGatewaySubnetStartAddress string
+param appGatewaySubnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
+param appGatewaySubnetStartAddress string = '10.0.0.1'
 @description('Create Application Gateway ingress for admin console.')
 param appgwForAdminServer bool = true
 @description('Create Application Gateway ingress for remote console.')

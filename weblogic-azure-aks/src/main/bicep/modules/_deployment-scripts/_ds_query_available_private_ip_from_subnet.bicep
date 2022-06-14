@@ -1,8 +1,8 @@
 // Copyright (c) 2022, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-param subnetId string
-param knownIP string
+param subnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
+param knownIP string = '10.0.0.1'
 
 param identity object
 param location string
