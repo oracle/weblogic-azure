@@ -438,7 +438,7 @@ module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvault
 }
 
 // get key vault object in a resource group
-resource sslKeyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = if (enableCustomSSL) {
+resource sslKeyvault 'Microsoft.KeyVault/vaults@2021-10-01' existing = if (enableCustomSSL) {
   name: (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultName : name_keyVaultName
   scope: resourceGroup(name_rgKeyvaultForWLSSSL)
 }
