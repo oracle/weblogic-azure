@@ -2150,6 +2150,7 @@
             "keyVaultSSLCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertDataSecretName]",
             "keyVaultSSLCertPasswordSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertPasswordSecretName]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
+            "newOrExistingVnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.newOrExisting]",
             "ocrSSOPSW": "[steps('section_aks').imageInfo.ocrSSOPassword]",
             "ocrSSOUser": "[steps('section_aks').imageInfo.ocrSSOUserName]",
             "servicePrincipal": "[steps('section_appGateway').appgwIngress.servicePrincipal]",
