@@ -52,7 +52,7 @@ param sslUploadedCustomTrustKeyStoreType string
 param sslUploadedPrivateKeyAlias string
 @secure()
 param sslUploadedPrivateKeyPassPhrase string
-param useAksWellTestedVersion bool
+param useAksWellTestedVersion bool = true
 param userProvidedAcr string
 param userProvidedImagePath string
 param useOracleImage bool

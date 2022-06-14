@@ -5,9 +5,9 @@
 param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
 @description('Public IP Name for the Application Gateway')
 param gatewayPublicIPAddressName string = 'gwip'
-param gatewaySubnetId string
+param gatewaySubnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
 param location string
-param staticPrivateFrontentIP string
+param staticPrivateFrontentIP string = '10.0.0.1'
 param usePrivateIP bool = false
 param utcValue string = utcNow()
 

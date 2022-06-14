@@ -261,6 +261,8 @@ param vnetForApplicationGateway object = {
     }
   }
 }
+@description('To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the resourceGroup property when hideExisting is false')
+param vnetRGNameForApplicationGateway string = 'vnet-contoso-rg-name'
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -459,6 +461,7 @@ module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bic
   params: {
     location: location
     vnetForApplicationGateway: vnetForApplicationGateway
+    vnetRGNameForApplicationGateway: vnetRGNameForApplicationGateway
   }
   dependsOn: [
     validateInputs
