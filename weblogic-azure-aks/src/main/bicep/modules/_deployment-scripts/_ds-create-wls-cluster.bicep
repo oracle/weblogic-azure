@@ -34,7 +34,8 @@ param wlsClusterSize int = 5
 param wlsCPU string = '200m'
 param wlsDomainName string = 'domain1'
 param wlsDomainUID string = 'sample-domain1'
-param wlsIdentityKeyStoreData string ='null'
+@secure()
+param wlsIdentityKeyStoreData string =newGuid()
 @secure()
 param wlsIdentityKeyStorePassphrase string = newGuid()
 @allowed([
@@ -47,10 +48,12 @@ param wlsJavaOption string = 'null'
 param wlsMemory string = '1.5Gi'
 @secure()
 param wlsPassword string
-param wlsPrivateKeyAlias string ='contoso'
+@secure()
+param wlsPrivateKeyAlias string =newGuid()
 @secure()
 param wlsPrivateKeyPassPhrase string = newGuid()
-param wlsTrustKeyStoreData string = 'null'
+@secure()
+param wlsTrustKeyStoreData string = newGuid()
 @secure()
 param wlsTrustKeyStorePassPhrase string = newGuid()
 @allowed([

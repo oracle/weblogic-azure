@@ -9,16 +9,19 @@ param location string
 @description('Price tier for Key Vault.')
 param sku string = 'Standard'
 param utcValue string = utcNow()
+@secure()
 param wlsIdentityKeyStoreData string = newGuid()
 param wlsIdentityKeyStoreDataSecretName string = 'myIdentityKeyStoreData'
 @secure()
 param wlsIdentityKeyStorePassphrase string = newGuid()
 param wlsIdentityKeyStorePassphraseSecretName string = 'myIdentityKeyStorePsw'
-param wlsPrivateKeyAlias string = 'server-cert'
+@secure()
+param wlsPrivateKeyAlias string = newGuid()
 param wlsPrivateKeyAliasSecretName string = 'privateKeyAlias'
 @secure()
 param wlsPrivateKeyPassPhrase string = newGuid()
 param wlsPrivateKeyPassPhraseSecretName string = 'privateKeyPsw'
+@secure()
 param wlsTrustKeyStoreData string = newGuid()
 param wlsTrustKeyStoreDataSecretName string = 'myTrustKeyStoreData'
 @secure()
