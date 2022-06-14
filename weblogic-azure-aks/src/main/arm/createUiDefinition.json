@@ -1584,7 +1584,7 @@
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
                                     "password": "Service Principal",
-                                    "confirmPassword": "Confirm password"
+                                    "confirmPassword": "Confirm service principal"
                                 },
                                 "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/&lt;AZURE_SUBSCRIPTION_ID&gt; | base64 -w0' On macOS omit the -w0.",
                                 "constraints": {
