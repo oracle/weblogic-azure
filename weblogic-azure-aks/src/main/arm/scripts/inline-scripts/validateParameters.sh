@@ -308,7 +308,7 @@ function validate_aks_network_plugin() {
   echo_stdout "Check AKS networking: passed!"
 }
 
-function download_wls_ssl_certificates_from_keyvault() {
+function get_wls_ssl_certificates_from_keyvault() {
   # check key vault accessibility for template deployment
   local enabledForTemplateDeployment=$(az keyvault show --name ${WLS_SSL_KEYVAULT_NAME} --query "properties.enabledForTemplateDeployment")
   if [[ "${enabledForTemplateDeployment,,}" != "true" ]]; then
@@ -318,94 +318,56 @@ function download_wls_ssl_certificates_from_keyvault() {
 
   # allow the identity to access the keyvault
   local principalId=$(az identity show --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY} --query "principalId" -o tsv)
-  az keyvault set-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId} --secret-permissions get list
-  validate_status "grant identity permission to get/list secrets in key vault ${WLS_SSL_KEYVAULT_NAME}"
+  az keyvault set-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId} --secret-permissions get
+  validate_status "grant identity permission to get secrets in key vault ${WLS_SSL_KEYVAULT_NAME}"
 
-  local identityDataFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/identityData.txt
-  local identityPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/identityPsw.txt
-  local trustDataFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/trustData.txt
-  local trustPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/trustPsw.txt
-  local privateKeyAliasFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/privateKeyData.txt
-  local privateKeyPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/privateKeyPsw.txt
-
-  rm -f ${identityDataFileName}
-  rm -f ${identityPswFileName}
-  rm -f ${trustDataFileName}
-  rm -f ${trustPswFileName}
-  rm -f ${privateKeyAliasFileName}
-  rm -f ${privateKeyPswFileName}
-
-  # download identity data
-  az keyvault secret download --file ${identityDataFileName} \
+  # get identity data and set it to the environment variable
+  WLS_SSL_IDENTITY_DATA=$(az keyvault secret show \
     --name ${WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set identity data with values in download file
-  WLS_SSL_IDENTITY_DATA=$(cat ${identityDataFileName})
-  # remove the data file
-  rm -f ${identityDataFileName}
+    --vault-name ${WLS_SSL_KEYVAULT_NAME} --query value --output tsv)
+  validate_status "get secret ${WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
 
-  # download identity password
-  az keyvault secret download --file ${identityPswFileName} \
+  # get identity password and set it to the environment variable
+  WLS_SSL_IDENTITY_PASSWORD=$(az keyvault secret show \
     --name ${WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set identity psw with values in download file
-  WLS_SSL_IDENTITY_PASSWORD=$(cat ${identityPswFileName})
-  # remove the data file
-  rm -f ${identityPswFileName}
-
-  # download trust data
-  az keyvault secret download --file ${trustDataFileName} \
+    --vault-name ${WLS_SSL_KEYVAULT_NAME} --query value --output tsv)
+  validate_status "get secret ${WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
+  
+  # get trust data and set it to the environment variable
+  WLS_SSL_TRUST_DATA=$(az keyvault secret show \
     --name ${WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set trust data with values in download file
-  WLS_SSL_TRUST_DATA=$(cat ${trustDataFileName})
-  # remove the data file
-  rm -f ${trustDataFileName}
+    --vault-name ${WLS_SSL_KEYVAULT_NAME} --query value --output tsv)
+  validate_status "get secret ${WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
 
-  # download trust psw
-  az keyvault secret download --file ${trustPswFileName} \
+  # get trust psw and set it to the environment variable
+  WLS_SSL_TRUST_PASSWORD=$(az keyvault secret show \
     --name ${WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set trust psw with values in download file
-  WLS_SSL_TRUST_PASSWORD=$(cat ${trustPswFileName})
-  # remove the data file
-  rm -f ${trustPswFileName}
+    --vault-name ${WLS_SSL_KEYVAULT_NAME} --query value --output tsv)
+  validate_status "get secret ${WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
 
-  # download alias
-  az keyvault secret download --file ${privateKeyAliasFileName} \
+  # get alias and set it to the environment variable
+  WLS_SSL_PRIVATE_KEY_ALIAS=$(az keyvault secret show \
     --name ${WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set alias with values in download file
-  WLS_SSL_PRIVATE_KEY_ALIAS=$(cat ${privateKeyAliasFileName})
-  # remove the data file
-  rm -f ${privateKeyAliasFileName}
+    --vault-name ${WLS_SSL_KEYVAULT_NAME} --query value --output tsv)
+  validate_status "get secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS} from key vault ${WLS_SSL_KEYVAULT_NAME}"
 
-  # download private key psw
-  az keyvault secret download --file ${privateKeyPswFileName} \
+  # get private key psw and set it to the environment variable
+  WLS_SSL_PRIVATE_KEY_PASSWORD=$(az keyvault secret show \
     --name ${WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set private key psw with values in download file
-  WLS_SSL_PRIVATE_KEY_PASSWORD=$(cat ${privateKeyPswFileName})
-  # remove the data file
-  rm -f ${privateKeyPswFileName}
+    --vault-name ${WLS_SSL_KEYVAULT_NAME} --query value --output tsv)
+  validate_status "get secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD} from key vault ${WLS_SSL_KEYVAULT_NAME}"
 
   WLS_SSL_IDENTITY_TYPE=${WLS_SSL_KEYVAULT_IDENTITY_TYPE}
   WLS_SSL_TRUST_TYPE=${WLS_SSL_KEYVAULT_TRUST_TYPE}
 
   # reset key vault policy
   az keyvault delete-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId}
-  validate_status "delete identity permission to get/list secrets in key vault ${WLS_SSL_KEYVAULT_NAME}"
+  validate_status "delete identity permission to get secrets in key vault ${WLS_SSL_KEYVAULT_NAME}"
 }
 
 function validate_wls_ssl_certificates() {
   if [[ "${sslConfigurationAccessOption}" == "${sslCertificateKeyVaultOption}" ]]; then
-    download_wls_ssl_certificates_from_keyvault
+    get_wls_ssl_certificates_from_keyvault
   fi
 
   local wlsIdentityKeyStoreFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/identity.keystore
