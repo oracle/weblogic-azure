@@ -1029,7 +1029,7 @@
                                     "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL certificate. The offer will look for the certificate and other configuration items in the Azure Key Vault specified here.",
                                     "link": {
                                         "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                        "uri": "https://aka.ms/wls-aks-ssl-key-vault"
                                     }
                                 }
                             },
@@ -1470,7 +1470,7 @@
                                     "text": "    ⁃ Generate a self-signed front-end certificate: Generate a self-signed front-end certificate and apply it during deployment.",
                                     "link": {
                                         "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                        "uri": "https://aka.ms/wls-aks-application-gateway-ssl-key-vault"
                                     }
                                 }
                             },
