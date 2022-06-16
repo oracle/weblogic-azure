@@ -183,6 +183,11 @@ function install_utilities() {
     unzip --help
     validate_status "Check status of unzip."
 
+    sudo apt-get -y -q install jq
+    echo "jq version"
+    jq --help
+    validate_status "Check status of unzip."
+
     download_wdt_wit
 
     curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
