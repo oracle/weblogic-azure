@@ -242,7 +242,7 @@ function get_wls_operator_version() {
     curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
     if [ $? -eq 0 ]; then
         wlsOptVersion=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WKO\") | .version" | tr -d "\"")
-        echo "WKO version: ${optVersion}"
+        echo "WKO version: ${wlsOptVersion}"
     else
         echo "WKO version: latest"
     fi
