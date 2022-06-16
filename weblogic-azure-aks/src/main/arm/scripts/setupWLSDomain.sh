@@ -244,7 +244,6 @@ function get_wls_operator_version() {
         wlsOptVersion=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WKO\") | .version" | tr -d "\"")
         echo "WKO version: ${optVersion}"
     else
-        wlsOptVersion=""
         echo "WKO version: latest"
     fi
 }
@@ -348,14 +347,24 @@ function install_wls_operator() {
     fi
 
     echo "install the operator"
-    helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
+    if [[ -n "${wlsOptVersion}" ]]; then
+        helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
+            --namespace ${wlsOptNameSpace} \
+            --set serviceAccount=${wlsOptSA} \
+            --set "enableClusterRoleBinding=true" \
+            --set "domainNamespaceSelectionStrategy=LabelSelector" \
+            --set "domainNamespaceLabelSelector=weblogic-operator\=enabled" \
+            --version ${wlsOptVersion} \
+            --wait
+    else
+        helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
         --namespace ${wlsOptNameSpace} \
         --set serviceAccount=${wlsOptSA} \
         --set "enableClusterRoleBinding=true" \
         --set "domainNamespaceSelectionStrategy=LabelSelector" \
         --set "domainNamespaceLabelSelector=weblogic-operator\=enabled" \
-        --version ${wlsOptVersion} \
         --wait
+    fi
 
     validate_status "Installing WLS operator."
 
