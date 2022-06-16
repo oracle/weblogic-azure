@@ -117,6 +117,29 @@ function initialize() {
     mkdir wlsdeploy/domainLibraries
 }
 
+function download_wdt_wit() {
+    local wlsToolingFamilyJsonFile=weblogic_tooling_family.json
+    # download the json file that wls operator version from weblogic-azure repo.
+    curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
+    if [ $? -eq 0 ]; then
+        wdtDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WDT\") | .downloadURL" | tr -d "\"")
+        echo "WDT URL: ${wdtDownloadURL}"
+        witDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WIT\") | .downloadURL" | tr -d "\"")
+        echo "WIT URL: ${witDownloadURL}"
+    else
+        echo "Get latest WDT and WIT."
+        wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/latest/download/weblogic-deploy.zip"
+        witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/latest/download/imagetool.zip"
+    fi
+
+    # Download weblogic tools
+    curl -m ${curlMaxTime} -fsL ${wdtDownloadURL} -o weblogic-deploy.zip
+    validate_status "Check status of weblogic-deploy.zip."
+
+    curl -m ${curlMaxTime} -fsL ${witDownloadURL} -o imagetool.zip
+    validate_status "Check status of imagetool.zip."
+}
+
 # Install docker, zip, unzip and java
 # Download WebLogic Tools
 function install_utilities() {
@@ -160,12 +183,7 @@ function install_utilities() {
     unzip --help
     validate_status "Check status of unzip."
 
-    # Download weblogic tools
-    curl -m ${curlMaxTime} -fL ${wdtDownloadURL} -o weblogic-deploy.zip
-    validate_status "Check status of weblogic-deploy.zip."
-
-    curl -m ${curlMaxTime} -fL ${witDownloadURL} -o imagetool.zip
-    validate_status "Check status of imagetool.zip."
+    download_wdt_wit
 
     curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
     validate_status "Install postgresql driver."
