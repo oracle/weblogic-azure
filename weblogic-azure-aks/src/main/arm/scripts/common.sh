@@ -19,6 +19,8 @@ export constDefaultAKSVersion="default"
 export constFalse="false"
 export constTrue="true"
 export constIntrospectorJobActiveDeadlineSeconds=300  # for Guaranteed Qos
+export constPostgreDriverName="postgresql-42.3.6.jar"
+export constMSSQLDriverName="mssql-jdbc-10.2.1.jre8.jar"
 
 export curlMaxTime=120 # seconds
 export ocrLoginServer="container-registry.oracle.com"
@@ -31,3 +33,7 @@ export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
 export optUninstallInterval=10
 
 export wlsContainerName="weblogic-server"
+export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.17/weblogic-deploy.zip"
+export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.16/imagetool.zip"
+export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.3.6.jar"
+export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/10.2.1.jre8/mssql-jdbc-10.2.1.jre8.jar"

@@ -33,7 +33,7 @@ domainInfo:
   AdminUserName: "@@SECRET:__weblogic-credentials__:username@@"
   AdminPassword: "@@SECRET:__weblogic-credentials__:password@@"
   ServerStartMode: "prod"
-  domainLibraries: [ 'wlsdeploy/domainLibraries/postgresql-42.2.8.jar', 'wlsdeploy/domainLibraries/mssql-jdbc-7.4.1.jre8.jar'${dbDriverPaths}]
+  domainLibraries: [ 'wlsdeploy/domainLibraries/${constPostgreDriverName}', 'wlsdeploy/domainLibraries/${constMSSQLDriverName}'${dbDriverPaths}]
 
 topology:
   Name: "@@ENV:CUSTOM_DOMAIN_NAME@@"

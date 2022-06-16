@@ -167,10 +167,10 @@ function install_utilities() {
     curl -m ${curlMaxTime} -fL ${witDownloadURL} -o imagetool.zip
     validate_status "Check status of imagetool.zip."
 
-    curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/postgresql-42.2.8.jar
+    curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
     validate_status "Install postgresql driver."
 
-    curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/mssql-jdbc-7.4.1.jre8.jar
+    curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
 }
 
@@ -323,11 +323,6 @@ export dbDriversUrls=${12}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export dbDriverPaths=""
-export ocrLoginServer="container-registry.oracle.com"
-export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.17/weblogic-deploy.zip"
-export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.16/imagetool.zip"
-export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.3.6.jar"
-export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/10.2.1.jre8/mssql-jdbc-10.2.1.jre8.jar"
 
 read_sensitive_parameters_from_stdin
 
