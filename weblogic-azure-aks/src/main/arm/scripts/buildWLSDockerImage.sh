@@ -119,7 +119,7 @@ function initialize() {
 
 function download_wdt_wit() {
     local wlsToolingFamilyJsonFile=weblogic_tooling_family.json
-    # download the json file that wls operator version from weblogic-azure repo.
+    # download the json file that has wls operator version from weblogic-azure repo.
     curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
     if [ $? -eq 0 ]; then
         wdtDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WDT\") | .downloadURL" | tr -d "\"")
@@ -127,7 +127,7 @@ function download_wdt_wit() {
         witDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WIT\") | .downloadURL" | tr -d "\"")
         echo "WIT URL: ${witDownloadURL}"
     else
-        echo "Get latest WDT and WIT."
+        echo "Use latest WDT and WIT."
         wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/latest/download/weblogic-deploy.zip"
         witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/latest/download/imagetool.zip"
     fi
