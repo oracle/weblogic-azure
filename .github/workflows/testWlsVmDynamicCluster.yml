@@ -39,8 +39,8 @@ env:
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
   otnUser: ${{ secrets.OTN_USERID }}
   otnPassword: ${{ secrets.OTN_PASSWORD }}
-  refJavaee: 062fe0eb4e72012ead98c23e1a1b2c6259e7e7c4
-  refArmTtk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
+  refJavaee: cf5c927eaf1f5652556e86a6b67816fc910d1b74
+  refArmTtk: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
