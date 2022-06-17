@@ -138,9 +138,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = if
       httpApplicationRouting: {
         enabled: false
       }
-      omsAgent: {
-        enabled: bool('${enableAzureMonitoring}')
-      }
+      omsAgent: enableAzureMonitoring ? obj_aciEnableOmsAgent : obj_aciDisableOmsAgent
     }
     enableRBAC: true
     networkProfile: {
