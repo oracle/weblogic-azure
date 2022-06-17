@@ -7,7 +7,7 @@
          "metadata": {
             "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
          },
-         "defaultValue": "${artifactsLocationBase}/arm-oraclelinux-wls-cluster/addnode/src/main/"
+         "defaultValue": "https://raw.githubusercontent.com/oracle/weblogic-azure/refs/heads/main/weblogic-azure-vm/arm-oraclelinux-wls-cluster/addnode/src/main/"
       },
       "_artifactsLocationSasToken": {
          "type": "securestring",
@@ -311,8 +311,8 @@
    "resources": [
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${cluster.addnode.start}",
+         "apiVersion": "2021-04-01",
+         "name": "ffa02caf-ecb9-59df-82ce-74b9b0247c50",
          "properties": {
             "mode": "Incremental",
             "template": {
@@ -323,7 +323,7 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+         "apiVersion": "2021-08-01",
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[concat(variables('name_vmMachine'),copyIndex(variables('const_appNodeMachineOffset')),variables('name_publicIPAddress'))]",
          "location": "[parameters('location')]",
@@ -339,13 +339,13 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersionForVirtualNetworks}",
+         "apiVersion": "2021-08-01",
          "type": "Microsoft.Network/virtualNetworks/subnets",
          "name": "[concat(variables('name_virtualNetwork'), '/', variables('name_subnet'))]",
          "condition": "[and(empty(variables('name_virtualNetwork')), empty(variables('name_subnet')))]"
       },
       {
-         "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
+         "apiVersion": "2021-08-01",
          "type": "Microsoft.Network/networkInterfaces",
          "name": "[concat(variables('name_vmMachine'),copyIndex(variables('const_appNodeMachineOffset')), variables('name_nic'))]",
          "location": "[parameters('location')]",
@@ -377,7 +377,7 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersionForVirtualMachines}",
+         "apiVersion": "2021-11-01",
          "type": "Microsoft.Compute/virtualMachines",
          "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')))]",
          "location": "[parameters('location')]",
@@ -425,7 +425,7 @@
             "diagnosticsProfile": {
                "bootDiagnostics": {
                   "enabled": true,
-                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '2021-06-01').primaryEndpoints.blob]"
                }
             }
          },
@@ -437,7 +437,7 @@
       },
       {
          "type": "Microsoft.Network/applicationGateways",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2021-04-01",
          "condition": "[parameters('appGatewaySettings').enable]",
          "name": "[variables('name_appGateway')]",
          "location": "[parameters('location')]",
@@ -627,7 +627,7 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersionForVirtualMachines}",
+         "apiVersion": "2021-11-01",
          "type": "Microsoft.Compute/virtualMachines/extensions",
          "name": "[concat(variables('name_vmMachine'), copyIndex(variables('const_appNodeMachineOffset')), '/newuserscript')]",
          "location": "[parameters('location')]",
@@ -655,13 +655,13 @@
                ]
             },
             "protectedSettings": {
-				"commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ', copyIndex(variables('const_appNodeMachineOffset')),' ', parameters('adminURL'),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ',parameters('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersion2}').keys[0].value,' ', variables('const_mountPointPath'),' ', if(parameters('aadsSettings').enable, parameters('aadsSettings').certificateBase64String, 'null'),' ',if(parameters('aadsSettings').enable, parameters('aadsSettings').publicIP, 'null'),' ', if(parameters('aadsSettings').enable, parameters('aadsSettings').serverHost, 'null'),' ',if(parameters('appGatewaySettings').enable, reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('appGatewaySettings').publicIPName),'${azure.apiVersion}').dnsSettings.fqdn, 'null'), ' ',parameters('elkSettings').enable, ' ',parameters('elkSettings').elasticsearchEndpoint,' ', parameters('elkSettings').elasticsearchUserName,' ', parameters('elkSettings').elasticsearchPassword, ' ', array.join(parameters('elkSettings').logsToIntegrate), ' ',parameters('elkSettings').logIndex, ' ', parameters('enableCoherence'),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),parameters('adminVMName')),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',parameters('customSSLSettings').enable,' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyAlias, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyPassPhrase, 'null'),'\"')]"            }
+				"commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ', copyIndex(variables('const_appNodeMachineOffset')),' ', parameters('adminURL'),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ',parameters('storageAccountName'), ' ', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-06-01').keys[0].value,' ', variables('const_mountPointPath'),' ', if(parameters('aadsSettings').enable, parameters('aadsSettings').certificateBase64String, 'null'),' ',if(parameters('aadsSettings').enable, parameters('aadsSettings').publicIP, 'null'),' ', if(parameters('aadsSettings').enable, parameters('aadsSettings').serverHost, 'null'),' ',if(parameters('appGatewaySettings').enable, reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('appGatewaySettings').publicIPName),'2021-04-01').dnsSettings.fqdn, 'null'), ' ',parameters('elkSettings').enable, ' ',parameters('elkSettings').elasticsearchEndpoint,' ', parameters('elkSettings').elasticsearchUserName,' ', parameters('elkSettings').elasticsearchPassword, ' ', array.join(parameters('elkSettings').logsToIntegrate), ' ',parameters('elkSettings').logIndex, ' ', parameters('enableCoherence'),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),parameters('adminVMName')),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',parameters('customSSLSettings').enable,' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customIdentityKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreBase64String, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStorePassPhrase, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').customTrustKeyStoreType, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyAlias, 'null'),' ',if(parameters('customSSLSettings').enable,parameters('customSSLSettings').privateKeyPassPhrase, 'null'),'\"')]"            }
          }
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${cluster.addnode.end}",
+         "apiVersion": "2021-04-01",
+         "name": "2452bb0e-13d9-5ad3-816b-d645ba5198c4",
          "dependsOn": [
             "virtualMachineExtensionLoop"
          ],
