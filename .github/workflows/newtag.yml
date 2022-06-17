@@ -20,7 +20,7 @@ on:
 env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
-  refArmttk: cf5c927eaf1f5652556e86a6b67816fc910d1b74
+  refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
   refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
   repoName: "weblogic-azure"
   userEmail: ${{ secrets.USER_EMAIL }}

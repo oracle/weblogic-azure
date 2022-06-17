@@ -8,7 +8,7 @@ on:
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-package"}'
 
 env:
-    refArmttk: cf5c927eaf1f5652556e86a6b67816fc910d1b74
+    refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
     refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
     azCliVersion: 2.30.0
     location: eastus
