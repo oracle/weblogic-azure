@@ -117,6 +117,29 @@ function initialize() {
     mkdir wlsdeploy/domainLibraries
 }
 
+function download_wdt_wit() {
+    local wlsToolingFamilyJsonFile=weblogic_tooling_family.json
+    # download the json file that has wls operator version from weblogic-azure repo.
+    curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
+    if [ $? -eq 0 ]; then
+        wdtDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WDT\") | .downloadURL" | tr -d "\"")
+        echo "WDT URL: ${wdtDownloadURL}"
+        witDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WIT\") | .downloadURL" | tr -d "\"")
+        echo "WIT URL: ${witDownloadURL}"
+    else
+        echo "Use latest WDT and WIT."
+        wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/latest/download/weblogic-deploy.zip"
+        witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/latest/download/imagetool.zip"
+    fi
+
+    # Download weblogic tools
+    curl -m ${curlMaxTime} -fsL ${wdtDownloadURL} -o weblogic-deploy.zip
+    validate_status "Check status of weblogic-deploy.zip."
+
+    curl -m ${curlMaxTime} -fsL ${witDownloadURL} -o imagetool.zip
+    validate_status "Check status of imagetool.zip."
+}
+
 # Install docker, zip, unzip and java
 # Download WebLogic Tools
 function install_utilities() {
@@ -160,17 +183,17 @@ function install_utilities() {
     unzip --help
     validate_status "Check status of unzip."
 
-    # Download weblogic tools
-    curl -m ${curlMaxTime} -fL ${wdtDownloadURL} -o weblogic-deploy.zip
-    validate_status "Check status of weblogic-deploy.zip."
+    sudo apt-get -y -q install jq
+    echo "jq version"
+    jq --help
+    validate_status "Check status of unzip."
 
-    curl -m ${curlMaxTime} -fL ${witDownloadURL} -o imagetool.zip
-    validate_status "Check status of imagetool.zip."
+    download_wdt_wit
 
-    curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/postgresql-42.2.8.jar
+    curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
     validate_status "Install postgresql driver."
 
-    curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/mssql-jdbc-7.4.1.jre8.jar
+    curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
 }
 
@@ -323,11 +346,6 @@ export dbDriversUrls=${12}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export dbDriverPaths=""
-export ocrLoginServer="container-registry.oracle.com"
-export wdtDownloadURL="https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-1.9.17/weblogic-deploy.zip"
-export witDownloadURL="https://github.com/oracle/weblogic-image-tool/releases/download/release-1.9.16/imagetool.zip"
-export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.3.6.jar"
-export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/10.2.1.jre8/mssql-jdbc-10.2.1.jre8.jar"
 
 read_sensitive_parameters_from_stdin
 

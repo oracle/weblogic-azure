@@ -1,0 +1,26 @@
+{
+    "name": "Oracle WebLogic Server Tooling Family used in WebLogic on AKS offer",
+    "description": "The versions are known to work for all the features of Azure WebLogic on AKS offer.",
+    "items": [
+        {
+            "key": "WKO",
+            "description": "Oracle WebLogic Kubernetes Operator",
+            "version": "3.4.1",
+            "testedDate": "2022-06-16"
+        },
+        {
+            "key": "WDT",
+            "description": "Oracle WebLogic Deploy Tooling",
+            "version": "2.3.0",
+            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-2.3.0/weblogic-deploy.zip",
+            "testedDate": "2022-06-16"
+        },
+        {
+            "key": "WIT",
+            "description": "Oracle WebLogic Image Tool",
+            "version": "1.11.1",
+            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.11.1/imagetool.zip",
+            "testedDate": "2022-06-16"
+        }
+    ]
+}

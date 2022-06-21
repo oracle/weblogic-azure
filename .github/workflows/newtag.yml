@@ -20,7 +20,7 @@ on:
 env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
-  refArmttk: cf5c927eaf1f5652556e86a6b67816fc910d1b74
+  refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
   refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
   repoName: "weblogic-azure"
   userEmail: ${{ secrets.USER_EMAIL }}
@@ -91,8 +91,8 @@ jobs:
           cd ${{ env.repoName }}
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-admin/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
-          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/arm-oraclelinux-wls-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
-          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
 
           echo "build bicep files"
           bicep build weblogic-azure-aks/src/main/bicep/mainTemplate.bicep --outfile weblogic-azure-aks/src/main/arm/mainTemplate.json

@@ -350,7 +350,7 @@
                                 "min": 1,
                                 "max": 1000,
                                 "label": "Node count",
-                                "defaultValue": 2,
+                                "defaultValue": 3,
                                 "showStepMarkers": false,
                                 "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.",
                                 "constraints": {

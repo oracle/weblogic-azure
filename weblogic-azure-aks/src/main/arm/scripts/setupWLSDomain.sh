@@ -236,6 +236,18 @@ function validate_status() {
     fi
 }
 
+function get_wls_operator_version() {
+    local wlsToolingFamilyJsonFile=weblogic_tooling_family.json
+    # download the json file that wls operator version from weblogic-azure repo.
+    curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
+    if [ $? -eq 0 ]; then
+        wlsOptVersion=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WKO\") | .version" | tr -d "\"")
+        echo "WKO version: ${wlsOptVersion}"
+    else
+        echo "WKO version: latest"
+    fi
+}
+
 # Install latest kubectl and Helm
 function install_utilities() {
     if [ -d "apps" ]; then
@@ -335,14 +347,24 @@ function install_wls_operator() {
     fi
 
     echo "install the operator"
-    helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
+    if [[ -n "${wlsOptVersion}" ]]; then
+        helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
+            --namespace ${wlsOptNameSpace} \
+            --set serviceAccount=${wlsOptSA} \
+            --set "enableClusterRoleBinding=true" \
+            --set "domainNamespaceSelectionStrategy=LabelSelector" \
+            --set "domainNamespaceLabelSelector=weblogic-operator\=enabled" \
+            --version ${wlsOptVersion} \
+            --wait
+    else
+        helm install ${wlsOptRelease} weblogic-operator/weblogic-operator \
         --namespace ${wlsOptNameSpace} \
         --set serviceAccount=${wlsOptSA} \
         --set "enableClusterRoleBinding=true" \
         --set "domainNamespaceSelectionStrategy=LabelSelector" \
         --set "domainNamespaceLabelSelector=weblogic-operator\=enabled" \
-        --version ${wlsOptVersion} \
         --wait
+    fi
 
     validate_status "Installing WLS operator."
 
@@ -798,7 +820,6 @@ export wlsOptHelmChart="https://oracle.github.io/weblogic-kubernetes-operator/ch
 export wlsOptNameSpace="weblogic-operator-ns"
 export wlsOptRelease="weblogic-operator"
 export wlsOptSA="weblogic-operator-sa"
-export wlsOptVersion="3.2.5"
 export wlsIdentityKeyStoreFileName="security/identity.keystore"
 export wlsTrustKeyStoreFileName="security/trust.keystore"
 export wlsTrustKeyStoreJKSFileName="security/trust.jks"
@@ -806,6 +827,8 @@ export wlsTrustKeyStoreJKSFileName="security/trust.jks"
 read_sensitive_parameters_from_stdin
 
 validate_input
+
+get_wls_operator_version
 
 install_utilities
 
