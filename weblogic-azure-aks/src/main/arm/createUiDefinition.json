@@ -1029,7 +1029,7 @@
                                     "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL certificate. The offer will look for the certificate and other configuration items in the Azure Key Vault specified here.",
                                     "link": {
                                         "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                        "uri": "https://aka.ms/wls-aks-ssl-key-vault"
                                     }
                                 }
                             },
@@ -1395,6 +1395,50 @@
                                 }
                             },
                             {
+                                "name": "vnetForApplicationGateway",
+                                "type": "Microsoft.Network.VirtualNetworkCombo",
+                                "label": {
+                                    "virtualNetwork": "Virtual network",
+                                    "subnets": "Subnets"
+                                },
+                                "toolTip": {
+                                    "virtualNetwork": "Select a virtual network in which to place the Application Gateway.",
+                                    "subnets": "The subnet must be dedicated only for use by the Application Gateway."
+                                },
+                                "defaultValue": {
+                                    "name": "[concat('wlsaks-vnet',take(guid(), 8))]",
+                                    "addressPrefixSize": "/24"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/24"
+                                },
+                                "options": {
+                                    "hideExisting": false
+                                },
+                                "subnets": {
+                                    "gatewaySubnet": {
+                                        "label": "Subnet",
+                                        "defaultValue": {
+                                            "name": "wls-aks-gateway-subnet",
+                                            "addressPrefixSize": "/24"
+                                        },
+                                        "constraints": {
+                                            "minAddressPrefixSize": "/24",
+                                            "minAddressCount": 38,
+                                            "requireContiguousAddresses": false
+                                        }
+                                    }
+                                },
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
+                                "name": "appgwUsePrivateIP",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Configure frontend IP with private IP address",
+                                "toolTip": "If checked, expose WebLogic Server with private IP address.",
+                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                            },
+                            {
                                 "name": "keyVaultText00",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
@@ -1426,7 +1470,7 @@
                                     "text": "    ⁃ Generate a self-signed front-end certificate: Generate a self-signed front-end certificate and apply it during deployment.",
                                     "link": {
                                         "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                        "uri": "https://aka.ms/wls-aks-application-gateway-ssl-key-vault"
                                     }
                                 }
                             },
@@ -1576,7 +1620,7 @@
                                 "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "You must input an Active Directory Service Principal that is encoded with base64 to create the Application Gateway Ingress Controller. See this <a href=https://aka.ms/wls-aks-agic-sp-doc target='_blank'>document</a> for more information.</br>You can generate one with command <b>az ad sp create-for-rbac --role Contributor --sdk-auth | base64 -w0</b>. On macOS omit the <b>-w0</b>."
+                                    "text": "You must input an Active Directory Service Principal that is encoded with base64 to create the Application Gateway Ingress Controller. See this <a href=https://aka.ms/wls-aks-agic-sp-doc target='_blank'>document</a> for more information.</br>You can generate one with command <b>az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/&lt;AZURE_SUBSCRIPTION_ID&gt; | base64 -w0</b>. On macOS omit the <b>-w0</b>."
                                 }
                             },
                             {
@@ -1584,9 +1628,9 @@
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
                                     "password": "Service Principal",
-                                    "confirmPassword": "Confirm password"
+                                    "confirmPassword": "Confirm service principal"
                                 },
-                                "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --role Contributor --sdk-auth | base64 -w0' On macOS omit the -w0.",
+                                "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/&lt;AZURE_SUBSCRIPTION_ID&gt; | base64 -w0' On macOS omit the -w0.",
                                 "constraints": {
                                     "required": true
                                 },
@@ -2066,6 +2110,7 @@
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
             "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
             "appgwForRemoteConsole": "[steps('section_appGateway').appgwIngress.appgwForAdminRemote]",
+            "appgwUsePrivateIP": "[steps('section_appGateway').appgwIngress.appgwUsePrivateIP]",
             "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
             "createACR": "[bool(steps('section_aks').imageInfo.oracleCreateACR)]",
@@ -2105,6 +2150,7 @@
             "keyVaultSSLCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertDataSecretName]",
             "keyVaultSSLCertPasswordSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertPasswordSecretName]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
+            "newOrExistingVnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.newOrExisting]",
             "ocrSSOPSW": "[steps('section_aks').imageInfo.ocrSSOPassword]",
             "ocrSSOUser": "[steps('section_aks').imageInfo.ocrSSOUserName]",
             "servicePrincipal": "[steps('section_appGateway').appgwIngress.servicePrincipal]",
@@ -2132,6 +2178,8 @@
             "userProvidedAcr": "[last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/'))]",
             "userProvidedImagePath": "[steps('section_aks').imageInfo.userProvidedImagePath]",
             "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
+            "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
+            "vnetRGNameForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.resourceGroup]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",

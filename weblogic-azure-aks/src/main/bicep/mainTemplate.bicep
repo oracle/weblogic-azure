@@ -67,6 +67,8 @@ param appGatewaySSLCertPassword string = newGuid()
 param appgwForAdminServer bool = true
 @description('Create Application Gateway ingress for remote console.')
 param appgwForRemoteConsole bool = true
+@description('If true, configure Azure Application Gateway frontend IP with private IP.')
+param appgwUsePrivateIP bool = false
 @description('Urls of Java EE application packages.')
 param appPackageUrls array = []
 @description('The number of managed server to start.')
@@ -156,13 +158,15 @@ param location string
 param lbSvcValues array = []
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
+@description('To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the newOrExisting property when hideExisting is false')
+param newOrExistingVnetForApplicationGateway string = 'new'
 @secure()
 @description('Password of Oracle SSO account.')
 param ocrSSOPSW string = newGuid()
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string = 'null'
 @secure()
-@description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth | base64 -w0')
+@description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/<AZURE_SUBSCRIPTION_ID> | base64 -w0')
 param servicePrincipal string = newGuid()
 @allowed([
   'uploadConfig'
@@ -199,7 +203,8 @@ param sslKeyVaultPrivateKeyPassPhraseSecretName string = 'kv-wls-ssl-alias'
 @description('Keyvault name containing Weblogic SSL certificates')
 param sslKeyVaultResourceGroup string = 'rg-kv-wls-ssl-name'
 @description('Custom Identity Store Data')
-param sslUploadedCustomIdentityKeyStoreData string = 'null'
+@secure()
+param sslUploadedCustomIdentityKeyStoreData string = newGuid()
 @secure()
 @description('Custom Identity Store passphrase')
 param sslUploadedCustomIdentityKeyStorePassphrase string = newGuid()
@@ -210,7 +215,8 @@ param sslUploadedCustomIdentityKeyStorePassphrase string = newGuid()
 ])
 param sslUploadedCustomIdentityKeyStoreType string = 'PKCS12'
 @description('Custom Trust Store data')
-param sslUploadedCustomTrustKeyStoreData string = 'null'
+@secure()
+param sslUploadedCustomTrustKeyStoreData string = newGuid()
 @secure()
 @description('Custom Trust Store passphrase')
 param sslUploadedCustomTrustKeyStorePassPhrase string = newGuid()
@@ -221,7 +227,8 @@ param sslUploadedCustomTrustKeyStorePassPhrase string = newGuid()
 ])
 param sslUploadedCustomTrustKeyStoreType string = 'PKCS12'
 @description('Alias of the private key')
-param sslUploadedPrivateKeyAlias string = 'contoso'
+@secure()
+param sslUploadedPrivateKeyAlias string = newGuid()
 @secure()
 @description('Password of the private key')
 param sslUploadedPrivateKeyPassPhrase string = newGuid()
@@ -242,6 +249,25 @@ param userProvidedImagePath string = 'null'
 @description('Use Oracle images or user provided patched images')
 param useOracleImage bool = true
 param validateApplications bool = false
+@description('VNET for Application Gateway.')
+param vnetForApplicationGateway object = {
+  name: 'wlsaks-app-gateway-vnet'
+  resourceGroup: resourceGroup().name
+  addressPrefixes: [
+    '172.16.0.0/24'
+  ]
+  addressPrefix: '172.16.0.0/24'
+  newOrExisting: 'new'
+  subnets: {
+    gatewaySubnet: {
+      name: 'wlsaks-gateway-subnet'
+      addressPrefix: '172.16.0.0/24'
+      startAddress: '172.16.0.4'
+    }
+  }
+}
+@description('To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the resourceGroup property when hideExisting is false')
+param vnetRGNameForApplicationGateway string = 'vnet-contoso-rg-name'
 @secure()
 @description('Password for model WebLogic Deploy Tooling runtime encrytion.')
 param wdtRuntimePassword string
@@ -263,6 +289,12 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
+// To mitigate arm-ttk error: Type Mismatch: Parameter in nested template is defined as string, but the parent template defines it as bool.
+var _enableCustomSSL = enableCustomSSL
+var _enableAppGWIngress = enableAppGWIngress
+var _appGatewaySubnetStartAddress = vnetForApplicationGateway.subnets.gatewaySubnet.startAddress
+var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
+
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
 var const_azureSubjectName = '${format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')}'
@@ -280,6 +312,9 @@ var const_enablePV = enableCustomSSL || enableAzureFileShare
 var const_hasStorageAccount = !createAKSCluster && reference('query-existing-storage-account').outputs.storageAccount.value != 'null'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
+var const_showAdminConsoleExUrl = (length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForAdminServer)
+var const_showRemoteAdminConsoleExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && !enableCustomSSL
+var const_showRemoteAdminConsoleSecuredExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && enableCustomSSL
 var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreType : sslUploadedCustomTrustKeyStoreType
 var const_wlsClusterName = 'cluster-1'
 var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
@@ -299,7 +334,7 @@ var name_tagNameForKeyVault = 'wlsKeyVault'
 var name_tagNameForStorageAccount = 'wlsStorageAccount'
 var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData'
 var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw'
-var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (enableCustomSSL) ? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
+var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (_enableCustomSSL) ? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
 /*
 * Beginning of the offer deployment
 */
@@ -380,6 +415,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     userProvidedAcr: userProvidedAcr // used in user provided images
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
+    vnetForApplicationGateway: vnetForApplicationGateway
     wlsImageTag: wlsImageTag
   }
   dependsOn: [
@@ -413,7 +449,7 @@ module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvault
 }
 
 // get key vault object in a resource group
-resource sslKeyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' existing = if (enableCustomSSL) {
+resource sslKeyvault 'Microsoft.KeyVault/vaults@2021-10-01' existing = if (enableCustomSSL) {
   name: (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultName : name_keyVaultName
   scope: resourceGroup(name_rgKeyvaultForWLSSSL)
 }
@@ -428,6 +464,20 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
     identity: identity
     location: location
   }
+}
+
+// To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
+module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress) {
+  name: 'vnet-application-gateway'
+  params: {
+    location: location
+    newOrExistingVnetForApplicationGateway: newOrExistingVnetForApplicationGateway
+    vnetForApplicationGateway: vnetForApplicationGateway
+    vnetRGNameForApplicationGateway: vnetRGNameForApplicationGateway
+  }
+  dependsOn: [
+    validateInputs
+  ]
 }
 
 module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCustomSSL) {
@@ -492,6 +542,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
   dependsOn: [
     validateInputs
     queryStorageAccount
+    vnetForAppgatewayDeployment
   ]
 }
 
@@ -557,6 +608,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   dependsOn: [
     wlsSSLCertSecretsDeployment
     queryStorageAccount
+    vnetForAppgatewayDeployment
   ]
 }
 
@@ -571,7 +623,7 @@ module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep
     location: location
     sku: keyVaultSku
     subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
-    useExistingAppGatewaySSLCertificate: (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
+    useExistingAppGatewaySSLCertificate: _useExistingAppGatewaySSLCertificate
     keyVaultName: name_keyVaultName
   }
   dependsOn: [
@@ -609,6 +661,8 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
+    appGatewaySubnetId: _enableAppGWIngress ? vnetForAppgatewayDeployment.outputs.subIdForApplicationGateway : ''
+    appGatewaySubnetStartAddress: _appGatewaySubnetStartAddress
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
     createDNSZone: createDNSZone
@@ -633,6 +687,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     lbSvcValues: lbSvcValues
     servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
+    appgwUsePrivateIP: appgwUsePrivateIP
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
@@ -715,19 +770,19 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
 }
 
 output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.value
-output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerUrl.value
-output adminConsoleExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalUrl : ''
-output adminConsoleExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminConsoleExternalSecuredUrl : ''
+output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerEndpoint.value
+output adminConsoleExternalUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalEndpoint : ''
+output adminConsoleExternalSecuredUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalSecuredEndpoint : ''
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
-output adminRemoteConsoleUrl string = const_enableNetworking && !enableCustomSSL ? networkingDeployment.outputs.adminRemoteConsoleUrl : ''
-output adminRemoteConsoleSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.adminRemoteConsoleSecuredUrl : ''
-output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalUrl.value
-output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.adminServerT3ChannelUrl) : ''
-output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterSVCUrl.value
-output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalUrl : ''
-output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredUrl : ''
-output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalUrl.value
-output clusterT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', networkingDeployment.outputs.clusterT3ChannelUrl) : ''
+output adminRemoteConsoleUrl string = const_showRemoteAdminConsoleExUrl ? networkingDeployment.outputs.adminRemoteConsoleEndpoint : ''
+output adminRemoteConsoleSecuredUrl string = const_showRemoteAdminConsoleSecuredExUrl ? networkingDeployment.outputs.adminRemoteConsoleSecuredEndpoint : ''
+output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalEndpoint.value
+output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.adminServerT3ChannelEndpoint : ''
+output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterEndpoint.value
+output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalEndpoint : ''
+output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredEndpoint : ''
+output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalEndpoint.value
+output clusterT3ExternalEndpoint string = enableClusterT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.clusterT3ChannelEndpoint : ''
 output shellCmdtoConnectAks string = format('az account set --subscription {0}; az aks get-credentials --resource-group {1} --name {2}', split(subscription().id, '/')[2], ref_wlsDomainDeployment.outputs.aksClusterRGName.value, ref_wlsDomainDeployment.outputs.aksClusterName.value)
 output shellCmdtoOutputWlsDomainYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsDomainYaml
 output shellCmdtoOutputWlsImageModelYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageModelYaml

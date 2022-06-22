@@ -20,6 +20,7 @@ param appgwForRemoteConsole bool = true
 param appgwFrontendSSLCertData string = newGuid()
 @secure()
 param appgwFrontendSSLCertPsw string = newGuid()
+param appgwUsePrivateIP bool = false
 param aksClusterRGName string = 'aks-contoso-rg'
 param aksClusterName string = 'aks-contoso'
 param dnszoneAdminConsoleLabel string = 'admin'
@@ -39,13 +40,12 @@ param location string
 param servicePrincipal string = newGuid()
 param useInternalLB bool = false
 param utcValue string = utcNow()
-param vnetName string = 'vnet-contoso'
 param wlsDomainName string = 'domain1' 
 param wlsDomainUID string = 'sample-domain1'
 
 var const_appgwHelmConfigTemplate='appgw-helm-config.yaml.template'
 var const_appgwSARoleBindingFile='appgw-ingress-clusterAdmin-roleBinding.yaml'
-var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${vnetName} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneClusterLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole} ${dnszoneAdminT3ChannelLabel} ${dnszoneClusterT3ChannelLabel}'
+var const_arguments = '${aksClusterRGName} ${aksClusterName} ${wlsDomainName} ${wlsDomainUID} "${string(lbSvcValues)}" ${enableAppGWIngress} ${subscription().id} ${resourceGroup().name} ${appgwName} ${appgwUsePrivateIP} ${string(servicePrincipal)} ${appgwForAdminServer} ${enableDNSConfiguration} ${dnszoneRGName} ${dnszoneName} ${dnszoneAdminConsoleLabel} ${dnszoneClusterLabel} ${appgwAlias} ${useInternalLB} ${appgwFrontendSSLCertData} ${appgwFrontendSSLCertPsw} ${appgwCertificateOption} ${enableCustomSSL} ${enableCookieBasedAffinity} ${appgwForRemoteConsole} ${dnszoneAdminT3ChannelLabel} ${dnszoneClusterT3ChannelLabel}'
 var const_commonScript = 'common.sh'
 var const_createDnsRecordScript = 'createDnsRecord.sh'
 var const_createLbSvcScript = 'createLbSvc.sh'
@@ -81,11 +81,11 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
 }
 
-output adminConsoleLBUrl string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminConsoleEndpoint != 'null') ? format('http://{0}/',reference(name_deploymentName).outputs.adminConsoleEndpoint): ''
-output adminConsoleLBSecuredUrl string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminConsoleEndpoint != 'null') ? format('https://{0}/',reference(name_deploymentName).outputs.adminConsoleEndpoint): ''
-output adminServerT3LBUrl string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminServerT3Endpoint != 'null') ? reference(name_deploymentName).outputs.adminServerT3Endpoint: ''
-output adminRemoteUrl string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminRemoteEndpoint != 'null') ? format('http://{0}',reference(name_deploymentName).outputs.adminRemoteEndpoint): ''
-output adminRemoteSecuredUrl string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminRemoteEndpoint != 'null') ? format('https://{0}',reference(name_deploymentName).outputs.adminRemoteEndpoint): ''
-output clusterLBUrl string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('http://{0}/',reference(name_deploymentName).outputs.clusterEndpoint): ''
-output clusterLBSecuredUrl string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('https://{0}/',reference(name_deploymentName).outputs.clusterEndpoint): ''
-output clusterT3LBUrl string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterT3Endpoint != 'null') ? reference(name_deploymentName).outputs.clusterT3Endpoint: ''
+output adminConsoleLBEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminConsoleEndpoint != 'null') ? format('http://{0}/',reference(name_deploymentName).outputs.adminConsoleEndpoint): ''
+output adminConsoleLBSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminConsoleEndpoint != 'null') ? format('https://{0}/',reference(name_deploymentName).outputs.adminConsoleEndpoint): ''
+output adminServerT3LBEndpoint string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminServerT3Endpoint != 'null') ? reference(name_deploymentName).outputs.adminServerT3Endpoint: ''
+output adminRemoteEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminRemoteEndpoint != 'null') ? format('http://{0}',reference(name_deploymentName).outputs.adminRemoteEndpoint): ''
+output adminRemoteSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminRemoteEndpoint != 'null') ? format('https://{0}',reference(name_deploymentName).outputs.adminRemoteEndpoint): ''
+output clusterLBEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('http://{0}/',reference(name_deploymentName).outputs.clusterEndpoint): ''
+output clusterLBSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('https://{0}/',reference(name_deploymentName).outputs.clusterEndpoint): ''
+output clusterT3LBEndpoint string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterT3Endpoint != 'null') ? reference(name_deploymentName).outputs.clusterT3Endpoint: ''

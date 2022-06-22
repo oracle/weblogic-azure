@@ -350,30 +350,51 @@ function network_peers_aks_appgw() {
 
     aksNetWorkId=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].id')
     aksNetworkName=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].name')
-    az network vnet peering create \
-        --name aks-appgw-peer \
-        --remote-vnet ${aksNetWorkId} \
-        --resource-group ${curRGName} \
-        --vnet-name ${vnetName} \
-        --allow-vnet-access
-    utility_validate_status "Create network peers for $aksNetWorkId and ${vnetName}."
+    appGatewaySubnetId=$(az network application-gateway show -g ${curRGName} --name ${appgwName} -o tsv --query "gatewayIpConfigurations[0].subnet.id")
+    appGatewayVnetResourceGroup=$(az network application-gateway show -g ${curRGName} --name ${appgwName} -o tsv --query "gatewayIpConfigurations[0].subnet.resourceGroup")
+    appGatewaySubnetName=$(az resource show --ids ${appGatewaySubnetId} --query "name" -o tsv)
+    appgwNetworkId=$(echo $appGatewaySubnetId | sed s/"\/subnets\/${appGatewaySubnetName}"//)
+    appgwVnetName=$(az resource show --ids ${appgwNetworkId} --query "name" -o tsv)
 
-    appgwNetworkId=$(az resource list -g ${curRGName} --name ${vnetName} -o tsv --query '[*].id')
-    az network vnet peering create \
-        --name aks-appgw-peer \
-        --remote-vnet ${appgwNetworkId} \
-        --resource-group ${aksMCRGName} \
-        --vnet-name ${aksNetworkName} \
-        --allow-vnet-access
+    local toPeer=true
+    # if the AKS and App Gateway have the same VNET, need not peer.
+    if [ "${aksNetWorkId}" == "${appgwNetworkId}" ]; then
+        echo_stdout "AKS and Application Gateway are in the same virtual network: ${appgwNetworkId}."
+        toPeer=false
+    fi
 
-    utility_validate_status "Create network peers for $aksNetWorkId and ${vnetName}."
+    # check if the Vnets have been peered.
+    local ret=$(az network vnet peering list \
+        --resource-group ${appGatewayVnetResourceGroup} \
+        --vnet-name ${appgwVnetName} -o json \
+        | jq ".[] | select(.remoteVirtualNetwork.id==\"${aksNetWorkId}\")")
+    if [ -n "$ret" ]; then
+        echo_stdout "VNET of AKS ${aksNetWorkId} and Application Gateway ${appgwNetworkId} is peering."
+        toPeer=false
+    fi
+
+    if [ "${toPeer}" == "true" ]; then
+        az network vnet peering create \
+            --name aks-appgw-peer \
+            --remote-vnet ${aksNetWorkId} \
+            --resource-group ${appGatewayVnetResourceGroup} \
+            --vnet-name ${appgwVnetName} \
+            --allow-vnet-access
+        utility_validate_status "Create network peers for $aksNetWorkId and ${appgwNetworkId}."
+
+        az network vnet peering create \
+            --name aks-appgw-peer \
+            --remote-vnet ${appgwNetworkId} \
+            --resource-group ${aksMCRGName} \
+            --vnet-name ${aksNetworkName} \
+            --allow-vnet-access
+
+        utility_validate_status "Complete creating network peers for $aksNetWorkId and ${appgwNetworkId}."
+    fi
 
     # For Kbectl network plugin: https://azure.github.io/application-gateway-kubernetes-ingress/how-tos/networking/#with-kubenet
     # find route table used by aks cluster
     routeTableId=$(az network route-table list -g $aksMCRGName --query "[].id | [0]" -o tsv)
-
-    # get the application gateway's subnet
-    appGatewaySubnetId=$(az network application-gateway show -n $appgwName -g $curRGName -o tsv --query "gatewayIpConfigurations[0].subnet.id")
 
     # associate the route table to Application Gateway's subnet
     az network vnet subnet update \
@@ -411,6 +432,7 @@ function install_azure_ingress() {
     sed -i -e "s:@APPGW_NAME@:${appgwName}:g" ${customAppgwHelmConfig}
     sed -i -e "s:@WATCH_NAMESPACE@:${wlsDomainNS}:g" ${customAppgwHelmConfig}
     sed -i -e "s:@SP_ENCODING_CREDENTIALS@:${spBase64String}:g" ${customAppgwHelmConfig}
+    sed -i -e "s:@USE_PRIVATE_IP@:${appgwUsePrivateIP,,}:g" ${customAppgwHelmConfig}
 
     helm install ingress-azure \
         -f ${customAppgwHelmConfig} \
@@ -542,7 +564,7 @@ function appgw_ingress_svc_for_admin_server() {
     generate_appgw_admin_config_file
     kubectl apply -f ${adminAppgwIngressYamlPath}
     utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_lb_svc_completed \
+    utility_waitfor_ingress_completed \
         ${adminIngressName} \
         ${wlsDomainNS} \
         ${checkSVCStateMaxAttempt} \
@@ -556,7 +578,7 @@ function appgw_ingress_svc_for_remote_console() {
 
     kubectl apply -f ${adminRemoteAppgwIngressYamlPath}
     utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_lb_svc_completed \
+    utility_waitfor_ingress_completed \
         ${adminRemoteIngressName} \
         ${wlsDomainNS} \
         ${checkSVCStateMaxAttempt} \
@@ -631,7 +653,7 @@ wlsDomainUID=$3
 subID=$4
 curRGName=$5
 appgwName=$6
-vnetName=$7
+appgwUsePrivateIP=$7
 appgwForAdminServer=$8
 enableCustomDNSAlias=$9
 dnsRGName=${10}

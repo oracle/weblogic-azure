@@ -9,23 +9,26 @@ param location string
 @description('Price tier for Key Vault.')
 param sku string = 'Standard'
 param utcValue string = utcNow()
+@secure()
 param wlsIdentityKeyStoreData string = newGuid()
 param wlsIdentityKeyStoreDataSecretName string = 'myIdentityKeyStoreData'
 @secure()
 param wlsIdentityKeyStorePassphrase string = newGuid()
 param wlsIdentityKeyStorePassphraseSecretName string = 'myIdentityKeyStorePsw'
-param wlsPrivateKeyAlias string = 'server-cert'
+@secure()
+param wlsPrivateKeyAlias string = newGuid()
 param wlsPrivateKeyAliasSecretName string = 'privateKeyAlias'
 @secure()
 param wlsPrivateKeyPassPhrase string = newGuid()
 param wlsPrivateKeyPassPhraseSecretName string = 'privateKeyPsw'
+@secure()
 param wlsTrustKeyStoreData string = newGuid()
 param wlsTrustKeyStoreDataSecretName string = 'myTrustKeyStoreData'
 @secure()
 param wlsTrustKeyStorePassPhrase string = newGuid()
 param wlsTrustKeyStorePassPhraseSecretName string = 'myTrustKeyStorePsw'
 
-resource keyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
+resource keyvault 'Microsoft.KeyVault/vaults@2021-10-01' = {
   name: keyVaultName
   location: location
   properties: {
@@ -42,7 +45,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   }
 }
 
-resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
   name: '${keyVaultName}/${wlsIdentityKeyStoreDataSecretName}'
   properties: {
     value: wlsIdentityKeyStoreData
@@ -52,7 +55,7 @@ resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-0
   ]
 }
 
-resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
   name: '${keyVaultName}/${wlsIdentityKeyStorePassphraseSecretName}'
   properties: {
     value: wlsIdentityKeyStorePassphrase
@@ -62,7 +65,7 @@ resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01
   ]
 }
 
-resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
   name: '${keyVaultName}/${wlsPrivateKeyAliasSecretName}'
   properties: {
     value: wlsPrivateKeyAlias
@@ -72,7 +75,7 @@ resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-pre
   ]
 }
 
-resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
   name: '${keyVaultName}/${wlsPrivateKeyPassPhraseSecretName}'
   properties: {
     value: wlsPrivateKeyPassPhrase
@@ -82,7 +85,7 @@ resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-previ
   ]
 }
 
-resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
   name: '${keyVaultName}/${wlsTrustKeyStoreDataSecretName}'
   properties: {
     value: wlsTrustKeyStoreData
@@ -92,7 +95,7 @@ resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-p
   ]
 }
 
-resource trustKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = {
+resource trustKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2021-10-01' = {
   name: '${keyVaultName}/${wlsTrustKeyStorePassPhraseSecretName}'
   properties: {
     value: wlsTrustKeyStorePassPhrase

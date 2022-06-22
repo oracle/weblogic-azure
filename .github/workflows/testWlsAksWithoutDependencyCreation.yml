@@ -36,8 +36,8 @@ on:
     types: [aks-integration-test-without-dependency-creation,integration-test-all]
 
 env:
-    refArmttk: 7dc2c2a7822c2825ea3524ac2af72e561847fece
-    refJavaee: 13fe6ec487024eb61355d661ab5700ae90cb0a8f
+    refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
+    refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
     azCliVersion: 2.30.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus

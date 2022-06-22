@@ -33,10 +33,11 @@
 # APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_PASSWORD_SECRET_NAME
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_DATA
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD
-# DNA_ZONE_NAME
-# DNA_ZONE_RESOURCEGROUP_NAME
+# DNS_ZONE_NAME
+# DNS_ZONE_RESOURCEGROUP_NAME
 # AKS_VERSION
 # USE_AKS_WELL_TESTED_VERSION
+# VNET_FOR_APPLICATIONGATEWAY
 
 function echo_stderr() {
   echo "$@" 1>&2
@@ -87,6 +88,7 @@ function validate_user_assigned_managed_identity() {
   validate_status "query resource type of ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}" "The user managed identity may not exist, please check."
   if [[ "${uamiType}" != "${userManagedIdentityType}" ]]; then
     echo_stderr "You must use User Assigned Managed Identity, please follow the document to create one: https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
+    exit 1
   fi
 
   echo_stdout "query principal Id of the User Assigned Identity."
@@ -97,6 +99,7 @@ function validate_user_assigned_managed_identity() {
     jq '[.[] | select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
   if [ ${roleLength} -lt 1 ]; then
     echo_stderr "You must grant the User Assigned Managed Identity with at least Contributor role. Please check ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}"
+    exit 1
   fi
 
   echo_stdout "Check User Assigned Identity: passed!"
@@ -520,12 +523,12 @@ function validate_service_principal() {
   #   "clientSecret": "uh0sZPoNsLKyUU3iOO1~xxxxxxx",
   #   "subscriptionId": "260524c9-7a4d-4483-8d85-xxxxxxx",
   #   "tenantId": "814a03f9-f7c3-41a4-8ecc-xxxxxxx",
-  #   "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-  #   "resourceManagerEndpointUrl": "https://management.azure.com/",
-  #   "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-  #   "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-  #   "galleryEndpointUrl": "https://gallery.azure.com/",
-  #   "managementEndpointUrl": "https://management.core.windows.net/"
+  #   "activeDirectoryEndpointUrl": "https://xxxxx.com",
+  #   "resourceManagerEndpointUrl": "https://xxxxx.com/",
+  #   "activeDirectoryGraphResourceId": "https://xxxxx.net/",
+  #   "sqlManagementEndpointUrl": "https://xxxxx.net:8443/",
+  #   "galleryEndpointUrl": "https://xxxxx.com/",
+  #   "managementEndpointUrl": "https://xxxxx.net/"
   # }
   local principalId=$(echo ${spObject} | jq '.clientId')
   validate_status "get client id from the service principal." "Invalid service principal."
@@ -556,8 +559,8 @@ function validate_service_principal() {
 
 function validate_dns_zone() {
   if [[ "${checkDNSZone,,}" == "true" ]]; then
-    az network dns zone show -n ${DNA_ZONE_NAME} -g ${DNA_ZONE_RESOURCEGROUP_NAME}
-    validate_status "check DNS Zone ${DNA_ZONE_NAME}" "Make sure the DNS Zone exists."
+    az network dns zone show -n ${DNS_ZONE_NAME} -g ${DNS_ZONE_RESOURCEGROUP_NAME}
+    validate_status "check DNS Zone ${DNS_ZONE_NAME}" "Make sure the DNS Zone exists."
 
     echo_stdout "Check DNS Zone: passed!"
   fi
@@ -589,6 +592,47 @@ function validate_aks_version() {
       outputAksVersion=${AKS_VERSION}
     else
       echo_stderr "ERROR: invalid aks version ${AKS_VERSION} in ${location}."
+      exit 1
+    fi
+  fi
+}
+
+# VNET input sample:
+# {
+#     "name": "wlsaks-vnet",
+#     "resourceGroup": "haiche-test",
+#     "addressPrefixes": [
+#         "10.3.0.0/28"
+#     ],
+#     "addressPrefix": "10.3.0.0/28",
+#     "newOrExisting": "new",
+#     "subnets": {
+#         "gatewaySubnet": {
+#             "name": "wls-aks-gateway-subnet",
+#             "addressPrefix": "10.3.0.0/29",
+#             "startAddress": "10.3.0.4"
+#         }
+#     }
+# }
+# To make sure the subnet only have application gateway
+function validate_appgateway_vnet() {
+  echo_stdout "VNET for application gateway: ${VNET_FOR_APPLICATIONGATEWAY}"
+  local vnetName=$(echo ${VNET_FOR_APPLICATIONGATEWAY} | jq '.name' | tr -d "\"")
+  local vnetResourceGroup=$(echo ${VNET_FOR_APPLICATIONGATEWAY} | jq '.resourceGroup' | tr -d "\"")
+  local newOrExisting=$(echo ${VNET_FOR_APPLICATIONGATEWAY} | jq '.newOrExisting' | tr -d "\"")
+  local subnetName=$(echo ${VNET_FOR_APPLICATIONGATEWAY} | jq '.subnets.gatewaySubnet.name' | tr -d "\"")
+
+  if [[ "${newOrExisting,,}" != "new" ]]; then
+    # the subnet can only have Application Gateway.
+    # query ipConfigurations:
+    # if lenght of ipConfigurations is greater than 0, the subnet fails to meet requirement of Application Gateway.
+    local ret=$(az network vnet show \
+      -g ${vnetResourceGroup} \
+      --name ${vnetName} \
+      | jq ".subnets[] | select(.name==\"${subnetName}\") | .ipConfigurations | length")
+    
+    if [ $ret -gt 0 ]; then
+      echo_stderr "ERROR: invalid subnet for Application Gateway, the subnet has ${ret} connected device(s). Make sure the subnet is only for Application Gateway."
       exit 1
     fi
   fi
@@ -645,6 +689,8 @@ validate_dns_zone
 if [[ "${createAKSCluster,,}" == "true" ]]; then
   validate_aks_version
 fi
+
+validate_appgateway_vnet
 
 output_result
 
