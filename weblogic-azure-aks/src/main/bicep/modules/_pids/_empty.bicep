@@ -8,3 +8,8 @@
 *   name: name
 * }
 */
+
+// Workaround to arm-ttk complain: Parameters property must exist in the template
+param name string = 'This is an empty deployment'
+
+output name string = name
