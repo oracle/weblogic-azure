@@ -48,6 +48,7 @@ param aksVersion string = 'default'
 param appPackageUrls array = []
 @description('The number of managed server to start.')
 param appReplicas int = 2
+param azCliVersion string = ''
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
@@ -60,7 +61,7 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
-param identity object
+param identity object = {}
 param isSSOSupportEntitled bool
 param location string
 @description('Name prefix of managed server.')
@@ -175,6 +176,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     acrName: useOracleImage ? acrName : userProvidedAcr
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
+    azCliVersion: azCliVersion
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling

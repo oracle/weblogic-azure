@@ -9,7 +9,7 @@ on:
 
 env:
     refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
-    refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
+    refJavaee: bad2965565e2e69318039bc15c2496844d55a59d
     azCliVersion: 2.30.0
     location: eastus
     aksRepoUserName: oracle

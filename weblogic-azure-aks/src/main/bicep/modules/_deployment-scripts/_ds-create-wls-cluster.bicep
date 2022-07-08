@@ -10,12 +10,13 @@ param aksClusterName string = ''
 param acrName string = ''
 param appPackageUrls array = []
 param appReplicas int = 2
+param azCliVersion string = ''
 param dbDriverLibrariesUrls array = []
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 param enablePV bool = false
-param identity object
+param identity object = {}
 param isSSOSupportEntitled bool
 param location string
 param managedServerPrefix string = 'managed-server'
@@ -81,7 +82,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: '2.15.0'
+    azCliVersion: azCliVersion
     arguments: const_arguments
     environmentVariables: [
       {

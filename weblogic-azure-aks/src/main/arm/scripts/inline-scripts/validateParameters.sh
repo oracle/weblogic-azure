@@ -39,33 +39,6 @@
 # USE_AKS_WELL_TESTED_VERSION
 # VNET_FOR_APPLICATIONGATEWAY
 
-function echo_stderr() {
-  echo "$@" 1>&2
-  # The function is used for scripts running within Azure Deployment Script
-  # The value of AZ_SCRIPTS_OUTPUT_PATH is /mnt/azscripts/azscriptoutput
-  echo -e "$@" >>${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/errors.log
-}
-
-function echo_stdout() {
-  echo "$@"
-  # The function is used for scripts running within Azure Deployment Script
-  # The value of AZ_SCRIPTS_OUTPUT_PATH is /mnt/azscripts/azscriptoutput
-  echo -e "$@" >>${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/debug.log
-}
-
-function install_jdk() {
-    # Install Microsoft OpenJDK
-    apk --no-cache add openjdk11 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-
-    echo "java version"
-    java -version
-    if [ $? -eq 1 ]; then
-        echo_stderr "Failed to install open jdk 11."
-        exit 1
-    fi
-    # JAVA_HOME=/usr/lib/jvm/java-11-openjdk
-}
-
 #Validate teminal status with $?, exit with exception if errors happen.
 # $1 - error message
 # $2 -  root cause message
@@ -76,33 +49,6 @@ function validate_status() {
   else
     echo_stdout "$1"
   fi
-}
-
-# Validate User Assigned Managed Identity
-# Check points:
-#   - the identity is User Assigned Identity, if not, exit with error.
-#   - the identity is assigned with Contributor or Owner role, if not, exit with error.
-function validate_user_assigned_managed_identity() {
-  # AZ_SCRIPTS_USER_ASSIGNED_IDENTITY
-  local uamiType=$(az identity show --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY} --query "type" -o tsv)
-  validate_status "query resource type of ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}" "The user managed identity may not exist, please check."
-  if [[ "${uamiType}" != "${userManagedIdentityType}" ]]; then
-    echo_stderr "You must use User Assigned Managed Identity, please follow the document to create one: https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
-    exit 1
-  fi
-
-  echo_stdout "query principal Id of the User Assigned Identity."
-  local principalId=$(az identity show --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY} --query "principalId" -o tsv)
-
-  echo_stdout "check if the user assigned managed identity has Contributor or Owner role."
-  local roleLength=$(az role assignment list --assignee ${principalId} |
-    jq '[.[] | select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
-  if [ ${roleLength} -lt 1 ]; then
-    echo_stderr "You must grant the User Assigned Managed Identity with at least Contributor role. Please check ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY}"
-    exit 1
-  fi
-
-  echo_stdout "Check User Assigned Identity: passed!"
 }
 
 # Validate compute resources
@@ -182,9 +128,7 @@ function validate_compute_resources() {
 
 function validate_ocr_account() {
   # install docker cli
-  apk add docker --no-cache --quiet
-  docker --help
-  validate_status "install docker"
+  install_docker
 
   # ORACLE_ACCOUNT_NAME
   # ORACLE_ACCOUNT_PASSWORD
@@ -202,7 +146,7 @@ function validate_ocr_image() {
 
     # download the ga cpu image mapping file.
     local cpuImagesListFile=weblogic_cpu_images.json
-    curl -L "${gitUrl4CpuImages}" -o ${cpuImagesListFile}
+    curl -L "${gitUrl4CpuImages}" --retry ${retryMaxAttempt} -o ${cpuImagesListFile}
     local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag == \"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
     echo_stdout "cpu tag: ${cpuTag}"
     # if we can not find a matched image, keep the input tag.
@@ -246,7 +190,7 @@ function validate_ocr_image() {
 }
 
 function check_acr_admin_enabled() {
-  local acrName = $1
+  local acrName=$1
   echo_stdout "check if admin user enabled in ACR $acrName "
   local adminUserEnabled=$(az acr show --name $acrName --query "adminUserEnabled")
   validate_status "query 'adminUserEnabled' property of ACR ${acrName}" "Invalid ACR: ${acrName}"
@@ -290,25 +234,6 @@ function validate_acr_admin_enabled()
   else
     check_acr_admin_enabled ${ACR_NAME_FOR_USER_PROVIDED_IMAGE}
   fi
-}
-
-# Only support kubenet currently
-function validate_aks_network_plugin() {
-  # AKS_CLUSTER_NAME
-  # AKS_CLUSTER_RESOURCEGROUP_NAME
-
-  if [[ "${createAKSCluster,,}" == "false" ]]; then
-    local networkPlugin=$(az aks show -n ${AKS_CLUSTER_NAME} \
-      -g ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
-      --query 'networkProfile.networkPlugin' -o tsv)
-
-    if [[ "${networkPlugin}" != "kubenet" ]]; then
-      echo_stderr "The offer only supports AKS network type kubenet, you are using a cluster of CNI."
-      exit 1
-    fi
-  fi
-
-  echo_stdout "Check AKS networking: passed!"
 }
 
 function download_wls_ssl_certificates_from_keyvault() {
@@ -513,50 +438,6 @@ function validate_gateway_frontend_certificates() {
   validate_status "access application gateway frontend key." "Make sure the Application Gateway frontend certificate is correct."
 }
 
-function validate_service_principal() {
-  local spObject=$(echo "${BASE64_FOR_SERVICE_PRINCIPAL}" | base64 -d)
-  validate_status "decode the service principal base64 string." "Invalid service principal."
-
-  # for sdk format string
-  # {
-  #   "clientId": "3082055e-dd40-452d-9190-xxxxxxx",
-  #   "clientSecret": "uh0sZPoNsLKyUU3iOO1~xxxxxxx",
-  #   "subscriptionId": "260524c9-7a4d-4483-8d85-xxxxxxx",
-  #   "tenantId": "814a03f9-f7c3-41a4-8ecc-xxxxxxx",
-  #   "activeDirectoryEndpointUrl": "https://xxxxx.com",
-  #   "resourceManagerEndpointUrl": "https://xxxxx.com/",
-  #   "activeDirectoryGraphResourceId": "https://xxxxx.net/",
-  #   "sqlManagementEndpointUrl": "https://xxxxx.net:8443/",
-  #   "galleryEndpointUrl": "https://xxxxx.com/",
-  #   "managementEndpointUrl": "https://xxxxx.net/"
-  # }
-  local principalId=$(echo ${spObject} | jq '.clientId')
-  validate_status "get client id from the service principal." "Invalid service principal."
-
-  if [[ "${principalId}" == "null" ]] || [[ "${principalId}" == "" ]]; then
-    echo_stderr "the service principal is invalid."
-    exit 1
-  fi
-
-  echo_stdout "check if the service principal has Contributor or Owner role."
-  local roleLength=$(az role assignment list --assignee ${principalId} |
-    jq '[.[] | select(.roleDefinitionName=="Contributor" or .roleDefinitionName=="Owner")] | length')
-  
-  # skip error like: 
-  #    Cannot find user or service principal in graph database for '"3082055e-dd40-452d-9190-xxxxxxx"'. 
-  #    If the assignee is an appId, make sure the corresponding service principal is created with 'az ad sp create --id "3082055e-dd40-452d-9190-xxxxxxx"'.
-  local re='^[0-9]+$'
-  if ! [[ $roleLength =~ $re ]] ; then
-    echo_stderr "You must grant the service principal with at least Contributor role."
-  fi
-
-  if [ ${roleLength} -lt 1 ]; then
-    echo_stderr "You must grant the service principal with at least Contributor role."
-  fi
-
-  echo_stdout "Check service principal: passed!"
-}
-
 function validate_dns_zone() {
   if [[ "${checkDNSZone,,}" == "true" ]]; then
     az network dns zone show -n ${DNS_ZONE_NAME} -g ${DNS_ZONE_RESOURCEGROUP_NAME}
@@ -570,7 +451,7 @@ function validate_aks_version() {
   if [[ "${USE_AKS_WELL_TESTED_VERSION,,}" == "true" ]]; then
     local aksWellTestedVersionFile=aks_well_tested_version.json
     # download the json file that has well-tested version from weblogic-azure repo.
-    curl -L "${gitUrl4AksWellTestedVersionJsonFile}" -o ${aksWellTestedVersionFile}
+    curl -L "${gitUrl4AksWellTestedVersionJsonFile}" --retry ${retryMaxAttempt} -o ${aksWellTestedVersionFile}
     local aksWellTestedVersion=$(cat ${aksWellTestedVersionFile} | jq  ".value" | tr -d "\"")
     echo "AKS well-tested version: ${aksWellTestedVersion}"
     # check if the well-tested version is supported in the location
@@ -663,9 +544,6 @@ checkDNSZone=${12}
 
 outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
-userManagedIdentityType="Microsoft.ManagedIdentity/userAssignedIdentities"
-
-validate_user_assigned_managed_identity
 
 validate_compute_resources
 
@@ -673,15 +551,12 @@ validate_base_image_path
 
 validate_acr_admin_enabled
 
-validate_aks_network_plugin
-
 if [[ "${enableCustomSSL,,}" == "true" ]]; then
   validate_wls_ssl_certificates
 fi
 
 if [[ "${enableAppGWIngress,,}" == "true" ]]; then
   validate_gateway_frontend_certificates
-  validate_service_principal
 fi
 
 validate_dns_zone

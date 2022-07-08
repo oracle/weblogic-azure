@@ -13,7 +13,8 @@ param appPackageFromStorageBlob object = {
   storageAccountName: 'stg-contoso'
   containerName: 'container-contoso'
 }
-param identity object
+param azCliVersion string = ''
+param identity object = {}
 param location string
 
 @secure()
@@ -28,7 +29,6 @@ param userProvidedImagePath string = 'null'
 param useOracleImage bool = true
 
 var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${resourceGroup().name} ${string(appPackageUrls)} ${const_scriptLocation} ${appPackageFromStorageBlob.storageAccountName} ${appPackageFromStorageBlob.containerName} ${userProvidedImagePath} ${useOracleImage} '
-var const_azcliVersion='2.15.0'
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
 var const_invokeScript = 'invokeUpdateApplications.sh'
@@ -42,7 +42,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: const_azcliVersion
+    azCliVersion: azCliVersion
     arguments: const_arguments
     primaryScriptUri: uri(const_scriptLocation, '${const_invokeScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [

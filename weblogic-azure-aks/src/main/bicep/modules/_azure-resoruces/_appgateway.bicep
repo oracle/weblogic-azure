@@ -3,14 +3,25 @@
 
 @description('DNS for ApplicationGateway')
 param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
+param enableCustomSSL bool = false
 @description('Public IP Name for the Application Gateway')
 param gatewayPublicIPAddressName string = 'gwip'
 param gatewaySubnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
+param gatewaySslCertName string = 'appGatewaySslCert'
+param gatewayTrustedRootCertName string = 'appGatewayTrustedRootCert'
 param location string
+param noSslCertPsw bool = false
+@secure()
+param sslCertData string = newGuid()
+@secure()
+param sslCertPswData string = newGuid()
 param staticPrivateFrontentIP string = '10.0.0.1'
+@secure()
+param trustedRootCertData string = newGuid()
 param usePrivateIP bool = false
 param utcValue string = utcNow()
 
+var const_sslCertPsw = (noSslCertPsw) ? '' : sslCertPswData
 var name_appGateway = 'appgw${uniqueString(utcValue)}'
 var name_backendAddressPool = 'myGatewayBackendPool'
 var name_frontEndIPConfig = 'appGwPublicFrontendIp'
@@ -24,6 +35,14 @@ var ref_frontendHTTPPort = resourceId('Microsoft.Network/applicationGateways/fro
 var ref_frontendIPConfiguration = resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', name_appGateway, name_frontEndIPConfig)
 var ref_httpListener = resourceId('Microsoft.Network/applicationGateways/httpListeners', name_appGateway, name_httpListener)
 var ref_publicIPAddress = resourceId('Microsoft.Network/publicIPAddresses', gatewayPublicIPAddressName)
+var obj_backendTrustedRootCerts = [
+  {
+    name: gatewayTrustedRootCertName
+    properties: {
+      data: trustedRootCertData
+    }
+  }
+]
 var obj_frontendIPConfigurations1 = [
   {
     name: name_frontEndIPConfig
@@ -55,7 +74,7 @@ var obj_frontendIPConfigurations2 = [
   }
 ]
 
-resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
+resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   name: gatewayPublicIPAddressName
   sku: {
     name: 'Standard'
@@ -69,7 +88,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2020-07-01' = {
   }
 }
 
-resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
+resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-01-01' = {
   name: name_appGateway
   location: location
   tags: {
@@ -80,6 +99,16 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
       name: 'WAF_v2'
       tier: 'WAF_v2'
     }
+    sslCertificates: [
+      {
+        name: gatewaySslCertName
+        properties: {
+          data: sslCertData
+          password: const_sslCertPsw
+        }
+      }
+    ]
+    trustedRootCertificates: enableCustomSSL ? obj_backendTrustedRootCerts : []
     gatewayIPConfigurations: [
       {
         name: 'appGatewayIpConfig'
@@ -131,6 +160,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
       {
         name: 'HTTPRoutingRule'
         properties: {
+          priority: 3
           httpListener: {
             id: ref_httpListener
           }
@@ -161,6 +191,7 @@ resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2020-07-01' = {
 }
 
 output appGatewayAlias string = usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn
+output appGatewayId string = wafv2AppGateway.id
 output appGatewayName string = name_appGateway
 output appGatewayURL string = uri(format('http://{0}/', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn), '')
 output appGatewaySecuredURL string = uri(format('https://{0}/', usePrivateIP ? staticPrivateFrontentIP : reference(gatewayPublicIP.id).dnsSettings.fqdn), '')

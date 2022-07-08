@@ -4,6 +4,8 @@
 # URL_3RD_DATASOURCE
 # ORACLE_ACCOUNT_ENTITLED
 
+echo "Script  ${0} starts"
+
 # read <azureACRPassword> and <ocrSSOPSW> from stdin
 function read_sensitive_parameters_from_stdin() {
     read azureACRPassword ocrSSOPSW
@@ -17,6 +19,7 @@ function initialize() {
 }
 
 function cleanup_vm() {
+    echo "deleting vm resources..."
     #Remove VM resources
     az extension add --name resource-graph
     # query vm id
@@ -24,7 +27,7 @@ function cleanup_vm() {
 | where type =~ 'microsoft.compute/virtualmachines' \
 | where name=~ '${vmName}' \
 | where resourceGroup  =~ '${currentResourceGroup}' \
-| project vmid = id" -o tsv)
+| project vmid = id" --query "data[0].vmid"  -o tsv)
 
     # query nic id
     nicId=$(az graph query -q "Resources \
@@ -34,7 +37,7 @@ function cleanup_vm() {
 | extend nics=array_length(properties.networkProfile.networkInterfaces) \
 | mv-expand nic=properties.networkProfile.networkInterfaces \
 | where nics == 1 or nic.properties.primary =~ 'true' or isempty(nic) \
-| project nicId = tostring(nic.id)" -o tsv)
+| project nicId = tostring(nic.id)" --query "data[0].nicId" -o tsv)
 
     # query ip id
     ipId=$(az graph query -q "Resources \
@@ -43,33 +46,42 @@ function cleanup_vm() {
 | extend ipConfigsCount=array_length(properties.ipConfigurations) \
 | mv-expand ipconfig=properties.ipConfigurations \
 | where ipConfigsCount == 1 or ipconfig.properties.primary =~ 'true' \
-| project  publicIpId = tostring(ipconfig.properties.publicIPAddress.id)" -o tsv)
+| project  publicIpId = tostring(ipconfig.properties.publicIPAddress.id)" --query "data[0].publicIpId" -o tsv)
 
     # query os disk id
     osDiskId=$(az graph query -q "Resources \
 | where type =~ 'microsoft.compute/virtualmachines' \
 | where name=~ '${vmName}' \
 | where resourceGroup  =~ '${currentResourceGroup}' \
-| project osDiskId = tostring(properties.storageProfile.osDisk.managedDisk.id)" -o tsv)
+| project osDiskId = tostring(properties.storageProfile.osDisk.managedDisk.id)" --query "data[0].osDiskId" -o tsv)
 
     # query vnet id
     vnetId=$(az graph query -q "Resources \
 | where type =~ 'Microsoft.Network/virtualNetworks' \
 | where name=~ '${vmName}VNET' \
 | where resourceGroup  =~ '${currentResourceGroup}' \
-| project vNetId = id" -o tsv)
+| project vNetId = id" --query "data[0].vNetId" -o tsv)
 
     # query nsg id
     nsgId=$(az graph query -q "Resources \
 | where type =~ 'Microsoft.Network/networkSecurityGroups' \
 | where name=~ '${vmName}NSG' \
 | where resourceGroup  =~ '${currentResourceGroup}' \
-| project nsgId = id" -o tsv)
+| project nsgId = id" --query "data[0].nsgId" -o tsv)
 
     # Delete VM NIC IP VNET NSG resoruces
-    vmResourceIdS=$(echo ${vmId} ${nicId} ${ipId} ${osDiskId} ${vnetId} ${nsgId})
-    echo ${vmResourceIdS}
-    az resource delete --verbose --ids ${vmResourceIdS}
+    echo "deleting vm ${vmId}"
+    az vm delete --ids $vmId --yes
+    echo "deleting nic ${nicId}"
+    az network nic delete --ids ${nicId}
+    echo "deleting public-ip ${ipId}"
+    az network public-ip delete --ids ${ipId}
+    echo "deleting disk ${osDiskId}"
+    az disk delete --yes --ids ${osDiskId}
+    echo "deleting vnet ${vnetId}"
+    az network vnet delete --ids ${vnetId}
+    echo "deleting nsg ${nsgId}"
+    az network nsg delete --ids ${nsgId}
 }
 
 # generate image full path based on the oracle account
@@ -80,7 +92,7 @@ function get_ocr_image_full_path() {
 
     # download the ga cpu image mapping file.
     local cpuImagesListFile=weblogic_cpu_images.json
-    curl -L ${gitUrl4CpuImages} -o ${cpuImagesListFile}
+    curl -L ${gitUrl4CpuImages} --retry ${retryMaxAttempt} -o ${cpuImagesListFile}
     local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag==\"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
     # if we can not find a matched image, keep the tag name the same as GA tag.
     if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
@@ -138,7 +150,7 @@ function build_docker_image() {
 }
 
 # Shell Global settings
-set -e #Exit immediately if a command exits with a non-zero status.
+set -Eeo pipefail #Exit immediately if a command exits with a non-zero status.
 
 # Main script
 export script="${BASH_SOURCE[0]}"

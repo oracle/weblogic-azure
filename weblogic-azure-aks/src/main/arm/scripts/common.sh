@@ -3,11 +3,14 @@
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
 export checkPodStatusInterval=20 # interval of checking pod status.
-export checkPodStatusMaxAttemps=50 # max attempt to check pod status.
+export checkPodStatusMaxAttemps=100 # max attempt to check pod status.
 export checkPVStateInterval=5 # interval of checking pvc status.
 export checkPVStateMaxAttempt=10 # max attempt to check pvc status.
 export checkSVCStateMaxAttempt=50
 export checkSVCInterval=30 #seconds
+export checkAGICStatusMaxAttempt=10
+export checkAGICStatusInterval=30
+export checkIngressStateMaxAttempt=50
 
 export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'
@@ -32,6 +35,9 @@ export gitUrl4WLSToolingFamilyJsonFile="https://raw.githubusercontent.com/oracle
 
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
 export optUninstallInterval=10
+
+export retryMaxAttempt=5 # retry attempt for curl command
+export retryInterval=10
 
 export wlsContainerName="weblogic-server"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.3.6.jar"

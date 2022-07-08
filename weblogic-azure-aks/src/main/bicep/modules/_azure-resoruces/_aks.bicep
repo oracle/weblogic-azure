@@ -34,9 +34,7 @@ var const_aksAvailabilityZones = [
 ]
 var name_aciWorkspace = 'Workspace-${guid(utcValue)}-${location}'
 // Generate a unique AKS name scoped to subscription. 
-// Create different cluster name for different deployment to avoid template validation error.
-var name_aksClusterNameDefault = '${aksClusterNamePrefix}0${uniqueString(utcValue)}'
-var name_aksClusterNameForSV = '${aksClusterNamePrefix}1${uniqueString(utcValue)}'
+var name_aksClusterNameForSV = '${aksClusterNamePrefix}${uniqueString(utcValue)}'
 var obj_aciDisableOmsAgent = {
   enabled: false
 }
@@ -63,55 +61,11 @@ resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@2020
   }
 }
 
-resource aksClusterDefault 'Microsoft.ContainerService/managedClusters@2021-02-01' = if (contains(aksVersion, 'default')) {
-  name: name_aksClusterNameDefault
-  location: location
-  properties: {
-    dnsPrefix: '${name_aksClusterNameDefault}-dns'
-    agentPoolProfiles: [
-      {
-        name: aksAgentPoolName
-        count: aksAgentPoolNodeCount
-        vmSize: aksAgentPoolVMSize
-        osDiskSizeGB: const_aksAgentPoolOSDiskSizeGB
-        osDiskType: 'Managed'
-        kubeletDiskType: 'OS'
-        maxPods: const_aksAgentPoolMaxPods
-        type: 'VirtualMachineScaleSets'
-        availabilityZones: const_aksAvailabilityZones
-        mode: 'System'
-        osType: 'Linux'
-      }
-    ]
-    addonProfiles: {
-      KubeDashboard: {
-        enabled: false
-      }
-      azurepolicy: {
-        enabled: false
-      }
-      httpApplicationRouting: {
-        enabled: false
-      }
-      omsAgent: enableAzureMonitoring ? obj_aciEnableOmsAgent : obj_aciDisableOmsAgent
-    }
-    enableRBAC: true
-    networkProfile: {
-      networkPlugin: 'kubenet'
-      loadBalancerSku: 'standard'
-    }
-  }
-  identity: {
-    // enable system identity.
-    type: 'SystemAssigned'
-  }
-}
-
-resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = if (!contains(aksVersion, 'default')) {
+resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
   name: name_aksClusterNameForSV
   location: location
   properties: {
-    kubernetesVersion: '${aksVersion}'
+    kubernetesVersion: aksVersion
     dnsPrefix: '${name_aksClusterNameForSV}-dns'
     agentPoolProfiles: [
       {
@@ -152,4 +106,4 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = if
   }
 }
 
-output aksClusterName string = '${aksVersion}' == 'default' ? name_aksClusterNameDefault : name_aksClusterNameForSV
+output aksClusterName string = name_aksClusterNameForSV

@@ -60,7 +60,7 @@ param dbUser string = 'contosoDbUser'
 @description('JDBC Connection String')
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 
-param identity object
+param identity object = {}
 
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'

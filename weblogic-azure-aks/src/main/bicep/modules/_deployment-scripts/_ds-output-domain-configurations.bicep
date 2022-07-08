@@ -3,13 +3,13 @@
 
 param aksClusterRGName string = ''
 param aksClusterName string = ''
-param identity object
+param azCliVersion string = ''
+param identity object = {}
 param location string
 param utcValue string = utcNow()
 param wlsClusterName string = 'cluster-1'
 param wlsDomainUID string = 'sample-domain1'
 
-var const_azcliVersion='2.15.0'
 var const_deploymentName='ds-query-wls-configurations'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -18,7 +18,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: const_azcliVersion
+    azCliVersion: azCliVersion
     environmentVariables: [
       {
         name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'

@@ -5,15 +5,12 @@
     "parameters": {
         "basics": [
             {
-                "name": "domainHomeSourceTypeExplainer",
-                "type": "Microsoft.Common.TextBlock",
+                "name": "infoForBeforeDeployment",
+                "type": "Microsoft.Common.InfoBox",
                 "visible": true,
                 "options": {
-                    "text": "This offer always deploys WebLogic Server using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked in 'Configure AKS cluster' blade.  For more information on domain home source types, follow the link below",
-                    "link": {
-                        "label": "Learn more",
-                        "uri": "https://aka.ms/wls-aks-docs-domain-home-source-type"
-                    }
+                    "icon": "Info",
+                    "text": "The Azure identity deploying this offer must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li><br>This offer always deploys WebLogic Server using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked in 'Configure AKS cluster' blade.  Click <a href=https://aka.ms/wls-aks-docs-domain-home-source-type>this link</a> for more information on domain home source types."
                 }
             },
             {
@@ -33,10 +30,6 @@
                                 {
                                     "regex": "^[a-z0-9A-Z]{1,30}$",
                                     "message": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                {
-                                    "isValid": "[equals(length(basics('basicsRequired').identity.userAssignedIdentities),1)]",
-                                    "message": "Please select exactly one user assigned managed identity from the User assigned managed identity control below."
                                 }
                             ]
                         },
@@ -77,31 +70,6 @@
                             "hideConfirmation": false
                         },
                         "visible": true
-                    },
-                    {
-                        "name": "errInfo",
-                        "type": "Microsoft.Common.InfoBox",
-                        "visible": "[not(equals(length(basics('basicsRequired').identity.userAssignedIdentities),1))]",
-                        "options": {
-                            "icon": "Error",
-                            "text": "Please select exactly one user assigned managed identity.  The identity must have the Contributor or Owner role in the specified subscription.",
-                            "uri": "https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal"
-                        }
-                    },
-                    {
-                        "name": "identity",
-                        "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                        "label": "Managed Identity Configuration",
-                        "toolTip": {
-                            "userAssignedIdentity": "Add user assigned identities to enable the WebLogic domain deployment."
-                        },
-                        "defaultValue": {
-                            "systemAssignedIdentity": "Off"
-                        },
-                        "options": {
-                            "hideSystemAssignedIdentity": true,
-                            "hideUserAssignedIdentity": false
-                        }
                     }
                 ],
                 "visible": true
@@ -1445,7 +1413,7 @@
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Configure frontend IP with private IP address",
                                 "toolTip": "If checked, expose WebLogic Server with private IP address.",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
+                                "visible": false
                             },
                             {
                                 "name": "keyVaultText00",
@@ -1622,31 +1590,6 @@
                                     "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
                                 },
                                 "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault'))]"
-                            },
-                            {
-                                "name": "agicSpInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You must input an Active Directory Service Principal that is encoded with base64 to create the Application Gateway Ingress Controller. See this <a href=https://aka.ms/wls-aks-agic-sp-doc target='_blank'>document</a> for more information.</br>You can generate one with command <b>az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/&lt;AZURE_SUBSCRIPTION_ID&gt; | base64 -w0</b>. On macOS omit the <b>-w0</b>."
-                                }
-                            },
-                            {
-                                "name": "servicePrincipal",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Service Principal",
-                                    "confirmPassword": "Confirm service principal"
-                                },
-                                "toolTip": "Base64 encoded JSON blob of the service principal. You can generate one with command 'az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/&lt;AZURE_SUBSCRIPTION_ID&gt; | base64 -w0' On macOS omit the -w0.",
-                                "constraints": {
-                                    "required": true
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
                             },
                             {
                                 "name": "enableCookieBasedAffinity",
@@ -2148,7 +2091,6 @@
             "enableDNSConfiguration": "[bool(steps('section_dnsConfiguration').enableDNSConfiguration)]",
             "enableAdminT3Tunneling": "[basics('basicsOptional').enableAdminT3Tunneling]",
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
-            "identity": "[basics('basicsRequired').identity]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
             "lbSvcValues": "[if(not(empty(first(if(empty(steps('section_appGateway').lbSVCInfo.lbSVC),parse('[{\"colName\":\"\"}]'), steps('section_appGateway').lbSVCInfo.lbSVC)).colName)),steps('section_appGateway').lbSVCInfo.lbSVC, parse('[]'))]",
@@ -2162,7 +2104,6 @@
             "newOrExistingVnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.newOrExisting]",
             "ocrSSOPSW": "[steps('section_aks').imageInfo.ocrSSOPassword]",
             "ocrSSOUser": "[steps('section_aks').imageInfo.ocrSSOUserName]",
-            "servicePrincipal": "[steps('section_appGateway').appgwIngress.servicePrincipal]",
             "sslConfigurationAccessOption": "[steps('section_sslConfiguration').sslConfigurationAccessOption]",
             "sslKeyVaultCustomIdentityKeyStoreDataSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStoreDataSecretName]",
             "sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStorePassPhraseSecretName]",

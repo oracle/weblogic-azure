@@ -2,7 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 @description('Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported.')
-param identity object
+param identity object = {}
 
 @description('Used to name the new Azure Key Vault resoure.')
 param keyVaultName string = 'wls-kv-${uniqueString(utcValue)}'
