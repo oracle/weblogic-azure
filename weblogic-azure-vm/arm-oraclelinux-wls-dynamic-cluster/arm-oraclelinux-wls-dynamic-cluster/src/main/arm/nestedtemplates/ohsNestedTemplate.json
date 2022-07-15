@@ -156,6 +156,31 @@
                 "description": "Name of storage account. One storage account can store 20 vitual machines with 2 VHDs of 500 IOPS."
             }
         },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "wls-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet"
+            }
+        },
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Specify whether to create a new or existing virtual network for the VM."
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group of Virtual network"
+            }
+        },
         "virtualNetworkName": {
             "type": "string",
             "metadata": {
@@ -206,12 +231,13 @@
         "name_outputOHSHost": "[concat(parameters('ohsVMName'),variables('name_publicIPAddress'))]",
         "name_publicIPAddress": "_PublicIP",
         "name_scriptFile": "setupOHS.sh",
-        "name_subnet": "Subnet",
-        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('name_subnet'))]"
+        "name_subnet": "[parameters('subnetName')]",
+        "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('name_subnet'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[concat( variables('name_networkSecurityGroup'),'/','OHSPorts')]",
             "apiVersion": "${azure.apiVersion}",
             "properties": {

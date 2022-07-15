@@ -203,19 +203,6 @@
                         }
                     },
                     {
-                        "name": "dnsLabelPrefix",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "DNS Label Prefix",
-                        "toolTip": "The string to prepend to the DNS label.",
-                        "defaultValue": "wls",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,10}$",
-                            "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
-                        },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
                         "name": "managedServerPrefix",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Managed Server Prefix",
@@ -238,40 +225,6 @@
                             "required": true,
                             "regex": "^[a-z0-9A-Z]{3,20}$",
                             "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
-                        },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
-                        "name": "portsToExpose",
-                        "label": "Ports and port ranges to expose (N or N-N, comma separated)",
-                        "type": "Microsoft.Common.TextBox",
-                        "toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
-                        "defaultValue": "80,443,7001-9000",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]){1,1000}$",
-                            "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
-                        },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
-                        "name": "denyPublicTrafficForAdminServer",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Deny public traffic for admin server?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "No",
-                                    "value": false
-                                },
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                }
-                            ],
-                            "required": true
                         },
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
@@ -1139,10 +1092,40 @@
                                 "visible": true
                             }
                         ]
+                    }
+                ],
+                "visible": true
+            },
+            {
+                "name": "section_networkingConfiguration",
+                "type": "Microsoft.Common.Section",
+                "label": "Networking",
+                "elements": [
+                    {
+                        "name": "denyPublicTrafficForAdminServer",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deny public traffic for admin server?",
+                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "No",
+                                    "value": false
+                                },
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                }
+                            ],
+                            "required": true
+                        }
                     },
                     {
                         "name": "denyPublicTrafficForManagedServer",
                         "type": "Microsoft.Common.OptionsGroup",
+                        "visible": "[and(steps('section_ohs').enableOHS, equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new'))]",
                         "label": "Deny public traffic for managed server?",
                         "defaultValue": "Yes",
                         "toolTip": "Select 'Yes' to deny public traffic for managed server. Configuration here for port 8002 ~ 8001 + 'node number' has a higher priority than the 'Ports and port ranges to expose' in basic blade.",
@@ -1158,21 +1141,53 @@
                                 }
                             ],
                             "required": true
+                        }
+                    },
+                    {
+                        "name": "vnetInfo",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "Info",
+                            "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /28 and a minimum subnet size of /29 are required. Additionally, the subnet must have adequate available addresses for the server setup. Oracle HTTP Server will be created in this subnet if enabled."
+                        }
+                    },
+                    {
+                        "name": "virtualNetwork",
+                        "type": "Microsoft.Network.VirtualNetworkCombo",
+                        "label": {
+                            "virtualNetwork": "Virtual network",
+                            "subnets": "Subnets"
                         },
-                        "visible": "[steps('section_ohs').enableOHS]"
-                    }
-                ],
-                "visible": true
-            },
-            {
-                "name": "section_dnsConfiguration",
-                "type": "Microsoft.Common.Section",
-                "label": "DNS Configuration",
-                "elements": [
+                        "toolTip": {
+                            "virtualNetwork": "Name of the virtual network",
+                            "subnets": "Subnets for the virtual network"
+                        },
+                        "defaultValue": {
+                            "name": "wls-vnet",
+                            "addressPrefixSize": "/28"
+                        },
+                        "constraints": {
+                            "minAddressPrefixSize": "/28"
+                        },
+                        "subnets": {
+                            "subnet1": {
+                                "label": "Subnet for WebLogic (OHS will be also created in this subnet if enabled)",
+                                "defaultValue": {
+                                    "name": "wls-subnet",
+                                    "addressPrefixSize": "/28"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/29",
+                                    "minAddressCount": "[if(bool(steps('section_ohs').enableOHS), add(int(basics('basicsRequired').maxDynamicClusterSize), 2), add(int(basics('basicsRequired').maxDynamicClusterSize), 1))]",
+                                    "requireContiguousAddresses": false
+                                }
+                            }
+                        }
+                    },
                     {
                         "name": "dnsConfigurationText",
                         "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
+                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
                         "options": {
                             "text": "Selecting 'Yes' here will cause the template to provision Load Balancer and Oracle WebLogic Administration Console using custom DNS Name (example: console.contoso.com)",
                             "link": {
@@ -1184,7 +1199,7 @@
                     {
                         "name": "enableCustomDNS",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "visible": true,
+                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
                         "label": "Configure Custom DNS Alias?",
                         "defaultValue": "No",
                         "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
@@ -1203,10 +1218,36 @@
                         }
                     },
                     {
+                        "name": "dnsLabelPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "DNS Label Prefix",
+                        "toolTip": "The string to prepend to the DNS label.",
+                        "defaultValue": "wls",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,10}$",
+                            "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]"
+                    },
+                    {
+                        "name": "portsToExpose",
+                        "label": "Ports and port ranges to expose (N or N-N, comma separated)",
+                        "type": "Microsoft.Common.TextBox",
+                        "toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
+                        "defaultValue": "80,443,7001-9000",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]){1,1000}$",
+                            "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
+                        },
+                        "visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]"
+                    },
+                    {
                         "name": "customDNSSettings",
                         "type": "Microsoft.Common.Section",
                         "label": "DNS Configuration Settings",
-                        "visible": "[bool(steps('section_dnsConfiguration').enableCustomDNS)]",
+                        "visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
                         "elements": [
                             {
                                 "name": "bringDNSZone",
@@ -1230,7 +1271,7 @@
                             {
                                 "name": "createDNSZoneText",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[not(bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone))]",
+                                "visible": "[not(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone))]",
                                 "options": {
                                     "icon": "Info",
                                     "text": "You must perform DNS Domain Delegation at your DNS Registry after deployment.",
@@ -1243,7 +1284,7 @@
                                 "options": {
                                     "text": "If you choose to use an existing Azure DNS Zone, you must select a user-assigned managed identity to enable the necessary configuration."
                                 },
-                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
+                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
                             },
                             {
                                 "name": "dnszoneName",
@@ -1266,9 +1307,9 @@
                                 "constraints": {
                                     "required": true,
                                     "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').existingDNSZonesSettings.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                    "validationMessage": "[if(greater(length(steps('section_networkingConfiguration').existingDNSZonesSettings.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
                                 },
-                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
+                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
                             },
                             {
                                 "name": "dnszoneAdminConsoleLabel",
@@ -1284,7 +1325,7 @@
                                             "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
                                         },
                                         {
-                                            "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
+                                            "isValid": "[less(sub(length(concat(steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
                                             "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
                                         }
                                     ]
@@ -1304,17 +1345,17 @@
                                             "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
                                         },
                                         {
-                                            "isValid": "[less(sub(length(concat(if(empty(steps('section_dnsConfiguration').customDNSSettings.dnszoneLoadBalancerLabel), '', steps('section_dnsConfiguration').customDNSSettings.dnszoneLoadBalancerLabel),'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(if(empty(steps('section_dnsConfiguration').customDNSSettings.dnszoneLoadBalancerLabel), '', steps('section_dnsConfiguration').customDNSSettings.dnszoneLoadBalancerLabel),'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
+                                            "isValid": "[less(sub(length(concat(if(empty(steps('section_networkingConfiguration').customDNSSettings.dnszoneLoadBalancerLabel), '', steps('section_networkingConfiguration').customDNSSettings.dnszoneLoadBalancerLabel),'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(if(empty(steps('section_networkingConfiguration').customDNSSettings.dnszoneLoadBalancerLabel), '', steps('section_networkingConfiguration').customDNSSettings.dnszoneLoadBalancerLabel),'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
                                             "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
                                         }
                                     ]
                                 },
-                                "visible": "[and(bool(steps('section_ohs').enableOHS), bool(steps('section_dnsConfiguration').enableCustomDNS))]"
+                                "visible": "[and(bool(steps('section_ohs').enableOHS), bool(steps('section_networkingConfiguration').enableCustomDNS))]"
                             },
                             {
                                 "name": "infoDNSIndentity",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone), less(length(steps('section_dnsConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
+                                "visible": "[and(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone), less(length(steps('section_networkingConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
                                 "options": {
                                     "icon": "Error",
                                     "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user-assigned identity to access Azure resources.",
@@ -1335,7 +1376,7 @@
                                     "hideSystemAssignedIdentity": true,
                                     "hideUserAssignedIdentity": false
                                 },
-                                "visible": "[bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone)]"
+                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]"
                             }
                         ]
                     }
@@ -1947,17 +1988,18 @@
             "aadsServerHost": "[steps('section_aad').aadInfo.aadsServerHost]",
             "adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
+            "addressPrefixes": "[steps('section_networkingConfiguration').virtualNetwork.addressPrefixes]",
             "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
-            "denyPublicTrafficForAdminServer": "[basics('basicsOptional').denyPublicTrafficForAdminServer]",
-            "denyPublicTrafficForManagedServer": "[steps('section_ohs').denyPublicTrafficForManagedServer]",
-            "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
+            "denyPublicTrafficForAdminServer": "[steps('section_networkingConfiguration').denyPublicTrafficForAdminServer]",
+            "denyPublicTrafficForManagedServer": "[steps('section_networkingConfiguration').denyPublicTrafficForManagedServer]",
+            "dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "dnszoneIdentity": "[steps('section_dnsConfiguration').customDNSSettings.dnsIdentity]",
-            "dnszoneName": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneName]",
-            "dnszoneResourceGroup": "[steps('section_dnsConfiguration').customDNSSettings.dnsZoneResourceGroup]",
-            "dnszoneAdminConsoleLabel": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
-            "dnszoneLoadBalancerLabel": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneLoadBalancerLabel]",
+            "dnszoneIdentity": "[steps('section_networkingConfiguration').customDNSSettings.dnsIdentity]",
+            "dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
+            "dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
+            "dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
+            "dnszoneLoadBalancerLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneLoadBalancerLabel]",
             "dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
@@ -1969,16 +2011,16 @@
             "enableCoherence": "[bool(steps('section_coherence').enableCoherence)]",
             "enableCoherenceWebLocalStorage": "[bool(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.enableCoherenceWebLocalStorage,'false'))]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
-            "enableCustomDNS": "[bool(steps('section_dnsConfiguration').enableCustomDNS)]",
+            "enableCustomDNS": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
             "enableOHS": "[bool(steps('section_ohs').enableOHS)]",
-            "hasDNSZones": "[bool(if(bool(steps('section_dnsConfiguration').enableCustomDNS), steps('section_dnsConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
+            "hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
             "maxDynamicClusterSize": "[int(basics('basicsRequired').maxDynamicClusterSize)]",
             "numberOfCoherenceCacheInstances": "[int(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.numberOfCoherenceStorageInstances,'1'))]",
-            "portsToExpose": "[basics('basicsOptional').portsToExpose]",
+            "portsToExpose": "[steps('section_networkingConfiguration').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
             "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
             "vmSizeSelect": "[basics('vmSizeSelect')]",
@@ -2003,6 +2045,8 @@
             "enableHTTPAdminListenPort": "[basics('basicsOptional').enableAdminHTTPListenPort]",
             "enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
             "sslConfigurationAccessOption": "[steps('section_sslConfiguration').sslConfigurationAccessOption]",
+            "subnetName": "[steps('section_networkingConfiguration').virtualNetwork.subnets.subnet1.name]",
+            "subnetPrefix": "[steps('section_networkingConfiguration').virtualNetwork.subnets.subnet1.addressPrefix]",
             "adminSSLKeyVaultResourceGroup": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup]",
             "adminSSLKeyVaultName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName]",
             "keyVaultCustomIdentityKeyStoreDataSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStoreDataSecretName]",
@@ -2025,6 +2069,9 @@
             "uploadedKeyStoreData": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreData]",
             "uploadedKeyStorePassword": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStorePassword]",
             "uploadedKeyStoreType": "[steps('section_ohs').uploadedCustomSSLSettings.uploadedKeyStoreType]",
+            "virtualNetworkName": "[steps('section_networkingConfiguration').virtualNetwork.name]",
+            "virtualNetworkResourceGroupName": "[steps('section_networkingConfiguration').virtualNetwork.resourceGroup]",
+            "virtualNetworkNewOrExisting": "[steps('section_networkingConfiguration').virtualNetwork.newOrExisting]",
             "keyType": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyType]",
             "keyVaultResourceGroup": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup]",
             "keyVaultName": "[steps('section_ohs').keyVaultStoredCustomSSLSettings.keyVaultName]",

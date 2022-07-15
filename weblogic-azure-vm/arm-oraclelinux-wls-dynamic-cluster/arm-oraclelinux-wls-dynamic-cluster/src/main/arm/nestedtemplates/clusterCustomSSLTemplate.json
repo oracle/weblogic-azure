@@ -97,21 +97,23 @@
             }
         },
         "skuUrnVersion": {
-           "type": "string",
-           "defaultValue": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
-           "allowedValues": [
-              "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
-              "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
-              "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
-              "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
-              "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
-              "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
-              "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
-              "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"              
-           ],
-           "metadata": {
-              "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
-           }
+            "type": "string",
+            "defaultValue": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+            "allowedValues": [
+                "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
+                "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
+                "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
+                "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
+                "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
+                "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
+                "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
+                "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest",
+                "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest",
+                "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
+            ],
+            "metadata": {
+                "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
+            }
         },
         "usePreviewImage": {
             "type": "bool",
@@ -134,6 +136,54 @@
                 "description": "Select appropriate VM Size as per requirement"
             }
         },
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Specify whether to create a new or existing virtual network for the VM."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "wls-vnet",
+            "metadata": {
+                "description": "Name of the existing or new VNET"
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group of Virtual network"
+            }
+        },
+        "addressPrefixes": {
+            "type": "array",
+            "defaultValue": [
+                "10.0.0.0/28"
+            ],
+            "metadata": {
+                "description": "Address prefix of the VNET."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "wls-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet"
+            }
+        },
+        "subnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/29",
+            "metadata": {
+                "description": "Address prefix of the subnet"
+            }
+        },
         "wlsDomainName": {
             "type": "string",
             "metadata": {
@@ -152,18 +202,18 @@
                 "description": "Username for your Weblogic domain name"
             }
         },
-        "enableHTTPAdminListenPort":{
+        "enableHTTPAdminListenPort": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
                 "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
             }
         },
-        "enableCustomSSL":{
-            "defaultValue":true,
+        "enableCustomSSL": {
+            "defaultValue": true,
             "type": "bool",
             "metadata": {
-               "description": "Boolean value indicating, if custom SSL is enabled or not"
+                "description": "Boolean value indicating, if custom SSL is enabled or not"
             }
         },
         "enableDNSConfiguration": {
@@ -232,7 +282,7 @@
         }
     },
     "variables": {
-        "const_addressPrefix": "10.0.0.0/16",
+        "const_addressPrefix": "[parameters('addressPrefixes')]",
         "const_hyphen": "-",
         "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
         "const_imagePublisher": "oracle",
@@ -252,29 +302,33 @@
         "const_publicIPAddressType": "Dynamic",
         "const_requiredPortrange": ",65200-65535,5556",
         "const_storageAccountType": "Standard_LRS",
-        "const_subnetPrefix": "10.0.0.0/24",
+        "const_subnetPrefix": "[parameters('subnetPrefix')]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "const_vmSize": "[parameters('vmSizeSelect')]",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
         "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
         "name_nic": "NIC",
-        "name_outputAdminHost": "[concat(parameters('adminVMName'),variables('name_publicIPAddress'))]",
+        "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
+        "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
+        "name_outputAdminHost_with_pub_ip": "[concat(parameters('adminVMName'),variables('name_publicIPAddress'))]",
+        "name_outputAdminHost_without_pub_ip": "[concat(parameters('adminVMName'),variables('name_nic_without_pub_ip'))]",
         "name_publicIPAddress": "PublicIP",
         "name_scriptFile": "setupDynamicClusterDomain.sh",
         "name_share": "wlsshare",
         "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
-        "name_subnet": "Subnet",
-        "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+        "name_subnet": "[parameters('subnetName')]",
+        "name_virtualNetwork": "[parameters('virtualNetworkName')]",
+        "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
         "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
-        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
+        "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "t3AdminPort": "[if(not(parameters('enableHTTPAdminListenPort')),'7005','7001')]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
         "name_customHostnameVerifierJavaFile": "src/main/java/WebLogicCustomHostNameVerifier.java",
         "name_customHostnameValuesTemplate": "src/main/java/HostNameValuesTemplate.txt",
-        "name_customHostnameVerifierTest" : "src/test/java/WebLogicCustomHostNameVerifierTest.java"
+        "name_customHostnameVerifierTest": "src/test/java/WebLogicCustomHostNameVerifierTest.java"
     },
     "resources": [
         {
@@ -294,6 +348,7 @@
         {
             "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
             "type": "Microsoft.Network/networkSecurityGroups",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -348,38 +403,65 @@
             "sku": {
                 "name": "[variables('const_storageAccountType')]"
             },
-            "kind": "Storage",
+            "kind": "StorageV2",
             "properties": {
                 "supportsHttpsTrafficOnly": false
             }
         },
         {
-			"type": "Microsoft.Storage/storageAccounts/fileServices",
-			"apiVersion": "${azure.apiVersion2}",
-			"name": "[concat(variables('name_storageAccount'), '/default')]",
-			"dependsOn": [
-				"[variables('ref_storage')]"
-			],
-			"sku": {
-				"name": "Standard_LRS",
-				"tier": "Standard"
-			}
-		},
-		{
-			"type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-			"apiVersion": "${azure.apiVersion2}",
-			"name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
-			"dependsOn": [
-				"[variables('ref_fileService')]",
-				"[variables('ref_storage')]"
-			],
-			"properties": {
-				"shareQuota": 5
-			}
-		},
+            "apiVersion": "${azure.apiVersionForPrivateEndpoint}",
+            "name": "[variables('name_privateSaEndpoint')]",
+            "type": "Microsoft.Network/privateEndpoints",
+            "location": "[parameters('location')]",
+            "properties": {
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[variables('name_privateSaEndpoint')]",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount'))]",
+                            "groupIds": [
+                                "file"
+                            ]
+                        }
+                    }
+                ],
+                "subnet": {
+                    "id": "[variables('ref_subnet')]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
+                "[variables('name_virtualNetwork')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "${azure.apiVersion2}",
+            "name": "[concat(variables('name_storageAccount'), '/default')]",
+            "dependsOn": [
+                "[variables('ref_storage')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "${azure.apiVersion2}",
+            "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
+            "dependsOn": [
+                "[variables('ref_fileService')]",
+                "[variables('ref_storage')]"
+            ],
+            "properties": {
+                "shareQuota": 5
+            }
+        },
         {
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -396,6 +478,7 @@
         {
             "apiVersion": "${azure.apiVersionForVirtualNetworks}",
             "type": "Microsoft.Network/virtualNetworks",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[variables('name_virtualNetwork')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -403,9 +486,7 @@
             ],
             "properties": {
                 "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('const_addressPrefix')]"
-                    ]
+                    "addressPrefixes": "[variables('const_addressPrefix')]"
                 },
                 "subnets": [
                     {
@@ -423,10 +504,11 @@
         {
             "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic')))]",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic_with_pub_ip')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_with_pub_ip')))]",
             "location": "[parameters('location')]",
             "copy": {
-                "name": "nicLoop",
+                "name": "nicLoop_public_ip",
                 "count": "[add(parameters('dynamicClusterSize'),1)]"
             },
             "dependsOn": [
@@ -454,6 +536,33 @@
             }
         },
         {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+            "name": "[if(equals(copyIndex(),0),variables('name_outputAdminHost_without_pub_ip'),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_without_pub_ip')))]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "nicLoop_private_ip",
+                "count": "[add(parameters('dynamicClusterSize'),1)]"
+            },
+            "dependsOn": [
+                "[variables('name_virtualNetwork')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('ref_subnet')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('const_managedVMPrefix'), copyIndex()))]",
@@ -463,7 +572,8 @@
                 "count": "[add(parameters('dynamicClusterSize'),1)]"
             },
             "dependsOn": [
-                "nicLoop"
+                "nicLoop_public_ip",
+                "nicLoop_private_ip"
             ],
             "identity": "[if(parameters('useSystemAssignedManagedIdentity'), json('{\"type\":\"SystemAssigned\"}'), null())]",
             "properties": {
@@ -493,7 +603,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic'))))]"
+                            "id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic_with_pub_ip')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_with_pub_ip')))), resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),variables('name_outputAdminHost_without_pub_ip'),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_without_pub_ip')))))]"
                         }
                     ]
                 },
@@ -537,7 +647,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('const_managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('managedServerPrefix'),' ',copyindex(),' ',variables('const_managedVMPrefix'),' ',parameters('maxDynamicClusterSize'),' ',parameters('dynamicClusterSize'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn), reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ', parameters('virtualNetworkNewOrExisting'),' ',reference(resourceId('Microsoft.Network/privateEndpoints/', variables('name_privateSaEndpoint')), '${azure.apiVersionForPrivateEndpoint}').customDnsConfigs[0].ipAddresses[0], ' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },
@@ -718,15 +828,15 @@
         },
         "adminHostName": {
             "type": "string",
-            "value": "[reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn]"
+            "value": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn, reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress)]"
         },
         "adminConsole": {
             "type": "string",
-            "value": "[concat('http://',reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn,':',variables('t3AdminPort'),'/console')]"
+            "value": "[uri(concat('http://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001/console'),'/')]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[concat('https://',reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn,':7002/console')]"
+            "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console'),'/')]"
         },
         "storageAccountName": {
             "type": "string",
@@ -736,7 +846,7 @@
             "type": "string",
             "value": "[variables('name_virtualNetwork')]"
         },
-        "adminRestMgmtURL":{
+        "adminRestMgmtURL": {
             "type": "string",
             "value": "[uri(format('http://{0}:{1}',parameters('adminVMName'),variables('t3AdminPort')), 'management/weblogic/latest')]"
         }
