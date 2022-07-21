@@ -155,6 +155,23 @@ topology:
                FrontendHTTPPort: $wlsAdminPort
 EOF
   fi
+
+#check if remoteanonymous attributes are supported in current WLS version
+#if supported, disable them by setting the attributes to false
+
+hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
+echo "hasRemoteAnonymousAttribs: ${hasRemoteAnonymousAttribs}"
+
+if [ "${hasRemoteAnonymousAttribs}" == "true" ];
+then
+echo "adding settings to disable remote anonymous t3/rmi disabled under domain security configuration"
+cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+   SecurityConfiguration:
+       RemoteAnonymousRmiiiopEnabled: false
+       RemoteAnonymousRmit3Enabled: false
+EOF
+fi
+
 }
 
 #Function to create Admin Only Domain
@@ -468,42 +485,22 @@ function setUMaskForSecurityDir()
 
 }
 
-#this function disables remote anonymous requests as required by Weblogic security checks
-function disableRemoteAnonymousRequests()
+#this function checks if remote Anonymous T3/RMI Attributes are available as part of domain security configuration
+function containsRemoteAnonymousT3RMIIAttribs()
 {
-    echo "DisableRemoteAnonymousRequests for domain  $wlsDomainName"
-    cat <<EOF >$DOMAIN_PATH/disableAnonymousRequests.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
-try:
-    edit("$wlsServerName")
-    startEdit()
-    cd("SecurityConfiguration/$wlsDomainName")
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/modelHelp.sh -oracle_home $oracleHome topology:/SecurityConfiguration | grep RemoteAnonymousRmiiiopEnabled" >> /dev/null
 
-    if hasattr(cmo,'setRemoteAnonymousRMIIIOPEnabled'):
-      cmo.setRemoteAnonymousRMIIIOPEnabled(false)
-    else:
-       print 'no attribute: SecurityConfiguration/$wlsDomainName: cmo.setRemoteAnonymousRMIIIOPEnabled'
+    result1=$?
 
-    if hasattr(cmo,'setRemoteAnonymousRMIT3Enabled'):
-      cmo.setRemoteAnonymousRMIT3Enabled(false)
-    else:
-      print 'no attribute: SecurityConfiguration/$wlsDomainName: setRemoteAnonymousRMIT3Enabled'
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/modelHelp.sh -oracle_home $oracleHome topology:/SecurityConfiguration | grep RemoteAnonymousRmit3Enabled" >> /dev/null
 
-    save()
-    activate()
-except Exception,e:
-    print e
-    print "Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
-    dumpStack()
-disconnect()
-EOF
-sudo chown -R $username:$groupname $DOMAIN_PATH
-runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/disableAnonymousRequests.py"
-if [[ $? != 0 ]]; then
-  echo "Error : Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
-  exit 1
-fi
+    result2=$?
 
+    if [ $result1 == 0 ] && [ $result2 == 0 ]; then
+      echo "true"
+    else
+      echo "false"
+    fi
 }
 
 function generateCustomHostNameVerifier()
@@ -625,8 +622,6 @@ enableAndStartAdminServerService
 echo "Waiting for admin server to be available"
 wait_for_admin
 echo "Weblogic admin server is up and running"
-
-disableRemoteAnonymousRequests
 
 configureCustomHostNameVerifier
 
