@@ -12,6 +12,7 @@ param _pidStart string = ''
 @description('Name of an existing AKS cluster.')
 param aksClusterName string = ''
 param aksClusterRGName string = ''
+param azCliVersion string = ''
 @description('One of the supported database types')
 param databaseType string = 'oracle'
 @allowed([
@@ -33,7 +34,7 @@ param dbUser string = 'contosoDbUser'
 @description('JDBC Connection String')
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 
-param identity object
+param identity object = {}
 
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
@@ -59,6 +60,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
+    azCliVersion: azCliVersion
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
     dbDriverName: dbDriverName

@@ -7,7 +7,8 @@ param _artifactsLocationSasToken string = ''
 
 param aksClusterRGName string = ''
 param aksClusterName string = ''
-param identity object
+param azCliVersion string = ''
+param identity object = {}
 param location string
 param utcValue string = utcNow()
 param wlsDomainUID string = 'sample-domain1'
@@ -16,8 +17,7 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
-var const_azcliVersion='2.15.0'
-var const_pyCheckAppStatusScript = 'py-scripts/checkApplicationStatus.py'
+var const_pyCheckAppStatusScript = 'checkApplicationStatus.py'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_validateAppScript= 'validateApplications.sh'
 var const_utilityScript= 'utility.sh'
@@ -29,7 +29,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: const_azcliVersion
+    azCliVersion: azCliVersion
     environmentVariables: [
       {
         name: 'AKS_RESOURCE_GROUP_NAME'

@@ -1,15 +1,15 @@
 // Copyright (c) 2022, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param aksClusterName string 
+param aksClusterRGName string
+param appgwName string = 'appgw-contoso'
 param azCliVersion string = ''
-param subnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
-param knownIP string = '10.0.0.1'
-
 param identity object = {}
 param location string
 param utcValue string = utcNow()
 
-var const_deploymentName='ds-query-private-ip'
+var const_deploymentName='ds-validate-agic'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
@@ -18,15 +18,23 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh'))
+    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/utility.sh'), loadTextContent('../../../arm/scripts/inline-scripts/enableAgic.sh'))
     environmentVariables: [
       {
-        name: 'SUBNET_ID'
-        value: subnetId
+        name: 'AKS_CLUSTER_RG_NAME'
+        value: aksClusterRGName
       }
       {
-        name: 'KNOWN_IP'
-        value: knownIP
+        name: 'AKS_CLUSTER_NAME'
+        value: aksClusterName
+      }
+      {
+        name: 'APPGW_NAME'
+        value: appgwName
+      }
+      {
+        name: 'CURRENT_RG_NAME'
+        value: resourceGroup().name
       }
     ]
     cleanupPreference: 'OnSuccess'
@@ -34,5 +42,3 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     forceUpdateTag: utcValue
   }
 }
-
-output privateIP string = string(reference(const_deploymentName).outputs.privateIP)

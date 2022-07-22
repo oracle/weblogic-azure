@@ -50,7 +50,7 @@ param appPackageFromStorageBlob object = {
 @description('Url array of Java EE application locations.')
 param appPackageUrls array = []
 
-param identity object
+param identity object = {}
 
 @secure()
 @description('Password of Oracle SSO account.')
@@ -70,6 +70,8 @@ param userProvidedAcr string = 'null'
 param userProvidedImagePath string = 'null'
 @description('Use Oracle images or user provided patched images')
 param useOracleImage bool = true
+
+var const_azCLIVersion = '2.33.1'
 
 module pids './_pids/_pid.bicep' = {
   name: 'initialization'
@@ -95,6 +97,7 @@ module updateWLSApplications '_deployment-scripts/_ds_update-applications.bicep'
     acrName: useOracleImage ? acrName : userProvidedAcr
     appPackageUrls: appPackageUrls
     appPackageFromStorageBlob: appPackageFromStorageBlob
+    azCliVersion: const_azCLIVersion
     identity: identity
     location: resourceGroup().location
     ocrSSOPSW: ocrSSOPSW

@@ -239,7 +239,7 @@ function validate_status() {
 function get_wls_operator_version() {
     local wlsToolingFamilyJsonFile=weblogic_tooling_family.json
     # download the json file that wls operator version from weblogic-azure repo.
-    curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
     if [ $? -eq 0 ]; then
         wlsOptVersion=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WKO\") | .version" | tr -d "\"")
         echo "WKO version: ${wlsOptVersion}"
@@ -264,14 +264,14 @@ function install_utilities() {
     validate_status ${ret}
 
     # Install Helm
-    browserURL=$(curl -m ${curlMaxTime} -s https://api.github.com/repos/helm/helm/releases/latest |
+    browserURL=$(curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -s https://api.github.com/repos/helm/helm/releases/latest |
         grep "browser_download_url.*linux-amd64.tar.gz.asc" |
         cut -d : -f 2,3 |
         tr -d \")
     helmLatestVersion=${browserURL#*download\/}
     helmLatestVersion=${helmLatestVersion%%\/helm*}
     helmPackageName=helm-${helmLatestVersion}-linux-amd64.tar.gz
-    curl -m ${curlMaxTime} -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
     tar -zxvf /tmp/${helmPackageName} -C /tmp
     mv /tmp/linux-amd64/helm /usr/local/bin/helm
     echo "Helm version"

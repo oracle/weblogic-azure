@@ -3,13 +3,13 @@
 
 param aksClusterName string = ''
 param aksClusterRGName string = ''
+param azCliVersion string = ''
 
-param identity object
+param identity object = {}
 param location string
 param utcValue string = utcNow()
 
 var const_arguments = '${aksClusterRGName} ${aksClusterName}'
-var const_azcliVersion='2.15.0'
 var const_deploymentName='ds-query-storage-account'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -18,7 +18,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: const_azcliVersion
+    azCliVersion: azCliVersion
     arguments: const_arguments
     scriptContent: loadTextContent('../../../arm/scripts/queryStorageAccount.sh')
     cleanupPreference: 'OnSuccess'

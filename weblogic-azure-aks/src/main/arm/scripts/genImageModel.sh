@@ -183,7 +183,7 @@ EOF
           continue
         fi
 
-        curl -m ${curlMaxTime} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/applications/${fileName}
+        curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/applications/${fileName}
         if [ $? -ne 0 ];then
           echo "Failed to download $item"
           exit 1
