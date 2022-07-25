@@ -73,12 +73,12 @@
 			}
 		},
 		"dbGlobalTranPro": {
-            "defaultValue": "OnePhaseCommit",
-            "type": "string",
-            "metadata": {
-                "description": "Determines the transaction protocol (global transaction processing behavior) for the data source."
-            }
-        },
+			"defaultValue": "OnePhaseCommit",
+			"type": "string",
+			"metadata": {
+				"description": "Determines the transaction protocol (global transaction processing behavior) for the data source."
+			}
+		},
 		"dbPassword": {
 			"defaultValue": "",
 			"type": "securestring",
@@ -375,8 +375,8 @@
 		},
 		"logsToIntegrate": {
 			"type": "array",
-			"defaultValue": ["HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog"],
-			"allowedValues": ["HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog"],
+			"defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
+			"allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
 			"metadata": {
 				"description": "Specify the expeted logs to integrate, you must input at least one log."
 			}
@@ -490,7 +490,7 @@
 				"owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
 				"owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
 				"owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
-				"owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"				
+				"owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
 			],
 			"metadata": {
 				"description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
@@ -554,6 +554,54 @@
 			"type": "string",
 			"metadata": {
 				"description": "Select appropriate VM Size for Coherence"
+			}
+		},
+		"virtualNetworkNewOrExisting": {
+			"type": "string",
+			"defaultValue": "new",
+			"allowedValues": [
+				"new",
+				"existing"
+			],
+			"metadata": {
+				"description": "Specify whether to create a new or existing virtual network for the VM."
+			}
+		},
+		"virtualNetworkName": {
+			"type": "string",
+			"defaultValue": "wls-vnet",
+			"metadata": {
+				"description": "Name of the existing or new VNET"
+			}
+		},
+		"virtualNetworkResourceGroupName": {
+			"type": "string",
+			"defaultValue": "[resourceGroup().name]",
+			"metadata": {
+				"description": "Resource group of Virtual network"
+			}
+		},
+		"addressPrefixes": {
+			"type": "array",
+			"defaultValue": [
+				"10.0.0.0/16"
+			],
+			"metadata": {
+				"description": "Address prefix of the VNET."
+			}
+		},
+		"subnetName": {
+			"type": "string",
+			"defaultValue": "wls-subnet",
+			"metadata": {
+				"description": "Name of the existing or new Subnet"
+			}
+		},
+		"subnetPrefix": {
+			"type": "string",
+			"defaultValue": "10.0.0.0/24",
+			"metadata": {
+				"description": "Address prefix of the subnet"
 			}
 		},
 		"wlsDomainName": {
@@ -732,7 +780,8 @@
 		"name_keyVaultNestedTemplate": "_sslKeyVaultNestedTemplate.json",
 		"name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcValue'))), 24)]"
 	},
-	"resources": [{
+	"resources": [
+		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersion}",
 			"name": "${dynamic.start}",
@@ -820,6 +869,9 @@
 					"authenticationType": {
 						"value": "[parameters('authenticationType')]"
 					},
+					"addressPrefixes": {
+						"value": "[parameters('addressPrefixes')]"
+					},
 					"dnsLabelPrefix": {
 						"value": "[parameters('dnsLabelPrefix')]"
 					},
@@ -841,6 +893,12 @@
 					"skuUrnVersion": {
 						"value": "[parameters('skuUrnVersion')]"
 					},
+					"subnetName": {
+						"value": "[parameters('subnetName')]"
+					},
+					"subnetPrefix": {
+						"value": "[parameters('subnetPrefix')]"
+					},
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
 					},
@@ -849,6 +907,15 @@
 					},
 					"vmSizeSelect": {
 						"value": "[parameters('vmSizeSelect')]"
+					},
+					"virtualNetworkNewOrExisting": {
+						"value": "[parameters('virtualNetworkNewOrExisting')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
+					},
+					"virtualNetworkResourceGroupName": {
+						"value": "[parameters('virtualNetworkResourceGroupName')]"
 					},
 					"wlsDomainName": {
 						"value": "[parameters('wlsDomainName')]"
@@ -901,6 +968,9 @@
 					"authenticationType": {
 						"value": "[parameters('authenticationType')]"
 					},
+					"addressPrefixes": {
+						"value": "[parameters('addressPrefixes')]"
+					},
 					"dnsLabelPrefix": {
 						"value": "[parameters('dnsLabelPrefix')]"
 					},
@@ -922,6 +992,12 @@
 					"skuUrnVersion": {
 						"value": "[parameters('skuUrnVersion')]"
 					},
+					"subnetName": {
+						"value": "[parameters('subnetName')]"
+					},
+					"subnetPrefix": {
+						"value": "[parameters('subnetPrefix')]"
+					},
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
 					},
@@ -930,6 +1006,15 @@
 					},
 					"vmSizeSelect": {
 						"value": "[parameters('vmSizeSelect')]"
+					},
+					"virtualNetworkNewOrExisting": {
+						"value": "[parameters('virtualNetworkNewOrExisting')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
+					},
+					"virtualNetworkResourceGroupName": {
+						"value": "[parameters('virtualNetworkResourceGroupName')]"
 					},
 					"wlsDomainName": {
 						"value": "[parameters('wlsDomainName')]"
@@ -943,12 +1028,12 @@
 					"enableHTTPAdminListenPort": {
 						"value": "[parameters('enableHTTPAdminListenPort')]"
 					},
-                    "enableDNSConfiguration": {
-                      "value": "[parameters('enableCustomDNS')]"
-                    },
-                    "customDNSNameForAdminServer": {
-                      "value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
-                    },
+					"enableDNSConfiguration": {
+						"value": "[parameters('enableCustomDNS')]"
+					},
+					"customDNSNameForAdminServer": {
+						"value": "[if(parameters('enableCustomDNS'), format('{0}.{1}', parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),'')]"
+					},
 					"enableCustomSSL": {
 						"value": "[parameters('enableCustomSSL')]"
 					},
@@ -1048,6 +1133,7 @@
 		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersion}",
+			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
 			"name": "networkSecurityLinkedTemplate",
 			"properties": {
 				"mode": "Incremental",
@@ -1103,8 +1189,8 @@
 						"value": "[parameters('databaseType')]"
 					},
 					"dbGlobalTranPro": {
-                        "value": "[parameters('dbGlobalTranPro')]"
-                    },
+						"value": "[parameters('dbGlobalTranPro')]"
+					},
 					"dbPassword": {
 						"value": "[parameters('dbPassword')]"
 					},
@@ -1418,6 +1504,9 @@
 					"skuUrnVersion": {
 						"value": "[parameters('skuUrnVersion')]"
 					},
+					"subnetName": {
+						"value": "[parameters('subnetName')]"
+					},
 					"storageAccountName": {
 						"value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.storageAccountName.value]"
 					},
@@ -1426,6 +1515,12 @@
 					},
 					"vmSizeSelectForCoherence": {
 						"value": "[parameters('vmSizeSelectForCoherence')]"
+					},
+					"virtualNetworkResourceGroupName": {
+						"value": "[parameters('virtualNetworkResourceGroupName')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
 					},
 					"wlsDomainName": {
 						"value": "[parameters('wlsDomainName')]"
@@ -1640,6 +1735,9 @@
 					"storageAccountName": {
 						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.storageAccountName.value]"
 					},
+					"subnetName": {
+						"value": "[parameters('subnetName')]"
+					},
 					"location": {
 						"value": "[parameters('location')]"
 					},
@@ -1686,6 +1784,12 @@
 					},
 					"oracleVaultPswd": {
 						"value": "[parameters('oracleVaultPswd')]"
+					},
+					"virtualNetworkNewOrExisting": {
+						"value": "[parameters('virtualNetworkNewOrExisting')]"
+					},
+					"virtualNetworkResourceGroupName": {
+						"value": "[parameters('virtualNetworkResourceGroupName')]"
 					},
 					"virtualNetworkName": {
 						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.virtualNetworkName.value]"
@@ -1811,7 +1915,7 @@
 		"ohsSecureAccessURL": {
 			"type": "string",
 			"condition": "[parameters('enableOHS')]",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'),parameters('ohshttpsPort'))), reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsSecureAccessURL.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'),parameters('ohshttpsPort')),''), reference('ohsLinkedTemplate', '${azure.apiVersion}').outputs.ohsSecureAccessURL.value)]"
 		}
 	}
 }
