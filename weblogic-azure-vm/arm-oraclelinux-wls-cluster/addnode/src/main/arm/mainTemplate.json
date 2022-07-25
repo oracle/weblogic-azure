@@ -177,6 +177,27 @@
             "description": "Select appropriate VM Size as per requirement"
          }
       },
+      "virtualNetworkName": {
+         "type": "string",
+         "defaultValue": "wls-vnet",
+         "metadata": {
+               "description": "Name of the existing or new VNET"
+         }
+      },
+      "virtualNetworkResourceGroupName": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().name]",
+         "metadata": {
+               "description": "Resource group of Virtual network"
+         }
+      },
+      "subnetName": {
+         "type": "string",
+         "defaultValue": "wls-subnet",
+         "metadata": {
+               "description": "Name of the existing or new Subnet"
+         }
+      },
       "wlsDomainName": {
          "type": "string",
          "defaultValue": "wlsd",
@@ -271,8 +292,8 @@
       "name_scriptELKConfiguration": "elkIntegration.sh",
       "name_scriptFile": "addnode.sh",
       "name_share": "wlsshare",
-      "name_subnet": "Subnet",
-      "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+      "name_subnet": "[parameters('subnetName')]",
+      "name_virtualNetwork": "[parameters('virtualNetworkName')]",
       "name_vmMachine": "[concat(parameters('managedServerPrefix'),'VM')]",
       "ref_backendAddressPool": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('name_appGateway'),variables('name_backendAddressPool'))]",
       "ref_backendHttpSettings": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('name_appGateway'),variables('name_httpSetting'))]",
@@ -283,7 +304,7 @@
       "ref_httpListener": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('name_appGateway'),variables('name_httpListener'))]",
       "ref_httpsListener": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('name_appGateway'),variables('name_httpsListener'))]",
       "ref_sslCertificate": "[resourceId('Microsoft.Network/applicationGateways/sslCertificates', variables('name_appGateway'),variables('name_appGatewayCertificate'))]",
-      "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
+      "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
       "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
       "name_customHostnameVerifierJavaFile": "src/main/java/WebLogicCustomHostNameVerifier.java",
       "name_customHostnameValuesTemplate": "src/main/java/HostNameValuesTemplate.txt",

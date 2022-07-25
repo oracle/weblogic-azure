@@ -130,6 +130,68 @@
                 "description": "Select appropriate VM Size as per requirement"
             }
         },
+                "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+               "new",
+               "existing"
+            ],
+            "metadata": {
+               "description": "Specify whether to create a new or existing virtual network for the VM."
+            }
+         },
+         "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "wls-vnet",
+            "metadata": {
+               "description": "Name of the existing or new VNET"
+            }
+         },
+         "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+               "description": "Resource group of Virtual network"
+            }
+         },
+         "addressPrefixes": {
+            "type": "array",
+            "defaultValue": [
+               "10.0.0.0/28"
+            ],
+            "metadata": {
+               "description": "Address prefix of the VNET."
+            }
+         },
+         "subnetName": {
+            "type": "string",
+            "defaultValue": "wls-subnet",
+            "metadata": {
+               "description": "Name of the existing or new Subnet"
+            }
+         },
+         "subnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/29",
+            "metadata": {
+               "description": "Address prefix of the subnet"
+            }
+         },
+        "subnetForAppGateway": {
+            "type": "string",
+            "defaultValue": "appgateway-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet for Application Gateway"
+            }
+        },
+        "subnetPrefixForAppGateway": {
+            "type": "string",
+            "defaultValue": "10.0.1.0/24",
+            "metadata": {
+                "description": "Address prefix of the subnet for Application Gateway"
+            }
+        },
         "wlsDomainName": {
             "type": "string",
             "metadata": {
@@ -147,6 +209,13 @@
             "type": "securestring",
             "metadata": {
                 "description": "Password for your Weblogic domain name"
+            }
+        },
+        "enableAppGateway": {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "If true, deploy an Azure App Gateway in front of the nodes of the cluster"
             }
         },
         "enableHTTPAdminListenPort":{
@@ -229,8 +298,8 @@
         }
     },
     "variables": {
-        "const_addressPrefix": "10.0.0.0/16",
-        "const_appGatewaySubnetPrefix": "10.0.1.0/24",
+        "const_addressPrefix": "[parameters('addressPrefixes')]",
+        "const_appGatewaySubnetPrefix": "[parameters('subnetPrefixForAppGateway')]",
         "const_hyphen": "-",
         "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
         "const_imagePublisher": "oracle",
@@ -250,30 +319,68 @@
         "const_publicIPAddressType": "Dynamic",
         "const_requiredPortrange": ",65200-65535,5556",
         "const_storageAccountType": "Standard_LRS",
-        "const_subnetPrefix": "10.0.0.0/24",
+        "const_subnetPrefix": "[parameters('subnetPrefix')]",
         "const_vmSize": "[parameters('vmSizeSelect')]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
-        "name_appGatewaySubnet": "appGatewaySubnet",
+        "name_appGatewaySubnet": "[parameters('subnetForAppGateway')]",
         "name_availabilitySet": "WLSCluster-AvailabilitySet",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
         "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
         "name_nic": "_NIC",
         "name_publicIPAddress": "_PublicIP",
-        "name_outputAdminHost": "[concat(parameters('adminVMName'),variables('name_publicIPAddress'))]",
+        "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
+        "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
+        "name_outputAdminHost_with_pub_ip": "[concat(parameters('adminVMName'),variables('name_publicIPAddress'))]",
+        "name_outputAdminHost_without_pub_ip": "[concat(parameters('adminVMName'),variables('name_nic_without_pub_ip'))]",
+        "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
         "name_scriptFile": "setupClusterDomain.sh",
         "name_share": "wlsshare",
         "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
-        "name_subnet": "Subnet",
-        "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+        "name_subnet": "[parameters('subnetName')]",
+        "name_virtualNetwork": "[parameters('virtualNetworkName')]",
         "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
-        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
+        "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
         "name_customHostnameVerifierJavaFile": "src/main/java/WebLogicCustomHostNameVerifier.java",
         "name_customHostnameValuesTemplate": "src/main/java/HostNameValuesTemplate.txt",
-        "name_customHostnameVerifierTest" : "src/test/java/WebLogicCustomHostNameVerifierTest.java"
+        "name_customHostnameVerifierTest" : "src/test/java/WebLogicCustomHostNameVerifierTest.java",
+        "property_subnet_with_app_gateway": [
+            {
+                "name": "[variables('name_subnet')]",
+                "properties": {
+                    "addressPrefix": "[variables('const_subnetPrefix')]",
+                    "networkSecurityGroup": {
+                        "id": "[variables('ref_networkSecurityGroup')]"
+                    }
+                }
+            },
+            {
+                // PENDING(edburns): Assume it is acceptable to create a subnet for the App Gateway, even if the user
+                // has not requested an App Gateway.  In support of this assumption we can note: the user may want an App 
+                // Gateway after deployment.
+                "name": "[variables('name_appGatewaySubnet')]",
+                "properties": {
+                    "addressPrefix": "[variables('const_appGatewaySubnetPrefix')]",
+                    "networkSecurityGroup": {
+                        "id": "[variables('ref_networkSecurityGroup')]"
+                    }
+                }
+            }
+        ],
+        "property_subnet_without_app_gateway": [
+            {
+                "name": "[variables('name_subnet')]",
+                "properties": {
+                    "addressPrefix": "[variables('const_subnetPrefix')]",
+                    "networkSecurityGroup": {
+                        "id": "[variables('ref_networkSecurityGroup')]"
+                    }
+                }
+            }
+        ]
     },
     "resources": [
         {
@@ -293,6 +400,7 @@
         {
             "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
             "type": "Microsoft.Network/networkSecurityGroups",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -362,12 +470,38 @@
             "sku": {
                 "name": "[variables('const_storageAccountType')]"
             },
-            "kind": "Storage",
+            "kind": "StorageV2",
             "properties": {
                 "supportsHttpsTrafficOnly": false
             },
             "dependsOn": [
                 "[variables('name_networkSecurityGroup')]"
+            ]
+        },
+        {
+            "apiVersion": "${azure.apiVersionForPrivateEndpoint}",
+            "name": "[variables('name_privateSaEndpoint')]",
+            "type": "Microsoft.Network/privateEndpoints",
+            "location": "[parameters('location')]",
+            "properties": {
+                  "privateLinkServiceConnections": [
+                     {
+                        "name": "[variables('name_privateSaEndpoint')]",
+                        "properties": {
+                              "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount'))]",
+                              "groupIds": [
+                                 "file"
+                              ]
+                        }
+                     }
+                  ],
+                  "subnet": {
+                     "id": "[variables('ref_subnet')]"
+                  }
+            },
+            "dependsOn": [
+               "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
+               "[variables('name_virtualNetwork')]"
             ]
         },
         {
@@ -397,6 +531,7 @@
         {
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -416,6 +551,7 @@
         {
             "apiVersion": "${azure.apiVersionForVirtualNetworks}",
             "type": "Microsoft.Network/virtualNetworks",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[variables('name_virtualNetwork')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -423,42 +559,19 @@
             ],
             "properties": {
                 "addressSpace": {
-                    "addressPrefixes": [
-                        "[variables('const_addressPrefix')]"
-                    ]
+                    "addressPrefixes": "[variables('const_addressPrefix')]"
                 },
-                "subnets": [
-                    {
-                        "name": "[variables('name_subnet')]",
-                        "properties": {
-                            "addressPrefix": "[variables('const_subnetPrefix')]",
-                            "networkSecurityGroup": {
-                                "id": "[variables('ref_networkSecurityGroup')]"
-                            }
-                        }
-                    },
-                    {
-                        // PENDING(edburns): Assume it is acceptable to create a subnet for the App Gateway, even if the user
-                        // has not requested an App Gateway.  In support of this assumption we can note: the user may want an App 
-                        // Gateway after deployment.
-                        "name": "[variables('name_appGatewaySubnet')]",
-                        "properties": {
-                            "addressPrefix": "[variables('const_appGatewaySubnetPrefix')]",
-                            "networkSecurityGroup": {
-                                "id": "[variables('ref_networkSecurityGroup')]"
-                            }
-                        }
-                    }
-                ]
+                "subnets": "[if(parameters('enableAppGateway'), variables('property_subnet_with_app_gateway'), variables('property_subnet_without_app_gateway'))]"
+
             }
         },
         {
             "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic')))]",
-            "location": "[parameters('location')]",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic_with_pub_ip')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_with_pub_ip')))]",            "location": "[parameters('location')]",
             "copy": {
-                "name": "nicLoop",
+                "name": "nicLoop_public_ip",
                 "count": "[parameters('numberOfInstances')]"
             },
             "dependsOn": [
@@ -483,6 +596,33 @@
                 "dnsSettings": {
                     "internalDnsNameLabel": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('const_managedVMPrefix'), copyIndex()))]"
                 }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+            "name": "[if(equals(copyIndex(),0),variables('name_outputAdminHost_without_pub_ip'),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_without_pub_ip')))]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "nicLoop_private_ip",
+                "count": "[parameters('numberOfInstances')]"
+            },
+            "dependsOn": [
+                "[variables('name_virtualNetwork')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('ref_subnet')]"
+                            }
+                        }
+                    }
+                ]
             }
         },
         {
@@ -511,8 +651,10 @@
                 "count": "[parameters('numberOfInstances')]"
             },
             "dependsOn": [
-                "nicLoop",
-                "[resourceId('Microsoft.Compute/availabilitySets/', variables('name_availabilitySet'))]"
+                "nicLoop_public_ip",
+                "nicLoop_private_ip",
+                "[resourceId('Microsoft.Compute/availabilitySets/', variables('name_availabilitySet'))]",
+                "[variables('name_privateSaEndpoint')]"
             ],
             "identity": "[if(parameters('useSystemAssignedManagedIdentity'), json('{\"type\":\"SystemAssigned\"}'), null())]",
             "properties": {
@@ -545,7 +687,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic'))))]"
+                            "id": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_nic_with_pub_ip')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_with_pub_ip')))), resourceId('Microsoft.Network/networkInterfaces',if(equals(copyIndex(),0),variables('name_outputAdminHost_without_pub_ip'),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_nic_without_pub_ip')))))]"
                         }
                     ]
                 },
@@ -590,7 +732,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',if(equals(copyIndex(),0),'admin',concat(parameters('managedServerPrefix'), copyIndex())),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',if(equals(copyIndex(),0),'admin',concat(parameters('managedServerPrefix'), copyIndex())),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn), reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ', parameters('virtualNetworkNewOrExisting'),' ',reference(resourceId('Microsoft.Network/privateEndpoints/', variables('name_privateSaEndpoint')), '${azure.apiVersionForPrivateEndpoint}').customDnsConfigs[0].ipAddresses[0],' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },
@@ -761,7 +903,7 @@
     "outputs": {
         "_adminPublicIPId": {
             "type": "string",
-            "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('adminVMName'),variables('name_publicIPAddress')))]"
+            "value": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('adminVMName'),variables('name_publicIPAddress'))),'')]"
         },
         "artifactsLocationPassedIn": {
             "type": "string",
@@ -769,15 +911,15 @@
         },
         "adminHostName": {
             "type": "string",
-            "value": "[reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn]"
+            "value": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn, reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress)]"
         },
         "adminConsole": {
             "type": "string",
-            "value": "[concat('http://',reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn,':7001/console')]"
+            "value": "[uri(concat('http://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001/console'),'/')]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[concat('https://',reference(variables('name_outputAdminHost'), '${azure.apiVersion}').dnsSettings.fqdn,':7002/console')]"
+            "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console'),'/')]"
         },
         "wlsDomainLocation": {
             "type": "string",

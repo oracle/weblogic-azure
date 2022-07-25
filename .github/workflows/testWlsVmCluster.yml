@@ -10,10 +10,14 @@ on:
         description: "Specify whether to enable ELK depoyment or not."
         required: true
         default: "false"
+      ref:
+        description: 'Specify Git Ref if needed.'
+        required: false
+        default: 'refs/heads/main'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
-  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-cluster"}'
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-cluster", "client_payload": {"enableELK": "false", "ref": "refs/heads/main"}}'
   repository_dispatch:
     types: [test-vm-cluster,integration-test-all]
 
@@ -53,6 +57,26 @@ jobs:
   preflight:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup environment variables
+        id: setup-env-variables-based-on-dispatch-event
+        run: |
+          if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+            enableELK=${{ github.event.inputs.enableELK }}
+            ref=${{ github.event.inputs.ref }}
+          else
+            enableELK=${{ github.event.client_payload.enableELK }}
+            ref=${{ github.event.client_payload.ref }}
+          fi
+          if [ -z "$enableELK" ]; then
+            enableELK='false'
+          fi
+          if [ -z "$ref" ]; then
+            ref='refs/heads/main'
+          fi
+          echo "##[set-output name=enableELK;]${enableELK}"
+          echo "##[set-output name=ref;]${ref}"
+          echo "enableELK=${enableELK}" >> $GITHUB_ENV
+          echo "ref=${ref}" >> $GITHUB_ENV
       - name: Checkout azure-javaee-iaas
         uses: actions/checkout@v2
         with:
@@ -70,6 +94,7 @@ jobs:
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
+          ref: ${{ env.ref }}
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -77,8 +102,8 @@ jobs:
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
       - name: Build and test ${{ env.offerName }}
-        run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
-
+        run: |
+          mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
@@ -506,6 +531,17 @@ jobs:
             ${{ env.wlsDomainName }} \
             ${{ env.managedServerPrefix }}"
             echo "Deploy Application Gateway Template..."
+            
+            # Create subnet for application gateway
+            az network vnet subnet create \
+            --verbose \
+            --debug \
+            --resource-group ${resourceGroup} \
+            --vnet-name wls-vnet \
+            --name appgateway-subnet \
+            --address-prefixes "10.0.1.0/24"
+
+            # Create application gateway
             az group deployment create \
             --verbose \
             --debug \
@@ -626,7 +662,7 @@ jobs:
 
       - name: Set up ELK by deploying sub template
         id: enable-elk
-        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
+        if: ${{ env.enableELK == 'true' }}
         run: |
             # Generate parameters for ELK template deployment
             bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-elk.sh \
@@ -853,7 +889,7 @@ jobs:
             az group delete --yes --no-wait --verbose --name $resourceGroup
       - name: Delete ELK index
         id: delete-elk-index
-        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
+        if: ${{ env.enableELK == 'true' }}
         run: |
           curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-cluster-${{ github.run_id }}${{ github.run_number }}
 

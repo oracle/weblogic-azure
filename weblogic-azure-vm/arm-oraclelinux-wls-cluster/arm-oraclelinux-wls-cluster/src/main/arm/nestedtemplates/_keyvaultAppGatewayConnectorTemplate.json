@@ -133,6 +133,38 @@
                 "description": "If true, will override the host name with dnszoneSubDomain."
             }
         },
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Specify whether to create a new or existing virtual network for the VM."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "wls-vnet",
+            "metadata": {
+                "description": "Name of the existing or new VNET"
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group of Virtual network"
+            }
+        },
+        "subnetForAppGateway": {
+            "type": "string",
+            "defaultValue": "appgateway-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet for Application Gateway"
+            }
+        },
         "wlsDomainName": {
             "defaultValue": "wlsd",
             "type": "string",
@@ -220,6 +252,18 @@
                     "overrideHostName": {
                         "value": "[parameters('overrideHostName')]"
                     },
+                    "virtualNetworkNewOrExisting": {
+                        "value": "[parameters('virtualNetworkNewOrExisting')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
+                    "subnetForAppGateway": {
+                        "value": "[parameters('subnetForAppGateway')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -290,6 +334,18 @@
                     "overrideHostName": {
                         "value": "[parameters('overrideHostName')]"
                     },
+                    "virtualNetworkNewOrExisting": {
+                        "value": "[parameters('virtualNetworkNewOrExisting')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
+                    "subnetForAppGateway": {
+                        "value": "[parameters('subnetForAppGateway')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -354,6 +410,18 @@
                     },
                     "overrideHostName": {
                         "value": "[parameters('overrideHostName')]"
+                    },
+                    "virtualNetworkNewOrExisting": {
+                        "value": "[parameters('virtualNetworkNewOrExisting')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
+                    "subnetForAppGateway": {
+                        "value": "[parameters('subnetForAppGateway')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
