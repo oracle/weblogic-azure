@@ -74,7 +74,7 @@ jobs:
                 java-version: 1.8
             - name: Set up bicep
               run: |
-                curl -Lo bicep https://github.com/Azure/bicep/releases/download/v0.4.613/bicep-linux-x64
+                curl -Lo bicep https://github.com/Azure/bicep/releases/download/v0.8.9/bicep-linux-x64
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version

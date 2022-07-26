@@ -42,7 +42,6 @@ var const_createGatewayIngressSvcScript = 'createAppGatewayIngress.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_primaryScript = 'setupNetworking.sh'
 var const_utilityScript = 'utility.sh'
-var name_deploymentName = 'ds-networking-deployment'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-networking-deployment'
@@ -167,11 +166,11 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
 }
 
-output adminConsoleLBEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminConsoleEndpoint != 'null') ? format('http://{0}/', reference(name_deploymentName).outputs.adminConsoleEndpoint) : ''
-output adminConsoleLBSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminConsoleEndpoint != 'null') ? format('https://{0}/', reference(name_deploymentName).outputs.adminConsoleEndpoint) : ''
-output adminServerT3LBEndpoint string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminServerT3Endpoint != 'null') ? reference(name_deploymentName).outputs.adminServerT3Endpoint : ''
-output adminRemoteEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminRemoteEndpoint != 'null') ? format('http://{0}', reference(name_deploymentName).outputs.adminRemoteEndpoint) : ''
-output adminRemoteSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.adminRemoteEndpoint != 'null') ? format('https://{0}', reference(name_deploymentName).outputs.adminRemoteEndpoint) : ''
-output clusterLBEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('http://{0}/', reference(name_deploymentName).outputs.clusterEndpoint) : ''
-output clusterLBSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterEndpoint != 'null') ? format('https://{0}/', reference(name_deploymentName).outputs.clusterEndpoint) : ''
-output clusterT3LBEndpoint string = length(lbSvcValues) > 0 && (reference(name_deploymentName).outputs.clusterT3Endpoint != 'null') ? reference(name_deploymentName).outputs.clusterT3Endpoint : ''
+output adminConsoleLBEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.adminConsoleEndpoint != 'null') ? format('http://{0}/', deploymentScript.properties.outputs.adminConsoleEndpoint) : ''
+output adminConsoleLBSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.adminConsoleEndpoint != 'null') ? format('https://{0}/', deploymentScript.properties.outputs.adminConsoleEndpoint) : ''
+output adminServerT3LBEndpoint string = length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.adminServerT3Endpoint != 'null') ? deploymentScript.properties.outputs.adminServerT3Endpoint : ''
+output adminRemoteEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.adminRemoteEndpoint != 'null') ? format('http://{0}', deploymentScript.properties.outputs.adminRemoteEndpoint) : ''
+output adminRemoteSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.adminRemoteEndpoint != 'null') ? format('https://{0}', deploymentScript.properties.outputs.adminRemoteEndpoint) : ''
+output clusterLBEndpoint string = (!enableCustomSSL) && length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.clusterEndpoint != 'null') ? format('http://{0}/', deploymentScript.properties.outputs.clusterEndpoint) : ''
+output clusterLBSecuredEndpoint string = enableCustomSSL && length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.clusterEndpoint != 'null') ? format('https://{0}/', deploymentScript.properties.outputs.clusterEndpoint) : ''
+output clusterT3LBEndpoint string = length(lbSvcValues) > 0 && (deploymentScript.properties.outputs.clusterT3Endpoint != 'null') ? deploymentScript.properties.outputs.clusterT3Endpoint : ''
