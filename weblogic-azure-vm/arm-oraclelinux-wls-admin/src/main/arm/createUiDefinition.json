@@ -721,26 +721,6 @@
                 "label": "Networking",
                 "elements": [
                     {
-                        "name": "customVnet",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Customize the virtual network for this deployment",
-                        "defaultValue": "No",
-                        "toolTip": "If yes, you can customize the virtual network into which the offer will deploy the WebLogic Server VM. If no, the offer will create a new virtual network.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "No",
-                                    "value": false
-                                },
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
                         "name": "vnetInfo",
                         "type": "Microsoft.Common.InfoBox",
                         "options": {
@@ -751,7 +731,6 @@
                     {
                         "name": "virtualNetwork",
                         "type": "Microsoft.Network.VirtualNetworkCombo",
-                        "visible": "[steps('section_networkingConfiguration').customVnet]",
                         "label": {
                             "virtualNetwork": "Virtual network",
                             "subnets": "Subnets"
