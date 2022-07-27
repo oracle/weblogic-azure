@@ -200,6 +200,18 @@ cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
        NodeManagerUsername: "$wlsUserName"
        NodeManagerPasswordEncrypted: "$wlsPassword"
 EOF
+
+hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
+echo "hasRemoteAnonymousAttribs: ${hasRemoteAnonymousAttribs}"
+
+if [ "${hasRemoteAnonymousAttribs}" == "true" ];
+then
+echo "adding settings to disable remote anonymous t3/rmi disabled under domain security configuration"
+cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+       RemoteAnonymousRmiiiopEnabled: false
+       RemoteAnonymousRmit3Enabled: false
+EOF
+fi
 }
 
 #Creates weblogic deployment model for cluster domain managed server
@@ -259,6 +271,20 @@ EOF
        NodeManagerUsername: "$wlsUserName"
        NodeManagerPasswordEncrypted: "$wlsPassword"
 EOF
+
+hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
+echo "hasRemoteAnonymousAttribs: ${hasRemoteAnonymousAttribs}"
+
+
+if [ "${hasRemoteAnonymousAttribs}" == "true" ];
+then
+echo "adding settings to disable remote anonymous t3/rmi disabled under domain security configuration"
+cat <<EOF>>$DOMAIN_PATH/managed-domain.yaml
+       RemoteAnonymousRmiiiopEnabled: false
+       RemoteAnonymousRmit3Enabled: false
+EOF
+fi
+
 }
 
 #This function to add machine for a given managed server
@@ -764,43 +790,24 @@ function setUMaskForSecurityDir()
    fi
 }
 
-#this function disables remote anonymous requests as required by Weblogic security checks
-function disableRemoteAnonymousRequests()
+#this function checks if remote Anonymous T3/RMI Attributes are available as part of domain security configuration
+function containsRemoteAnonymousT3RMIIAttribs()
 {
-    echo "DisableRemoteAnonymousRequests for domain  $wlsDomainName"
-    cat <<EOF >$DOMAIN_PATH/disableAnonymousRequests.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
-try:
-    edit("$wlsServerName")
-    startEdit()
-    cd("SecurityConfiguration/$wlsDomainName")
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/modelHelp.sh -oracle_home $oracleHome topology:/SecurityConfiguration | grep RemoteAnonymousRmiiiopEnabled" >> /dev/null
 
-    if hasattr(cmo,'setRemoteAnonymousRMIIIOPEnabled'):
-      cmo.setRemoteAnonymousRMIIIOPEnabled(false)
-    else:
-       print 'no attribute: SecurityConfiguration/$wlsDomainName: cmo.setRemoteAnonymousRMIIIOPEnabled'
+    result1=$?
 
-    if hasattr(cmo,'setRemoteAnonymousRMIT3Enabled'):
-      cmo.setRemoteAnonymousRMIT3Enabled(false)
-    else:
-      print 'no attribute: SecurityConfiguration/$wlsDomainName: setRemoteAnonymousRMIT3Enabled'
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/modelHelp.sh -oracle_home $oracleHome topology:/SecurityConfiguration | grep RemoteAnonymousRmit3Enabled" >> /dev/null
 
-    save()
-    activate()
-except Exception,e:
-    print e
-    print "Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
-    dumpStack()
-disconnect()
-EOF
-sudo chown -R $username:$groupname $DOMAIN_PATH
-runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/disableAnonymousRequests.py"
-if [[ $? != 0 ]]; then
-  echo "Error : Failed to DisableRemoteAnonymousRequests for domain  $wlsDomainName"
-  exit 1
-fi
+    result2=$?
 
+    if [ $result1 == 0 ] && [ $result2 == 0 ]; then
+      echo "true"
+    else
+      echo "false"
+    fi
 }
+
 
 function generateCustomHostNameVerifier()
 {
@@ -941,7 +948,6 @@ then
   enabledAndStartNodeManagerService
   enableAndStartAdminServerService
   wait_for_admin
-  disableRemoteAnonymousRequests
   configureCustomHostNameVerifier
 else
   wait_for_admin
