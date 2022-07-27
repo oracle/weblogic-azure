@@ -29,8 +29,7 @@ var _signedFrontendCertAndNoBackendCert = !empty(keyvaultFrontendCertPswSecretNa
 var _signedFrontendCertAndBackendCert = !empty(keyvaultFrontendCertPswSecretName) && enableCustomSSL
 var const_null = 'null' // To mitigate arm-ttk error: Parameter-Types-Should-Be-Consistent
 var name_gatewayDeploymentPrefix = 'app-gateway-deployment-'
-var name_gatewayDeployment = _selfSignedFrontendCertAndNoBackendCert ? '${name_gatewayDeploymentPrefix}1' : (_selfSignedFrontendCertAndBackendCert ? '${name_gatewayDeploymentPrefix}2' : _signedFrontendCertAndNoBackendCert ? '${name_gatewayDeploymentPrefix}3' : '${name_gatewayDeploymentPrefix}4')
-var ref_gatewayDeployment = reference(name_gatewayDeployment)
+var ref_gatewayDeployment = _selfSignedFrontendCertAndNoBackendCert ? appgwDeployment1 : (_selfSignedFrontendCertAndBackendCert ? appgwDeployment2 : _signedFrontendCertAndNoBackendCert ? appgwDeployment3 : appgwDeployment4)
 
 module pidAppgwStart './_pids/_pid.bicep' = {
   name: 'pid-app-gateway-start-deployment'
@@ -168,11 +167,11 @@ module pidAppgwEnd './_pids/_pid.bicep' = {
   ]
 }
 
-output appGatewayAlias string = ref_gatewayDeployment.outputs.appGatewayAlias.value
-output appGatewayId string = ref_gatewayDeployment.outputs.appGatewayId.value
-output appGatewayName string = ref_gatewayDeployment.outputs.appGatewayName.value
-output appGatewayURL string = ref_gatewayDeployment.outputs.appGatewayURL.value
-output appGatewaySecuredURL string = ref_gatewayDeployment.outputs.appGatewaySecuredURL.value
+output appGatewayAlias string = ref_gatewayDeployment.outputs.appGatewayAlias
+output appGatewayId string = ref_gatewayDeployment.outputs.appGatewayId
+output appGatewayName string = ref_gatewayDeployment.outputs.appGatewayName
+output appGatewayURL string = uri(ref_gatewayDeployment.outputs.appGatewayURL, '')
+output appGatewaySecuredURL string = uri(ref_gatewayDeployment.outputs.appGatewaySecuredURL, '')
 // To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the resourceGroup property when hideExisting is false
 output vnetResourceGroupName string = vnetRGNameForApplicationGateway
 // To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the newOrExisting property when hideExisting is false

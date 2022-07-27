@@ -10,7 +10,8 @@ param utcValue string = utcNow()
 param wlsClusterName string = 'cluster-1'
 param wlsDomainUID string = 'sample-domain1'
 
-var const_deploymentName='ds-query-wls-configurations'
+// To mitigate arm-ttk error: Unreferenced variable: $fxv#0
+var base64_queryDomainConfigurations = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryDomainConfigurations.sh')
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'ds-query-wls-configurations'
@@ -37,14 +38,14 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: wlsDomainUID
       }
     ]
-    scriptContent: loadTextContent('../../../arm/scripts/inline-scripts/queryDomainConfigurations.sh')
+    scriptContent: base64ToString(base64_queryDomainConfigurations)
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue
   }
 }
 
-output shellCmdtoOutputWlsDomainYaml string = format('echo -e {0} | base64 -d > domain.yaml', reference(const_deploymentName).outputs.domainDeploymentYaml)
-output shellCmdtoOutputWlsImageModelYaml string = format('echo -e {0} | base64 -d > model.yaml', reference(const_deploymentName).outputs.wlsImageModelYaml)
-output shellCmdtoOutputWlsImageProperties string = format('echo -e {0} | base64 -d > model.properties', reference(const_deploymentName).outputs.wlsImageProperties)
-output shellCmdtoOutputWlsVersions string = format('echo -e {0} | base64 -d > version.info', reference(const_deploymentName).outputs.wlsVersionDetails)
+output shellCmdtoOutputWlsDomainYaml string = format('echo -e {0} | base64 -d > domain.yaml', deploymentScript.properties.outputs.domainDeploymentYaml)
+output shellCmdtoOutputWlsImageModelYaml string = format('echo -e {0} | base64 -d > model.yaml', deploymentScript.properties.outputs.wlsImageModelYaml)
+output shellCmdtoOutputWlsImageProperties string = format('echo -e {0} | base64 -d > model.properties', deploymentScript.properties.outputs.wlsImageProperties)
+output shellCmdtoOutputWlsVersions string = format('echo -e {0} | base64 -d > version.info', deploymentScript.properties.outputs.wlsVersionDetails)

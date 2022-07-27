@@ -9,7 +9,10 @@ param identity object = {}
 param location string
 param utcValue string = utcNow()
 
-var const_deploymentName='ds-query-private-ip'
+// To mitigate arm-ttk error: Unreferenced variable: $fxv#0
+var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
+var base64_queryPrivateIPForAppGateway = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh')
+var const_deploymentName = 'ds-query-private-ip'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
@@ -18,7 +21,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh'))
+    scriptContent: format('{0}\r\n\r\n{1}', base64ToString(base64_common), base64ToString(base64_queryPrivateIPForAppGateway))
     environmentVariables: [
       {
         name: 'SUBNET_ID'
@@ -35,4 +38,4 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
 }
 
-output privateIP string = string(reference(const_deploymentName).outputs.privateIP)
+output privateIP string = string(deploymentScript.properties.outputs.privateIP)

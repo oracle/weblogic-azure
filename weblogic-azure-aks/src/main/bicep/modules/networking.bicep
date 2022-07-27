@@ -58,8 +58,7 @@ var _enableAppGWIngress = enableAppGWIngress
 var const_appgwCustomDNSAlias = format('{0}.{1}/', dnszoneClusterLabel, dnszoneName)
 var const_appgwAdminCustomDNSAlias = format('{0}.{1}/', dnszoneAdminConsoleLabel, dnszoneName)
 var const_enableLbService = length(lbSvcValues) > 0
-var name_networkDeployment = _enableAppGWIngress ? 'ds-networking-deployment-yes-appgw' : 'ds-networking-deployment-no-appgw'
-var ref_networkDeployment = reference(name_networkDeployment)
+var ref_networkDeployment = _enableAppGWIngress ? networkingDeploymentYesAppGW : networkingDeploymentNoAppGW
 
 module pidNetworkingStart './_pids/_pid.bicep' = {
   name: 'pid-networking-start-deployment'
@@ -230,11 +229,11 @@ module pidNetworkingEnd './_pids/_pid.bicep' = {
   ]
 }
 
-output adminConsoleExternalEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appGatewayAlias)) : ref_networkDeployment.outputs.adminConsoleLBEndpoint.value
-output adminConsoleExternalSecuredEndpoint string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminConsoleLBSecuredEndpoint.value
-output adminRemoteConsoleEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appGatewayAlias)) : ref_networkDeployment.outputs.adminRemoteEndpoint.value
-output adminRemoteConsoleSecuredEndpoint string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminRemoteSecuredEndpoint.value
-output adminServerT3ChannelEndpoint string = format('{0}://{1}', enableCustomSSL ? 't3s': 't3', ref_networkDeployment.outputs.adminServerT3LBEndpoint.value)
-output clusterExternalEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appGatewayURL) : ref_networkDeployment.outputs.clusterLBEndpoint.value
-output clusterExternalSecuredEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appGatewaySecuredURL) : ref_networkDeployment.outputs.clusterLBSecuredEndpoint.value
-output clusterT3ChannelEndpoint string = format('{0}://{1}', enableCustomSSL ? 't3s': 't3', ref_networkDeployment.outputs.clusterT3LBEndpoint.value)
+output adminConsoleExternalEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}console', const_appgwAdminCustomDNSAlias) : format('http://{0}/console', appGatewayAlias)) : ref_networkDeployment.outputs.adminConsoleLBEndpoint
+output adminConsoleExternalSecuredEndpoint string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}console', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminConsoleLBSecuredEndpoint
+output adminRemoteConsoleEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : format('http://{0}/remoteconsole', appGatewayAlias)) : ref_networkDeployment.outputs.adminRemoteEndpoint
+output adminRemoteConsoleSecuredEndpoint string = enableAppGWIngress && enableCustomSSL && enableDNSConfiguration ? format('https://{0}remoteconsole', const_appgwAdminCustomDNSAlias) : ref_networkDeployment.outputs.adminRemoteSecuredEndpoint
+output adminServerT3ChannelEndpoint string = format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', ref_networkDeployment.outputs.adminServerT3LBEndpoint)
+output clusterExternalEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('http://{0}', const_appgwCustomDNSAlias) : appGatewayURL) : ref_networkDeployment.outputs.clusterLBEndpoint
+output clusterExternalSecuredEndpoint string = enableAppGWIngress ? (enableDNSConfiguration ? format('https://{0}', const_appgwCustomDNSAlias) : appGatewaySecuredURL) : ref_networkDeployment.outputs.clusterLBSecuredEndpoint
+output clusterT3ChannelEndpoint string = format('{0}://{1}', enableCustomSSL ? 't3s' : 't3', ref_networkDeployment.outputs.clusterT3LBEndpoint)

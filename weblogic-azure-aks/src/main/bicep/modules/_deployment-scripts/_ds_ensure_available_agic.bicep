@@ -9,6 +9,10 @@ param identity object = {}
 param location string
 param utcValue string = utcNow()
 
+// To mitigate arm-ttk error: Unreferenced variable: $fxv#0
+var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
+var base64_enableAgic = loadFileAsBase64('../../../arm/scripts/inline-scripts/enableAgic.sh')
+var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var const_deploymentName='ds-validate-agic'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -18,7 +22,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/utility.sh'), loadTextContent('../../../arm/scripts/inline-scripts/enableAgic.sh'))
+    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableAgic))
     environmentVariables: [
       {
         name: 'AKS_CLUSTER_RG_NAME'

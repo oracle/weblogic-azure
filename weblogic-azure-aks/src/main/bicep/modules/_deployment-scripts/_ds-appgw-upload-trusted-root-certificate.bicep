@@ -9,6 +9,8 @@ param identity object = {}
 param location string
 param utcValue string = utcNow()
 
+// To mitigate arm-ttk error: Unreferenced variable: $fxv#0
+var base64_uploadAppGatewayTrutedRootCert=loadFileAsBase64('../../../arm/scripts/uploadAppGatewayTrutedRootCert.sh')
 var const_arguments = '${resourceGroup().name} ${appgwName} ${sslBackendRootCertData}'
 var const_deploymentName='ds-upload-trusted-root-certificatre-to-gateway'
 
@@ -20,7 +22,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   properties: {
     azCliVersion: azCliVersion
     arguments: const_arguments
-    scriptContent: loadTextContent('../../../arm/scripts/uploadAppGatewayTrutedRootCert.sh')
+    scriptContent: base64ToString(base64_uploadAppGatewayTrutedRootCert)
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue

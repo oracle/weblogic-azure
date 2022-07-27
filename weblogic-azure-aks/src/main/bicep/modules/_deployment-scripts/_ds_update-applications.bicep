@@ -57,4 +57,4 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
 }
 
-output image string = reference('ds-wls-update-applications').outputs.image
+output image string = deploymentScript.properties.outputs.image
