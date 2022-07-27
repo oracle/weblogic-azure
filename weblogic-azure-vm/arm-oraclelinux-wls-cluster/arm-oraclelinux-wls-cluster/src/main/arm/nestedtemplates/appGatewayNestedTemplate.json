@@ -89,6 +89,38 @@
 				"description": "If true, will override the host name with dnszoneSubDomain."
 			}
 		},
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Specify whether to create a new or existing virtual network for the VM."
+            }
+        },
+		"virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "wls-vnet",
+            "metadata": {
+                "description": "Name of the existing or new VNET"
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group of Virtual network"
+            }
+        },
+        "subnetForAppGateway": {
+            "type": "string",
+            "defaultValue": "appgateway-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet for Application Gateway"
+            }
+        },
 		"wlsDomainName": {
 			"defaultValue": "wlsd",
 			"type": "string",
@@ -116,11 +148,13 @@
 		"const_appGatewayFrontEndHTTPSPort": 443,
 		"const_backendPort": 8001,
 		"const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "name_nic_with_pub_ip": "_NIC_with_pub_ip",
+        "name_nic_without_pub_ip": "_NIC_without_pub_ip",
 		"const_wlsAdminPort": "7005",
 		"const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
 		"name_appGateway": "myAppGateway",
 		"name_appGatewayCertificate": "appGwSslCertificate",
-		"name_appGatewaySubnet": "appGatewaySubnet",
+		"name_appGatewaySubnet": "[parameters('subnetForAppGateway')]",
 		"name_backendAddressPool": "myGatewayBackendPool",
 		"name_frontEndIPConfig": "appGwPublicFrontendIp",
 		"name_httpListener": "HTTPListener",
@@ -130,7 +164,7 @@
 		"name_httpsPort": "https_port",
 		"name_probe": "HTTPhealthProbe",
 		"name_scriptAGWConfiguration": "setupApplicationGateway.sh",
-		"name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+		"name_virtualNetwork": "[parameters('virtualNetworkName')]",
 		"obj_HTTPSettingsDefault": {
 			"provisioningState": "Succeeded",
 			"port": "[int(variables('const_backendPort'))]",
@@ -157,7 +191,7 @@
 			}
 		},
 		"ref_appGatewayPublicIP": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('gatewayPublicIPAddressName'))]",
-		"ref_appGatewaySubnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_appGatewaySubnet'))]",
+		"ref_appGatewaySubnet": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_appGatewaySubnet'))]",
 		"ref_backendAddressPool": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('name_appGateway'),variables('name_backendAddressPool'))]",
 		"ref_backendHttpSettings": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('name_appGateway'),variables('name_httpSetting'))]",
 		"ref_backendProbe": "[resourceId('Microsoft.Network/applicationGateways/probes', variables('name_appGateway'),variables('name_probe'))]",
@@ -267,7 +301,7 @@
 									"name": "BackendAddresses",
 									"count": "[sub(int(parameters('numberOfInstances')),1)]",
 									"input": {
-										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), '_NIC')),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
+										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex('BackendAddresses',1), if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), variables('name_nic_with_pub_ip'), variables('name_nic_without_pub_ip')))),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
 									}
 								}
 							]

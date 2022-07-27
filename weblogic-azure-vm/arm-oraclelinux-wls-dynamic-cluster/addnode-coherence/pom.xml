@@ -10,7 +10,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-dynamic-cluster-addnode-coherence</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>

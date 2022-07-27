@@ -8,6 +8,7 @@ param _artifactsLocationSasToken string = ''
 param aksClusterName string 
 param aksClusterRGName string
 param databaseType string = 'oracle'
+param azCliVersion string = ''
 param dbConfigurationType string = 'createOrUpdate'
 param dbDriverName string = 'org.contoso.Driver'
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
@@ -16,7 +17,7 @@ param dbPassword string = newGuid()
 param dbTestTableName string = 'Null'
 param dbUser string
 param dsConnectionURL string
-param identity object
+param identity object = {}
 param jdbcDataSourceName string
 param location string
 param utcValue string = utcNow()
@@ -27,7 +28,6 @@ param wlsPassword string
 param wlsUserName string = 'weblogic'
 
 var const_arguments = '${aksClusterRGName} ${aksClusterName} ${databaseType} ${dbPassword} ${dbUser} "${dsConnectionURL}" ${jdbcDataSourceName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${dbConfigurationType}'
-var const_azcliVersion='2.15.0'
 var const_commonScript = 'common.sh'
 var const_datasourceScript='setupDBConnections.sh'
 var const_datasourceModelScript='genDatasourceModel.sh'
@@ -42,7 +42,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: const_azcliVersion
+    azCliVersion: azCliVersion
     arguments: const_arguments
     environmentVariables: [
       {

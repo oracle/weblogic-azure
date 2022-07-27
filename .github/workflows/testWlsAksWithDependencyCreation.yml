@@ -21,7 +21,7 @@ on:
     types: [aks-integration-test-with-dependency-creation,integration-test-all]
 
 env:
-    refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
+    refArmttk: bad2965565e2e69318039bc15c2496844d55a59d
     refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
     azCliVersion: 2.30.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -30,13 +30,11 @@ env:
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
-    servicePrincipal: ${{ secrets.SERVICE_PRINCIPAL }}
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
     wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
-    userAssignedManagedIdentity: ${{ secrets.USER_ASSIGNED_MANAGED_IDENTITY_ID }}
     resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
@@ -256,18 +254,16 @@ jobs:
                 sed -i "s/#location#/${location}/g; \
                         s/#wlsUserName#/${wlsUserName}/g; \
                         s/#wlsPassword#/${wlsPassword}/g; \
-                        s/#userAssignedManagedIdentity#/${userAssignedManagedIdentity}/g; \
                         s/#ocrSSOPSW#/${ocrSSOPSW}/g; \
                         s/#ocrSSOUser#/${ocrSSOUser}/g; \
                         s/#appPackageUrls#/${cargoTrackerBlobUrl}/g; \
-                        s/#servicePrincipal#/${servicePrincipal}/g; \
                         s/#wdtRuntimePassword#/${wdtRuntimePassword}/g; \
                         s/#testbranchName#/${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}/g; \
                         s/#gitUserName#/${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }}/g; \
                         s/#dbPassword#/${dbPassword}/g; \
                         s/#dbUser#/${dbAdminUser}@${dbName}/g; \
                         s/#dsConnectionURL#/jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres/g" \
-                        weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.json
+                        weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.jsonc
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
               uses: azure/CLI@v1
@@ -278,7 +274,7 @@ jobs:
                     --verbose \
                     --resource-group ${{ env.resourceGroupForWlsAks }} \
                     --name wls-on-aks \
-                    --parameters @weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.json \
+                    --parameters @weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.jsonc \
                     --template-file ${artifactName}/mainTemplate.json
             - name: Query Application Gateway URL
               run: |

@@ -8,38 +8,26 @@
 
 echo "Script  ${0} starts"
 
-# read <spBase64String> <appgwFrontendSSLCertPsw> from stdin
-function read_sensitive_parameters_from_stdin() {
-  read spBase64String appgwFrontendSSLCertPsw
-}
-
 function generate_appgw_cluster_config_file_expose_https() {
-    clusterIngressHttpsName=${wlsDomainUID}-cluster-appgw-ingress-https-svc
-    clusterAppgwIngressHttpsYamlPath=${scriptDir}/appgw-cluster-ingress-https-svc.yaml
-    cat <<EOF >${clusterAppgwIngressHttpsYamlPath}
+  clusterIngressHttpsName=${WLS_DOMAIN_UID}-cluster-appgw-ingress-https-svc
+  clusterAppgwIngressHttpsYamlPath=${scriptDir}/appgw-cluster-ingress-https-svc.yaml
+  cat <<EOF >${clusterAppgwIngressHttpsYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${clusterIngressHttpsName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
-EOF
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    cat <<EOF >>${clusterAppgwIngressHttpsYamlPath}
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
-  tls:
-  - secretName: ${appgwFrontendSecretName}
   rules:
     - http:
         paths:
@@ -54,29 +42,23 @@ EOF
 }
 
 function generate_appgw_cluster_config_file_nossl() {
-    clusterIngressName=${wlsDomainUID}-cluster-appgw-ingress-svc
-    clusterAppgwIngressYamlPath=${scriptDir}/appgw-cluster-ingress-svc.yaml
-    cat <<EOF >${clusterAppgwIngressYamlPath}
+  clusterIngressName=${WLS_DOMAIN_UID}-cluster-appgw-ingress-svc
+  clusterAppgwIngressYamlPath=${scriptDir}/appgw-cluster-ingress-svc.yaml
+  cat <<EOF >${clusterAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${clusterIngressName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
-EOF
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    cat <<EOF >>${clusterAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
   rules:
     - http:
@@ -92,45 +74,41 @@ EOF
 }
 
 function generate_appgw_cluster_config_file_ssl() {
-    clusterIngressName=${wlsDomainUID}-cluster-appgw-ingress-svc
-    clusterAppgwIngressYamlPath=${scriptDir}/appgw-cluster-ingress-svc.yaml
-    cat <<EOF >${clusterAppgwIngressYamlPath}
+  clusterIngressName=${WLS_DOMAIN_UID}-cluster-appgw-ingress-svc
+  clusterAppgwIngressYamlPath=${scriptDir}/appgw-cluster-ingress-svc.yaml
+  cat <<EOF >${clusterAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${clusterIngressName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 EOF
-    if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
-        cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/backend-hostname: "${dnsClusterLabel}.${dnsZoneName}"
-EOF
-    else
-        cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/backend-hostname: "${appgwAlias}"
-EOF
-    fi
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
+  if [[ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]]; then
     cat <<EOF >>${clusterAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
+    appgw.ingress.kubernetes.io/backend-hostname: "${DNS_CLUSTER_LABEL}.${DNS_ZONE_NAME}"
+EOF
+  else
+    cat <<EOF >>${clusterAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/backend-hostname: "${APPGW_ALIAS}"
+EOF
+  fi
+
+  cat <<EOF >>${clusterAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${APPGW_TRUSTED_ROOT_CERT_NAME}"
 
 spec:
-  tls:
-  - secretName: ${appgwFrontendSecretName}
   rules:
     - http:
         paths:
@@ -145,29 +123,22 @@ EOF
 }
 
 function generate_appgw_admin_config_file_nossl() {
-    adminIngressName=${wlsDomainUID}-admin-appgw-ingress-svc
-    adminAppgwIngressYamlPath=${scriptDir}/appgw-admin-ingress-svc.yaml
-    cat <<EOF >${adminAppgwIngressYamlPath}
+  adminIngressName=${WLS_DOMAIN_UID}-admin-appgw-ingress-svc
+  adminAppgwIngressYamlPath=${scriptDir}/appgw-admin-ingress-svc.yaml
+  cat <<EOF >${adminAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${adminIngressName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constAdminServerName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
-EOF
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    cat <<EOF >>${adminAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
 spec:
   rules:
     - http:
@@ -183,28 +154,21 @@ EOF
 }
 
 function generate_appgw_admin_remote_config_file_nossl() {
-    cat <<EOF >${adminRemoteAppgwIngressYamlPath}
+  cat <<EOF >${adminRemoteAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${adminRemoteIngressName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constAdminServerName}-remote-console"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
-EOF
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
-    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
 spec:
   rules:
     - http:
@@ -220,46 +184,41 @@ EOF
 }
 
 function generate_appgw_admin_config_file_ssl() {
-    adminIngressName=${wlsDomainUID}-admin-appgw-ingress-svc
-    adminAppgwIngressYamlPath=${scriptDir}/appgw-admin-ingress-svc.yaml
-    cat <<EOF >${adminAppgwIngressYamlPath}
+  adminIngressName=${WLS_DOMAIN_UID}-admin-appgw-ingress-svc
+  adminAppgwIngressYamlPath=${scriptDir}/appgw-admin-ingress-svc.yaml
+  cat <<EOF >${adminAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${adminIngressName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constAdminServerName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
 EOF
 
-    if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
-        cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/backend-hostname: "${dnsAdminLabel}.${dnsZoneName}"
-EOF
-    else
-        cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/backend-hostname: "${appgwAlias}"
-EOF
-    fi
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
+  if [[ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]]; then
     cat <<EOF >>${adminAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
+    appgw.ingress.kubernetes.io/backend-hostname: "${DNS_ADMIN_LABEL}.${DNS_ZONE_NAME}"
+EOF
+  else
+    cat <<EOF >>${adminAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/backend-hostname: "${APPGW_ALIAS}"
+EOF
+  fi
+
+  cat <<EOF >>${adminAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${APPGW_TRUSTED_ROOT_CERT_NAME}"
 
 spec:
-  tls:
-  - secretName: ${appgwFrontendSecretName}
   rules:
     - http:
         paths:
@@ -274,14 +233,14 @@ EOF
 }
 
 function generate_appgw_admin_remote_config_file_ssl() {
-    cat <<EOF >${adminRemoteAppgwIngressYamlPath}
+  cat <<EOF >${adminRemoteAppgwIngressYamlPath}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ${adminRemoteIngressName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constAdminServerName}-remote-console"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
@@ -289,31 +248,25 @@ metadata:
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
-    
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
+    appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
 EOF
 
-    if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
-        cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/backend-hostname: "${dnsAdminLabel}.${dnsZoneName}"
-EOF
-    else
-        cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/backend-hostname: "${appgwAlias}"
-EOF
-    fi
-
-    if [[ "${enableCookieBasedAffinity,,}" == "true" ]]; then
-        cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-EOF
-    fi
-
+  if [[ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]]; then
     cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
-    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${appgwBackendSecretName}"
+    appgw.ingress.kubernetes.io/backend-hostname: "${DNS_ADMIN_LABEL}.${DNS_ZONE_NAME}"
+EOF
+  else
+    cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/backend-hostname: "${APPGW_ALIAS}"
+EOF
+  fi
+
+  cat <<EOF >>${adminRemoteAppgwIngressYamlPath}
+    appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${APPGW_TRUSTED_ROOT_CERT_NAME}"
 
 spec:
-  tls:
-  - secretName: ${appgwFrontendSecretName}
   rules:
     - http:
         paths:
@@ -328,72 +281,90 @@ EOF
 }
 
 function query_admin_target_port() {
-    if [[ "${enableCustomSSL,,}" == "true" ]]; then
-        adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default-secure')
-    else
-        adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default')
-    fi
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
+    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default-secure')
+  else
+    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default')
+  fi
 
-    echo "Admin port of ${adminServerName}: ${adminTargetPort}"
+  echo "Admin port of ${adminServerName}: ${adminTargetPort}"
 }
 
 # Create network peers for aks and appgw
 function network_peers_aks_appgw() {
-    # To successfully peer two virtual networks command 'az network vnet peering create' must be called twice with the values
-    # for --vnet-name and --remote-vnet reversed.
-    aksMCRGName=$(az aks show -n $aksClusterName -g $aksClusterRGName -o tsv --query "nodeResourceGroup")
-    ret=$(az group exists -n ${aksMCRGName})
-    if [ "${ret,,}" == "false" ]; then
-        echo_stderr "AKS namaged resource group ${aksMCRGName} does not exist."
-        exit 1
-    fi
+  # To successfully peer two virtual networks command 'az network vnet peering create' must be called twice with the values
+  # for --vnet-name and --remote-vnet reversed.
 
-    aksNetWorkId=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].id')
-    aksNetworkName=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].name')
-    appGatewaySubnetId=$(az network application-gateway show -g ${curRGName} --name ${appgwName} -o tsv --query "gatewayIpConfigurations[0].subnet.id")
-    appGatewayVnetResourceGroup=$(az network application-gateway show -g ${curRGName} --name ${appgwName} -o tsv --query "gatewayIpConfigurations[0].subnet.resourceGroup")
-    appGatewaySubnetName=$(az resource show --ids ${appGatewaySubnetId} --query "name" -o tsv)
-    appgwNetworkId=$(echo $appGatewaySubnetId | sed s/"\/subnets\/${appGatewaySubnetName}"//)
-    appgwVnetName=$(az resource show --ids ${appgwNetworkId} --query "name" -o tsv)
+  local aksMCRGName=$(az aks show -n $AKS_CLUSTER_NAME -g $AKS_CLUSTER_RG_NAME -o tsv --query "nodeResourceGroup")
+  local ret=$(az group exists -n ${aksMCRGName})
+  if [ "${ret,,}" == "false" ]; then
+      echo_stderr "AKS namaged resource group ${aksMCRGName} does not exist."
+      exit 1
+  fi
 
-    local toPeer=true
-    # if the AKS and App Gateway have the same VNET, need not peer.
-    if [ "${aksNetWorkId}" == "${appgwNetworkId}" ]; then
-        echo_stdout "AKS and Application Gateway are in the same virtual network: ${appgwNetworkId}."
-        toPeer=false
-    fi
+  # query vnet from managed resource group
+  local aksNetWorkId=$(az resource list -g ${aksMCRGName} --resource-type Microsoft.Network/virtualNetworks -o tsv --query '[*].id')
 
-    # check if the Vnets have been peered.
-    local ret=$(az network vnet peering list \
-        --resource-group ${appGatewayVnetResourceGroup} \
-        --vnet-name ${appgwVnetName} -o json \
-        | jq ".[] | select(.remoteVirtualNetwork.id==\"${aksNetWorkId}\")")
-    if [ -n "$ret" ]; then
-        echo_stdout "VNET of AKS ${aksNetWorkId} and Application Gateway ${appgwNetworkId} is peering."
-        toPeer=false
-    fi
+  # no vnet in managed resource group, then query vnet from aks agent
+  if [ -z "${aksNetWorkId}" ]; then
+    # assume all the agent pools are in the same vnet
+    # e.g. /subscriptions/xxxx-xxxx-xxxx-xxxx/resourceGroups/foo-rg/providers/Microsoft.Network/virtualNetworks/foo-aks-vnet/subnets/default
+    local aksAgent1Subnet=$(az aks show -n $AKS_CLUSTER_NAME -g $AKS_CLUSTER_RG_NAME | jq '.agentPoolProfiles[0] | .vnetSubnetId' | tr -d "\"")
+    utility_validate_status "Get subnet id of aks agent 0."
+    aksNetWorkId=${aksAgent1Subnet%\/subnets\/*}
+  fi
 
-    if [ "${toPeer}" == "true" ]; then
-        az network vnet peering create \
-            --name aks-appgw-peer \
-            --remote-vnet ${aksNetWorkId} \
-            --resource-group ${appGatewayVnetResourceGroup} \
-            --vnet-name ${appgwVnetName} \
-            --allow-vnet-access
-        utility_validate_status "Create network peers for $aksNetWorkId and ${appgwNetworkId}."
+  local aksNetworkName=${aksNetWorkId#*\/virtualNetworks\/}
+  local aksNetworkRgName=${aksNetWorkId#*\/resourceGroups\/}
+  local aksNetworkRgName=${aksNetworkRgName%\/providers\/*}
 
-        az network vnet peering create \
-            --name aks-appgw-peer \
-            --remote-vnet ${appgwNetworkId} \
-            --resource-group ${aksMCRGName} \
-            --vnet-name ${aksNetworkName} \
-            --allow-vnet-access
+  local appGatewaySubnetId=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIpConfigurations[0].subnet.id")
+  local appGatewayVnetResourceGroup=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIpConfigurations[0].subnet.resourceGroup")
+  local appGatewaySubnetName=$(az resource show --ids ${appGatewaySubnetId} --query "name" -o tsv)
+  local appgwNetworkId=$(echo $appGatewaySubnetId | sed s/"\/subnets\/${appGatewaySubnetName}"//)
+  local appgwVnetName=$(az resource show --ids ${appgwNetworkId} --query "name" -o tsv)
 
-        utility_validate_status "Complete creating network peers for $aksNetWorkId and ${appgwNetworkId}."
-    fi
+  local toPeer=true
+  # if the AKS and App Gateway have the same VNET, need not peer.
+  if [ "${aksNetWorkId}" == "${appgwNetworkId}" ]; then
+    echo_stdout "AKS and Application Gateway are in the same virtual network: ${appgwNetworkId}."
+    toPeer=false
+  fi
 
-    # For Kbectl network plugin: https://azure.github.io/application-gateway-kubernetes-ingress/how-tos/networking/#with-kubenet
-    # find route table used by aks cluster
+  # check if the Vnets have been peered.
+  local ret=$(az network vnet peering list \
+    --resource-group ${appGatewayVnetResourceGroup} \
+    --vnet-name ${appgwVnetName} -o json |
+    jq ".[] | select(.remoteVirtualNetwork.id==\"${aksNetWorkId}\")")
+  if [ -n "$ret" ]; then
+    echo_stdout "VNET of AKS ${aksNetWorkId} and Application Gateway ${appgwNetworkId} is peering."
+    toPeer=false
+  fi
+
+  if [ "${toPeer}" == "true" ]; then
+    az network vnet peering create \
+      --name aks-appgw-peer \
+      --remote-vnet ${aksNetWorkId} \
+      --resource-group ${appGatewayVnetResourceGroup} \
+      --vnet-name ${appgwVnetName} \
+      --allow-vnet-access
+    utility_validate_status "Create network peers for $aksNetWorkId and ${appgwNetworkId}."
+
+    az network vnet peering create \
+      --name aks-appgw-peer \
+      --remote-vnet ${appgwNetworkId} \
+      --resource-group ${aksNetworkRgName} \
+      --vnet-name ${aksNetworkName} \
+      --allow-vnet-access
+
+    utility_validate_status "Complete creating network peers for $aksNetWorkId and ${appgwNetworkId}."
+  fi
+
+  # For kubenet network plugin: https://azure.github.io/application-gateway-kubernetes-ingress/how-tos/networking/#with-kubenet
+  # find route table used by aks cluster
+  local networkPlugin=$(az aks show -n $AKS_CLUSTER_NAME -g $AKS_CLUSTER_RG_NAME --query "networkProfile.networkPlugin" -o tsv)
+  if [[ "${networkPlugin}" == "kubenet" ]]; then
+    # the route table is in MC_ resource group
     routeTableId=$(az network route-table list -g $aksMCRGName --query "[].id | [0]" -o tsv)
 
     # associate the route table to Application Gateway's subnet
@@ -402,241 +373,174 @@ function network_peers_aks_appgw() {
         --route-table $routeTableId
 
     utility_validate_status "Associate the route table ${routeTableId} to Application Gateway's subnet ${appGatewaySubnetId}"
+  fi
 }
 
 function query_cluster_target_port() {
-    if [[ "${enableCustomSSL,,}" == "true" ]]; then
-        clusterTargetPort=$(utility_query_service_port ${svcCluster} ${wlsDomainNS} 'default-secure')
-    else
-        clusterTargetPort=$(utility_query_service_port ${svcCluster} ${wlsDomainNS} 'default')
-    fi
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
+    clusterTargetPort=$(utility_query_service_port ${svcCluster} ${wlsDomainNS} 'default-secure')
+  else
+    clusterTargetPort=$(utility_query_service_port ${svcCluster} ${wlsDomainNS} 'default')
+  fi
 
-    echo "Cluster port of ${clusterName}: ${clusterTargetPort}"
-}
-
-function install_azure_ingress() {
-    # create sa and bind cluster-admin role
-    # grant azure ingress permission to access WebLogic service
-    kubectl apply -f ${scriptDir}/appgw-ingress-clusterAdmin-roleBinding.yaml
-
-    install_helm
-    helm repo add application-gateway-kubernetes-ingress ${appgwIngressHelmRepo}
-    helm repo update
-
-    # generate Helm config for azure ingress
-    customAppgwHelmConfig=${scriptDir}/appgw-helm-config.yaml
-    cp ${scriptDir}/appgw-helm-config.yaml.template ${customAppgwHelmConfig}
-    subID=${subID#*\/subscriptions\/}
-    sed -i -e "s:@SUB_ID@:${subID}:g" ${customAppgwHelmConfig}
-    sed -i -e "s:@APPGW_RG_NAME@:${curRGName}:g" ${customAppgwHelmConfig}
-    sed -i -e "s:@APPGW_NAME@:${appgwName}:g" ${customAppgwHelmConfig}
-    sed -i -e "s:@WATCH_NAMESPACE@:${wlsDomainNS}:g" ${customAppgwHelmConfig}
-    sed -i -e "s:@SP_ENCODING_CREDENTIALS@:${spBase64String}:g" ${customAppgwHelmConfig}
-    sed -i -e "s:@USE_PRIVATE_IP@:${appgwUsePrivateIP,,}:g" ${customAppgwHelmConfig}
-
-    helm install ingress-azure \
-        -f ${customAppgwHelmConfig} \
-        application-gateway-kubernetes-ingress/ingress-azure \
-        --version ${azureAppgwIngressVersion}
-
-    utility_validate_status "Install app gateway ingress controller."
-
-    attempts=0
-    podState="running"
-    while [ "$podState" == "running" ] && [ $attempts -lt ${checkPodStatusMaxAttemps} ]; do
-        podState="completed"
-        attempts=$((attempts + 1))
-        echo Waiting for Pod running...${attempts}
-        sleep ${checkPodStatusInterval}
-
-        ret=$(kubectl get pod -o json |
-            jq '.items[] | .status.containerStatuses[] | select(.name=="ingress-azure") | .ready')
-        if [[ "${ret}" == "false" ]]; then
-            podState="running"
-        fi
-    done
-
-    if [ "$podState" == "running" ] && [ $attempts -ge ${checkPodStatusMaxAttemps} ]; then
-        echo_stderr "Failed to install app gateway ingress controller."
-        exit 1
-    fi
-}
-
-function output_create_gateway_ssl_k8s_secret() {
-    echo "export gateway frontend certificates"
-    echo "$appgwFrontendSSLCertData" | base64 -d >${scriptDir}/$appgwFrontCertFileName
-
-    appgwFrontendSSLCertPassin=${appgwFrontendSSLCertPsw}
-    if [[ "$appgwCertificateOption" == "${appgwSelfsignedCert}" ]]; then
-        appgwFrontendSSLCertPassin="" # empty password
-    fi
-
-    openssl pkcs12 \
-        -in ${scriptDir}/$appgwFrontCertFileName \
-        -nocerts \
-        -out ${scriptDir}/$appgwFrontCertKeyFileName \
-        -passin pass:${appgwFrontendSSLCertPassin} \
-        -passout pass:${appgwFrontendSSLCertPsw}
-
-    utility_validate_status "Export key from frontend certificate."
-
-    openssl rsa -in ${scriptDir}/$appgwFrontCertKeyFileName \
-        -out ${scriptDir}/$appgwFrontCertKeyDecrytedFileName \
-        -passin pass:${appgwFrontendSSLCertPsw}
-
-    utility_validate_status "Decryte private key."
-
-    openssl pkcs12 \
-        -in ${scriptDir}/$appgwFrontCertFileName \
-        -clcerts \
-        -nokeys \
-        -out ${scriptDir}/$appgwFrontPublicCertFileName \
-        -passin pass:${appgwFrontendSSLCertPassin}
-
-    utility_validate_status "Export cert from frontend certificate."
-
-    echo "create k8s tsl secret for app gateway frontend ssl termination"
-    kubectl -n ${wlsDomainNS} create secret tls ${appgwFrontendSecretName} \
-        --key="${scriptDir}/$appgwFrontCertKeyDecrytedFileName" \
-        --cert="${scriptDir}/$appgwFrontPublicCertFileName"
-
-    utility_validate_status "create k8s tsl secret for app gateway frontend ssl termination."
-}
-
-function validate_backend_ca_cert() {
-    az network application-gateway root-cert list \
-        --gateway-name $appgwName \
-        --resource-group $curRGName |
-        jq '.[] | .name' | grep "${appgwBackendSecretName}"
-
-    utility_validate_status "check if backend cert exists."
+  echo "Cluster port of ${clusterName}: ${clusterTargetPort}"
 }
 
 function generate_appgw_cluster_config_file() {
-    if [[ "${enableCustomSSL,,}" == "true" ]]; then
-        generate_appgw_cluster_config_file_ssl
-    else
-        generate_appgw_cluster_config_file_nossl
-        generate_appgw_cluster_config_file_expose_https
-    fi
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
+    generate_appgw_cluster_config_file_ssl
+  else
+    generate_appgw_cluster_config_file_nossl
+    generate_appgw_cluster_config_file_expose_https
+  fi
 }
 
 function generate_appgw_admin_config_file() {
-    if [[ "${enableCustomSSL,,}" == "true" ]]; then
-        generate_appgw_admin_config_file_ssl
-    else
-        generate_appgw_admin_config_file_nossl
-    fi
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
+    generate_appgw_admin_config_file_ssl
+  else
+    generate_appgw_admin_config_file_nossl
+  fi
 }
 
 function generate_appgw_admin_remote_config_file() {
-    if [[ "${enableCustomSSL,,}" == "true" ]]; then
-        generate_appgw_admin_remote_config_file_ssl
-    else
-        generate_appgw_admin_remote_config_file_nossl
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
+    generate_appgw_admin_remote_config_file_ssl
+  else
+    generate_appgw_admin_remote_config_file_nossl
+  fi
+}
+
+# Currently, ingress controller does not have a tag that identifies it's ready to create ingress.
+# This function is to create an ingress and check it's status. If the ingress is not available, then re-create it again.
+function waitfor_agic_ready_and_create_ingress() {
+  local svcName=$1
+  local ymlFilePath=$2
+
+  local ready=false
+  local attempt=0
+  while [[ "${ready}" == "false" && $attempt -lt ${checkAGICStatusMaxAttempt} ]]; do
+    echo "Waiting for AGIC ready... ${attempt}"
+    attempt=$((attempt + 1))
+    kubectl apply -f ${ymlFilePath}
+
+    # wait for the ingress ready, if the ingress is not available then delete it
+    local svcAttempts=0
+    local svcState="running"
+    while [ "$svcState" == "running" ] && [ $svcAttempts -lt ${checkIngressStateMaxAttempt} ]; do
+      svcAttempts=$((svcAttempts + 1))
+      echo Waiting for job completed...${svcAttempts}
+      sleep ${checkSVCInterval}
+
+      ip=$(kubectl get ingress ${svcName} -n ${wlsDomainNS} -o json |
+        jq '.status.loadBalancer.ingress[0].ip')
+      echo "ip: ${ip}"
+      if [[ "${ip}" != "null" ]]; then
+        svcState="completed"
+        ready=true
+      fi
+    done
+
+    if [[ "${ready}" == "false" ]]; then
+      kubectl delete -f ${ymlFilePath}
+      sleep ${checkAGICStatusInterval}
     fi
+  done
+
+  if [ ${attempt} -ge ${checkAGICStatusMaxAttempt} ]; then
+    echo_stderr "azure igress is not ready to create ingress. "
+    exit 1
+  fi
+
 }
 
 function appgw_ingress_svc_for_cluster() {
-    # generate ingress svc config for cluster
-    generate_appgw_cluster_config_file
-    kubectl apply -f ${clusterAppgwIngressYamlPath}
-    utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_ingress_completed \
-        ${clusterIngressName} \
-        ${wlsDomainNS} \
-        ${checkSVCStateMaxAttempt} \
-        ${checkSVCInterval}
+  # generate ingress svc config for cluster
+  generate_appgw_cluster_config_file
+  kubectl apply -f ${clusterAppgwIngressYamlPath}
+  utility_validate_status "Create appgw ingress svc."
+  waitfor_agic_ready_and_create_ingress \
+    ${clusterIngressName} \
+    ${clusterAppgwIngressYamlPath}
 
-    # expose https for cluster if e2e ssl is not set up.
-    if [[ "${enableCustomSSL,,}" != "true" ]]; then
-        kubectl apply -f ${clusterAppgwIngressHttpsYamlPath}
-        utility_validate_status "Create appgw ingress https svc."
-        utility_waitfor_ingress_completed \
-            ${clusterIngressHttpsName} \
-            ${wlsDomainNS} \
-            ${checkSVCStateMaxAttempt} \
-            ${checkSVCInterval}
-    fi
+  # expose https for cluster if e2e ssl is not set up.
+  if [[ "${ENABLE_CUSTOM_SSL,,}" != "true" ]]; then
+    kubectl apply -f ${clusterAppgwIngressHttpsYamlPath}
+    utility_validate_status "Create appgw ingress https svc."
+    utility_waitfor_ingress_completed \
+      ${clusterIngressHttpsName} \
+      ${wlsDomainNS} \
+      ${checkSVCStateMaxAttempt} \
+      ${checkSVCInterval}
+  fi
 }
 
 function appgw_ingress_svc_for_admin_server() {
-    generate_appgw_admin_config_file
-    kubectl apply -f ${adminAppgwIngressYamlPath}
-    utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_ingress_completed \
-        ${adminIngressName} \
-        ${wlsDomainNS} \
-        ${checkSVCStateMaxAttempt} \
-        ${checkSVCInterval}
+  generate_appgw_admin_config_file
+  kubectl apply -f ${adminAppgwIngressYamlPath}
+  utility_validate_status "Create appgw ingress svc."
+  utility_waitfor_ingress_completed \
+    ${adminIngressName} \
+    ${wlsDomainNS} \
+    ${checkSVCStateMaxAttempt} \
+    ${checkSVCInterval}
 }
 
 function appgw_ingress_svc_for_remote_console() {
-    adminRemoteIngressName=${wlsDomainUID}-admin-remote-appgw-ingress-svc
-    adminRemoteAppgwIngressYamlPath=${scriptDir}/appgw-admin-remote-ingress-svc.yaml
-    generate_appgw_admin_remote_config_file
+  adminRemoteIngressName=${WLS_DOMAIN_UID}-admin-remote-appgw-ingress-svc
+  adminRemoteAppgwIngressYamlPath=${scriptDir}/appgw-admin-remote-ingress-svc.yaml
+  generate_appgw_admin_remote_config_file
 
-    kubectl apply -f ${adminRemoteAppgwIngressYamlPath}
-    utility_validate_status "Create appgw ingress svc."
-    utility_waitfor_ingress_completed \
-        ${adminRemoteIngressName} \
-        ${wlsDomainNS} \
-        ${checkSVCStateMaxAttempt} \
-        ${checkSVCInterval}
+  kubectl apply -f ${adminRemoteAppgwIngressYamlPath}
+  utility_validate_status "Create appgw ingress svc."
+  utility_waitfor_ingress_completed \
+    ${adminRemoteIngressName} \
+    ${wlsDomainNS} \
+    ${checkSVCStateMaxAttempt} \
+    ${checkSVCInterval}
 }
 
 function create_dns_record() {
-    if [[ "${enableCustomDNSAlias,,}" == "true" ]]; then
-        create_dns_CNAME_record \
-            ${appgwAlias} \
-            ${dnsClusterLabel} \
-            ${dnsRGName} \
-            ${dnsZoneName}
-    fi
+  if [[ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]]; then
+    create_dns_CNAME_record \
+      ${APPGW_ALIAS} \
+      ${DNS_CLUSTER_LABEL} \
+      ${DNS_ZONE_RG_NAME} \
+      ${DNS_ZONE_NAME}
+  fi
 
-    if [[ "${enableCustomDNSAlias,,}" == "true" ]] &&
-        [[ "${appgwForAdminServer,,}" == "true" ]]; then
-        create_dns_CNAME_record \
-            ${appgwAlias} \
-            ${dnsAdminLabel} \
-            ${dnsRGName} \
-            ${dnsZoneName}
-    fi
+  if [[ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]] &&
+    [[ "${APPGW_FOR_ADMIN_SERVER,,}" == "true" ]]; then
+    create_dns_CNAME_record \
+      ${APPGW_ALIAS} \
+      ${DNS_ADMIN_LABEL} \
+      ${DNS_ZONE_RG_NAME} \
+      ${DNS_ZONE_NAME}
+  fi
 }
 
 function create_gateway_ingress() {
-    # query admin server port used for non-ssl or ssl
-    query_admin_target_port
-    # query cluster port used for non-ssl or ssl
-    query_cluster_target_port
-    # create network peers between gateway vnet and aks vnet
-    network_peers_aks_appgw
-    # install azure ingress controllor
-    install_azure_ingress
-    # create tsl/ssl frontend secrets
-    output_create_gateway_ssl_k8s_secret
+  # query admin server port used for non-ssl or ssl
+  query_admin_target_port
+  # query cluster port used for non-ssl or ssl
+  query_cluster_target_port
+  # create network peers between gateway vnet and aks vnet
+  network_peers_aks_appgw
 
-    # validate backend CA certificate
-    # the certificate has been upload to Application Gateway in
-    # weblogic-azure-aks\src\main\bicep\modules\networking.bicep
-    if [[ "${enableCustomSSL,,}" == "true" ]]; then
-        validate_backend_ca_cert
-    fi
+  # create ingress svc for cluster
+  appgw_ingress_svc_for_cluster
 
-    # create ingress svc for cluster
-    appgw_ingress_svc_for_cluster
+  # create ingress svc for admin console
+  if [[ "${APPGW_FOR_ADMIN_SERVER,,}" == "true" ]]; then
+    appgw_ingress_svc_for_admin_server
+  fi
 
-    # create ingress svc for admin console
-    if [[ "${appgwForAdminServer,,}" == "true" ]]; then
-        appgw_ingress_svc_for_admin_server
-    fi
+  # create ingress svc for admin remote console
+  if [[ "${APPGW_FOR_REMOTE_CONSOLE,,}" == "true" ]]; then
+    appgw_ingress_svc_for_remote_console
+  fi
 
-    # create ingress svc for admin remote console
-    if [[ "${enableRemoteConsole,,}" == "true" ]]; then
-        appgw_ingress_svc_for_remote_console
-    fi
-
-    create_dns_record
+  create_dns_record
 }
 
 # Initialize
@@ -647,43 +551,13 @@ source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 source ${scriptDir}/createDnsRecord.sh
 
-aksClusterRGName=$1
-aksClusterName=$2
-wlsDomainUID=$3
-subID=$4
-curRGName=$5
-appgwName=$6
-appgwUsePrivateIP=$7
-appgwForAdminServer=$8
-enableCustomDNSAlias=$9
-dnsRGName=${10}
-dnsZoneName=${11}
-dnsAdminLabel=${12}
-dnsClusterLabel=${13}
-appgwAlias=${14}
-appgwFrontendSSLCertData=${15}
-appgwCertificateOption=${16}
-enableCustomSSL=${17}
-enableCookieBasedAffinity=${18}
-enableRemoteConsole=${19}
+set -Eo pipefail
 
 adminServerName=${constAdminServerName} # define in common.sh
-appgwIngressHelmRepo="https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/"
-appgwFrontCertFileName="appgw-frontend-cert.pfx"
-appgwFrontCertKeyDecrytedFileName="appgw-frontend-cert.key"
-appgwFrontCertKeyFileName="appgw-frontend-cert-decryted.key"
-appgwFrontPublicCertFileName="appgw-frontend-cert.crt"
-appgwFrontendSecretName="frontend-tls"
-appgwBackendSecretName="backend-tls"
-appgwSelfsignedCert="generateCert"
 azureAppgwIngressVersion="1.5.1"
 clusterName=${constClusterName}
-httpsListenerName="myHttpsListenerName$(date +%s)"
-httpsRuleName="myHttpsRule$(date +%s)"
-svcAdminServer="${wlsDomainUID}-${adminServerName}"
-svcCluster="${wlsDomainUID}-cluster-${clusterName}"
-wlsDomainNS="${wlsDomainUID}-ns"
-
-read_sensitive_parameters_from_stdin
+svcAdminServer="${WLS_DOMAIN_UID}-${adminServerName}"
+svcCluster="${WLS_DOMAIN_UID}-cluster-${clusterName}"
+wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 
 create_gateway_ingress

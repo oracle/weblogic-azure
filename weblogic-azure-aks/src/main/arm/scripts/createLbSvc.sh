@@ -8,7 +8,7 @@
 #   * [Optional] cluster T3 channel
 #
 # Special parameter example:
-#   * lbSvcValues: [{"colName":"admin-t3","colTarget":"adminServerT3","colPort":"7005"},{"colName":"cluster","colTarget":"cluster1T3","colPort":"8011"}]
+#   * LB_SVC_VALUES: [{"colName":"admin-t3","colTarget":"adminServerT3","colPort":"7005"},{"colName":"cluster","colTarget":"cluster1T3","colPort":"8011"}]
 
 echo "Script  ${0} starts"
 
@@ -20,13 +20,13 @@ metadata:
   name: ${adminServerLBSVCName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constAdminServerName}"
     azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
-  if [[ "${enableInternalLB,,}" == "true" ]]; then
+  if [[ "${USE_INTERNAL_LB,,}" == "true" ]]; then
     cat <<EOF >>${scriptDir}/admin-server-lb.yaml
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
@@ -41,7 +41,7 @@ spec:
     protocol: TCP
     targetPort: ${adminTargetPort}
   selector:
-    weblogic.domainUID: ${wlsDomainUID}
+    weblogic.domainUID: ${WLS_DOMAIN_UID}
     weblogic.serverName: ${adminServerName}
   sessionAffinity: None
   type: LoadBalancer
@@ -56,13 +56,13 @@ metadata:
   name: ${adminServerT3LBSVCName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constAdminServerName}-t3-channel"
     azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
-  if [[ "${enableInternalLB,,}" == "true" ]]; then
+  if [[ "${USE_INTERNAL_LB,,}" == "true" ]]; then
     cat <<EOF >>${adminServerT3LBDefinitionPath}
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
@@ -77,7 +77,7 @@ spec:
     protocol: TCP
     targetPort: ${adminT3Port}
   selector:
-    weblogic.domainUID: ${wlsDomainUID}
+    weblogic.domainUID: ${WLS_DOMAIN_UID}
     weblogic.serverName: ${adminServerName}
   sessionAffinity: None
   type: LoadBalancer
@@ -92,13 +92,13 @@ metadata:
   name: ${clusterLBSVCName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
-  if [[ "${enableInternalLB,,}" == "true" ]]; then
+  if [[ "${USE_INTERNAL_LB,,}" == "true" ]]; then
     cat <<EOF >>${scriptDir}/cluster-lb.yaml
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
@@ -113,7 +113,7 @@ spec:
     protocol: TCP
     targetPort: ${clusterTargetPort}
   selector:
-    weblogic.domainUID: ${wlsDomainUID}
+    weblogic.domainUID: ${WLS_DOMAIN_UID}
     weblogic.clusterName: ${clusterName}
   sessionAffinity: None
   type: LoadBalancer
@@ -128,13 +128,13 @@ metadata:
   name: ${clusterT3LBSVCName}
   namespace: ${wlsDomainNS}
   labels:
-    weblogic.domainUID: "${wlsDomainUID}"
+    weblogic.domainUID: "${WLS_DOMAIN_UID}"
     azure.weblogic.target: "${constClusterName}-t3-channel"
     azure.weblogc.createdByWlsOffer: "true"
 EOF
 
   # to create internal load balancer service
-  if [[ "${enableInternalLB,,}" == "true" ]]; then
+  if [[ "${USE_INTERNAL_LB,,}" == "true" ]]; then
     cat <<EOF >>${clusterT3LBDefinitionPath}
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
@@ -149,7 +149,7 @@ spec:
     protocol: TCP
     targetPort: ${clusterT3Port}
   selector:
-    weblogic.domainUID: ${wlsDomainUID}
+    weblogic.domainUID: ${WLS_DOMAIN_UID}
     weblogic.clusterName: ${clusterName}
   sessionAffinity: None
   type: LoadBalancer
@@ -157,7 +157,7 @@ EOF
 }
 
 function query_admin_target_port() {
-  if [[ "${enableCustomSSL,,}" == "true" ]]; then
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
     adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default-secure')
   else
     adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default')
@@ -167,7 +167,7 @@ function query_admin_target_port() {
 }
 
 function query_cluster_target_port() {
-  if [[ "${enableCustomSSL,,}" == "true" ]]; then
+  if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
     clusterTargetPort=$(utility_query_service_port ${svcCluster} ${wlsDomainNS} 'default-secure')
   else
     clusterTargetPort=$(utility_query_service_port ${svcCluster} ${wlsDomainNS} 'default')
@@ -197,9 +197,9 @@ function create_lb_svc_for_admin_server_default_channel() {
   adminServerEndpoint=$(kubectl get svc ${adminServerLBSVCName} -n ${wlsDomainNS} \
     -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
 
-  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
-    create_dns_A_record "${adminServerEndpoint%%:*}" ${dnsAdminLabel} ${dnsRGName} ${dnsZoneName}
-    adminServerEndpoint="${dnsAdminLabel}.${dnsZoneName}:${adminServerEndpoint#*:}"
+  if [ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]; then
+    create_dns_A_record "${adminServerEndpoint%%:*}" ${DNS_ADMIN_LABEL} ${DNS_ZONE_RG_NAME} ${DNS_ZONE_NAME}
+    adminServerEndpoint="${DNS_ADMIN_LABEL}.${DNS_ZONE_NAME}:${adminServerEndpoint#*:}"
   fi
 
   adminConsoleEndpoint="${adminServerEndpoint}/console"
@@ -226,9 +226,9 @@ function create_lb_svc_for_admin_t3_channel() {
   adminServerT3Endpoint=$(kubectl get svc ${adminServerT3LBSVCName} -n ${wlsDomainNS} \
     -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
 
-  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
-    create_dns_A_record "${adminServerT3Endpoint%%:*}" "${dnszoneAdminT3ChannelLabel}" ${dnsRGName} ${dnsZoneName}
-    adminServerT3Endpoint="${dnszoneAdminT3ChannelLabel}.${dnsZoneName}:${adminServerT3Endpoint#*:}"
+  if [ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]; then
+    create_dns_A_record "${adminServerT3Endpoint%%:*}" "${DNS_ADMIN_T3_LABEL}" ${DNS_ZONE_RG_NAME} ${DNS_ZONE_NAME}
+    adminServerT3Endpoint="${DNS_ADMIN_T3_LABEL}.${DNS_ZONE_NAME}:${adminServerT3Endpoint#*:}"
   fi
 }
 
@@ -250,9 +250,9 @@ function create_lb_svc_for_cluster_default_channel() {
 
   clusterEndpoint=$(kubectl get svc ${clusterLBSVCName} -n ${wlsDomainNS} -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
 
-  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
-    create_dns_A_record "${clusterEndpoint%%:*}" ${dnsClusterLabel} ${dnsRGName} ${dnsZoneName}
-    clusterEndpoint="${dnsClusterLabel}.${dnsZoneName}:${clusterEndpoint#*:}"
+  if [ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]; then
+    create_dns_A_record "${clusterEndpoint%%:*}" ${DNS_CLUSTER_LABEL} ${DNS_ZONE_RG_NAME} ${DNS_ZONE_NAME}
+    clusterEndpoint="${DNS_CLUSTER_LABEL}.${DNS_ZONE_NAME}:${clusterEndpoint#*:}"
   fi
 }
 
@@ -276,16 +276,16 @@ function create_lb_svc_for_cluster_t3_channel() {
   clusterT3Endpoint=$(kubectl get svc ${clusterT3LBSVCName} -n ${wlsDomainNS} \
     -o=jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}')
 
-  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
-    create_dns_A_record "${clusterT3Endpoint%%:*}" ${dnszoneClusterT3ChannelLabel} ${dnsRGName} ${dnsZoneName}
-    clusterT3Endpoint="${dnszoneClusterT3ChannelLabel}.${dnsZoneName}:${clusterT3Endpoint#*:}"
+  if [ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]; then
+    create_dns_A_record "${clusterT3Endpoint%%:*}" ${DNS_CLUSTER_T3_LABEL} ${DNS_ZONE_RG_NAME} ${DNS_ZONE_NAME}
+    clusterT3Endpoint="${DNS_CLUSTER_T3_LABEL}.${DNS_ZONE_NAME}:${clusterT3Endpoint#*:}"
   fi
 }
 
 function patch_admin_t3_public_address() {
   # patch admin t3 public address
-  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
-    adminT3Address="${dnszoneAdminT3ChannelLabel}.${dnsZoneName}"
+  if [ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]; then
+    adminT3Address="${DNS_ADMIN_T3_LABEL}.${DNS_ZONE_NAME}"
   else
     adminT3Address=$(kubectl -n ${wlsDomainNS} get svc ${adminServerT3LBSVCName} -o json |
       jq '. | .status.loadBalancer.ingress[0].ip' |
@@ -305,8 +305,8 @@ function patch_admin_t3_public_address() {
 
 function patch_cluster_t3_public_address() {
   #patch cluster t3 pubilc address
-  if [ "${enableCustomDNSAlias,,}" == "true" ]; then
-    clusterT3Adress="${dnszoneClusterT3ChannelLabel}.${dnsZoneName}"
+  if [ "${ENABLE_DNS_CONFIGURATION,,}" == "true" ]; then
+    clusterT3Adress="${DNS_CLUSTER_T3_LABEL}.${DNS_ZONE_NAME}"
   else
     clusterT3Adress=$(kubectl -n ${wlsDomainNS} get svc ${clusterT3LBSVCName} -o json |
       jq '. | .status.loadBalancer.ingress[0].ip' |
@@ -326,7 +326,7 @@ function patch_cluster_t3_public_address() {
 
 function rolling_update_with_t3_public_address() {
   timestampBeforePatchingDomain=$(date +%s)
-  currentDomainConfig=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json)
+  currentDomainConfig=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json)
   cat <<EOF >${scriptDir}/domainPreviousConfiguration.yaml
 ${currentDomainConfig}
 EOF
@@ -342,7 +342,7 @@ EOF
 
   if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
     # restart cluster
-    restartVersion=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json |
+    restartVersion=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json |
       jq '. | .spec.restartVersion' |
       tr -d "\"")
     restartVersion=$((restartVersion + 1))
@@ -359,14 +359,14 @@ ${currentDomainConfig}
 EOF
     echo ${currentDomainConfig} | kubectl -n ${wlsDomainNS} apply -f -
 
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json |
+    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json |
       jq '. | .spec.clusters[] | .replicas')
 
     # wait for the restart completed.
     utility_wait_for_pod_restarted \
       ${timestampBeforePatchingDomain} \
       ${replicas} \
-      ${wlsDomainUID} \
+      ${WLS_DOMAIN_UID} \
       ${checkPodStatusMaxAttemps} \
       ${checkPodStatusInterval}
 
@@ -428,17 +428,8 @@ function create_svc_lb() {
   query_admin_target_port
   query_cluster_target_port
 
-  # Parse lb svc input values
-  # Generate valid json
-  ret=$(echo $lbSvcValues | sed "s/\:/\\\"\:\\\"/g" |
-    sed "s/{/{\"/g" |
-    sed "s/}/\"}/g" |
-    sed "s/,/\",\"/g" |
-    sed "s/}\",\"{/},{/g" |
-    tr -d \(\))
-
   cat <<EOF >${scriptDir}/lbConfiguration.json
-${ret}
+${LB_SVC_VALUES}
 EOF
 
   array=$(jq -r '.[] | "\(.colName),\(.colTarget),\(.colPort)"' ${scriptDir}/lbConfiguration.json)
@@ -493,18 +484,6 @@ source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 source ${scriptDir}/createDnsRecord.sh
 
-enableInternalLB=$1
-enableCustomSSL=$2
-enableCustomDNSAlias=$3
-dnsRGName=$4
-dnsZoneName=$5
-dnsAdminLabel=$6
-dnszoneAdminT3ChannelLabel=$7
-dnsClusterLabel=$8
-dnszoneClusterT3ChannelLabel=$9
-lbSvcValues=${10}
-wlsDomainUID=${11}
-
 adminConsoleEndpoint="null"
 adminServerName=${constAdminServerName} # define in common.sh
 adminServerT3Endpoint="null"
@@ -512,11 +491,11 @@ adminRemoteEndpoint="null"
 clusterEndpoint="null"
 clusterName=${constClusterName}
 clusterT3Endpoint="null"
-svcAdminServer="${wlsDomainUID}-${adminServerName}"
-svcCluster="${wlsDomainUID}-cluster-${clusterName}"
-wlsDomainNS="${wlsDomainUID}-ns"
+svcAdminServer="${WLS_DOMAIN_UID}-${adminServerName}"
+svcCluster="${WLS_DOMAIN_UID}-cluster-${clusterName}"
+wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 
-echo ${lbSvcValues}
+echo ${LB_SVC_VALUES}
 
 create_svc_lb
 

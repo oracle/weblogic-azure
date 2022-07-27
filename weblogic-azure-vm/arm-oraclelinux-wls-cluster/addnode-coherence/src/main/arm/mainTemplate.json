@@ -147,6 +147,27 @@
                 "description": "Select appropriate VM Size for Coherence"
             }
         },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "wls-vnet",
+            "metadata": {
+                "description": "Name of the existing or new VNET"
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group of Virtual network"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "wls-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet"
+            }
+        },
         "wlsDomainName": {
             "type": "string",
             "defaultValue": "wlsd",
@@ -227,11 +248,11 @@
         "name_scriptCoherenceFile": "setupCoherence.sh",
         "name_scriptELKConfiguration": "elkIntegration.sh",
         "name_share": "wlsshare",
-        "name_subnet": "Subnet",
-        "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
+        "name_subnet": "[parameters('subnetName')]",
+        "name_virtualNetwork": "[parameters('virtualNetworkName')]",
         "name_vmMachine": "[concat(parameters('managedServerPrefix'),'StorageVM')]",
         "name_wlsServerPrefix": "[concat(parameters('managedServerPrefix'),'Storage')]",
-        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
+        "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
         "name_customHostnameVerifierJavaFile": "src/main/java/WebLogicCustomHostNameVerifier.java",
         "name_customHostnameValuesTemplate": "src/main/java/HostNameValuesTemplate.txt",

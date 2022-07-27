@@ -135,8 +135,6 @@ param enableDNSConfiguration bool = false
 param enableAdminT3Tunneling bool = false
 @description('Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling')
 param enableClusterT3Tunneling bool = false
-@description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
-param identity object
 @description('Is the specified SSO account associated with an active Oracle support contract?')
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
@@ -165,9 +163,6 @@ param newOrExistingVnetForApplicationGateway string = 'new'
 param ocrSSOPSW string = newGuid()
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string = 'null'
-@secure()
-@description('Base64 string of service principal. use the command to generate a testing string: az ad sp create-for-rbac --sdk-auth --role Contributor --scopes /subscriptions/<AZURE_SUBSCRIPTION_ID> | base64 -w0')
-param servicePrincipal string = newGuid()
 @allowed([
   'uploadConfig'
   'keyVaultStoredConfig'
@@ -292,12 +287,12 @@ param wlsUserName string = 'weblogic'
 // To mitigate arm-ttk error: Type Mismatch: Parameter in nested template is defined as string, but the parent template defines it as bool.
 var _enableCustomSSL = enableCustomSSL
 var _enableAppGWIngress = enableAppGWIngress
-var _appGatewaySubnetStartAddress = vnetForApplicationGateway.subnets.gatewaySubnet.startAddress
 var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_azureSubjectName = '${format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')}'
+var const_azcliVersion = '2.33.1'
+var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_hasTags = contains(resourceGroup(), 'tags')
 // If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
 // * upload custom TLS/SSL certificates for WLS trust and identity.
@@ -319,12 +314,14 @@ var const_trustKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertO
 var const_wlsClusterName = 'cluster-1'
 var const_wlsJavaOptions = wlsJavaOption == '' ? 'null' : wlsJavaOption
 var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
+var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
+var name_appgwBackendRootCertName = 'appGatewayTrustedRootCert'
 var name_defaultPidDeployment = 'pid'
-var name_dnsNameforApplicationGateway = '${concat(dnsNameforApplicationGateway, take(utcValue, 6))}'
-var name_domainLabelforApplicationGateway = '${take(concat(name_dnsNameforApplicationGateway, '-', toLower(name_rgNameWithoutSpecialCharacter), '-', toLower(wlsDomainName)), 63)}'
+var name_dnsNameforApplicationGateway = '${dnsNameforApplicationGateway}${take(utcValue, 6)}'
+var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGateway}-${toLower(name_rgNameWithoutSpecialCharacter)}-${toLower(wlsDomainName)}', 63)
 var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData'
 var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw'
-var name_keyVaultName = empty(const_keyvaultNameFromTag) ? '${take(concat('wls-kv', uniqueString(utcValue)), 24)}' : resourceGroup().tags.wlsKeyVault
+var name_keyVaultName = empty(const_keyvaultNameFromTag) ? '${take('wls-kv${uniqueString(utcValue)}', 24)}' : resourceGroup().tags.wlsKeyVault
 var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias'
 var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
 var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
@@ -335,6 +332,14 @@ var name_tagNameForStorageAccount = 'wlsStorageAccount'
 var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData'
 var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw'
 var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (_enableCustomSSL) ? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
+var obj_uamiForDeploymentScript = {
+  type: 'UserAssigned'
+  userAssignedIdentities: {
+    '${uamiDeployment.outputs.uamiIdForDeploymentScript}': {}
+  }
+}
+
+
 /*
 * Beginning of the offer deployment
 */
@@ -346,6 +351,13 @@ module pids './modules/_pids/_pid.bicep' = {
 // For test, replace the pid with testing one, and build the package.
 module partnerCenterPid './modules/_pids/_empty.bicep' = {
   name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
+}
+
+module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
+  name: 'uami-deployment'
+  params: {
+    location: location
+  }
 }
 
 /*
@@ -375,6 +387,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewaySSLCertData: appGatewaySSLCertData
     appGatewaySSLCertPassword: appGatewaySSLCertPassword
+    azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createDNSZone: createDNSZone
     dnszoneName: dnszoneName
@@ -386,12 +399,11 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     keyVaultResourceGroup: keyVaultResourceGroup
     keyVaultSSLCertDataSecretName: keyVaultSSLCertDataSecretName
     keyVaultSSLCertPasswordSecretName: keyVaultSSLCertPasswordSecretName
-    identity: identity
+    identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser
-    servicePrincipal: servicePrincipal
     sslConfigurationAccessOption: sslConfigurationAccessOption
     sslKeyVaultCustomIdentityKeyStoreDataSecretName: sslKeyVaultCustomIdentityKeyStoreDataSecretName
     sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName: sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName
@@ -421,6 +433,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
   dependsOn: [
     pids
     preAzureResourceDeployment
+    uamiDeployment
   ]
 }
 
@@ -461,22 +474,57 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
   params: {
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
-    identity: identity
+    azCliVersion: const_azcliVersion
+    identity: obj_uamiForDeploymentScript
     location: location
   }
 }
 
-// To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
-module vnetForAppgatewayDeployment 'modules/_azure-resoruces/_vnetAppGateway.bicep' = if (enableAppGWIngress) {
-  name: 'vnet-application-gateway'
+module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
+  name: 'appgateway-certificates-secrets-deployment'
   params: {
+    backendCertificateDataValue: appGatewaySSLBackendRootCertData
+    certificateDataValue: appGatewaySSLCertData
+    certificatePasswordValue: appGatewaySSLCertPassword
+    enableCustomSSL: enableCustomSSL
+    identity: obj_uamiForDeploymentScript
+    location: location
+    sku: keyVaultSku
+    subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
+    useExistingAppGatewaySSLCertificate: _useExistingAppGatewaySSLCertificate
+    keyVaultName: name_keyVaultName
+  }
+  dependsOn: [
+    wlsSSLCertSecretsDeployment
+  ]
+}
+
+// To void space overlap with AKS Vnet, must deploy the Applciation Gateway VNet before AKS deployment.
+module appgatewayDeployment 'modules/_appGateway.bicep' = if (enableAppGWIngress) {
+  name: 'application-gateway-deployment'
+  params: {
+    _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
+    _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
+    appgwPublicIPAddressName: appGatewayPublicIPAddressName
+    appgwUsePrivateIP: appgwUsePrivateIP
+    appgwSslCertName: name_appgwFrontendSSLCertName
+    appgwTrustedRootCertName: name_appgwBackendRootCertName
+    azCliVersion: const_azcliVersion
+    dnsNameforApplicationGateway: name_domainLabelforApplicationGateway
+    enableCustomSSL: enableCustomSSL
+    identity: obj_uamiForDeploymentScript
+    keyVaultName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultName : appgwSecretDeployment.outputs.keyVaultName
+    keyVaultResourceGroup: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultResourceGroup : resourceGroup().name
+    keyvaultBackendCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLBackendRootCertDataSecretName : appgwSecretDeployment.outputs.sslBackendCertDataSecretName
+    keyvaultFrontendCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
+    keyvaultFrontendCertPswSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
     location: location
     newOrExistingVnetForApplicationGateway: newOrExistingVnetForApplicationGateway
     vnetForApplicationGateway: vnetForApplicationGateway
     vnetRGNameForApplicationGateway: vnetRGNameForApplicationGateway
   }
   dependsOn: [
-    validateInputs
+    appgwSecretDeployment
   ]
 }
 
@@ -500,6 +548,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
+    azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
@@ -508,7 +557,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: const_enablePV
-    identity: identity
+    identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     managedServerPrefix: managedServerPrefix
@@ -542,7 +591,6 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
   dependsOn: [
     validateInputs
     queryStorageAccount
-    vnetForAppgatewayDeployment
   ]
 }
 
@@ -566,6 +614,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
+    azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
@@ -574,7 +623,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePV: const_enablePV
-    identity: identity
+    identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
     location: location
     managedServerPrefix: managedServerPrefix
@@ -608,27 +657,6 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   dependsOn: [
     wlsSSLCertSecretsDeployment
     queryStorageAccount
-    vnetForAppgatewayDeployment
-  ]
-}
-
-module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
-  name: 'appgateway-certificates-secrets-deployment'
-  params: {
-    backendCertificateDataValue: appGatewaySSLBackendRootCertData
-    certificateDataValue: appGatewaySSLCertData
-    certificatePasswordValue: appGatewaySSLCertPassword
-    enableCustomSSL: enableCustomSSL
-    identity: identity
-    location: location
-    sku: keyVaultSku
-    subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
-    useExistingAppGatewaySSLCertificate: _useExistingAppGatewaySSLCertificate
-    keyVaultName: name_keyVaultName
-  }
-  dependsOn: [
-    wlsDomainDeployment
-    wlsDomainWithCustomSSLDeployment
   ]
 }
 
@@ -655,18 +683,20 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     _artifactsLocationSasToken: _artifactsLocationSasToken
     _pidNetworkingEnd: pids.outputs.networkingEnd == '' ? name_defaultPidDeployment : pids.outputs.networkingEnd
     _pidNetworkingStart: pids.outputs.networkingStart == '' ? name_defaultPidDeployment : pids.outputs.networkingStart
-    _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
-    _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
-    appGatewayCertificateOption: appGatewayCertificateOption
-    appGatewayPublicIPAddressName: appGatewayPublicIPAddressName
-    appGatewaySubnetId: _enableAppGWIngress ? vnetForAppgatewayDeployment.outputs.subIdForApplicationGateway : ''
-    appGatewaySubnetStartAddress: _appGatewaySubnetStartAddress
+    appGatewayName: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewayName : ''
+    appGatewayAlias: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewayAlias : ''
+    appGatewaySecuredURL: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewaySecuredURL : ''
+    appGatewayURL: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewayURL : ''
+    appGatewaySslCert: name_appgwFrontendSSLCertName
+    appGatewayTrustedRootCert: name_appgwBackendRootCertName
+    appgwUsePrivateIP: appgwUsePrivateIP
     appgwForAdminServer: appgwForAdminServer
     appgwForRemoteConsole: appgwForRemoteConsole
+    azCliVersion: const_azcliVersion
+    createAKSCluster: createAKSCluster
     createDNSZone: createDNSZone
-    dnsNameforApplicationGateway: name_domainLabelforApplicationGateway
     dnszoneAdminConsoleLabel: dnszoneAdminConsoleLabel
     dnszoneAdminT3ChannelLabel: dnszoneAdminT3ChannelLabel
     dnszoneClusterLabel: dnszoneClusterLabel
@@ -677,22 +707,17 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     enableCookieBasedAffinity: enableCookieBasedAffinity
     enableCustomSSL: enableCustomSSL
     enableDNSConfiguration: enableDNSConfiguration
-    identity: identity
-    keyVaultName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultName : appgwSecretDeployment.outputs.keyVaultName
-    keyVaultResourceGroup: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultResourceGroup : resourceGroup().name
-    keyvaultBackendCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLBackendRootCertDataSecretName : appgwSecretDeployment.outputs.sslBackendCertDataSecretName
-    keyVaultSSLCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
-    keyVaultSSLCertPasswordSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
+    identity: obj_uamiForDeploymentScript
     location: location
     lbSvcValues: lbSvcValues
-    servicePrincipal: servicePrincipal
     useInternalLB: useInternalLB
-    appgwUsePrivateIP: appgwUsePrivateIP
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    appgwSecretDeployment
+    appgatewayDeployment
+    wlsDomainDeployment
+    wlsDomainWithCustomSSLDeployment
   ]
 }
 
@@ -705,6 +730,7 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     _pidStart: pids.outputs.dbStart
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    azCliVersion: const_azcliVersion
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
     dbDriverName: dbDriverName
@@ -713,7 +739,7 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     dbTestTableName: dbTestTableName
     dbUser: dbUser
     dsConnectionURL: dsConnectionURL
-    identity: identity
+    identity: obj_uamiForDeploymentScript
     jdbcDataSourceName: jdbcDataSourceName
     location: location
     wlsDomainUID: wlsDomainUID
@@ -724,7 +750,6 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     networkingDeployment
   ]
 }
-
 
 /*
 * To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
@@ -737,7 +762,8 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
-    identity: identity
+    azCliVersion: const_azcliVersion
+    identity: obj_uamiForDeploymentScript
     location: location
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
@@ -759,7 +785,8 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
   params: {
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
-    identity: identity
+    azCliVersion: const_azcliVersion
+    identity: obj_uamiForDeploymentScript
     location: location
     wlsClusterName: const_wlsClusterName
     wlsDomainUID: wlsDomainUID

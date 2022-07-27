@@ -120,7 +120,7 @@ function initialize() {
 function download_wdt_wit() {
     local wlsToolingFamilyJsonFile=weblogic_tooling_family.json
     # download the json file that has wls operator version from weblogic-azure repo.
-    curl -m ${curlMaxTime} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
     if [ $? -eq 0 ]; then
         wdtDownloadURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WDT\") | .downloadURL" | tr -d "\"")
         echo "WDT URL: ${wdtDownloadURL}"
@@ -133,10 +133,10 @@ function download_wdt_wit() {
     fi
 
     # Download weblogic tools
-    curl -m ${curlMaxTime} -fsL ${wdtDownloadURL} -o weblogic-deploy.zip
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL ${wdtDownloadURL} -o weblogic-deploy.zip
     validate_status "Check status of weblogic-deploy.zip."
 
-    curl -m ${curlMaxTime} -fsL ${witDownloadURL} -o imagetool.zip
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL ${witDownloadURL} -o imagetool.zip
     validate_status "Check status of imagetool.zip."
 }
 
@@ -146,7 +146,7 @@ function install_utilities() {
     # Install docker
     sudo apt-get -q update
     sudo apt-get -y -q install apt-transport-https
-    curl -m ${curlMaxTime} -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo \
         "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
     $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
@@ -190,10 +190,10 @@ function install_utilities() {
 
     download_wdt_wit
 
-    curl -m ${curlMaxTime} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
     validate_status "Install postgresql driver."
 
-    curl -m ${curlMaxTime} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
 }
 
@@ -213,7 +213,7 @@ function install_db_drivers() {
         local fileName="${urlWithoutQueryString##*/}"
         echo $fileName
 
-        curl -m ${curlMaxTime} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${fileName}
+        curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${fileName}
         if [ $? -ne 0 ];then
           echo "Failed to download $item"
           exit 1

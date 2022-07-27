@@ -434,6 +434,68 @@
                 "description": "Select appropriate VM Size for Coherence"
             }
         },
+        "virtualNetworkNewOrExisting": {
+            "type": "string",
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Specify whether to create a new or existing virtual network for the VM."
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "wls-vnet",
+            "metadata": {
+                "description": "Name of the existing or new VNET"
+            }
+        },
+        "virtualNetworkResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group of Virtual network"
+            }
+        },
+        "addressPrefixes": {
+            "type": "array",
+            "defaultValue": [
+                "10.0.0.0/16"
+            ],
+            "metadata": {
+                "description": "Address prefix of the VNET."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "wls-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet"
+            }
+        },
+        "subnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/24",
+            "metadata": {
+                "description": "Address prefix of the subnet"
+            }
+        },
+        "subnetForAppGateway": {
+            "type": "string",
+            "defaultValue": "appgateway-subnet",
+            "metadata": {
+                "description": "Name of the existing or new Subnet for Application Gateway"
+            }
+        },
+        "subnetPrefixForAppGateway": {
+            "type": "string",
+            "defaultValue": "10.0.1.0/24",
+            "metadata": {
+                "description": "Address prefix of the subnet for Application Gateway"
+            }
+        },
         "wlsDomainName": {
             "defaultValue": "wlsd",
             "type": "string",
@@ -715,6 +777,9 @@
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
                     },
+                    "addressPrefixes": {
+                        "value": "[parameters('addressPrefixes')]"
+                    },
                     "dnsLabelPrefix": {
                         "value": "[parameters('dnsLabelPrefix')]"
                     },
@@ -733,6 +798,18 @@
                     "skuUrnVersion": {
                         "value": "[parameters('skuUrnVersion')]"
                     },
+                    "subnetName": {
+                        "value": "[parameters('subnetName')]"
+                    },
+                    "subnetPrefix": {
+                        "value": "[parameters('subnetPrefix')]"
+                    },
+                    "subnetForAppGateway": {
+                        "value": "[parameters('subnetForAppGateway')]"
+                    },
+                    "subnetPrefixForAppGateway": {
+                        "value": "[parameters('subnetPrefixForAppGateway')]"
+                    },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
                     },
@@ -742,6 +819,15 @@
                     "vmSizeSelect": {
                         "value": "[parameters('vmSizeSelect')]"
                     },
+                    "virtualNetworkNewOrExisting": {
+                        "value": "[parameters('virtualNetworkNewOrExisting')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -750,6 +836,9 @@
                     },
                     "wlsUserName": {
                         "value": "[parameters('wlsUserName')]"
+                    },
+                    "enableAppGateway": {
+                        "value": "[parameters('enableAppGateway')]"
                     },
                     "enableHTTPAdminListenPort":{
                         "value": "[parameters('enableHTTPAdminListenPort')]"
@@ -838,6 +927,9 @@
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
                     },
+                    "addressPrefixes": {
+                        "value": "[parameters('addressPrefixes')]"
+                    },
                     "dnsLabelPrefix": {
                         "value": "[parameters('dnsLabelPrefix')]"
                     },
@@ -856,6 +948,18 @@
                     "skuUrnVersion": {
                         "value": "[parameters('skuUrnVersion')]"
                     },
+                    "subnetName": {
+                        "value": "[parameters('subnetName')]"
+                    },
+                    "subnetPrefix": {
+                        "value": "[parameters('subnetPrefix')]"
+                    },
+                    "subnetForAppGateway": {
+                        "value": "[parameters('subnetForAppGateway')]"
+                    },
+                    "subnetPrefixForAppGateway": {
+                        "value": "[parameters('subnetPrefixForAppGateway')]"
+                    },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
                     },
@@ -865,6 +969,15 @@
                     "vmSizeSelect": {
                         "value": "[parameters('vmSizeSelect')]"
                     },
+                    "virtualNetworkNewOrExisting": {
+                        "value": "[parameters('virtualNetworkNewOrExisting')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -873,6 +986,9 @@
                     },
                     "wlsUserName": {
                         "value": "[parameters('wlsUserName')]"
+                    },
+                    "enableAppGateway": {
+                        "value": "[parameters('enableAppGateway')]"
                     },
                     "enableHTTPAdminListenPort":{
                         "value": "[parameters('enableHTTPAdminListenPort')]"
@@ -998,6 +1114,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
+            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "networkSecurityLinkedTemplate",
             "properties": {
                 "mode": "Incremental",
@@ -1089,6 +1206,18 @@
                     },
                     "overrideHostName": {
                         "value": "[parameters('enableDNSConfiguration')]"
+                    },
+                    "virtualNetworkNewOrExisting": {
+                        "value": "[parameters('virtualNetworkNewOrExisting')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "subnetForAppGateway": {
+                        "value": "[parameters('subnetForAppGateway')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
@@ -1504,11 +1633,20 @@
                     "storageAccountName": {
                         "value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.storageAccountName.value]"
                     },
+                    "subnetName": {
+                        "value": "[parameters('subnetName')]"
+                    },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
                     },
                     "vmSizeSelectForCoherence": {
                         "value": "[parameters('vmSizeSelectForCoherence')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
@@ -1735,7 +1873,7 @@
         },
         "appGatewaySecuredURL": {
             "type": "string",
-            "value": "[if(parameters('enableAppGateway'), if(parameters('enableDNSConfiguration'), uri('https://{0}.{1}', parameters('dnszoneAppGatewayLabel'),parameters('dnszoneName')), reference('keyVaultLinkedAppGatewayTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value),'')]"
+            "value": "[if(parameters('enableAppGateway'), if(parameters('enableDNSConfiguration'), uri(concat('https://',parameters('dnszoneAppGatewayLabel'),'.',parameters('dnszoneName')),''), reference('keyVaultLinkedAppGatewayTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value),'')]"
         },
         "logIndex": {
             "type": "string",

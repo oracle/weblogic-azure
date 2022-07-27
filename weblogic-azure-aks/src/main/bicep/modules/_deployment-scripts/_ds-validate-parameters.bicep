@@ -11,6 +11,7 @@ param appGatewayCertificateOption string
 param appGatewaySSLCertData string
 @secure()
 param appGatewaySSLCertPassword string
+param azCliVersion string = ''
 param createAKSCluster bool
 param createDNSZone bool
 param dnszoneName string
@@ -22,14 +23,12 @@ param keyVaultName string
 param keyVaultResourceGroup string
 param keyVaultSSLCertDataSecretName string
 param keyVaultSSLCertPasswordSecretName string
-param identity object
+param identity object = {}
 param isSSOSupportEntitled bool
 param location string
 @secure()
 param ocrSSOPSW string
 param ocrSSOUser string
-@secure()
-param servicePrincipal string
 param sslConfigurationAccessOption string
 param sslKeyVaultCustomIdentityKeyStoreDataSecretName string
 param sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName string
@@ -64,7 +63,6 @@ param utcValue string = utcNow()
 param wlsImageTag string
 
 var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone}'
-var const_azcliVersion = '2.15.0'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
 var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
 
@@ -74,7 +72,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: identity
   properties: {
-    azCliVersion: const_azcliVersion
+    azCliVersion: azCliVersion
     arguments: const_arguments
     environmentVariables: [
       {
@@ -108,10 +106,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       {
         name: 'AKS_VERSION'
         value: aksVersion
-      }
-      {
-        name: 'BASE64_FOR_SERVICE_PRINCIPAL'
-        secureValue: servicePrincipal
       }
       {
         name: 'WLS_SSL_KEYVAULT_NAME'
@@ -226,7 +220,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: string(vnetForApplicationGateway)
       }
     ]
-    scriptContent: format('{0}\r\n\r\n{1}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
+    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/utility.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue

@@ -109,6 +109,18 @@ function validateInput()
             exit 1
         fi
     fi
+
+    if [ -z "$virtualNetworkNewOrExisting" ];
+    then
+        echo_stderr "virtualNetworkNewOrExisting is required. "
+        exit 1
+    fi
+
+    if [ -z "$storageAccountPrivateIp" ];
+    then
+        echo_stderr "storageAccountPrivateIp is required. "
+        exit 1
+    fi
 }
 
 #Function to cleanup all temporary files
@@ -710,13 +722,13 @@ function mountFileShare()
   fi
   echo "chmod 600 /etc/smbcredentials/${storageAccountName}.cred"
   sudo chmod 600 /etc/smbcredentials/${storageAccountName}.cred
-  echo "//${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
-  sudo bash -c "echo \"//${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
-  echo "mount -t cifs //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
-  sudo mount -t cifs //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
+  echo "//${storageAccountPrivateIp}/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo bash -c "echo \"//${storageAccountPrivateIp}/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
+  echo "mount -t cifs //${storageAccountPrivateIp}/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo mount -t cifs //${storageAccountPrivateIp}/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
   if [[ $? != 0 ]];
   then
-         echo "Failed to mount //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath"
+         echo "Failed to mount //${storageAccountPrivateIp}/wlsshare $mountpointPath"
 	 exit 1
   fi
 }
@@ -955,7 +967,7 @@ SCRIPT_PWD=`pwd`
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-read wlsDomainName wlsUserName wlsPassword managedServerPrefix indexValue vmNamePrefix maxDynamicClusterSize dynamicClusterSize adminVMName oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword managedServerPrefix indexValue vmNamePrefix maxDynamicClusterSize dynamicClusterSize adminVMName oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 DOMAIN_PATH="/u01/domains"
 CUSTOM_HOSTNAME_VERIFIER_HOME="/u01/app/custom-hostname-verifier"

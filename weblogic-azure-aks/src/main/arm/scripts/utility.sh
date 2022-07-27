@@ -18,34 +18,84 @@ function echo_stdout() {
 
 #Validate teminal status with $?, exit with exception if errors happen.
 function utility_validate_status() {
-  if [ $? == 1 ]; then
-    echo_stderr "$@"
-    echo_stderr "Errors happen, exit 1."
-    exit 1
-  else
-    echo_stdout "$@"
-  fi
+    if [ $? == 1 ]; then
+        echo_stderr "$@"
+        echo_stderr "Errors happen, exit 1."
+        exit 1
+    else
+        echo_stdout "$@"
+    fi
 }
 
+# JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 function install_jdk() {
-    # Install Microsoft OpenJDK
-    apk --no-cache add openjdk11 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+    local ready=false
+    local attempt=0
+    while [[ "${ready}" == "false" && $attempt -le ${retryMaxAttempt} ]]; do
+        echo "Installing openjdk11 ${attempt}"
+        ready=true
+        # Install Microsoft OpenJDK
+        apk add openjdk11 \
+            --no-cache \
+            -q --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 
-    echo "java version"
-    java -version
-    if [ $? -eq 1 ]; then
-        echo_stderr "Failed to install open jdk 11."
+        echo "java version"
+        java -version
+        if [ $? -eq 1 ]; then
+            ready=false
+        fi
+
+        attempt=$((attempt + 1))
+        sleep ${retryInterval}
+    done
+
+    if [ ${attempt} -gt ${retryMaxAttempt} ]; then
+        echo_stderr "Failed to install openjdk11."
         exit 1
     fi
-    # JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+}
+
+function install_docker() {
+    local ready=false
+    local attempt=0
+    while [[ "${ready}" == "false" && $attempt -le ${retryMaxAttempt} ]]; do
+        echo "Installing docker ${attempt}"
+        ready=true
+        apk add docker --no-cache --quiet
+        docker --help
+        if [ $? -eq 1 ]; then
+            ready=false
+        fi
+
+        attempt=$((attempt + 1))
+        sleep ${retryInterval}
+    done
+
+    if [ ${attempt} -gt ${retryMaxAttempt} ]; then
+        echo_stderr "Failed to install docker."
+        exit 1
+    fi
 }
 
 function install_kubectl() {
-    # Install kubectl
-    az aks install-cli
-    echo "validate kubectl"
-    kubectl --help
-    if [ $? -eq 1 ]; then
+    local ready=false
+    local attempt=0
+    while [[ "${ready}" == "false" && $attempt -le ${retryMaxAttempt} ]]; do
+        echo "Installing kubectl ${attempt}"
+        ready=true
+        # Install kubectl
+        az aks install-cli
+        echo "validate kubectl"
+        kubectl --help
+        if [ $? -eq 1 ]; then
+            ready=false
+        fi
+
+        attempt=$((attempt + 1))
+        sleep ${retryInterval}
+    done
+
+    if [ ${attempt} -gt ${retryMaxAttempt} ]; then
         echo_stderr "Failed to install kubectl."
         exit 1
     fi
@@ -53,14 +103,14 @@ function install_kubectl() {
 
 function install_helm() {
     # Install Helm
-    browserURL=$(curl -m ${curlMaxTime} -s https://api.github.com/repos/helm/helm/releases/latest |
+    browserURL=$(curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -s https://api.github.com/repos/helm/helm/releases/latest |
         grep "browser_download_url.*linux-amd64.tar.gz.asc" |
         cut -d : -f 2,3 |
         tr -d \")
     helmLatestVersion=${browserURL#*download\/}
     helmLatestVersion=${helmLatestVersion%%\/helm*}
     helmPackageName=helm-${helmLatestVersion}-linux-amd64.tar.gz
-    curl -m ${curlMaxTime} -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL https://get.helm.sh/${helmPackageName} -o /tmp/${helmPackageName}
     tar -zxvf /tmp/${helmPackageName} -C /tmp
     mv /tmp/linux-amd64/helm /usr/local/bin/helm
     echo "Helm version"
@@ -156,9 +206,9 @@ function utility_validate_application_status() {
     local wlsPassword=$4
     local pyScriptPath=$5
 
-    local podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json \
-        | jq '.items[0] | .metadata.name' \
-        | tr -d "\"")
+    local podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json |
+        jq '.items[0] | .metadata.name' |
+        tr -d "\"")
 
     # get non-ssl port
     local adminTargetPort=$(kubectl get svc ${wlsAdminSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
@@ -170,8 +220,8 @@ function utility_validate_application_status() {
     kubectl exec -it ${podName} -n ${wlsDomainNS} -c "weblogic-server" \
         -- bash -c "wlst.sh ${targetFilePath} -user ${wlsUser} -password ${wlsPassword} -t3ChannelAddress ${t3ChannelAddress} -t3ChannelPort ${adminTargetPort}" |
         grep "Summary: all applications are active"
-    
-    if [ $? == 1 ];then
+
+    if [ $? == 1 ]; then
         echo_stderr "Failed to deploy application to WLS cluster. Please make sure the configurations are correct."
         exit 1
     fi
