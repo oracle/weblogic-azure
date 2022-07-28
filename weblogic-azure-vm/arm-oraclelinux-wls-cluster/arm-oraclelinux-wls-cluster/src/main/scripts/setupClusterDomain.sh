@@ -983,6 +983,9 @@ groupname="oracle"
 
 cleanup
 
+# Executing this function first just to make sure certificate errors are first caught
+storeCustomSSLCerts
+
 installUtilities
 mountFileShare
 
