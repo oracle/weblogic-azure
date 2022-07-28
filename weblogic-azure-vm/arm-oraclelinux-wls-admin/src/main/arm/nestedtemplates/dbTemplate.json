@@ -127,7 +127,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh <<< \"',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('jdbcDataSourceName'),' ',parameters('dsConnectionURL'),' ',parameters('dbUser'),' ',parameters('dbPassword'), ' ', parameters('dbGlobalTranPro'), '\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh <<< \"',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',base64(parameters('wlsPassword')),' ',base64(parameters('jdbcDataSourceName')),' ',base64(parameters('dsConnectionURL')),' ',parameters('dbUser'),' ',base64(parameters('dbPassword')), ' ', parameters('dbGlobalTranPro'), '\"')]"
                 }
             }
         },
