@@ -172,7 +172,8 @@ function verifyCertValidity()
 		VALIDITY_REMIANS_SECONDS=`expr $CERT_UNTIL_SECONDS - $VALIDITY`
 		if [[ $VALIDITY_REMIANS_SECONDS -le 0 ]];
 		then
-			echo "Error : Supplied certificate is either expired or expiring soon within $MIN_CERT_VALIDITY day"
+			echo_stderr "$KEYSTORE is \"$VALIDITY_PERIOD\""
+			echo_stderr "Error : Supplied certificate $KEYSTORE is either expired or expiring soon within $MIN_CERT_VALIDITY day"
 			exit 1
 		fi		
 	done
