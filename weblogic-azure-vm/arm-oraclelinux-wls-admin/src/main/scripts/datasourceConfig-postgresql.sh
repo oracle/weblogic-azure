@@ -19,6 +19,11 @@ function usage()
 
 function validateInput()
 {
+   # parse base64 string
+   wlsPassword=$(echo "${wlsPassword}" | base64 -d)
+   jdbcDataSourceName=$(echo "${jdbcDataSourceName}" | base64 -d)
+   dsConnectionURL=$(echo "${dsConnectionURL}" | base64 -d)
+   dsPassword=$(echo "${dsPassword}" | base64 -d)
 
    if [ -z "$oracleHome" ];
    then
@@ -85,7 +90,6 @@ function validateInput()
        echo _stderr "Please provide Weblogic target cluster name"
        exit 1
    fi
-
 }
 
 function createJDBCSource_model()
