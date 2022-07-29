@@ -240,6 +240,48 @@ function mapLDAPHostWithPublicIP()
     sudo echo "${wlsLDAPPublicIP}  ${adServerHost}" >> /etc/hosts
 }
 
+# This function verifies whether certificate is valid and not expired
+function verifyCertValidity()
+{
+
+	CERT_FILE=$1
+    CURRENT_DATE=$2
+    MIN_CERT_VALIDITY=$3
+    VALIDITY=$(($CURRENT_DATE + ($MIN_CERT_VALIDITY*24*60*60)))
+	
+	. $oracleHome/oracle_common/common/bin/setWlstEnv.sh
+	
+	echo "Verifying $CERT_FILE is valid at least $MIN_CERT_VALIDITY day from the deployment time"
+	if [ $VALIDITY -le $CURRENT_DATE ];
+    then
+        echo_stderr "Error : Invalid minimum validity days supplied"
+  		exit 1
+  	fi 
+	
+	# Check whether CERT_FILE supplied can be opened for reading
+	# Redirecting as no need to display the contents
+	sudo ${JAVA_HOME}/bin/keytool -printcert -file $CERT_FILE > /dev/null 2>&1
+	
+	if [ $? != 0 ];
+	then
+		echo_stderr "Error opening the certificate : $CERT_FILE"
+		exit 1
+	fi
+	
+	VALIDITY_PERIOD=`sudo ${JAVA_HOME}/bin/keytool -printcert -file $CERT_FILE | grep Valid`
+	echo "Certificate $CERT_FILE is \"$VALIDITY_PERIOD\""
+	CERT_UNTIL_DATE=`echo $VALIDITY_PERIOD | awk -F'until:|\r' '{print $2}'`
+	CERT_UNTIL_SECONDS=`date -d "$CERT_UNTIL_DATE" +%s`
+	VALIDITY_REMIANS_SECONDS=`expr $CERT_UNTIL_SECONDS - $VALIDITY`	
+	if [[ $VALIDITY_REMIANS_SECONDS -le 0 ]];
+	then
+		echo_stderr "$CERT_FILE is \"$VALIDITY_PERIOD\""
+		echo_stderr "Error : Supplied certificate $CERT_FILE is either expired or expiring soon within $MIN_CERT_VALIDITY day"
+		exit 1
+	fi
+	echo "$CERT_FILE validation is successful"		
+}
+
 function parseLDAPCertificate()
 {
     echo "create key store"
@@ -257,6 +299,9 @@ function parseLDAPCertificate()
 
     openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
     addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
+    
+    # Verify certificate validity period more than MIN_CERT_VALIDITY
+    verifyCertValidity $addsCertificate $CURRENT_DATE $MIN_CERT_VALIDITY
 }
 
 function importAADCertificate()
@@ -445,7 +490,18 @@ USER_ORACLE="oracle"
 GROUP_ORACLE="oracle"
 DOMAIN_PATH="/u01/domains"
 
-read wlsUserName wlsPassword wlsDomainName adProviderName adServerHost adServerPort adPrincipal adPassword adGroupBaseDN adUserBaseDN oracleHome wlsAdminHost wlsAdminPort wlsADSSLCer wlsLDAPPublicIP wlsAdminServerName wlsDomainPath isCustomSSLEnabled customTrustKeyStorePassPhrase customTrustKeyStoreType vmIndex
+# Used for certificate expiry validation
+CURRENT_DATE=`date +%s`
+# Supplied certificate to have minimum days validity for the deployment
+MIN_CERT_VALIDITY="1"
+
+
+read wlsUserName wlsPassword wlsDomainName adProviderName adServerHost adServerPort adPrincipal adPassword adUserBaseDN adGroupBaseDN oracleHome wlsAdminHost wlsAdminPort wlsADSSLCer wlsLDAPPublicIP wlsAdminServerName wlsDomainPath isCustomSSLEnabled customTrustKeyStorePassPhrase customTrustKeyStoreType vmIndex
+
+# Passing these values as base64 as values has space embedded
+adPrincipal=$(echo "$adPrincipal" | base64 --decode)
+adUserBaseDN=$(echo "$adUserBaseDN" | base64 --decode)
+adGroupBaseDN=$(echo "$adGroupBaseDN" | base64 --decode)
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
@@ -454,6 +510,12 @@ then
     customTrustKeyStorePassPhrase=$(echo "$customTrustKeyStorePassPhrase" | base64 --decode)
     customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
 fi
+
+validateInput
+
+# Executing parse and validate certificates to ensure there are no certificates issues
+# If any certificates issues then it will be cuaght earlier
+parseLDAPCertificate
 
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
@@ -468,7 +530,6 @@ then
     createAADProvider_model
     createSSL_model
     mapLDAPHostWithPublicIP
-    parseLDAPCertificate
     importAADCertificate
     importAADCertificateIntoWLSCustomTrustKeyStore
     configureSSL
@@ -483,7 +544,6 @@ then
 else
     createTempFolder
     mapLDAPHostWithPublicIP
-    parseLDAPCertificate
     importAADCertificate
     importAADCertificateIntoWLSCustomTrustKeyStore
     cleanup
