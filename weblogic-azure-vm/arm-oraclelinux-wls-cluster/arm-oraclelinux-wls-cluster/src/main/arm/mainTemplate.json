@@ -1861,11 +1861,11 @@
         },
         "adminConsole": {
             "type": "string",
-            "value": "[if(parameters('enableDNSConfiguration'), format('http://{0}.{1}:7001/console', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminConsole.value)]"
+            "value": "[if(parameters('enableDNSConfiguration'), uri(format('http://{0}.{1}:7001/console/', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminConsole.value)]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[if(parameters('enableDNSConfiguration'), format('https://{0}.{1}:7002/console', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminSecuredConsole.value)]"
+            "value": "[if(parameters('enableDNSConfiguration'), uri(format('https://{0}.{1}:7002/console/', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminSecuredConsole.value)]"
         },
         "appGatewayURL": {
             "type": "string",
