@@ -17,7 +17,7 @@
 
   <groupId>com.oracle.weblogic.azure</groupId>
   <artifactId>wls-on-aks-azure-marketplace</artifactId>
-  <version>1.0.41</version>
+  <version>1.0.42</version>
 
   <parent>
     <groupId>com.microsoft.azure.iaas</groupId>
