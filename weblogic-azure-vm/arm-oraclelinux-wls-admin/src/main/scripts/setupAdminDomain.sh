@@ -75,6 +75,57 @@ function cleanup()
     echo "Cleanup completed."
 }
 
+# This function verifies whether certificate is valid and not expired
+function verifyCertValidity()
+{
+    KEYSTORE=$1
+    PASSWORD=$2
+    CURRENT_DATE=$3
+    MIN_CERT_VALIDITY=$4
+    KEY_STORE_TYPE=$5
+    VALIDITY=$(($CURRENT_DATE + ($MIN_CERT_VALIDITY*24*60*60)))
+    
+    echo "Verifying $KEYSTORE is valid at least $MIN_CERT_VALIDITY day from the deployment time"
+    
+    if [ $VALIDITY -le $CURRENT_DATE ];
+    then
+        echo_stderr "Error : Invalid minimum validity days supplied"
+  		exit 1
+  	fi 
+
+	# Check whether KEYSTORE supplied can be opened for reading
+	# Redirecting as no need to display the contents
+	runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE > /dev/null 2>&1"
+	if [ $? != 0 ];
+	then
+		echo_stderr "Error opening the keystore : $KEYSTORE"
+		exit 1
+	fi
+
+	aliasList=`runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE | grep Alias" |awk '{print $3}'`
+	if [[ -z $aliasList ]]; 
+	then 
+		echo_stderr "Error : No alias found in supplied certificate $KEYSTORE"
+		exit 1
+	fi
+	
+	for alias in $aliasList 
+	do
+		VALIDITY_PERIOD=`runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE -alias $alias | grep Valid"`
+		echo "$KEYSTORE is \"$VALIDITY_PERIOD\""
+		CERT_UNTIL_DATE=`echo $VALIDITY_PERIOD | awk -F'until:|\r' '{print $2}'`
+		CERT_UNTIL_SECONDS=`date -d "$CERT_UNTIL_DATE" +%s`
+		VALIDITY_REMIANS_SECONDS=`expr $CERT_UNTIL_SECONDS - $VALIDITY`
+		if [[ $VALIDITY_REMIANS_SECONDS -le 0 ]];
+		then
+			echo_stderr "$KEYSTORE is \"$VALIDITY_PERIOD\""
+			echo_stderr "Error : Supplied certificate $KEYSTORE is either expired or expiring soon within $MIN_CERT_VALIDITY day"
+			exit 1
+		fi		
+	done
+	echo "$KEYSTORE validation is successful"
+}
+
 #Creates weblogic deployment model for admin domain
 function create_admin_model()
 {
@@ -395,6 +446,9 @@ function validateSSLKeyStores()
        exit 1
    fi
 
+   # Verify Identity keystore validity period more than MIN_CERT_VALIDITY
+   verifyCertValidity $customIdentityKeyStoreFileName $customIdentityKeyStorePassPhrase $CURRENT_DATE $MIN_CERT_VALIDITY $customIdentityKeyStoreType
+
    #validate Trust keystore
    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; keytool -list -v -keystore $customTrustKeyStoreFileName -storepass $customTrustKeyStorePassPhrase -storetype $customTrustKeyStoreType | grep 'Entry type:' | grep 'trustedCertEntry'"
 
@@ -402,6 +456,9 @@ function validateSSLKeyStores()
        echo "Error : Trust Keystore Validation Failed !!"
        exit 1
    fi
+
+   # Verify Identity keystore validity period more than MIN_CERT_VALIDITY
+   verifyCertValidity $customTrustKeyStoreFileName $customTrustKeyStorePassPhrase $CURRENT_DATE $MIN_CERT_VALIDITY $customTrustKeyStoreType
 
    echo "ValidateSSLKeyStores Successfull !!"
 }
@@ -567,6 +624,12 @@ fi
 SCRIPT_PWD=`pwd`
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
+
+# Used for certificate expiry validation
+CURRENT_DATE=`date +%s`
+# Supplied certificate to have minimum days validity for the deployment
+MIN_CERT_VALIDITY="1"
+
 
 #read arguments from stdin
 read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
