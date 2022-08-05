@@ -785,11 +785,11 @@
       },
       "adminConsoleURL": {
          "type": "string",
-         "value": "[uri(concat('http://', if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn, reference(variables('name_nic_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001/console'), '/')]"
+         "value": "[uri(concat('http://', if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn, reference(variables('name_nic_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001/console/'), '')]"
       },
       "adminConsoleSecureURL": {
          "type": "string",
-         "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn, reference(variables('name_nic_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console'), '/')]"
+         "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn, reference(variables('name_nic_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console/'), '')]"
       }
    }
 }

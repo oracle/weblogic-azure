@@ -915,11 +915,11 @@
         },
         "adminConsole": {
             "type": "string",
-            "value": "[uri(concat('http://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001/console'),'/')]"
+            "value": "[uri(concat('http://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001/console/'),'')]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console'),'/')]"
+            "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console/'),'')]"
         },
         "wlsDomainLocation": {
             "type": "string",
