@@ -83,6 +83,7 @@ param createDNSZone bool = false
   'oracle'
   'postgresql'
   'sqlserver'
+  'mysql'
   'otherdb'
 ])
 @description('One of the supported database types')

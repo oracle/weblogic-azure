@@ -1876,6 +1876,10 @@
                                             "value": "sqlserver"
                                         },
                                         {
+                                            "label": "MySQL",
+                                            "value": "mysql"
+                                        },
+                                        {
                                             "label": "Other",
                                             "value": "otherdb"
                                         }
@@ -1905,8 +1909,16 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                    "validations": [
+                                        {
+                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                        },
+                                        {
+                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), not(contains(steps('section_database').databaseConnectionInfo.databaseType,'serverTimezone')), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain server time zone, for an example, 'jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC'."
+                                        }
+                                    ]
                                 },
                                 "visible": "[and(bool(steps('section_database').enableDB), not(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb')))]"
                             },

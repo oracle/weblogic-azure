@@ -17,6 +17,9 @@ function generate_ds_model() {
     elif [[ "${databaseType}" == "${dbTypeSQLServer}" ]]; then
         databaseDriver=${driverSQLServer}
         databaseTestTableName=${testTableSQLServer}
+    elif [[ "${databaseType}" == "${dbTypeMySQL}" ]]; then
+        databaseDriver=${driverMySQL}
+        databaseTestTableName=${testTableMySQL}
     elif [[ "${databaseType}" == "${dbTypeOthers}" ]]; then
         databaseDriver=${DB_DRIVER_NAME}
         databaseTestTableName=${TEST_TABLE_NAME}
@@ -155,14 +158,17 @@ export clusterName="cluster-1"
 export dbTypeOracle="oracle"
 export dbTypePostgre="postgresql"
 export dbTypeSQLServer="sqlserver"
+export dbTypeMySQL='mysql'
 export dbTypeOthers="otherdb"
 export driverOracle="oracle.jdbc.OracleDriver"
 export driverPostgre="org.postgresql.Driver"
 export driverSQLServer="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+export driverMySQL="com.mysql.jdbc.Driver"
 export optTypeDelete='delete'
 export testTableOracle="SQL ISVALID"
 export testTablePostgre="SQL SELECT 1"
 export testTableSQLServer="SQL SELECT 1"
+export testTableMySQL="SQL SELECT 1"
 export wlsConfigmapName="${wlsDomainUID}-wdt-config-map"
 
 read_sensitive_parameters_from_stdin
