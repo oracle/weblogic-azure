@@ -3,84 +3,55 @@
 
 echo "Script ${0} starts"
 
-# read <dbPassword> <wlsPassword> from stdin
-function read_sensitive_parameters_from_stdin() {
-    read dbPassword wlsPassword
-}
-
-#Function to display usage message
-function usage() {
-    usage=$(cat <<-END
-Usage:
-echo <dbPassword> <wlsPassword> |
-    ./setupDBConnections.sh
-    <aksClusterRGName>
-    <aksClusterName>
-    <databaseType>
-    <dbUser>
-    <dsConnectionURL>
-    <jdbcDataSourceName>
-    <wlsDomainUID>
-    <wlsUser>
-    <dbOptType>
-END
-)
-    echo_stdout "${usage}"
-    if [ $1 -eq 1 ]; then
-        echo_stderr "${usage}"
-        exit 1
-    fi
-}
-
 #Function to validate input
 function validate_input() {
-    if [[ -z "$aksClusterRGName" || -z "${aksClusterName}" ]]; then
-        echo_stderr "aksClusterRGName and aksClusterName are required. "
-        usage 1
+    if [[ -z "$AKS_RESOURCE_GROUP_NAME" || -z "${AKS_NAME}" ]]; then
+        echo_stderr "AKS_RESOURCE_GROUP_NAME and AKS_NAME are required. "
+        exit 1
     fi
 
-    if [ -z "$databaseType" ]; then
-        echo_stderr "databaseType is required. "
-        usage 1
+    if [ -z "$DATABASE_TYPE" ]; then
+        echo_stderr "DATABASE_TYPE is required. "
+        exit 1
     fi
 
-    if [[ -z "$dbPassword" || -z "${dbUser}" ]]; then
-        echo_stderr "dbPassword and dbUser are required. "
-        usage 1
+    if [[ -z "$DB_PASSWORD" || -z "${DB_USER}" ]]; then
+        echo_stderr "DB_PASSWORD and DB_USER are required. "
+        exit 1
     fi
 
-    if [ -z "$dsConnectionURL" ]; then
-        echo_stderr "dsConnectionURL is required. "
-        usage 1
+    if [ -z "$DB_CONNECTION_STRING" ]; then
+        echo_stderr "DB_CONNECTION_STRING is required. "
+        exit 1
     fi
 
-    if [ -z "$jdbcDataSourceName" ]; then
-        echo_stderr "jdbcDataSourceName is required. "
-        usage 1
+    if [ -z "$JDBC_DATASOURCE_NAME" ]; then
+        echo_stderr "JDBC_DATASOURCE_NAME is required. "
+        exit 1
     fi
 
-    if [ -z "$wlsDomainUID" ]; then
-        echo_stderr "wlsDomainUID is required. "
-        usage 1
+    if [ -z "$WLS_DOMAIN_UID" ]; then
+        echo_stderr "WLS_DOMAIN_UID is required. "
+        exit 1
     fi
 
-    if [[ -z "$wlsUser" || -z "${wlsPassword}" ]]; then
-        echo_stderr "wlsUser and wlsPassword are required. "
-        usage 1
+    if [[ -z "$WLS_DOMAIN_USER" || -z "${WLS_DOMAIN_PASSWORD}" ]]; then
+        echo_stderr "WLS_DOMAIN_USER and WLS_DOMAIN_PASSWORD are required. "
+        exit 1
     fi
 }
 
 # Connect to AKS cluster
 function connect_aks_cluster() {
     az aks get-credentials \
-        --resource-group ${aksClusterRGName} \
-        --name ${aksClusterName} \
+        --resource-group ${AKS_RESOURCE_GROUP_NAME} \
+        --name ${AKS_NAME} \
         --overwrite-existing
 }
 
 function create_datasource_model_configmap_and_secret() {
     echo "get data source secret name"
-    jndiLabel=${jdbcDataSourceName//\//\_}
+    jndiLabel=${JDBC_DATASOURCE_NAME//\//\_}
     secretLen=$(kubectl get secret -n ${wlsDomainNS} -l datasource.JNDI="${jndiLabel}" -o json \
         | jq '.items | length')
     if [ ${secretLen} -ge 1 ];then
@@ -88,27 +59,19 @@ function create_datasource_model_configmap_and_secret() {
             | jq ".items[0].metadata.name" \
             | tr -d "\"")
     else
-        dbSecretName="ds-secret-${databaseType}-${datetime}"
+        dbSecretName="ds-secret-${DATABASE_TYPE}-${datetime}"
     fi
 
     echo "Data source secret name: ${dbSecretName}"
     chmod ugo+x $scriptDir/dbUtility.sh
-    echo "${dbPassword}" | \
-        bash $scriptDir/dbUtility.sh \
-        ${databaseType} \
-        "${dbUser}" \
-        "${dsConnectionURL}" \
-        "${jdbcDataSourceName}" \
-        "${wlsDomainUID}" \
-        "${dbSecretName}" \
-        "${optTypeUpdate}"
+    bash $scriptDir/dbUtility.sh ${dbSecretName} ${optTypeUpdate}
 }
 
 function apply_datasource_to_domain() {
     echo "apply datasoure"
     # get domain configurations
     domainConfigurationJsonFile=$scriptDir/domain.json
-    kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json >${domainConfigurationJsonFile}
+    kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json >${domainConfigurationJsonFile}
 
     restartVersion=$(cat ${domainConfigurationJsonFile} | jq '. | .spec.restartVersion' | tr -d "\"")
     secretList=$(cat ${domainConfigurationJsonFile} | jq -r '. | .spec.configuration.secrets')
@@ -136,7 +99,7 @@ function apply_datasource_to_domain() {
     # apply the secret
     # restart the domain
     timestampBeforePatchingDomain=$(date +%s)
-    kubectl -n ${wlsDomainNS} patch domain ${wlsDomainUID} \
+    kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         -p '[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/configuration/model/configMap", "value":'${wlsConfigmapName}'}, {"op": "replace", "path": "/spec/configuration/secrets", "value": '${secretStrings}'}]'
 }
@@ -145,7 +108,7 @@ function remove_datasource_from_domain() {
     echo "remove datasoure secret from domain configuration"
     # get domain configurations
     domainConfigurationJsonFile=$scriptDir/domain.json
-    kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json >${domainConfigurationJsonFile}
+    kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json >${domainConfigurationJsonFile}
 
     restartVersion=$(cat ${domainConfigurationJsonFile} | jq '. | .spec.restartVersion' | tr -d "\"")
     secretList=$(cat ${domainConfigurationJsonFile} | jq -r '. | .spec.configuration.secrets')
@@ -183,20 +146,20 @@ function remove_datasource_from_domain() {
     # apply the secret
     # restart the domain
     timestampBeforePatchingDomain=$(date +%s)
-    kubectl -n ${wlsDomainNS} patch domain ${wlsDomainUID} \
+    kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         -p '[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/configuration/model/configMap", "value":'${wlsConfigmapName}'}, {"op": "replace", "path": "/spec/configuration/secrets", "value": '${secretStrings}'}]'
 }
 
 function wait_for_operation_completed() {
     # Make sure all of the pods are running.
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .spec.clusters[] | .replicas')
 
     utility_wait_for_pod_restarted \
         ${timestampBeforePatchingDomain} \
         ${replicas} \
-        ${wlsDomainUID} \
+        ${WLS_DOMAIN_UID} \
         ${checkPodStatusMaxAttemps} \
         ${checkPodStatusInterval}
 
@@ -208,19 +171,11 @@ function wait_for_operation_completed() {
 }
 
 function delete_datasource() {
-    echo "remove secret and model of data source ${jdbcDataSourceName}"
+    echo "remove secret and model of data source ${JDBC_DATASOURCE_NAME}"
     # remove secret
     # remove model
     chmod ugo+x $scriptDir/dbUtility.sh
-     echo "${dbPassword}" | \
-        bash $scriptDir/dbUtility.sh \
-        ${databaseType} \
-        "${dbUser}" \
-        "${dsConnectionURL}" \
-        "${jdbcDataSourceName}" \
-        "${wlsDomainUID}" \
-        "${dbSecretName}" \
-        "${optTypeDelete}"
+    bash $scriptDir/dbUtility.sh ${dbSecretName} ${optTypeDelete}
 
     # update weblogic domain
     remove_datasource_from_domain
@@ -245,11 +200,11 @@ function validate_datasource() {
     clusterTargetPort=$(kubectl get svc ${wlsClusterSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
     t3ConnectionString="t3://${wlsClusterSvcName}.${wlsDomainNS}.svc.cluster.local:${clusterTargetPort}"
     cat <<EOF >${testDatasourceScript}
-connect('${wlsUser}', '${wlsPassword}', '${t3ConnectionString}')
+connect('${WLS_DOMAIN_USER}', '${WLS_DOMAIN_PASSWORD}', '${t3ConnectionString}')
 serverRuntime()
 print 'start to query data source jndi bean'
 dsMBeans = cmo.getJDBCServiceRuntime().getJDBCDataSourceRuntimeMBeans()
-ds_name = '${jdbcDataSourceName}'
+ds_name = '${JDBC_DATASOURCE_NAME}'
 for ds in dsMBeans:
     if (ds_name == ds.getName()):
         print 'DS name is: '+ds.getName()
@@ -262,7 +217,7 @@ EOF
     kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} -- bash -c "wlst.sh ${targetDSFilePath}" | grep "State is Running"
     
     if [ $? == 1 ];then
-        echo_stderr "Failed to configure datasource ${jdbcDataSourceName}. Please make sure the input values are correct."
+        echo_stderr "Failed to configure datasource ${JDBC_DATASOURCE_NAME}. Please make sure the input values are correct."
         delete_datasource
         exit 1
     fi
@@ -270,31 +225,21 @@ EOF
 
 
 # Main script
+set -Eo pipefail
+
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
 source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
-export aksClusterRGName=$1
-export aksClusterName=$2
-export databaseType=$3
-export dbUser=$4
-export dsConnectionURL=$5
-export jdbcDataSourceName=$6
-export wlsDomainUID=$7
-export wlsUser=$8
-export dbOptType=$9
-
 export datetime=$(date +%s)
 export optTypeDelete='delete'
 export optTypeUpdate='createOrUpdate'
 export wlsClusterName="cluster-1"
-export wlsClusterSvcName="${wlsDomainUID}-cluster-${wlsClusterName}"
-export wlsConfigmapName="${wlsDomainUID}-wdt-config-map"
-export wlsDomainNS="${wlsDomainUID}-ns"
-
-read_sensitive_parameters_from_stdin
+export wlsClusterSvcName="${WLS_DOMAIN_UID}-cluster-${wlsClusterName}"
+export wlsConfigmapName="${WLS_DOMAIN_UID}-wdt-config-map"
+export wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 
 validate_input
 
@@ -302,11 +247,11 @@ connect_aks_cluster
 
 install_kubectl
 
-if [[ "${dbOptType}" == "${optTypeDelete}" ]];then
-    echo "delete date source: ${jdbcDataSourceName}"
+if [[ "${DB_CONFIGURATION_TYPE}" == "${optTypeDelete}" ]];then
+    echo "delete date source: ${JDBC_DATASOURCE_NAME}"
     delete_datasource
 else
-    echo "create/update data source: ${jdbcDataSourceName}"
+    echo "create/update data source: ${JDBC_DATASOURCE_NAME}"
     create_datasource_model_configmap_and_secret
     apply_datasource_to_domain
     wait_for_operation_completed

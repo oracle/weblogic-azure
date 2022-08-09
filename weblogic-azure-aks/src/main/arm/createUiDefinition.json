@@ -1915,8 +1915,8 @@
                                             "message": "A valid JDBC URL for the chosen database type must be provided"
                                         },
                                         {
-                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), not(contains(steps('section_database').databaseConnectionInfo.databaseType,'serverTimezone')), bool('true'))]",
-                                            "message": "The connection string of MySQL must contain server time zone, for an example, 'jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC'."
+                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain server time zone, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC\"."
                                         }
                                     ]
                                 },

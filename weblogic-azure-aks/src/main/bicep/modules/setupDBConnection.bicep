@@ -40,6 +40,7 @@ param aksClusterName string = ''
   'oracle'
   'postgresql'
   'sqlserver'
+  'mysql'
   'otherdb'
 ])
 @description('One of the supported database types')
@@ -71,12 +72,15 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
+// This template is used for post deployment, hard code the CLI version with a variable.
+var const_azCliVersion = '2.33.1'
+
 module pids './_pids/_pid.bicep' = {
   name: 'initialization'
 }
 
 module configDataSource './_setupDBConnection.bicep' = {
-  name: 'create-update--delete-datasource'
+  name: 'create-update-delete-datasource'
   params:{
     _pidEnd: pids.outputs.dbEnd
     _pidStart: pids.outputs.dbStart
@@ -84,6 +88,7 @@ module configDataSource './_setupDBConnection.bicep' = {
     _artifactsLocationSasToken: _artifactsLocationSasToken
     aksClusterName: aksClusterName
     aksClusterRGName: resourceGroup().name
+    azCliVersion: const_azCliVersion
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
     dbGlobalTranPro: dbGlobalTranPro
