@@ -1375,6 +1375,10 @@
                                         {
                                             "label": "Azure SQL",
                                             "value": "sqlserver"
+                                        },
+                                        {
+                                            "label": "MySQL",
+                                            "value": "mysql"
                                         }
                                     ],
                                     "required": true
@@ -1402,8 +1406,16 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+									"validations": [
+                                        {
+                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                        },
+                                        {
+                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), and(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols=TLSv1.2')), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain server time zone and enable TLS v1.2, for an example, 'jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2'."
+                                        }
+                                    ]
                                 },
                                 "visible": true
                             },
