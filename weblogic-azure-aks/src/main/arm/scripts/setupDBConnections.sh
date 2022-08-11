@@ -3,41 +3,70 @@
 
 echo "Script ${0} starts"
 
+#Function to display usage message
+function usage() {
+    usage=$(cat <<-END
+Usage:
+You must specify the following environment variables:
+AKS_RESOURCE_GROUP_NAME: the name of resource group that runs the AKS cluster.
+AKS_NAME: the name of the AKS cluster.
+DATABASE_TYPE: one of the supported database types.
+DB_CONFIGURATION_TYPE: createOrUpdate: create a new data source connection, or update an existing data source connection. delete: delete an existing data source connection.
+DB_PASSWORD: password for Database.
+DB_USER: user id of Database.
+DB_CONNECTION_STRING: JDBC Connection String.
+DB_DRIVER_NAME: datasource driver name, must be specified if database type is otherdb.
+GLOBAL_TRANSATION_PROTOCOL: Determines the transaction protocol (global transaction processing behavior) for the data source.
+JDBC_DATASOURCE_NAME: JNDI Name for JDBC Datasource.
+TEST_TABLE_NAME: the name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.
+WLS_DOMAIN_UID: UID of WebLogic domain, used in WebLogic Operator.
+WLS_DOMAIN_USER: user name for WebLogic Administrator.
+WLS_DOMAIN_PASSWORD: passowrd for WebLogic Administrator.
+END
+)
+
+    echo_stdout "${usage}"
+    if [ $1 -eq 1 ]; then
+        echo_stderr "${usage}"
+        exit 1
+    fi
+}
+
 #Function to validate input
 function validate_input() {
     if [[ -z "$AKS_RESOURCE_GROUP_NAME" || -z "${AKS_NAME}" ]]; then
         echo_stderr "AKS_RESOURCE_GROUP_NAME and AKS_NAME are required. "
-        exit 1
+        usage 1
     fi
 
     if [ -z "$DATABASE_TYPE" ]; then
         echo_stderr "DATABASE_TYPE is required. "
-        exit 1
+        usage 1
     fi
 
     if [[ -z "$DB_PASSWORD" || -z "${DB_USER}" ]]; then
         echo_stderr "DB_PASSWORD and DB_USER are required. "
-        exit 1
+        usage 1
     fi
 
     if [ -z "$DB_CONNECTION_STRING" ]; then
         echo_stderr "DB_CONNECTION_STRING is required. "
-        exit 1
+        usage 1
     fi
 
     if [ -z "$JDBC_DATASOURCE_NAME" ]; then
         echo_stderr "JDBC_DATASOURCE_NAME is required. "
-        exit 1
+        usage 1
     fi
 
     if [ -z "$WLS_DOMAIN_UID" ]; then
         echo_stderr "WLS_DOMAIN_UID is required. "
-        exit 1
+        usage 1
     fi
 
     if [[ -z "$WLS_DOMAIN_USER" || -z "${WLS_DOMAIN_PASSWORD}" ]]; then
         echo_stderr "WLS_DOMAIN_USER and WLS_DOMAIN_PASSWORD are required. "
-        exit 1
+        usage 1
     fi
 }
 
