@@ -3,21 +3,19 @@
 
 echo "Script ${0} starts"
 
-# read <dbPassword> from stdin
-function read_sensitive_parameters_from_stdin() {
-    read dbPassword
-}
-
 function generate_ds_model() {
     databaseDriver=${driverOracle}
     databaseTestTableName=${testTableOracle}
-    if [[ "${databaseType}" == "${dbTypePostgre}" ]]; then
+    if [[ "${DATABASE_TYPE}" == "${dbTypePostgre}" ]]; then
         databaseDriver=${driverPostgre}
         databaseTestTableName=${testTablePostgre}
-    elif [[ "${databaseType}" == "${dbTypeSQLServer}" ]]; then
+    elif [[ "${DATABASE_TYPE}" == "${dbTypeSQLServer}" ]]; then
         databaseDriver=${driverSQLServer}
         databaseTestTableName=${testTableSQLServer}
-    elif [[ "${databaseType}" == "${dbTypeOthers}" ]]; then
+    elif [[ "${DATABASE_TYPE}" == "${dbTypeMySQL}" ]]; then
+        databaseDriver=${driverMySQL}
+        databaseTestTableName=${testTableMySQL}
+    elif [[ "${DATABASE_TYPE}" == "${dbTypeOthers}" ]]; then
         databaseDriver=${DB_DRIVER_NAME}
         databaseTestTableName=${TEST_TABLE_NAME}
     fi
@@ -27,7 +25,7 @@ function generate_ds_model() {
     dsModelFilePath=$scriptDir/${dbSecretName}.yaml
     bash $scriptDir/genDatasourceModel.sh \
         ${dsModelFilePath} \
-        "${jdbcDataSourceName}" \
+        "${JDBC_DATASOURCE_NAME}" \
         "${clusterName}" \
         "${databaseDriver}" \
         "${databaseTestTableName}" \
@@ -71,11 +69,11 @@ function export_models_and_delete_configmap() {
 
 function cleanup_secret_and_model() {
     echo "check if the datasource secret exists"
-    jndiLabel=${jdbcDataSourceName//\//\_}
+    jndiLabel=${JDBC_DATASOURCE_NAME//\//\_}
     secretLen=$(kubectl get secret -n ${domainNamespace} -l datasource.JNDI="${jndiLabel}" -o json |
         jq '.items | length')
     if [ ${secretLen} -ge 1 ]; then
-        echo "secret for ${jdbcDataSourceName} exists"
+        echo "secret for ${JDBC_DATASOURCE_NAME} exists"
         # delete the secrets
         index=0
         while [ $index -lt ${secretLen} ]; do
@@ -96,16 +94,16 @@ function cleanup_secret_and_model() {
 function create_datasource_secret() {
     cleanup_secret_and_model
 
-    echo "create/update secret ${dbSecretName} for ${jdbcDataSourceName}"
+    echo "create/update secret ${dbSecretName} for ${JDBC_DATASOURCE_NAME}"
     kubectl -n ${domainNamespace} create secret generic \
         ${dbSecretName} \
-        --from-literal=password="${dbPassword}" \
-        --from-literal=url="${dsConnectionURL}" \
-        --from-literal=user="${dbUser}"
+        --from-literal=password="${DB_PASSWORD}" \
+        --from-literal=url="${DB_CONNECTION_STRING}" \
+        --from-literal=user="${DB_USER}"
 
     kubectl -n sample-domain1-ns label secret \
         ${dbSecretName} \
-        weblogic.domainUID=${wlsDomainUID} \
+        weblogic.domainUID=${WLS_DOMAIN_UID} \
         datasource.JNDI="${jndiLabel}"
 }
 
@@ -121,7 +119,7 @@ function update_configmap() {
     kubectl -n ${domainNamespace} create configmap ${wlsConfigmapName} \
         --from-file=${modelFilePath}
     kubectl -n ${domainNamespace} label configmap ${wlsConfigmapName} \
-        weblogic.domainUID=${wlsDomainUID}
+        weblogic.domainUID=${WLS_DOMAIN_UID}
 }
 
 function delete_model_and_secret() {
@@ -135,37 +133,35 @@ function delete_model_and_secret() {
     kubectl -n ${domainNamespace} create configmap ${wlsConfigmapName} \
         --from-file=${modelFilePath}
     kubectl -n ${domainNamespace} label configmap ${wlsConfigmapName} \
-        weblogic.domainUID=${wlsDomainUID}
+        weblogic.domainUID=${WLS_DOMAIN_UID}
 }
 
 # Main script
+set -Eo pipefail
+
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
-export databaseType=$1
-export dbUser=$2
-export dsConnectionURL=$3
-export jdbcDataSourceName=$4
-export wlsDomainUID=$5
-export dbSecretName=$6
-export operationType=$7
+export dbSecretName=$1
+export operationType=$2
 
-export domainNamespace=${wlsDomainUID}-ns
+export domainNamespace=${WLS_DOMAIN_UID}-ns
 export clusterName="cluster-1"
 export dbTypeOracle="oracle"
 export dbTypePostgre="postgresql"
 export dbTypeSQLServer="sqlserver"
+export dbTypeMySQL='mysql'
 export dbTypeOthers="otherdb"
 export driverOracle="oracle.jdbc.OracleDriver"
 export driverPostgre="org.postgresql.Driver"
 export driverSQLServer="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+export driverMySQL="com.mysql.jdbc.Driver"
 export optTypeDelete='delete'
 export testTableOracle="SQL ISVALID"
 export testTablePostgre="SQL SELECT 1"
 export testTableSQLServer="SQL SELECT 1"
-export wlsConfigmapName="${wlsDomainUID}-wdt-config-map"
-
-read_sensitive_parameters_from_stdin
+export testTableMySQL="SQL SELECT 1"
+export wlsConfigmapName="${WLS_DOMAIN_UID}-wdt-config-map"
 
 if [[ "${operationType}" == "${optTypeDelete}" ]]; then
     delete_model_and_secret

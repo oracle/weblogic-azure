@@ -1882,7 +1882,40 @@
                                     ],
                                     "required": true
                                 },
-                                "visible": true
+                                "visible": "[and(bool(steps('section_database').enableDB), not(or(bool(steps('section_aks').imageInfo.isSSOSupportEntitled),equals(steps('section_aks').imageInfo.oracleImageSelector, '14.1.1.0-11'))))]"
+                            },
+                            {
+                                "name": "databaseTypewithMySQL",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Choose database type",
+                                "toolTip": "Choose database type",
+                                "defaultValue": "Oracle database",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Azure database for PostgreSQL",
+                                            "value": "postgresql"
+                                        },
+                                        {
+                                            "label": "Oracle database",
+                                            "value": "oracle"
+                                        },
+                                        {
+                                            "label": "Azure SQL",
+                                            "value": "sqlserver"
+                                        },
+                                        {
+                                            "label": "MySQL",
+                                            "value": "mysql"
+                                        },
+                                        {
+                                            "label": "Other",
+                                            "value": "otherdb"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), or(bool(steps('section_aks').imageInfo.isSSOSupportEntitled),equals(steps('section_aks').imageInfo.oracleImageSelector, '14.1.1.0-11')))]"
                             },
                             {
                                 "name": "jdbcDataSourceName",
@@ -1905,10 +1938,22 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                    "validations": [
+                                        {
+                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                        },
+                                        {
+                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain server time zone, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC\"."
+                                        },
+                                        {
+                                            "isValid": "[if(and(not(bool(steps('section_aks').imageInfo.isSSOSupportEntitled)), equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'), equals(steps('section_aks').imageInfo.oracleImageSelector, '14.1.1.0-11')), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols'), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain enabled TLS protocols, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2\"."
+                                        }
+                                    ]
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb')))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), not(or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb'))))]"
                             },
                             {
                                 "name": "dsConnectionURL2",
@@ -1921,7 +1966,7 @@
                                     "regex": "^jdbc:.*$",
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
                             },
                             {
                                 "name": "dbGlobalTranPro",
@@ -2007,7 +2052,7 @@
                                     "uploadMode": "url",
                                     "openMode": "binary"
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
                             },
                             {
                                 "name": "dbDriverInfoBox",
@@ -2017,7 +2062,7 @@
                                     "text": "WebLogic Server provides support for application data access to any database using a JDBC-compliant driver. Select here for more details.",
                                     "uri": "https://aka.ms/wls-aks-dbdriver"
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
                             },
                             {
                                 "name": "dbDriverName",
@@ -2030,7 +2075,7 @@
                                     "regex": "^[a-zA-Z_][a-zA-Z0-9_]+(\\.[a-zA-Z_][a-zA-Z0-9_]+){1,50}$",
                                     "validationMessage": "A valid driver name for the chosen database type must be provided"
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
                             },
                             {
                                 "name": "dbTestTableName",
@@ -2042,7 +2087,7 @@
                                     "regex": "^.*$",
                                     "validationMessage": "A test table name for the chosen database type must be provided"
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
                             }
                         ],
                         "visible": "[bool(steps('section_database').enableDB)]"
@@ -2074,7 +2119,7 @@
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbTestTableName": "[steps('section_database').databaseConnectionInfo.dbTestTableName]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
-            "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+            "databaseType": "[coalesce(steps('section_database').databaseConnectionInfo.databaseType,steps('section_database').databaseConnectionInfo.databaseTypewithMySQL,'oracle')]",
             "dnszoneAdminConsoleLabel": "[steps('section_dnsConfiguration').dnszoneAdminConsoleLabel]",
             "dnszoneAdminT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneAdminT3ChannelLabel]",
             "dnszoneClusterLabel": "[steps('section_dnsConfiguration').dnszoneGatewayLabel]",

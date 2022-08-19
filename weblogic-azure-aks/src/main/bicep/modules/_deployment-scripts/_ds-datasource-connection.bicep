@@ -27,12 +27,10 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
-var const_arguments = '${aksClusterRGName} ${aksClusterName} ${databaseType} ${dbPassword} ${dbUser} "${dsConnectionURL}" ${jdbcDataSourceName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${dbConfigurationType}'
 var const_commonScript = 'common.sh'
 var const_datasourceScript='setupDBConnections.sh'
 var const_datasourceModelScript='genDatasourceModel.sh'
 var const_dbUtilityScript='dbUtility.sh'
-var const_invokeSetupDBConnectionsScript='invokeSetupDBConnections.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_utilityScript= 'utility.sh'
 
@@ -43,8 +41,35 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    arguments: const_arguments
     environmentVariables: [
+      {
+        name: 'AKS_RESOURCE_GROUP_NAME'
+        value: aksClusterRGName
+      }
+      {
+        name: 'AKS_NAME'
+        value: aksClusterName
+      }
+      {
+        name: 'DATABASE_TYPE'
+        value: databaseType
+      }
+      {
+        name: 'DB_CONFIGURATION_TYPE'
+        value: dbConfigurationType
+      }
+      {
+        name: 'DB_PASSWORD'
+        secureValue: dbPassword
+      }
+      {
+        name: 'DB_USER'
+        value: dbUser
+      }
+      {
+        name: 'DB_CONNECTION_STRING'
+        value: dsConnectionURL
+      }
       {
         name: 'DB_DRIVER_NAME'
         value:  dbDriverName
@@ -54,13 +79,28 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value:  dbGlobalTranPro
       }
       {
+        name: 'JDBC_DATASOURCE_NAME'
+        value: jdbcDataSourceName
+      }
+      {
         name: 'TEST_TABLE_NAME'
         value:  dbTestTableName
       }
+      {
+        name: 'WLS_DOMAIN_UID'
+        value: wlsDomainUID
+      }
+      {
+        name: 'WLS_DOMAIN_USER'
+        value: wlsUserName
+      }
+      {
+        name: 'WLS_DOMAIN_PASSWORD'
+        secureValue: wlsPassword
+      }
     ]
-    primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetupDBConnectionsScript}${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, '${const_datasourceScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
-      uri(const_scriptLocation, '${const_datasourceScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_dbUtilityScript}${_artifactsLocationSasToken}')
