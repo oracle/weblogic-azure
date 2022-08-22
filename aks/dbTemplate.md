@@ -48,12 +48,12 @@ you must have an existing database instance to use.
 
 #### Work with built-in data source driver
 
-The marketplace offer ships with database driver for [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal).  You can invoke the dbTemplate to create data source connection for those database. 
-If you do not have an instance, please create one from Azure portal.
+The marketplace offer ships with database driver for [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/), [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) and [MySQL](https://www.mysql.com/). You can invoke the dbTemplate to create data source connection for those database. 
+If you do not have an instance, please create one from Azure portal. You are able to provision a MySQL instance quickly using [Azure Database for MySQL](https://docs.microsoft.com/en-us/azure/mysql/).
 
 #### Bring your own data source driver
 
-Besides [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal), you are able to create data source connection using other databases, such as [IBM Informix](https://www.ibm.com/products/informix) and [MariaDB](https://mariadb.org/), but you have to follow those steps to achieve that:
+Besides [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/), [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) and [MySQL](https://www.mysql.com/), you are able to create data source connection using other databases, such as [IBM Informix](https://www.ibm.com/products/informix) and [MariaDB](https://mariadb.org/), but you have to follow those steps to achieve that:
 
   - Create your database server, and make sure the database is accessible from Azure.
 
@@ -85,7 +85,7 @@ To deploy data source using your own data source driver, we assume the data sour
 | `wlsDomainUID` | Required. String value. <br> UID of the domain that you are going to update. Make sure it's the same with the initial cluster deployment. |
 | `wlsPassword` | Required. String value. <br> Password for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
 | `wlsUserName` | Required. String value. <br> User name for WebLogic Administrator. Make sure it's the same with the initial cluster deployment. |
-| `databaseType`| Optinal. Enum value. <br> Defaults by `oracle`. <br> `oracle`: will provision a [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database) datasoruce connection. <br> `postgresql`: will provision a [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) data source connection.<br> `sqlserver`: will provision a [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) data source connection. |
+| `databaseType`| Optinal. Enum value. <br> Defaults by `oracle`. <br> `oracle`: will provision a [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database) datasoruce connection. <br> `postgresql`: will provision a [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) data source connection.<br> `sqlserver`: will provision a [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) data source connection. <br> `mysql`: will provision a [MySQL](https://www.mysql.com/) data source connection. |
 | `dbConfigurationType`| Optinal. Enum value. <br> Defaults by `createOrUpdate`. <br> `createOrUpdate`: the deployment will create a new data source connection if there is no  data source has the same name with `jdbcDataSourceName`, otherwise, will update the expected data source with new inputs. <br> `delete`: the deployment will delete a data source connection that has name `jdbcDataSourceName` |
 | `dbGlobalTranPro` | Optinal. Enum value. <br> Defaults by `OnePhaseCommit`. The transaction protocol (global transaction processing behavior) for the data source. You may use one from: `["TwoPhaseCommit", "LoggingLastResource", "OnePhaseCommit", "None"]`|
 
@@ -102,6 +102,20 @@ This value must be the following.
 The parameter `dsConnectionURL` stands for JDBC connection string. The connection string is database specific.
 
 {% include sub-template-datasource-connection-url.md %}
+
+{% include sub-template-datasource-mysql-connection-url.md %}
+
+* If you are using **Patched WebLogic Server Images** from [Oracle Container Registry](https://container-registry.oracle.com/) **middleware/weblogic_cpu** repository, you have to specify **serverTimezone**, like the following:
+
+  ```bash
+  jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC
+  ```
+
+* If you are using **General WebLogic Server Images** from [Oracle Container Registry](https://container-registry.oracle.com/) **middleware/weblogic** repository, you have to specify **serverTimezone** and **enabledTLSProtocols**, like the following:
+
+  ```bash
+  jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2
+  ```
 
 #### Example Parameters JSON
 
