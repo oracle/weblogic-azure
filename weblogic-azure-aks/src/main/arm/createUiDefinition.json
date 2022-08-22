@@ -305,7 +305,7 @@
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "AKS supports a range of Kubernetes versions.  This offer is tested with a specific Kubernetes version known to work with WebLogic Server on AKS; click 'Learn more' to the find the version information.",
+                                    "text": "AKS supports a range of Kubernetes versions.  This offer is tested with a specific Kubernetes version known to work with WebLogic Server on AKS; click 'Learn more' to find the version information.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/wls-aks-well-tested-version"
