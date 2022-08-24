@@ -16,7 +16,7 @@ The following steps use the [Azure Create UI Definition Sandbox](https://portal.
 
 - Fill in the appropriate values. For guidance, see [running Oracle WebLogic Server on Azure Kuberneters Service document](https://oracle.github.io/weblogic-kubernetes-operator/userguide/aks/).
 
-  - In the **Basics** blade, configure the credentials for {{ site.data.var.wlsFullBrandName }} and select User assigned managed identity.
+  - In the **Basics** blade, configure the credentials for {{ site.data.var.wlsFullBrandName }}.
 
     - If you are updating an {{ site.data.var.wlsFullBrandName }} cluster, make sure you have right domain UID and domain name.
 
@@ -98,14 +98,6 @@ The parameters using default value haven't been shown for brevity.
     },
     "enableClusterT3Tunneling": {
       "value": true
-    },
-    "identity": {
-      "value": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "/subscriptions/subscription-id/resourceGroups/samples/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azure_wls_aks": {}
-        }
-      }
     },
     "lbSvcValues": {
       "value": [
