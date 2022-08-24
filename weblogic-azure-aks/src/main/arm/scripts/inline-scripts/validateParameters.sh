@@ -447,6 +447,14 @@ function validate_dns_zone() {
   fi
 }
 
+function get_aks_default_version() {
+  constDefaultAKSVersion=$(az aks get-versions --location ${location} \
+    | jq '.orchestrators[] | select(.default==true) | .orchestratorVersion' \
+    | tr -d "\"")
+
+  validate_status "get AKS default version ${constDefaultAKSVersion}"
+}
+
 function validate_aks_version() {
   if [[ "${USE_AKS_WELL_TESTED_VERSION,,}" == "true" ]]; then
     local aksWellTestedVersionFile=aks_well_tested_version.json
@@ -462,6 +470,7 @@ function validate_aks_version() {
       outputAksVersion=${aksWellTestedVersion}
     else
       # if the well-tested version is invalid, use default version.
+      get_aks_default_version
       outputAksVersion=${constDefaultAKSVersion}
     fi
   else
