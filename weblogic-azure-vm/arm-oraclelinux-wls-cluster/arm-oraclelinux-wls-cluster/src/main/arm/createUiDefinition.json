@@ -1386,6 +1386,16 @@
                                 "visible": true
                             },
                             {
+                                "name": "dbDriverWarningInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[and(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), or(equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest'), equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest')))]",
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "Your current selection of WebLogic Server version, Java version, and MySQL database has a known problem. Please see the link for important information on how to solve it.",
+                                    "uri": "https://aka.ms/wls-vms-mysql-12213"
+                                }
+                            },
+                            {
                                 "name": "jdbcDataSourceName",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "JNDI Name",
