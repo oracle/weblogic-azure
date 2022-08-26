@@ -3,30 +3,24 @@
 
 echo "Script ${0} starts"
 
-# read <ocrSSOPSW> from stdin
-function read_sensitive_parameters_from_stdin() {
-    read ocrSSOPSW
-}
-
 function usage() {
     usage=$(cat <<-END
-Usage: 
-echo <ocrSSOPSW> | 
-    ./updateApplications.sh
-    <ocrSSOUser>
-    <aksClusterRGName>
-    <aksClusterName>
-    <wlsImageTag>
-    <acrName>
-    <wlsDomainName>
-    <wlsDomainUID>
-    <currentResourceGroup>
-    <appPackageUrls>
-    <scriptURL>
-    <appStorageAccountName>
-    <appContainerName>
-    <userProvidedImagePath>
-    <useOracleImage>
+Specify the following ENV variables:
+ACR_NAME
+AKS_CLUSTER_NAME
+AKS_CLUSTER_RESOURCEGROUP_NAME
+CURRENT_RESOURCEGROUP_NAME
+ORACLE_ACCOUNT_NAME
+ORACLE_ACCOUNT_PASSWORD
+STORAGE_ACCOUNT_NAME
+STORAGE_ACCOUNT_CONTAINER_NAME
+SCRIPT_LOCATION
+USE_ORACLE_IMAGE
+USER_PROVIDED_IMAGE_PATH
+WLS_APP_PACKAGE_URLS
+WLS_DOMAIN_NAME
+WLS_DOMAIN_UID
+WLS_IMAGE_TAG
 END
 )
     echo_stdout "${usage}"
@@ -38,68 +32,68 @@ END
 
 #Function to validate input
 function validate_input() {
-    if [ -z "$useOracleImage" ]; then
-        echo_stderr "userProvidedImagePath is required. "
+    if [ -z "$USE_ORACLE_IMAGE" ]; then
+        echo_stderr "USER_PROVIDED_IMAGE_PATH is required. "
         usage 1
     fi
 
-    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]] && [[ -z "$ORACLE_ACCOUNT_NAME" || -z "${ORACLE_ACCOUNT_PASSWORD}" ]]; then
         echo_stderr "Oracle SSO account is required. "
         usage 1
     fi
 
-    if [[ -z "$aksClusterRGName" || -z "${aksClusterName}" ]]; then
+    if [[ -z "$AKS_CLUSTER_RESOURCEGROUP_NAME" || -z "${AKS_CLUSTER_NAME}" ]]; then
         echo_stderr "AKS cluster name and resource group name are required. "
         usage 1
     fi
 
-    if [ -z "$wlsImageTag" ]; then
-        echo_stderr "wlsImageTag is required. "
+    if [ -z "$WLS_IMAGE_TAG" ]; then
+        echo_stderr "WLS_IMAGE_TAG is required. "
         usage 1
     fi
 
-    if [ -z "$acrName" ]; then
-        echo_stderr "acrName is required. "
+    if [ -z "$ACR_NAME" ]; then
+        echo_stderr "ACR_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$wlsDomainName" ]; then
-        echo_stderr "wlsDomainName is required. "
+    if [ -z "$WLS_DOMAIN_NAME" ]; then
+        echo_stderr "WLS_DOMAIN_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$wlsDomainUID" ]; then
-        echo_stderr "wlsDomainUID is required. "
+    if [ -z "$WLS_DOMAIN_UID" ]; then
+        echo_stderr "WLS_DOMAIN_UID is required. "
         usage 1
     fi
 
-    if [ -z "$currentResourceGroup" ]; then
-        echo_stderr "currentResourceGroup is required. "
+    if [ -z "$CURRENT_RESOURCEGROUP_NAME" ]; then
+        echo_stderr "CURRENT_RESOURCEGROUP_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$appPackageUrls" ]; then
-        echo_stderr "appPackageUrls is required. "
+    if [ -z "$WLS_APP_PACKAGE_URLS" ]; then
+        echo_stderr "WLS_APP_PACKAGE_URLS is required. "
         usage 1
     fi
 
-    if [ -z "$scriptURL" ]; then
-        echo_stderr "scriptURL is required. "
+    if [ -z "$SCRIPT_LOCATION" ]; then
+        echo_stderr "SCRIPT_LOCATION is required. "
         usage 1
     fi
 
-    if [ -z "$appStorageAccountName" ]; then
-        echo_stderr "appStorageAccountName is required. "
+    if [ -z "$STORAGE_ACCOUNT_NAME" ]; then
+        echo_stderr "STORAGE_ACCOUNT_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$appContainerName" ]; then
-        echo_stderr "appContainerName is required. "
+    if [ -z "$STORAGE_ACCOUNT_CONTAINER_NAME" ]; then
+        echo_stderr "STORAGE_ACCOUNT_CONTAINER_NAME is required. "
         usage 1
     fi
 
-    if [[ "${useOracleImage,,}" == "${constFalse}" ]] && [ -z "$userProvidedImagePath" ]; then
-        echo_stderr "userProvidedImagePath is required. "
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constFalse}" ]] && [ -z "$USER_PROVIDED_IMAGE_PATH" ]; then
+        echo_stderr "USER_PROVIDED_IMAGE_PATH is required. "
         usage 1
     fi
 }
@@ -107,30 +101,30 @@ function validate_input() {
 # Connect to AKS cluster
 function connect_aks_cluster() {
     az aks get-credentials \
-        --resource-group ${aksClusterRGName} \
-        --name ${aksClusterName} \
+        --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
+        --name ${AKS_CLUSTER_NAME} \
         --overwrite-existing
 }
 
 function query_wls_cluster_info(){
-    wlsClusterSize=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
-        | jq '. | .status.clusters[] | select(.clusterName == "'${wlsClusterName}'") | .maximumReplicas')
-    echo "cluster size: ${wlsClusterSize}"
+    WLS_CLUSTER_SIZE=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
+        | jq '. | .status.clusters[] | select(.clusterName == "'${constClusterName}'") | .maximumReplicas')
+    echo "cluster size: ${WLS_CLUSTER_SIZE}"
     
-    enableCustomSSL=${constFalse}
-    sslIdentityEnv=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+    ENABLE_CUSTOM_SSL=${constFalse}
+    sslIdentityEnv=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .spec.serverPod.env[] | select(.name=="'${sslIdentityEnvName}'")')
     if [ -n "${sslIdentityEnv}" ]; then
-        enableCustomSSL=${constTrue}
+        ENABLE_CUSTOM_SSL=${constTrue}
     fi
 }
 
 # Query ACR login server, username, password
 function query_acr_credentials() {
-    echo "query credentials of ACR ${acrName}"
-    azureACRServer=$(az acr show -n $acrName --query 'loginServer' -o tsv)
-    azureACRUserName=$(az acr credential show -n $acrName --query 'username' -o tsv)
-    azureACRPassword=$(az acr credential show -n $acrName --query 'passwords[0].value' -o tsv)
+    echo "query credentials of ACR ${ACR_NAME}"
+    ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME --query 'loginServer' -o tsv)
+    ACR_USER_NAME=$(az acr credential show -n $ACR_NAME --query 'username' -o tsv)
+    ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query 'passwords[0].value' -o tsv)
 }
 
 function get_app_sas_url() {
@@ -142,9 +136,9 @@ function get_app_sas_url() {
         appName=${args[${index}]}
         echo "app package file name: ${appName}"
         if [[ "$appName" == *".war" || "$appName" == *".ear" || "$appName" == *".jar" ]]; then
-            appSaSUrl=$(az storage blob url --container-name ${appContainerName} \
+            appSaSUrl=$(az storage blob url --container-name ${STORAGE_ACCOUNT_CONTAINER_NAME} \
                 --name ${appName} \
-                --account-name ${appStorageAccountName} \
+                --account-name ${STORAGE_ACCOUNT_NAME} \
                 --sas-token ${sasToken} -o tsv)
             echo ${appSaSUrl}
             appSASUrlString="${appSASUrlString},${appSaSUrl}"
@@ -154,32 +148,32 @@ function get_app_sas_url() {
     done
 
     # append urls
-    if [ "${appPackageUrls}" == "[]" ]; then
-        appPackageUrls="[${appSASUrlString:1:${#appSASUrlString}-1}]" # remove the beginning comma
+    if [ "${WLS_APP_PACKAGE_URLS}" == "[]" ]; then
+        WLS_APP_PACKAGE_URLS="[${appSASUrlString:1:${#appSASUrlString}-1}]" # remove the beginning comma
     else
-        appPackageUrls=$(echo "${appPackageUrls:1:${#appPackageUrls}-2}") # remove []
-        appPackageUrls="[${appPackageUrls}${appSASUrlString}]"
+        WLS_APP_PACKAGE_URLS=$(echo "${WLS_APP_PACKAGE_URLS:1:${#WLS_APP_PACKAGE_URLS}-2}") # remove []
+        WLS_APP_PACKAGE_URLS="[${WLS_APP_PACKAGE_URLS}${appSASUrlString}]"
     fi
 
-    echo $appPackageUrls
+    echo $WLS_APP_PACKAGE_URLS
 }
 
 function query_app_urls() {
     echo "check if the storage account exists."
-    ret=$(az storage account check-name --name ${appStorageAccountName} \
+    ret=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} \
         | grep "AlreadyExists")
     if [ -z "$ret" ]; then
-        echo "${appStorageAccountName} does not exist."
+        echo "${STORAGE_ACCOUNT_NAME} does not exist."
         return
     fi
 
-    appList=$(az storage blob list --container-name ${appContainerName} \
-        --account-name ${appStorageAccountName} \
+    appList=$(az storage blob list --container-name ${STORAGE_ACCOUNT_CONTAINER_NAME} \
+        --account-name ${STORAGE_ACCOUNT_NAME} \
         | jq '.[] | .name' \
         | tr -d "\"")
 
     if [ $? == 1 ]; then
-        echo "Failed to query application from ${appContainerName}"
+        echo "Failed to query application from ${STORAGE_ACCOUNT_CONTAINER_NAME}"
         return
     fi
 
@@ -187,7 +181,7 @@ function query_app_urls() {
     sasTokenEnd=`date -d@"$expiryData" -u '+%Y-%m-%dT%H:%MZ'`
     sasToken=$(az storage account generate-sas \
         --permissions r \
-        --account-name ${appStorageAccountName} \
+        --account-name ${STORAGE_ACCOUNT_NAME} \
         --services b \
         --resource-types sco \
         --expiry $sasTokenEnd -o tsv)
@@ -196,60 +190,44 @@ function query_app_urls() {
 }
 
 function build_docker_image() {
-    local enableAdminT3=${constFalse}
-    local enableClusterT3=${constFalse}
-
-    local adminT3AddressEnv=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+    local adminT3AddressEnv=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .spec.serverPod.env[] | select(.name=="'${constAdminT3AddressEnvName}'")')
     if [ -n "${adminT3AddressEnv}" ]; then
-        enableAdminT3=${constTrue}
+        ENABLE_ADMIN_CUSTOM_T3=${constTrue}
     fi
 
-    local clusterT3AddressEnv=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+    local clusterT3AddressEnv=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .spec.serverPod.env[] | select(.name=="'${constClusterT3AddressEnvName}'")')
     if [ -n "${clusterT3AddressEnv}" ]; then
-        enableClusterT3=${constTrue}
+        ENABLE_CLUSTER_CUSTOM_T3=${constTrue}
     fi
 
+    export WLS_APP_PACKAGE_URLS=$(echo $WLS_APP_PACKAGE_URLS | base64 -w0)
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    echo $azureACRPassword $ocrSSOPSW | \
-        bash $scriptDir/createVMAndBuildImage.sh \
-        $currentResourceGroup \
-        $wlsImageTag \
-        $azureACRServer \
-        $azureACRUserName \
-        $newImageTag \
-        "$appPackageUrls" \
-        $ocrSSOUser \
-        $wlsClusterSize \
-        $enableCustomSSL \
-        "$scriptURL" \
-        ${enableAdminT3} \
-        ${enableClusterT3} \
-        ${useOracleImage} \
-        ${userProvidedImagePath}
+    echo ${ACR_PASSWORD} \
+        | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
 
-    az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
+    az acr repository show -n ${ACR_NAME} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
-        echo "Failed to create image ${azureACRServer}/aks-wls-images:${newImageTag}"
+        echo "Failed to create image ${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}"
         exit 1
     fi
 }
 
 function apply_new_image() {
-    acrImagePath="${azureACRServer}/aks-wls-images:${newImageTag}"
-    restartVersion=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} '-o=jsonpath={.spec.restartVersion}')
+    acrImagePath="${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}"
+    restartVersion=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} '-o=jsonpath={.spec.restartVersion}')
     # increase restart version
     restartVersion=$((restartVersion + 1))
-    kubectl -n ${wlsDomainNS} patch domain ${wlsDomainUID} \
+    kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         '-p=[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/image", "value": "'${acrImagePath}'" }]'
 }
 
 function wait_for_pod_completed() {
     # Make sure all of the pods are running.
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .spec.clusters[] | .replicas')
 
     utility_wait_for_pod_completed \
@@ -262,7 +240,7 @@ function wait_for_pod_completed() {
 function wait_for_image_update_completed() {
     # Make sure all of the pods are updated with new image.
     # Assumption: we have only one cluster currently.
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${wlsDomainUID} -o json \
+    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .spec.clusters[] | .replicas')
     
     utility_wait_for_image_update_completed \
@@ -291,29 +269,18 @@ export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
-export ocrSSOUser=$1
-export aksClusterRGName=$2
-export aksClusterName=$3
-export wlsImageTag=$4
-export acrName=$5
-export wlsDomainName=$6
-export wlsDomainUID=$7
-export currentResourceGroup=$8
-export appPackageUrls=$9
-export scriptURL=${10}
-export appStorageAccountName=${11}
-export appContainerName=${12}
-export userProvidedImagePath=${13}
-export useOracleImage=${14}
-
 export newImageTag=$(date +%s)
 # seconds
 export sasTokenValidTime=3600
 export sslIdentityEnvName="SSL_IDENTITY_PRIVATE_KEY_ALIAS"
-export wlsClusterName="cluster-1"
-export wlsDomainNS="${wlsDomainUID}-ns"
+export wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 
-read_sensitive_parameters_from_stdin
+# export ENV var that will be used in createVMAndBuildImage.sh
+export ENABLE_ADMIN_CUSTOM_T3=${constFalse}
+export ENABLE_CLUSTER_CUSTOM_T3=${constFalse}
+export ENABLE_CUSTOM_SSL=${constFalse}
+export WLS_CLUSTER_SIZE=5
+export URL_3RD_DATASOURCE=$(echo "[]" | base64)
 
 validate_input
 

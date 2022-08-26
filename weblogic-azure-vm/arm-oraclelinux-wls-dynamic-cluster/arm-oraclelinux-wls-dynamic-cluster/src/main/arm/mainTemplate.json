@@ -111,15 +111,6 @@
 				"description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
 			}
 		},
-		"dnszoneIdentity": {
-			"type": "Object",
-			"defaultValue": {
-				"type": "UserAssigned",
-				"userAssignedIdentities": {
-					"/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1": {}
-				}
-			}
-		},
 		"dnszoneName": {
 			"defaultValue": "contoso.xyz",
 			"type": "string",
@@ -1841,9 +1832,6 @@
 					},
 					"hasDNSZones": {
 						"value": "[parameters('hasDNSZones')]"
-					},
-					"identity": {
-						"value": "[parameters('dnszoneIdentity')]"
 					},
 					"location": {
 						"value": "[parameters('location')]"
