@@ -11,7 +11,6 @@ param utcValue string = utcNow()
 
 // To mitigate arm-ttk error: Unreferenced variable: $fxv#0
 var base64_queryStorageAccount = loadFileAsBase64('../../../arm/scripts/queryStorageAccount.sh')
-var const_arguments = '${aksClusterRGName} ${aksClusterName}'
 var const_deploymentName = 'ds-query-storage-account'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
@@ -21,7 +20,16 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    arguments: const_arguments
+    environmentVariables: [
+      {
+        name: 'AKS_CLUSTER_NAME'
+        value: aksClusterName
+      }
+      {
+        name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
+        value: aksClusterRGName
+      }
+    ]
     scriptContent: base64ToString(base64_queryStorageAccount)
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'

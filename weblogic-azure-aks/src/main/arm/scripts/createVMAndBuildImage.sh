@@ -6,16 +6,9 @@
 
 echo "Script  ${0} starts"
 
-# read <azureACRPassword> and <ocrSSOPSW> from stdin
+# read <acrPassword> from stdin
 function read_sensitive_parameters_from_stdin() {
-    read azureACRPassword ocrSSOPSW
-}
-
-function initialize() {
-    # initialize URL_3RD_DATASOURCE
-    if [ -z "${URL_3RD_DATASOURCE}" ];then
-        URL_3RD_DATASOURCE="[]"
-    fi
+    read acrPassword
 }
 
 function cleanup_vm() {
@@ -26,14 +19,14 @@ function cleanup_vm() {
     vmId=$(az graph query -q "Resources \
 | where type =~ 'microsoft.compute/virtualmachines' \
 | where name=~ '${vmName}' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
+| where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | project vmid = id" --query "data[0].vmid"  -o tsv)
 
     # query nic id
     nicId=$(az graph query -q "Resources \
 | where type =~ 'microsoft.compute/virtualmachines' \
 | where name=~ '${vmName}' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
+| where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | extend nics=array_length(properties.networkProfile.networkInterfaces) \
 | mv-expand nic=properties.networkProfile.networkInterfaces \
 | where nics == 1 or nic.properties.primary =~ 'true' or isempty(nic) \
@@ -52,21 +45,21 @@ function cleanup_vm() {
     osDiskId=$(az graph query -q "Resources \
 | where type =~ 'microsoft.compute/virtualmachines' \
 | where name=~ '${vmName}' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
+| where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | project osDiskId = tostring(properties.storageProfile.osDisk.managedDisk.id)" --query "data[0].osDiskId" -o tsv)
 
     # query vnet id
     vnetId=$(az graph query -q "Resources \
 | where type =~ 'Microsoft.Network/virtualNetworks' \
 | where name=~ '${vmName}VNET' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
+| where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | project vNetId = id" --query "data[0].vNetId" -o tsv)
 
     # query nsg id
     nsgId=$(az graph query -q "Resources \
 | where type =~ 'Microsoft.Network/networkSecurityGroups' \
 | where name=~ '${vmName}NSG' \
-| where resourceGroup  =~ '${currentResourceGroup}' \
+| where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | project nsgId = id" --query "data[0].nsgId" -o tsv)
 
     # Delete VM NIC IP VNET NSG resoruces
@@ -86,17 +79,17 @@ function cleanup_vm() {
 
 # generate image full path based on the oracle account
 function get_ocr_image_full_path() {
-  local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${wlsImageTag}"
+  local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${WLS_IMAGE_TAG}"
 
   if [[ "${ORACLE_ACCOUNT_ENTITLED,,}" == "true" ]]; then
 
     # download the ga cpu image mapping file.
     local cpuImagesListFile=weblogic_cpu_images.json
     curl -L ${gitUrl4CpuImages} --retry ${retryMaxAttempt} -o ${cpuImagesListFile}
-    local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag==\"${wlsImageTag}\") | .cpuTag" | tr -d "\"")
+    local cpuTag=$(cat ${cpuImagesListFile} | jq ".items[] | select(.gaTag==\"${WLS_IMAGE_TAG}\") | .cpuTag" | tr -d "\"")
     # if we can not find a matched image, keep the tag name the same as GA tag.
     if [[ "${cpuTag}" == "" ||  "${cpuTag,,}" == "null" ]]; then
-      cpuTag=${wlsImageTag}
+      cpuTag=${WLS_IMAGE_TAG}
     fi
 
     ocrImageFullPath="${ocrLoginServer}/${ocrCpuImagePath}:${cpuTag}"
@@ -118,7 +111,7 @@ function build_docker_image() {
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
     # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which causes vm-redeployed issue
     az vm create \
-    --resource-group ${currentResourceGroup} \
+    --resource-group ${CURRENT_RESOURCEGROUP_NAME} \
     --name ${vmName} \
     --image "Canonical:UbuntuServer:18.04-LTS:latest" \
     --admin-username azureuser \
@@ -129,22 +122,22 @@ function build_docker_image() {
     --enable-auto-update false \
     --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
-    if [[ "${useOracleImage,,}" == "${constTrue}" ]]; then
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]]; then
         get_ocr_image_full_path
     else
-        wlsImagePath="${userProvidedImagePath}"
+        wlsImagePath="${USER_PROVIDED_IMAGE_PATH}"
     fi
 
     echo "wlsImagePath: ${wlsImagePath}"
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | tr -d "\"") # remove " from the string
     az vm extension set --name CustomScript \
         --extension-instance-name wls-image-script \
-        --resource-group ${currentResourceGroup} \
+        --resource-group ${CURRENT_RESOURCEGROUP_NAME} \
         --vm-name ${vmName} \
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
-        --settings "{ \"fileUris\": [\"${scriptURL}model.properties\",\"${scriptURL}genImageModel.sh\",\"${scriptURL}buildWLSDockerImage.sh\",\"${scriptURL}common.sh\"]}" \
-        --protected-settings "{\"commandToExecute\":\"echo ${azureACRPassword} ${ocrSSOPSW} | bash buildWLSDockerImage.sh ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${newImageTag} \\\"${appPackageUrls}\\\" ${ocrSSOUser} ${wlsClusterSize} ${enableCustomSSL} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${useOracleImage} \\\"${URL_3RD_DATASOURCE}\\\" \"}"
+        --settings "{ \"fileUris\": [\"${SCRIPT_LOCATION}model.properties\",\"${SCRIPT_LOCATION}genImageModel.sh\",\"${SCRIPT_LOCATION}buildWLSDockerImage.sh\",\"${SCRIPT_LOCATION}common.sh\"]}" \
+        --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} \"}"
     
     cleanup_vm
 }
@@ -158,24 +151,11 @@ export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
 source ${scriptDir}/common.sh
 
-export currentResourceGroup=$1
-export wlsImageTag=$2
-export azureACRServer=$3
-export azureACRUserName=$4
-export newImageTag=$5
-export appPackageUrls=$6
-export ocrSSOUser=$7
-export wlsClusterSize=$8
-export enableCustomSSL=$9
-export scriptURL=${10}
-export enableAdminT3Tunneling=${11}
-export enableClusterT3Tunneling=${12}
-export useOracleImage=${13}
-export userProvidedImagePath=${14}
+export newImageTag=$1
+export acrLoginServer=$2
+export acrUser=$3
 
 read_sensitive_parameters_from_stdin
-
-initialize
 
 build_docker_image
 

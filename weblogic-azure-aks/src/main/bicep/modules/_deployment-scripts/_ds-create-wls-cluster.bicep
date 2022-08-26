@@ -64,10 +64,8 @@ param wlsTrustKeyStorePassPhrase string = newGuid()
 param wlsTrustKeyStoreType string = 'PKCS12'
 param wlsUserName string = 'weblogic'
 
-var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${wlsUserName} ${wlsPassword} ${wdtRuntimePassword} ${wlsCPU} ${wlsMemory} ${managedServerPrefix} ${appReplicas} ${string(appPackageUrls)} ${resourceGroup().name} ${const_scriptLocation} ${storageAccountName} ${wlsClusterSize} ${enableCustomSSL} ${wlsIdentityKeyStoreData} ${wlsIdentityKeyStorePassphrase} ${wlsIdentityKeyStoreType} ${wlsPrivateKeyAlias} ${wlsPrivateKeyPassPhrase} ${wlsTrustKeyStoreData} ${wlsTrustKeyStorePassPhrase} ${wlsTrustKeyStoreType} ${enablePV} ${enableAdminT3Tunneling} ${enableClusterT3Tunneling} ${t3ChannelAdminPort} ${t3ChannelClusterPort} "${wlsJavaOption}" ${userProvidedImagePath} ${useOracleImage}'
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
-var const_invokeSetUpDomainScript = 'invokeSetupWLSDomain.sh'
 var const_pvTempalte = 'pv.yaml.template'
 var const_pvcTempalte = 'pvc.yaml.template'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
@@ -83,20 +81,166 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    arguments: const_arguments
     environmentVariables: [
       {
-        name: 'URL_3RD_DATASOURCE'
-        value:  '${string(dbDriverLibrariesUrls)}'
+        name: 'ACR_NAME'
+        value: acrName
+      }
+      {
+        name: 'AKS_CLUSTER_NAME'
+        value: aksClusterName
+      }
+      {
+        name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
+        value: aksClusterRGName
+      }
+      {
+        name: 'CURRENT_RESOURCEGROUP_NAME'
+        value: resourceGroup().name
+      }
+      {
+        name: 'ENABLE_ADMIN_CUSTOM_T3'
+        value: string(enableAdminT3Tunneling)
+      }
+      {
+        name: 'ENABLE_CLUSTER_CUSTOM_T3'
+        value: string(enableClusterT3Tunneling)
+      }
+      {
+        name: 'ENABLE_CUSTOM_SSL'
+        value: string(enableCustomSSL)
+      }
+      {
+        name: 'ENABLE_PV'
+        value: string(enablePV)
+      }
+      {
+        name: 'ORACLE_ACCOUNT_NAME'
+        value: ocrSSOUser
+      }
+      {
+        name: 'ORACLE_ACCOUNT_PASSWORD'
+        secureValue: ocrSSOPSW
       }
       {
         name: 'ORACLE_ACCOUNT_ENTITLED'
         value: string(isSSOSupportEntitled)
       }
+      {
+        name: 'SCRIPT_LOCATION'
+        value: const_scriptLocation
+      }
+      {
+        name: 'STORAGE_ACCOUNT_NAME'
+        value: storageAccountName
+      }
+      {
+        name: 'URL_3RD_DATASOURCE'
+        value:  base64(string(dbDriverLibrariesUrls))
+      }
+      {
+        name: 'USE_ORACLE_IMAGE'
+        value: string(useOracleImage)
+      }
+      {
+        name: 'USER_PROVIDED_IMAGE_PATH'
+        value: userProvidedImagePath
+      }
+      {
+        name: 'WLS_ADMIN_PASSWORD'
+        secureValue: wlsPassword
+      }
+      {
+        name: 'WLS_ADMIN_USER_NAME'
+        secureValue: wlsUserName
+      }
+      {
+        name: 'WLS_APP_PACKAGE_URLS'
+        value: base64(string(appPackageUrls))
+      }
+      {
+        name: 'WLS_APP_REPLICAS'
+        value: string(appReplicas)
+      }
+      {
+        name: 'WLS_CLUSTER_SIZE'
+        value: string(wlsClusterSize)
+      }
+      {
+        name: 'WLS_DOMAIN_NAME'
+        value: wlsDomainName
+      }
+      {
+        name: 'WLS_DOMAIN_UID'
+        value: wlsDomainUID
+      }
+      {
+        name: 'WLS_IMAGE_TAG'
+        value: wlsImageTag
+      }
+      {
+        name: 'WLS_JAVA_OPTIONS'
+        value: wlsJavaOption
+      }
+      {
+        name: 'WLS_MANAGED_SERVER_PREFIX'
+        value: managedServerPrefix
+      }
+      {
+        name: 'WLS_RESOURCE_REQUEST_CPU'
+        value: wlsCPU
+      }
+      {
+        name: 'WLS_RESOURCE_REQUEST_MEMORY'
+        value: wlsMemory
+      }
+      {
+        name: 'WLS_SSL_IDENTITY_DATA'
+        secureValue: wlsIdentityKeyStoreData
+      }
+      {
+        name: 'WLS_SSL_IDENTITY_PASSWORD'
+        secureValue: wlsIdentityKeyStorePassphrase
+      }
+      {
+        name: 'WLS_SSL_IDENTITY_TYPE'
+        value: wlsIdentityKeyStoreType
+      }
+      {
+        name: 'WLS_SSL_TRUST_DATA'
+        secureValue: wlsTrustKeyStoreData
+      }
+      {
+        name: 'WLS_SSL_TRUST_PASSWORD'
+        secureValue: wlsTrustKeyStorePassPhrase
+      }
+      {
+        name: 'WLS_SSL_TRUST_TYPE'
+        value: wlsTrustKeyStoreType
+      }
+      {
+        name: 'WLS_SSL_PRIVATE_KEY_ALIAS'
+        secureValue: wlsPrivateKeyAlias
+      }
+      {
+        name: 'WLS_SSL_PRIVATE_KEY_PASSWORD'
+        secureValue: wlsPrivateKeyPassPhrase
+      }
+      {
+        name: 'WLS_T3_ADMIN_PORT'
+        value: string(t3ChannelAdminPort)
+      }
+      {
+        name: 'WLS_T3_CLUSTER_PORT'
+        value: string(t3ChannelClusterPort)
+      }
+      {
+        name: 'WLS_WDT_RUNTIME_PSW'
+        secureValue: wdtRuntimePassword
+      }
     ]
-    primaryScriptUri: uri(const_scriptLocation, '${const_invokeSetUpDomainScript}${_artifactsLocationSasToken}')
+    primaryScriptUri: uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
-      uri(const_scriptLocation, '${const_setUpDomainScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_genDomainConfigScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_pvTempalte}${_artifactsLocationSasToken}')
