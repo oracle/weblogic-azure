@@ -196,7 +196,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "appGatewaywithExistingKeyVaultTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault'))]",
             "properties": {
@@ -278,7 +278,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "appGatewaywithExistingSSLCertTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveCert'))]",
             "properties": {
@@ -360,7 +360,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "appGatewaywithSelfSignedSSLCertTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionGenerateCert'))]",
             "properties": {
@@ -440,18 +440,18 @@
         "appGatewayAlias": {
             "type": "string",
             "value": "[if(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault')),
-                reference('appGatewaywithExistingKeyVaultTemplate', '${azure.apiVersion}').outputs.appGatewayAlias.value, 
+                reference('appGatewaywithExistingKeyVaultTemplate', '2021-04-01').outputs.appGatewayAlias.value, 
                 if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),
-                reference('appGatewaywithExistingSSLCertTemplate', '${azure.apiVersion}').outputs.appGatewayAlias.value, 
-                reference('appGatewaywithSelfSignedSSLCertTemplate', '${azure.apiVersion}').outputs.appGatewayAlias.value))]"
+                reference('appGatewaywithExistingSSLCertTemplate', '2021-04-01').outputs.appGatewayAlias.value, 
+                reference('appGatewaywithSelfSignedSSLCertTemplate', '2021-04-01').outputs.appGatewayAlias.value))]"
         },
         "appGatewayURL": {
             "type": "string",
-            "value": "[if(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault')),reference('appGatewaywithExistingKeyVaultTemplate', '${azure.apiVersion}').outputs.appGatewayURL.value, if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '${azure.apiVersion}').outputs.appGatewayURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '${azure.apiVersion}').outputs.appGatewayURL.value))]"
+            "value": "[if(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault')),reference('appGatewaywithExistingKeyVaultTemplate', '2021-04-01').outputs.appGatewayURL.value, if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '2021-04-01').outputs.appGatewayURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '2021-04-01').outputs.appGatewayURL.value))]"
         },
         "appGatewaySecuredURL": {
             "type": "string",
-            "value": "[if(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault')),reference('appGatewaywithExistingKeyVaultTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value, if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '${azure.apiVersion}').outputs.appGatewaySecuredURL.value))]"
+            "value": "[if(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault')),reference('appGatewaywithExistingKeyVaultTemplate', '2021-04-01').outputs.appGatewaySecuredURL.value, if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '2021-04-01').outputs.appGatewaySecuredURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '2021-04-01').outputs.appGatewaySecuredURL.value))]"
         }
     }
 }

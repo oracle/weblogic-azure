@@ -84,7 +84,7 @@
     "resources": [
         {
             "type": "Microsoft.KeyVault/vaults",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "2021-10-01",
             "name": "[parameters('keyvaultName')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -95,7 +95,7 @@
                 "tenantId": "[subscription().tenantId]",
                 "accessPolicies": [
                     {
-                        "objectId": "[reference(string(identity.getId(parameters('identity'))), '${azure.apiVersionForIndentity}').principalId]",
+                        "objectId": "[reference(string(identity.getId(parameters('identity'))), '2018-11-30').principalId]",
                         "tenantId": "[subscription().tenantId]",
                         "permissions": "[parameters('permission')]"
                     }
@@ -108,7 +108,7 @@
         },
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "2020-10-01",
             "name": "script-createAddCertificate",
             "location": "[parameters('location')]",
             "dependsOn": [
