@@ -57,12 +57,6 @@
                 "description": "If true, update A records in the existing DNS Zone, otherwise, create a new DNS Zone and ."
             }
         },
-        "identity": {
-            "type": "Object",
-            "metadata": {
-                "description": "Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported."
-            }
-        },
         "location": {
             "type": "string",
             "metadata": {
@@ -183,9 +177,6 @@
                     },
                     "dnszoneName": {
                         "value": "[parameters('dnszoneName')]"
-                    },
-                    "identity": {
-                        "value": "[parameters('identity')]"
                     },
                     "location": {
                         "value": "[parameters('location')]"

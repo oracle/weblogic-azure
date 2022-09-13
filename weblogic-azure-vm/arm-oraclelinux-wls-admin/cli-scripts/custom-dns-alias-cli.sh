@@ -22,7 +22,6 @@ Options:
         -g   --resource-group     (Required)       The name of resource group that has WebLogic cluster deployed
         -l   --location           (Required)       Location of current cluster resources.
         -z   --zone-name          (Required)       DNS Zone name
-        --identity-id             (Optional)       Specify an Azure Managed User Identity to update DNS Zone
         --zone-resource-group     (Optional)       The name of resource group that has WebLogic cluster deployed
         -h   --help
 
@@ -35,7 +34,6 @@ Samples:
             --artifact-location <artifact-location> \\
             --location eastus \\
             --zone-name contoso.com \\
-            --identity-id <your-identity-id> \\
             --zone-resource-group haiche-dns-test1
 
         2. Configure DNS alias on a new DNS Zone
@@ -153,14 +151,6 @@ function generateParameterFile() {
         "hasDNSZones": {
             "value": ${hasDNSZone}
         },
-        "identity": {
-            "value": {
-              "type": "UserAssigned",
-              "userAssignedIdentities": {
-                "${identity}": {}
-              }
-            }
-        },
         "location": {
             "value": "${location}"
         },
@@ -231,7 +221,6 @@ Custom DNS alias:
 # main script start from here
 # default value
 hasDNSZone=false
-identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
 
 # Transform long options to short ones
 for arg in "$@"; do
@@ -244,7 +233,6 @@ for arg in "$@"; do
   "--admin-vm-name") set -- "$@" "-m" ;;
   "--admin-console-label") set -- "$@" "-c" ;;
   "--zone-resource-group") set -- "$@" "-r" ;;
-  "--identity-id") set -- "$@" "-i" ;;
   "--location") set -- "$@" "-l" ;;
   "--"*)
     set -- usage
@@ -268,7 +256,6 @@ while getopts "hg:f:z:m:c:w:r:i:l:" opt; do
   "m") adminVMName="$OPTARG" ;;
   "c") adminLabel="$OPTARG" ;;
   "r") zoneResourceGroup="$OPTARG" ;;
-  "i") identity="$OPTARG" ;;
   "l") location="$OPTARG" ;;
   esac
 done
