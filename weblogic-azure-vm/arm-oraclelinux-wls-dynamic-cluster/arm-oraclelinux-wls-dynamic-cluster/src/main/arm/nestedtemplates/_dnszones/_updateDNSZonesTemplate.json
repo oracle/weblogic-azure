@@ -46,12 +46,6 @@
                 "description": "Azure DNS Zone name."
             }
         },
-        "identity": {
-            "type": "Object",
-            "metadata": {
-                "description": "Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported."
-            }
-        },
         "location": {
             "type": "string",
             "metadata": {
@@ -105,21 +99,100 @@
         }
     ],
     "variables": {
-        "name_scriptDNSConfiguration": "updateDNSZones.sh"
+        "name_deploymentScriptUserDefinedManagedIdentity": "wls-vm-dns-user-defined-managed-itentity",
+        "name_scriptDNSConfiguration": "updateDNSZones.sh",
+        "name_templateUAMIDeployment": "_uamiAndRoleAssignment.json"
     },
     "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "uamiDeployment",
+            "apiVersion": "${azure.apiVersion}",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/_dnszones/', variables('name_templateUAMIDeployment')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "uamiName": {
+                        "value": "[variables('name_deploymentScriptUserDefinedManagedIdentity')]"
+                    }
+                }
+            }
+        },
         {
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "${azure.apiVersionForDeploymentScript}",
             "name": "script-createDNSRecords",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'uamiDeployment')]"
+            ],
             "location": "[parameters('location')]",
-            "identity": "[parameters('identity')]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_deploymentScriptUserDefinedManagedIdentity'))]": {}
+                }
+            },
             "kind": "AzureCLI",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
                 "AzCliVersion": "2.15.0",
                 "timeout": "PT30M",
-                "arguments": "[format('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}', parameters('resourceGroup'), parameters('dnszoneName'), array.join(parameters('dnszonesARecordSetNames')),array.join(parameters('targetResources')), length(parameters('dnszonesARecordSetNames')), length(parameters('targetResources')), parameters('ttl'), array.join(parameters('dnszonesCNAMERecordSetNames')),array.join(parameters('dnszonesCNAMEAlias')),length(parameters('dnszonesCNAMERecordSetNames')), length(parameters('dnszonesCNAMEAlias')))]",
+                "environmentVariables": [
+                    {
+                        "name": "DNS_CNAME_ALIAS",
+                        "value": "[array.join(parameters('dnszonesCNAMEAlias'))]"
+                    },
+                    {
+                        "name": "DNS_CNAME_ALIAS_LENGTH",
+                        "value": "[length(parameters('dnszonesCNAMEAlias'))]"
+                    },
+                    {
+                        "name": "DNS_CNAME_RECORDSET_LENGTH",
+                        "value": "[length(parameters('dnszonesCNAMERecordSetNames'))]"
+                    },
+                    {
+                        "name": "DNS_CNAME_RECORDSET_NAMES",
+                        "value": "[array.join(parameters('dnszonesCNAMERecordSetNames'))]"
+                    },
+                    {
+                        "name": "DNS_RECORDSET_NAMES",
+                        "value": "[array.join(parameters('dnszonesARecordSetNames'))]"
+                    },
+                    {
+                        "name": "DNS_RECORD_NAMES_LENGTH",
+                        "value": "[length(parameters('dnszonesARecordSetNames'))]"
+                    },
+                    {
+                        "name": "DNS_TARGET_RESOURCES_LENGTH",
+                        "value": "[length(parameters('targetResources'))]"
+                    },
+                    {
+                        "name": "DNS_TARGET_RESOURCES",
+                        "value": "[array.join(parameters('targetResources'))]"
+                    },
+                    {
+                        "name": "DNS_RECORD_TTL",
+                        "value": "[parameters('ttl')]"
+                    },
+                    {
+                        "name": "DNS_ZONE_NAME",
+                        "value": "[parameters('dnszoneName')]"
+                    },
+                    {
+                        "name": "MANAGED_IDENTITY_ID",
+                        "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_deploymentScriptUserDefinedManagedIdentity'))]"
+                    },
+                    {
+                        "name": "RESOURCE_GROUP_NAME",
+                        "value": "[parameters('resourceGroup')]"
+                    }
+                ],
                 "primaryScriptUri": "[uri(parameters('_artifactsLocationDNSZonesTemplate'), concat('../../scripts/', variables('name_scriptDNSConfiguration'), parameters('_artifactsLocationSasToken')))]",
                 "cleanupPreference": "OnSuccess",
                 "retentionInterval": "P1D"
