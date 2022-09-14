@@ -1,13 +1,18 @@
-export aksClusterRGName=$1
-export aksClusterName=$2
+# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
+# Inputs:
+# AKS_CLUSTER_RESOURCEGROUP_NAME
+# AKS_CLUSTER_NAME
+
+echo "Script ${0} starts"
 
 export currentStorageAccount="null"
 
 # Connect to AKS cluster
 function connect_aks_cluster() {
   az aks get-credentials \
-    --resource-group ${aksClusterRGName} \
-    --name ${aksClusterName} \
+    --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
+    --name ${AKS_CLUSTER_NAME} \
     --overwrite-existing
 }
 

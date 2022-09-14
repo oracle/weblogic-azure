@@ -169,6 +169,7 @@ EOF
     index=1
     for item in $appUrlArray; do
         echo ${item}
+        item=$(echo $item | tr -d "\"") # remove ""
         # e.g. https://wlsaksapp.blob.core.windows.net/japps/testwebapp.war?sp=r&se=2021-04-29T15:12:38Z&sv=2020-02-10&sr=b&sig=7grL4qP%2BcJ%2BLfDJgHXiDeQ2ZvlWosRLRQ1ciLk0Kl7M%3D
         urlWithoutQueryString="${item%\?*}"
         echo $urlWithoutQueryString

@@ -20,6 +20,7 @@ Parameters
     - storageAccountName: Storage account name.
     - containerName: container name.
   - identity: Azure user managed identity used, make sure the identity has permission to create/update/delete Azure resources. It's recommended to assign "Contributor" role.
+  - isSSOSupportEntitled: Is the specified SSO account associated with an active Oracle support contract?
   - ocrSSOPSW: Password of Oracle SSO account. The script will pull image from Oracle Container Registry (OCR), Oracle account is required. Make sure the account has checkout WebLogic images.
   - ocrSSOUser: User name of Oracle SSO account.
   - wlsDomainName: Name of the domain that you are going to update. Make sure it's the same with the initial cluster deployment.
@@ -52,6 +53,8 @@ param appPackageUrls array = []
 
 param identity object = {}
 
+@description('Is the specified SSO account associated with an active Oracle support contract?')
+param isSSOSupportEntitled bool = false
 @secure()
 @description('Password of Oracle SSO account.')
 param ocrSSOPSW string = 'null'
@@ -99,6 +102,7 @@ module updateWLSApplications '_deployment-scripts/_ds_update-applications.bicep'
     appPackageFromStorageBlob: appPackageFromStorageBlob
     azCliVersion: const_azCLIVersion
     identity: identity
+    isSSOSupportEntitled: isSSOSupportEntitled
     location: resourceGroup().location
     ocrSSOPSW: ocrSSOPSW
     ocrSSOUser: ocrSSOUser

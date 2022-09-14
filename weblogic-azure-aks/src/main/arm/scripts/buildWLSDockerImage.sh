@@ -100,6 +100,9 @@ function validate_inputs() {
         echo_stderr "dbDriversUrls is required. "
         usage 1
     fi
+
+    appPackageUrls=$(echo $appPackageUrls | base64 -d)
+    dbDriversUrls=$(echo $dbDriversUrls | base64 -d)
 }
 
 function initialize() {

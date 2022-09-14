@@ -7,48 +7,50 @@
 
 echo "Script ${0} starts"
 
-# read <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentityKeyPsw> <wlsTrustPsw> from stdin
-function read_sensitive_parameters_from_stdin() {
-    read ocrSSOPSW wlsPassword wdtRuntimePassword wlsIdentityPsw wlsIdentityKeyPsw wlsTrustPsw
-}
-
 #Function to display usage message
 function usage() {
     usage=$(
         cat <<-END
-Usage:
-echo <ocrSSOPSW> <wlsPassword> <wdtRuntimePassword> <wlsIdentityPsw> <wlsIdentityKeyPsw> <wlsTrustPsw> | 
-./setupWLSDomain.sh
-    <ocrSSOUser>
-    <aksClusterRGName>
-    <aksClusterName>
-    <wlsImageTag>
-    <acrName>
-    <wlsDomainName>
-    <wlsDomainUID>
-    <wlsUserName>
-    <wlsCPU>
-    <wlsMemory>
-    <managedServerPrefix>
-    <appReplicas>
-    <appPackageUrls>
-    <currentResourceGroup>
-    <scriptURL>
-    <storageAccountName>
-    <wlsClusterSize>
-    <enableCustomSSL>
-    <wlsIdentityData>
-    <wlsIdentityType>
-    <wlsIdentityAlias>
-    <wlsTrustData>
-    <wlsTrustType>
-    <enablePV>
-    <enableAdminT3Tunneling>
-    <enableClusterT3Tunneling>
-    <t3AdminPort>
-    <t3ClusterPort>
-    <userProvidedImagePath>
-    <useOracleImage>
+Specify the following ENV variables:
+ACR_NAME
+AKS_CLUSTER_NAME
+AKS_CLUSTER_RESOURCEGROUP_NAME
+CURRENT_RESOURCEGROUP_NAME
+ENABLE_ADMIN_CUSTOM_T3
+ENABLE_CLUSTER_CUSTOM_T3
+ENABLE_CUSTOM_SSL
+ENABLE_PV
+ORACLE_ACCOUNT_NAME
+ORACLE_ACCOUNT_PASSWORD
+ORACLE_ACCOUNT_ENTITLED
+SCRIPT_LOCATION
+STORAGE_ACCOUNT_NAME
+URL_3RD_DATASOURCE
+USE_ORACLE_IMAGE
+USER_PROVIDED_IMAGE_PATH
+WLS_DOMAIN_NAME
+WLS_DOMAIN_UID
+WLS_ADMIN_PASSWORD
+WLS_ADMIN_USER_NAME
+WLS_APP_PACKAGE_URLS
+WLS_APP_REPLICAS
+WLS_CLUSTER_SIZE
+WLS_IMAGE_TAG
+WLS_JAVA_OPTIONS
+WLS_MANAGED_SERVER_PREFIX
+WLS_RESOURCE_REQUEST_CPU
+WLS_RESOURCE_REQUEST_MEMORY
+WLS_SSL_IDENTITY_DATA
+WLS_SSL_IDENTITY_PASSWORD
+WLS_SSL_IDENTITY_TYPE
+WLS_SSL_TRUST_DATA
+WLS_SSL_TRUST_PASSWORD
+WLS_SSL_TRUST_TYPE
+WLS_SSL_PRIVATE_KEY_ALIAS
+WLS_SSL_PRIVATE_KEY_PASSWORD
+WLS_T3_ADMIN_PORT
+WLS_T3_CLUSTER_PORT
+WLS_WDT_RUNTIME_PSW
 END
     )
     echo_stdout ${usage}
@@ -60,167 +62,167 @@ END
 
 #Function to validate input
 function validate_input() {
-    if [ -z "$useOracleImage" ]; then
-        echo_stderr "userProvidedImagePath is required. "
+    if [ -z "$USE_ORACLE_IMAGE" ]; then
+        echo_stderr "USER_PROVIDED_IMAGE_PATH is required. "
         usage 1
     fi
 
-    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [[ -z "$ocrSSOUser" || -z "${ocrSSOPSW}" ]]; then
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]] && [[ -z "$ORACLE_ACCOUNT_NAME" || -z "${ORACLE_ACCOUNT_PASSWORD}" ]]; then
         echo_stderr "Oracle SSO account is required. "
         usage 1
     fi
 
-    if [[ -z "$aksClusterRGName" || -z "${aksClusterName}" ]]; then
+    if [[ -z "$AKS_CLUSTER_RESOURCEGROUP_NAME" || -z "${AKS_CLUSTER_NAME}" ]]; then
         echo_stderr "AKS cluster name and resource group name are required. "
         usage 1
     fi
 
-    if [ -z "$wlsImageTag" ]; then
-        echo_stderr "wlsImageTag is required. "
+    if [ -z "$WLS_IMAGE_TAG" ]; then
+        echo_stderr "WLS_IMAGE_TAG is required. "
         usage 1
     fi
 
-    if [ -z "$acrName" ]; then
-        echo_stderr "acrName is required. "
+    if [ -z "$ACR_NAME" ]; then
+        echo_stderr "ACR_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$wlsDomainName" ]; then
-        echo_stderr "wlsDomainName is required. "
+    if [ -z "$WLS_DOMAIN_NAME" ]; then
+        echo_stderr "WLS_DOMAIN_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$wlsDomainUID" ]; then
-        echo_stderr "wlsDomainUID is required. "
+    if [ -z "$WLS_DOMAIN_UID" ]; then
+        echo_stderr "WLS_DOMAIN_UID is required. "
         usage 1
     fi
 
-    if [ -z "$wlsUserName" ]; then
-        echo_stderr "wlsUserName is required. "
+    if [ -z "$WLS_ADMIN_USER_NAME" ]; then
+        echo_stderr "WLS_ADMIN_USER_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$wlsPassword" ]; then
-        echo_stderr "wlsPassword is required. "
+    if [ -z "$WLS_ADMIN_PASSWORD" ]; then
+        echo_stderr "WLS_ADMIN_PASSWORD is required. "
         usage 1
     fi
 
-    if [ -z "$wdtRuntimePassword" ]; then
-        echo_stderr "wdtRuntimePassword is required. "
+    if [ -z "$WLS_WDT_RUNTIME_PSW" ]; then
+        echo_stderr "WLS_WDT_RUNTIME_PSW is required. "
         usage 1
     fi
 
-    if [ -z "$wlsCPU" ]; then
-        echo_stderr "wlsCPU is required. "
+    if [ -z "$WLS_RESOURCE_REQUEST_CPU" ]; then
+        echo_stderr "WLS_RESOURCE_REQUEST_CPU is required. "
         usage 1
     fi
 
-    if [ -z "$wlsMemory" ]; then
-        echo_stderr "wlsMemory is required. "
+    if [ -z "$WLS_RESOURCE_REQUEST_MEMORY" ]; then
+        echo_stderr "WLS_RESOURCE_REQUEST_MEMORY is required. "
         usage 1
     fi
 
-    if [ -z "$managedServerPrefix" ]; then
-        echo_stderr "managedServerPrefix is required. "
+    if [ -z "$WLS_MANAGED_SERVER_PREFIX" ]; then
+        echo_stderr "WLS_MANAGED_SERVER_PREFIX is required. "
         usage 1
     fi
 
-    if [ -z "$appReplicas" ]; then
-        echo_stderr "appReplicas is required. "
+    if [ -z "$WLS_APP_REPLICAS" ]; then
+        echo_stderr "WLS_APP_REPLICAS is required. "
         usage 1
     fi
 
-    if [ -z "$appPackageUrls" ]; then
-        echo_stderr "appPackageUrls is required. "
+    if [ -z "$WLS_APP_PACKAGE_URLS" ]; then
+        echo_stderr "WLS_APP_PACKAGE_URLS is required. "
         usage 1
     fi
 
-    if [ -z "$currentResourceGroup" ]; then
-        echo_stderr "currentResourceGroup is required. "
+    if [ -z "$CURRENT_RESOURCEGROUP_NAME" ]; then
+        echo_stderr "CURRENT_RESOURCEGROUP_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$scriptURL" ]; then
-        echo_stderr "scriptURL is required. "
+    if [ -z "$SCRIPT_LOCATION" ]; then
+        echo_stderr "SCRIPT_LOCATION is required. "
         usage 1
     fi
 
-    if [ -z "$storageAccountName" ]; then
-        echo_stderr "storageAccountName is required. "
+    if [ -z "$STORAGE_ACCOUNT_NAME" ]; then
+        echo_stderr "STORAGE_ACCOUNT_NAME is required. "
         usage 1
     fi
 
-    if [ -z "$wlsClusterSize" ]; then
-        echo_stderr "wlsClusterSize is required. "
+    if [ -z "$WLS_CLUSTER_SIZE" ]; then
+        echo_stderr "WLS_CLUSTER_SIZE is required. "
         usage 1
     fi
 
-    if [ -z "$enableCustomSSL" ]; then
-        echo_stderr "enableCustomSSL is required. "
+    if [ -z "$ENABLE_CUSTOM_SSL" ]; then
+        echo_stderr "ENABLE_CUSTOM_SSL is required. "
         usage 1
     fi
 
-    if [[ -z "$wlsIdentityData" || -z "${wlsIdentityPsw}" ]]; then
-        echo_stderr "wlsIdentityPsw and wlsIdentityData are required. "
+    if [[ -z "$WLS_SSL_IDENTITY_DATA" || -z "${WLS_SSL_IDENTITY_PASSWORD}" ]]; then
+        echo_stderr "WLS_SSL_IDENTITY_PASSWORD and WLS_SSL_IDENTITY_DATA are required. "
         usage 1
     fi
 
-    if [ -z "$wlsIdentityType" ]; then
-        echo_stderr "wlsIdentityType is required. "
+    if [ -z "$WLS_SSL_IDENTITY_TYPE" ]; then
+        echo_stderr "WLS_SSL_IDENTITY_TYPE is required. "
         usage 1
     fi
 
-    if [[ -z "$wlsIdentityAlias" || -z "${wlsIdentityKeyPsw}" ]]; then
-        echo_stderr "wlsIdentityAlias and wlsIdentityKeyPsw are required. "
+    if [[ -z "$WLS_SSL_PRIVATE_KEY_ALIAS" || -z "${WLS_SSL_PRIVATE_KEY_PASSWORD}" ]]; then
+        echo_stderr "WLS_SSL_PRIVATE_KEY_ALIAS and WLS_SSL_PRIVATE_KEY_PASSWORD are required. "
         usage 1
     fi
 
-    if [[ -z "$wlsTrustData" || -z "${wlsTrustPsw}" ]]; then
-        echo_stderr "wlsIdentityAlias and wlsIdentityKeyPsw are required. "
+    if [[ -z "$WLS_SSL_TRUST_DATA" || -z "${WLS_SSL_TRUST_PASSWORD}" ]]; then
+        echo_stderr "WLS_SSL_TRUST_DATA and WLS_SSL_TRUST_PASSWORD are required. "
         usage 1
     fi
 
-    if [ -z "$wlsTrustType" ]; then
-        echo_stderr "wlsTrustType is required. "
+    if [ -z "$WLS_SSL_TRUST_TYPE" ]; then
+        echo_stderr "WLS_SSL_TRUST_TYPE is required. "
         usage 1
     fi
 
-    if [ -z "$enablePV" ]; then
-        echo_stderr "enablePV is required. "
+    if [ -z "$ENABLE_PV" ]; then
+        echo_stderr "ENABLE_PV is required. "
         usage 1
     fi
 
-    if [ -z "$enableAdminT3Tunneling" ]; then
-        echo_stderr "enableAdminT3Tunneling is required. "
+    if [ -z "$ENABLE_ADMIN_CUSTOM_T3" ]; then
+        echo_stderr "ENABLE_ADMIN_CUSTOM_T3 is required. "
         usage 1
     fi
 
-    if [ -z "$enableClusterT3Tunneling" ]; then
-        echo_stderr "enableClusterT3Tunneling is required. "
+    if [ -z "$ENABLE_CLUSTER_CUSTOM_T3" ]; then
+        echo_stderr "ENABLE_CLUSTER_CUSTOM_T3 is required. "
         usage 1
     fi
 
-    if [ -z "$t3AdminPort" ]; then
-        echo_stderr "t3AdminPort is required. "
+    if [ -z "$WLS_T3_ADMIN_PORT" ]; then
+        echo_stderr "WLS_T3_ADMIN_PORT is required. "
         usage 1
     fi
 
-    if [ -z "$t3ClusterPort" ]; then
-        echo_stderr "t3ClusterPort is required. "
+    if [ -z "$WLS_T3_CLUSTER_PORT" ]; then
+        echo_stderr "WLS_T3_CLUSTER_PORT is required. "
         usage 1
     fi
 
-    if [ -z "$wlsJavaOption" ]; then
-        echo_stderr "wlsJavaOption is required. "
+    if [ -z "$WLS_JAVA_OPTIONS" ]; then
+        echo_stderr "WLS_JAVA_OPTIONS is required. "
         usage 1
     fi
 
-    if [[ "${wlsJavaOption}" == "null" ]];then
-        wlsJavaOption=""
+    if [[ "${WLS_JAVA_OPTIONS}" == "null" ]];then
+        WLS_JAVA_OPTIONS=""
     fi
 
-    if [[ "${useOracleImage,,}" == "${constFalse}" ]] && [ -z "$userProvidedImagePath" ]; then
-        echo_stderr "userProvidedImagePath is required. "
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constFalse}" ]] && [ -z "$USER_PROVIDED_IMAGE_PATH" ]; then
+        echo_stderr "USER_PROVIDED_IMAGE_PATH is required. "
         usage 1
     fi
 }
@@ -285,7 +287,7 @@ function install_utilities() {
 
 # Connect to AKS cluster
 function connect_aks_cluster() {
-    az aks get-credentials --resource-group ${aksClusterRGName} --name ${aksClusterName} --overwrite-existing
+    az aks get-credentials --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} --name ${AKS_CLUSTER_NAME} --overwrite-existing
 }
 
 # remove the operator if it is not running.
@@ -378,10 +380,13 @@ function install_wls_operator() {
 
 # Query ACR login server, username, password
 function query_acr_credentials() {
-    azureACRServer=$(az acr show -n $acrName --query 'loginServer' -o tsv)
-    validate_status ${azureACRServer}
-    azureACRUserName=$(az acr credential show -n $acrName --query 'username' -o tsv)
-    azureACRPassword=$(az acr credential show -n $acrName --query 'passwords[0].value' -o tsv)
+    ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME --query 'loginServer' -o tsv)
+    validate_status ${ACR_LOGIN_SERVER}
+    
+    ACR_USER_NAME=$(az acr credential show -n $ACR_NAME --query 'username' -o tsv)
+    validate_status "Query ACR credentials."
+
+    ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query 'passwords[0].value' -o tsv)
     validate_status "Query ACR credentials."
 }
 
@@ -393,33 +398,18 @@ function query_acr_credentials() {
 function build_docker_image() {
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    echo $azureACRPassword $ocrSSOPSW |
-        bash $scriptDir/createVMAndBuildImage.sh \
-            $currentResourceGroup \
-            $wlsImageTag \
-            $azureACRServer \
-            $azureACRUserName \
-            $newImageTag \
-            "$appPackageUrls" \
-            $ocrSSOUser \
-            $wlsClusterSize \
-            $enableCustomSSL \
-            "$scriptURL" \
-            ${enableAdminT3Tunneling} \
-            ${enableClusterT3Tunneling} \
-            ${useOracleImage} \
-            ${userProvidedImagePath}
+    echo ${ACR_PASSWORD} | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
 
-    az acr repository show -n ${acrName} --image aks-wls-images:${newImageTag}
+    az acr repository show -n ${ACR_NAME} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
-        echo "Failed to create image ${azureACRServer}/aks-wls-images:${newImageTag}"
+        echo "Failed to create image ${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}"
         exit 1
     fi
 }
 
 function create_source_folder_for_certificates() {
     mntRoot="/wls"
-    mntPath="$mntRoot/$storageAccountName/$azFileShareName"
+    mntPath="$mntRoot/$STORAGE_ACCOUNT_NAME/$azFileShareName"
 
     mkdir -p $mntPath
 
@@ -438,7 +428,7 @@ function validate_ssl_keystores() {
     #validate if trust keystore has entry
     ${JAVA_HOME}/bin/keytool -list -v \
         -keystore ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
-        -storepass $wlsTrustPsw \
+        -storepass $WLS_SSL_TRUST_PASSWORD \
         -storetype jks |
         grep 'Entry type:' |
         grep 'trustedCertEntry'
@@ -453,7 +443,7 @@ function upload_certificates_to_fileshare() {
     sasTokenEnd=$(date -d@"$expiryData" -u '+%Y-%m-%dT%H:%MZ')
     sasToken=$(az storage share generate-sas \
         --name ${azFileShareName} \
-        --account-name ${storageAccountName} \
+        --account-name ${STORAGE_ACCOUNT_NAME} \
         --https-only \
         --permissions dlrw \
         --expiry $sasTokenEnd -o tsv)
@@ -463,13 +453,13 @@ function upload_certificates_to_fileshare() {
     utility_create_directory_to_fileshare \
         ${fsSecurityDirName} \
         ${azFileShareName} \
-        ${storageAccountName} \
+        ${STORAGE_ACCOUNT_NAME} \
         $sasToken
 
     echo "upload $wlsIdentityKeyStoreFileName"
     utility_upload_file_to_fileshare \
         ${azFileShareName} \
-        ${storageAccountName} \
+        ${STORAGE_ACCOUNT_NAME} \
         "$wlsIdentityKeyStoreFileName" \
         ${mntPath}/$wlsIdentityKeyStoreFileName \
         $sasToken
@@ -477,7 +467,7 @@ function upload_certificates_to_fileshare() {
     echo "upload $wlsTrustKeyStoreFileName"
     utility_upload_file_to_fileshare \
         ${azFileShareName} \
-        ${storageAccountName} \
+        ${STORAGE_ACCOUNT_NAME} \
         "$wlsTrustKeyStoreFileName" \
         ${mntPath}/$wlsTrustKeyStoreFileName \
         $sasToken
@@ -485,7 +475,7 @@ function upload_certificates_to_fileshare() {
     echo "upload $wlsTrustKeyStoreJKSFileName"
     utility_upload_file_to_fileshare \
         ${azFileShareName} \
-        ${storageAccountName} \
+        ${STORAGE_ACCOUNT_NAME} \
         "$wlsTrustKeyStoreJKSFileName" \
         ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
         $sasToken
@@ -494,24 +484,24 @@ function upload_certificates_to_fileshare() {
 function output_ssl_keystore() {
     echo "Custom SSL is enabled. Storing CertInfo as files..."
     #decode cert data once again as it would got base64 encoded
-    echo "$wlsIdentityData" | base64 -d >${mntPath}/$wlsIdentityKeyStoreFileName
-    echo "$wlsTrustData" | base64 -d >${mntPath}/$wlsTrustKeyStoreFileName
+    echo "$WLS_SSL_IDENTITY_DATA" | base64 -d >${mntPath}/$wlsIdentityKeyStoreFileName
+    echo "$WLS_SSL_TRUST_DATA" | base64 -d >${mntPath}/$wlsTrustKeyStoreFileName
 
     # export jks file
     # -Dweblogic.security.SSL.trustedCAKeyStorePassPhrase for PKCS12 is not working correctly
     # we neet to convert PKCS12 file to JKS file and specify in domain.yaml via -Dweblogic.security.SSL.trustedCAKeyStore
-    if [[ "${wlsTrustType,,}" != "jks" ]]; then
+    if [[ "${WLS_SSL_TRUST_TYPE,,}" != "jks" ]]; then
         ${JAVA_HOME}/bin/keytool -importkeystore \
             -srckeystore ${mntPath}/${wlsTrustKeyStoreFileName} \
-            -srcstoretype ${wlsTrustType} \
-            -srcstorepass ${wlsTrustPsw} \
+            -srcstoretype ${WLS_SSL_TRUST_TYPE} \
+            -srcstorepass ${WLS_SSL_TRUST_PASSWORD} \
             -destkeystore ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
             -deststoretype jks \
-            -deststorepass ${wlsTrustPsw}
+            -deststorepass ${WLS_SSL_TRUST_PASSWORD}
 
         validate_status "Export trust JKS file."
     else
-        echo "$wlsTrustData" | base64 -d >${mntPath}/${wlsTrustKeyStoreJKSFileName}
+        echo "$WLS_SSL_TRUST_DATA" | base64 -d >${mntPath}/${wlsTrustKeyStoreJKSFileName}
     fi
 }
 
@@ -521,8 +511,8 @@ function output_ssl_keystore() {
 # * Create PVC
 function create_pv() {
     echo "check if pv/pvc have been created."
-    pvcName=${wlsDomainUID}-pvc-azurefile
-    pvName=${wlsDomainUID}-pv-azurefile
+    pvcName=${WLS_DOMAIN_UID}-pvc-azurefile
+    pvName=${WLS_DOMAIN_UID}-pv-azurefile
     ret=$(kubectl -n ${wlsDomainNS} get pvc ${pvcName} | grep "Bound")
 
     if [ -n "$ret" ]; then
@@ -531,23 +521,23 @@ function create_pv() {
         # the offer will create a new storage account in a new resource group.
         # remove the new storage account.
         currentStorageAccount=$(kubectl get pv ${pvName} -o json | jq '. | .metadata.labels.storageAccount' | tr -d "\"")
-        if [[ "${currentStorageAccount}" != "${storageAccountName}" ]]; then
+        if [[ "${currentStorageAccount}" != "${STORAGE_ACCOUNT_NAME}" ]]; then
             echo "the cluster is bound to pv on storage account ${currentStorageAccount}"
-            az storage account delete -n ${storageAccountName} -g $currentResourceGroup -y
-            storageAccountName=${currentStorageAccount} # update storage account name
+            az storage account delete -n ${STORAGE_ACCOUNT_NAME} -g $CURRENT_RESOURCEGROUP_NAME -y
+            STORAGE_ACCOUNT_NAME=${currentStorageAccount} # update storage account name
             echo "query storage account resource group"
-            storageResourceGroup=$(az storage account show --name ${storageAccountName} | jq '.resourceGroup' | tr -d "\"")
-            echo "resource group that contains storage account ${storageAccountName} is ${storageResourceGroup}"
+            storageResourceGroup=$(az storage account show --name ${STORAGE_ACCOUNT_NAME} | jq '.resourceGroup' | tr -d "\"")
+            echo "resource group that contains storage account ${STORAGE_ACCOUNT_NAME} is ${storageResourceGroup}"
         fi
 
         return
     fi
 
     echo "create pv/pvc."
-    export storageAccountKey=$(az storage account keys list --resource-group $storageResourceGroup --account-name $storageAccountName --query "[0].value" -o tsv)
+    export storageAccountKey=$(az storage account keys list --resource-group $storageResourceGroup --account-name $STORAGE_ACCOUNT_NAME --query "[0].value" -o tsv)
     export azureSecretName="azure-secret"
     kubectl -n ${wlsDomainNS} create secret generic ${azureSecretName} \
-        --from-literal=azurestorageaccountname=${storageAccountName} \
+        --from-literal=azurestorageaccountname=${STORAGE_ACCOUNT_NAME} \
         --from-literal=azurestorageaccountkey=${storageAccountKey}
 
     # generate pv configurations
@@ -556,14 +546,14 @@ function create_pv() {
     sed -i -e "s:@NAMESPACE@:${wlsDomainNS}:g" ${customPVYaml}
     sed -i -e "s:@PV_NAME@:${pvName}:g" ${customPVYaml}
     sed -i -e "s:@PVC_NAME@:${pvcName}:g" ${customPVYaml}
-    sed -i -e "s:@STORAGE_ACCOUNT@:${storageAccountName}:g" ${customPVYaml}
+    sed -i -e "s:@STORAGE_ACCOUNT@:${STORAGE_ACCOUNT_NAME}:g" ${customPVYaml}
 
     # generate pv configurations
     customPVCYaml=${scriptDir}/pvc.yaml
     cp ${scriptDir}/pvc.yaml.template ${customPVCYaml}
     sed -i -e "s:@NAMESPACE@:${wlsDomainNS}:g" ${customPVCYaml}
     sed -i -e "s:@PVC_NAME@:${pvcName}:g" ${customPVCYaml}
-    sed -i -e "s:@STORAGE_ACCOUNT@:${storageAccountName}:g" ${customPVCYaml}
+    sed -i -e "s:@STORAGE_ACCOUNT@:${STORAGE_ACCOUNT_NAME}:g" ${customPVCYaml}
 
     kubectl apply -f ${customPVYaml}
     utility_check_pv_state ${pvName} "Available" ${checkPVStateMaxAttempt} ${checkPVStateInterval}
@@ -578,10 +568,10 @@ function create_pv() {
 }
 
 function wait_for_pod_completed() {
-    echo "Waiting for $((appReplicas + 1)) pods are running."
+    echo "Waiting for $((WLS_APP_REPLICAS + 1)) pods are running."
 
     utility_wait_for_pod_completed \
-        ${appReplicas} \
+        ${WLS_APP_REPLICAS} \
         "${wlsDomainNS}" \
         ${checkPodStatusMaxAttemps} \
         ${checkPodStatusInterval}
@@ -590,12 +580,12 @@ function wait_for_pod_completed() {
 function wait_for_image_update_completed() {
     # Make sure all of the pods are updated with new image.
     # Assumption: we have only one cluster currently.
-    acrImagePath=${azureACRServer}/aks-wls-images:${newImageTag}
-    echo "Waiting for $((appReplicas + 1)) new pods created with image ${acrImagePath}"
+    acrImagePath=${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}
+    echo "Waiting for $((WLS_APP_REPLICAS + 1)) new pods created with image ${acrImagePath}"
 
     utility_wait_for_image_update_completed \
         "${acrImagePath}" \
-        ${appReplicas} \
+        ${WLS_APP_REPLICAS} \
         "${wlsDomainNS}" \
         ${checkPodStatusMaxAttemps} \
         ${checkPodStatusInterval}
@@ -620,26 +610,26 @@ function create_domain_namespace() {
 
     kubectl -n ${wlsDomainNS} create secret generic \
         ${kubectlWLSCredentialName} \
-        --from-literal=username=${wlsUserName} \
-        --from-literal=password=${wlsPassword}
+        --from-literal=username=${WLS_ADMIN_USER_NAME} \
+        --from-literal=password=${WLS_ADMIN_PASSWORD}
 
-    kubectl -n ${wlsDomainNS} label secret ${kubectlWLSCredentialName} weblogic.domainUID=${wlsDomainUID}
+    kubectl -n ${wlsDomainNS} label secret ${kubectlWLSCredentialName} weblogic.domainUID=${WLS_DOMAIN_UID}
 
     kubectl -n ${wlsDomainNS} create secret generic ${kubectlWDTEncryptionSecret} \
-        --from-literal=password=${wdtRuntimePassword}
-    kubectl -n ${wlsDomainNS} label secret ${kubectlWDTEncryptionSecret} weblogic.domainUID=${wlsDomainUID}
+        --from-literal=password=${WLS_WDT_RUNTIME_PSW}
+    kubectl -n ${wlsDomainNS} label secret ${kubectlWDTEncryptionSecret} weblogic.domainUID=${WLS_DOMAIN_UID}
 
     kubectl create secret docker-registry ${kubectlSecretForACR} \
-        --docker-server=${azureACRServer} \
-        --docker-username=${azureACRUserName} \
-        --docker-password=${azureACRPassword} \
+        --docker-server=${ACR_LOGIN_SERVER} \
+        --docker-username=${ACR_USER_NAME} \
+        --docker-password=${ACR_PASSWORD} \
         -n ${wlsDomainNS}
 
-    kubectl -n ${wlsDomainNS} label secret ${kubectlSecretForACR} weblogic.domainUID=${wlsDomainUID}
+    kubectl -n ${wlsDomainNS} label secret ${kubectlSecretForACR} weblogic.domainUID=${WLS_DOMAIN_UID}
 }
 
 function parsing_ssl_certs_and_create_ssl_secret() {
-    if [[ "${enableCustomSSL,,}" == "${constTrue}" ]]; then
+    if [[ "${ENABLE_CUSTOM_SSL,,}" == "${constTrue}" ]]; then
         # use default Java, if no, install open jdk 11.
         # why not use Microsoft open jdk? No apk installation package!
         export JAVA_HOME=/usr/lib/jvm/default-jvm/
@@ -661,16 +651,16 @@ function parsing_ssl_certs_and_create_ssl_secret() {
         fi
         echo "create secret  ${kubectlWLSSSLCredentialsName}"
         kubectl -n ${wlsDomainNS} create secret generic ${kubectlWLSSSLCredentialsName} \
-            --from-literal=sslidentitykeyalias=${wlsIdentityAlias} \
-            --from-literal=sslidentitykeypassword=${wlsIdentityKeyPsw} \
+            --from-literal=sslidentitykeyalias=${WLS_SSL_PRIVATE_KEY_ALIAS} \
+            --from-literal=sslidentitykeypassword=${WLS_SSL_PRIVATE_KEY_PASSWORD} \
             --from-literal=sslidentitystorepath=${sharedPath}/$wlsIdentityKeyStoreFileName \
-            --from-literal=sslidentitystorepassword=${wlsIdentityPsw} \
-            --from-literal=sslidentitystoretype=${wlsIdentityType} \
+            --from-literal=sslidentitystorepassword=${WLS_SSL_IDENTITY_PASSWORD} \
+            --from-literal=sslidentitystoretype=${WLS_SSL_IDENTITY_TYPE} \
             --from-literal=ssltruststorepath=${sharedPath}/${wlsTrustKeyStoreFileName} \
-            --from-literal=ssltruststoretype=${wlsTrustType} \
-            --from-literal=ssltruststorepassword=${wlsTrustPsw}
+            --from-literal=ssltruststoretype=${WLS_SSL_TRUST_TYPE} \
+            --from-literal=ssltruststorepassword=${WLS_SSL_TRUST_PASSWORD}
 
-        kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${wlsDomainUID}
+        kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${WLS_DOMAIN_UID}
         javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} ${javaOptions}"
     fi
 }
@@ -683,7 +673,7 @@ function parsing_ssl_certs_and_create_ssl_secret() {
 #  * Deploy WebLogic domain using image in ACR
 #  * Wait for the domain completed
 function setup_wls_domain() {
-    export javaOptions=${wlsJavaOption}
+    export javaOptions=${WLS_JAVA_OPTIONS}
     if [[ "${enableClusterT3Channel,,}" == "true" ]] || [[ "${enableAdminT3Channel,,}" == "true" ]]; then
         # for remote t3/t3s access.
         # refer to https://oracle.github.io/weblogic-kubernetes-operator/faq/external-clients/#enabling-unknown-host-access
@@ -694,7 +684,7 @@ function setup_wls_domain() {
     create_domain_namespace
 
     echo "constTrue": "${constTrue}"
-    if [[ "${enablePV,,}" == "${constTrue}" ]]; then
+    if [[ "${ENABLE_PV,,}" == "${constTrue}" ]]; then
         echo "start to create pv/pvc. "
         create_pv
     fi
@@ -713,45 +703,19 @@ function setup_wls_domain() {
 
     customDomainYaml=${scriptDir}/custom-domain.yaml
     if [[ "${updateNamepace}" == "${constTrue}" ]]; then
-        echo "start to update domain  ${wlsDomainUID}"
+        echo "start to update domain  ${WLS_DOMAIN_UID}"
         chmod ugo+x $scriptDir/updateDomainConfig.sh
         bash $scriptDir/updateDomainConfig.sh \
             ${customDomainYaml} \
-            ${appReplicas} \
-            ${wlsCPU} \
-            ${wlsDomainUID} \
-            ${wlsDomainName} \
-            "${azureACRServer}/aks-wls-images:${newImageTag}" \
-            ${wlsMemory} \
-            ${managedServerPrefix} \
-            ${enableCustomSSL} \
-            ${enablePV} \
-            ${enableAdminT3Tunneling} \
-            ${enableClusterT3Tunneling} \
-            ${t3AdminPort} \
-            ${t3ClusterPort} \
-            ${constClusterName} \
+            "${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}" \
             "${javaOptions}"
     else
-        echo "start to create domain  ${wlsDomainUID}"
+        echo "start to create domain  ${WLS_DOMAIN_UID}"
         # generate domain yaml
         chmod ugo+x $scriptDir/genDomainConfig.sh
         bash $scriptDir/genDomainConfig.sh \
             ${customDomainYaml} \
-            ${appReplicas} \
-            ${wlsCPU} \
-            ${wlsDomainUID} \
-            ${wlsDomainName} \
-            "${azureACRServer}/aks-wls-images:${newImageTag}" \
-            ${wlsMemory} \
-            ${managedServerPrefix} \
-            ${enableCustomSSL} \
-            ${enablePV} \
-            ${enableAdminT3Tunneling} \
-            ${enableClusterT3Tunneling} \
-            ${t3AdminPort} \
-            ${t3ClusterPort} \
-            ${constClusterName} \
+            "${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}" \
             "${javaOptions}"
     fi
 
@@ -769,53 +733,21 @@ export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
-export ocrSSOUser=$1
-export aksClusterRGName=$2
-export aksClusterName=$3
-export wlsImageTag=$4
-export acrName=$5
-export wlsDomainName=$6
-export wlsDomainUID=$7
-export wlsUserName=$8
-export wlsCPU=$9
-export wlsMemory=${10}
-export managedServerPrefix=${11}
-export appReplicas=${12}
-export appPackageUrls=${13}
-export currentResourceGroup=${14}
-export scriptURL=${15}
-export storageAccountName=${16}
-export wlsClusterSize=${17}
-export enableCustomSSL=${18}
-export wlsIdentityData=${19}
-export wlsIdentityType=${20}
-export wlsIdentityAlias=${21}
-export wlsTrustData=${22}
-export wlsTrustType=${23}
-export enablePV=${24}
-export enableAdminT3Tunneling=${25}
-export enableClusterT3Tunneling=${26}
-export t3AdminPort=${27}
-export t3ClusterPort=${28}
-export wlsJavaOption=${29}
-export userProvidedImagePath=${30}
-export useOracleImage=${31}
-
 export adminServerName="admin-server"
 export azFileShareName="weblogic"
 export exitCode=0
 export kubectlSecretForACR="regsecret"
-export kubectlWDTEncryptionSecret="${wlsDomainUID}-runtime-encryption-secret"
-export kubectlWLSCredentialName="${wlsDomainUID}-weblogic-credentials"
-export kubectlWLSSSLCredentialsName="${wlsDomainUID}-weblogic-ssl-credentials"
+export kubectlWDTEncryptionSecret="${WLS_DOMAIN_UID}-runtime-encryption-secret"
+export kubectlWLSCredentialName="${WLS_DOMAIN_UID}-weblogic-credentials"
+export kubectlWLSSSLCredentialsName="${WLS_DOMAIN_UID}-weblogic-ssl-credentials"
 export newImageTag=$(date +%s)
 export operatorName="weblogic-operator"
 # seconds
 export sasTokenValidTime=3600
 export storageFileShareName="weblogic"
-export storageResourceGroup=${currentResourceGroup}
+export storageResourceGroup=${CURRENT_RESOURCEGROUP_NAME}
 export sharedPath="/shared"
-export wlsDomainNS="${wlsDomainUID}-ns"
+export wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 export wlsOptHelmChart="https://oracle.github.io/weblogic-kubernetes-operator/charts"
 export wlsOptNameSpace="weblogic-operator-ns"
 export wlsOptRelease="weblogic-operator"
@@ -823,8 +755,6 @@ export wlsOptSA="weblogic-operator-sa"
 export wlsIdentityKeyStoreFileName="security/identity.keystore"
 export wlsTrustKeyStoreFileName="security/trust.keystore"
 export wlsTrustKeyStoreJKSFileName="security/trust.jks"
-
-read_sensitive_parameters_from_stdin
 
 validate_input
 
