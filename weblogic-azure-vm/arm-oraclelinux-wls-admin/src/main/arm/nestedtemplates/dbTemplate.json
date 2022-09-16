@@ -92,7 +92,8 @@
         "name_scriptFilePrefix": "datasourceConfig-",
         "name_scriptFileSuffix-sqlserver": "sqlserver.sh",
         "name_scriptFileSuffix-oracle": "oracle.sh",
-        "name_scriptFileSuffix-postgresql": "postgresql.sh"
+        "name_scriptFileSuffix-postgresql": "postgresql.sh",
+        "name_scriptFileSuffix-mysql": "mysql.sh"
     },
     "resources": [
         {
@@ -123,7 +124,8 @@
                     "fileUris": [
                         "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-sqlserver'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-oracle'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-postgresql'), parameters('_artifactsLocationSasToken')))]"
+                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-postgresql'), parameters('_artifactsLocationSasToken')))]",
+                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-mysql'), parameters('_artifactsLocationSasToken')))]"
                     ]
                 },
                 "protectedSettings": {
@@ -189,6 +191,24 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "${database.sqlserver}",
             "condition": "[if(contains(parameters('databaseType'), 'sqlserver'), bool('true'), bool('false'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${database.mysql}",
+            "condition": "[if(contains(parameters('databaseType'), 'mysql'), bool('true'), bool('false'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],
