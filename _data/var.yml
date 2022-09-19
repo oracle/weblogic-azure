@@ -22,4 +22,4 @@ passwordInFileNote: |-3
    * We did not include values for parameters that have a default value.
    * Even though this parameters file has values for sensitive fields such as passwords, these values are not echoed on the command line, or repeated in the logs because they are passed directly as `secureString` type in ARM.  **Please ensure any occurrences of the parameters file in the filesystem are sufficiently secured.**
    
-artifactsLocationTag: 2022-08-22-1-Q3
+artifactsLocationTag: 2022-09-19-1-Q3
