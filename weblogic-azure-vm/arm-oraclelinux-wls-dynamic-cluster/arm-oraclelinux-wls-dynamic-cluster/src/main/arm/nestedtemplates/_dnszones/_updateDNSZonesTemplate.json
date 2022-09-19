@@ -141,7 +141,7 @@
             "kind": "AzureCLI",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
-                "AzCliVersion": "2.15.0",
+                "AzCliVersion": "${azure.cli.version}",
                 "timeout": "PT30M",
                 "environmentVariables": [
                     {
