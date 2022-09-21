@@ -17,7 +17,7 @@ This page documents how to configure an existing deployment of {{ site.data.var.
 
 ### WebLogic Server Instance
 
-The DNS Configuraton ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
+The DNS Configuration ARM template will be applied to an existing {{ site.data.var.wlsFullBrandName }} instance.  If you don't have one, please create a new instance from the Azure portal, by following the link to the offer [in the index](index.md).
 
 ### Registered Domain Name
 
@@ -25,7 +25,7 @@ You need to buy a domain name to create a custom DNS alias.
 
 ### Azure DNS Zone
 
-If you create the DNS alias on an existing [Azure DNS Zone](https://docs.microsoft.com/en-us/azure/dns/dns-overview), make sure you have perfomed the [Azure DNS Delegation](https://docs.microsoft.com/en-us/azure/dns/dns-domain-delegation).  After you have completed the delegation, you can verify it with `nslookup`.  For example, assuming your domain name is **contoso.com**, this output shows a correct delegation.
+If you create the DNS alias on an existing [Azure DNS Zone](https://docs.microsoft.com/en-us/azure/dns/dns-overview), make sure you have performed the [Azure DNS Delegation](https://docs.microsoft.com/en-us/azure/dns/dns-domain-delegation).  After you have completed the delegation, you can verify it with `nslookup`.  For example, assuming your domain name is **contoso.com**, this output shows a correct delegation.
 
 ```bash
 $ nslookup -type=SOA contoso.com
@@ -49,15 +49,6 @@ Address: 2603:1061::1
 
 We strongly recommand you create an Azure DNS Zone for domain management and reuse it for other perpose. Follow the [guide](https://docs.microsoft.com/en-us/azure/dns/dns-getstarted-portal) to create an Azure DNS Zone.
 
-### Azure Managed Indentify
-
-If you are going to configure DNS alias based on an existing DNS Zone, you are required to input the ID of a user-assigned managed identity. 
-
-Follow this [guide](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal) to create a user-assigned managed identity.
-
-To obtain ID of the indentify: go to Azure Portal; open the identity **Overview** page; click **JSON View** and copy the **Resource ID**.
-
-
 ## Prepare the Parameters
 
 We provide an automation shell script for DNS configuration. You must specify the information of the existing Oracle WebLogic Server. This section shows how to obtain the values for the following required properties.
@@ -71,7 +62,6 @@ We provide an automation shell script for DNS configuration. You must specify th
 | `--location ` | Required. Must be the same region into which the server was initially deployed. |
 | `--zone-name ` | Required. Azure DNS Zone name. |
 | `--gateway-label` | Optional. Label for applciation gateway. Used to generate subdomain of application gateway. The parameter is only required if you want to create DNS alias for application gateway.|
-| `--identity-id` | Optional. ID of Azure user-assigned managed identity. The parameter is only required if you are creating DNS alias on an existing DNS Zone.|
 | `--zone-resource-group` | Optional. Name of resource group that has Azure DNS Zone deployed. The parameter is only required if you are creating DNS alias on an existing DNS Zone. |
 | `--help` | Help. |
 
@@ -97,7 +87,7 @@ To configure a DNS alias on an existing Azure DNS Zone, in addition to the requi
 This is an example to create a DNS alias `admin.contoso.com` for the admin console and `applciations.contoso.com` for the application gateway on an existing Azure DNS Zone.
 
 ```bash
-$ curl -fsSL {{ site.data.var.artifactsLocationBase }}{{ pageDir }}/{{ site.data.var.artifactsLocationTag }}/cli-scripts/custom-dns-alias-cli.sh \
+$ curl -fsSL {{ site.data.var.artifactsLocationBase }}/{{ site.data.var.artifactsLocationTag }}/{{site.data.var.artifactsLocationSubPathForVM}}{{ pageDir }}/cli-scripts/custom-dns-alias-cli.sh \
   | /bin/bash -s -- \
   --resource-group `yourResourceGroup` \
   --admin-vm-name adminVM \
@@ -106,7 +96,6 @@ $ curl -fsSL {{ site.data.var.artifactsLocationBase }}{{ pageDir }}/{{ site.data
   --location eastus \
   --zone-name contoso.com \
   --gateway-label applications \
-  --identity-id `yourIndentityID` \
   --zone-resource-group `yourDNSZoneResourceGroup`
 ```
 
@@ -133,7 +122,7 @@ To configure a DNS alias on a new Azure DNS Zone, you must specify the required 
 This is an example of creating an Azure DNS Zone, then creating a DNS alias `admin.contoso.com` for the admin console and `applications.contoso.com` for application gateway. 
 
 ```bash
-$ curl -fsSL {{ site.data.var.artifactsLocationBase }}{{ pageDir }}/{{ site.data.var.artifactsLocationTag }}/cli-scripts/custom-dns-alias-cli.sh \
+$ curl -fsSL {{ site.data.var.artifactsLocationBase }}/{{ site.data.var.artifactsLocationTag }}/{{site.data.var.artifactsLocationSubPathForVM}}{{ pageDir }}/cli-scripts/custom-dns-alias-cli.sh \
   | /bin/bash -s -- \
   --resource-group `yourResourceGroup` \
   --admin-vm-name adminVM \
