@@ -1279,12 +1279,13 @@
                                 }
                             },
                             {
-                                "name": "deplymentScriptInfo",
-                                "type": "Microsoft.Common.TextBlock",
+                                "name": "infoDNSIndentity",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]",
                                 "options": {
-                                    "text": "If you choose to use an existing Azure DNS Zone, you must select a user-assigned managed identity to enable the necessary configuration."
-                                },
-                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
+                                    "icon": "Info",
+                                    "text": "This option will add/update records in your Azure DNS Zone. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+                                }
                             },
                             {
                                 "name": "dnszoneName",
@@ -1351,32 +1352,6 @@
                                     ]
                                 },
                                 "visible": "[and(bool(steps('section_ohs').enableOHS), bool(steps('section_networkingConfiguration').enableCustomDNS))]"
-                            },
-                            {
-                                "name": "infoDNSIndentity",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone), less(length(steps('section_networkingConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user-assigned identity to access Azure resources.",
-                                    "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
-                                }
-                            },
-                            {
-                                "name": "dnsIdentity",
-                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                                "label": "Managed Identity Configuration",
-                                "toolTip": {
-                                    "userAssignedIdentity": "Add user-assigned identities to grant the resource access to Azure resources."
-                                },
-                                "defaultValue": {
-                                    "systemAssignedIdentity": "Off"
-                                },
-                                "options": {
-                                    "hideSystemAssignedIdentity": true,
-                                    "hideUserAssignedIdentity": false
-                                },
-                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]"
                             }
                         ]
                     }
@@ -2017,7 +1992,6 @@
             "denyPublicTrafficForManagedServer": "[steps('section_networkingConfiguration').denyPublicTrafficForManagedServer]",
             "dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "dnszoneIdentity": "[steps('section_networkingConfiguration').customDNSSettings.dnsIdentity]",
             "dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
             "dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
             "dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",

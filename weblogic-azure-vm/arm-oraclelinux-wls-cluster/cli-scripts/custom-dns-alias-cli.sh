@@ -22,7 +22,6 @@ Options:
         -l   --location           (Required)       Location of current cluster resources.
         -z   --zone-name          (Required)       DNS Zone name
         --gateway-label           (Optional)       Specify a lable to generate the DNS alias for Application Gateway
-        --identity-id             (Optional)       Specify an Azure Managed User Identity to update DNS Zone
         --zone-resource-group     (Optional)       The name of resource group that has WebLogic cluster deployed
         -h   --help
 
@@ -36,7 +35,6 @@ Samples:
             --location eastus \\
             --zone-name contoso.com \\
             --gateway-label application \\
-            --identity-id <your-identity-id> \\
             --zone-resource-group haiche-dns-test1
 
         2. Configure DNS alias on a new DNS Zone
@@ -201,14 +199,6 @@ EOF
         "hasDNSZones": {
             "value": ${hasDNSZone}
         },
-        "identity": {
-            "value": {
-              "type": "UserAssigned",
-              "userAssignedIdentities": {
-                "${identity}": {}
-              }
-            }
-        },
         "location": {
             "value": "${location}"
         },
@@ -287,7 +277,6 @@ Custom DNS alias:
 # default value
 enableGateWay=false
 hasDNSZone=false
-identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
 
 # Transform long options to short ones
 for arg in "$@"; do
@@ -301,7 +290,6 @@ for arg in "$@"; do
   "--admin-console-label") set -- "$@" "-c" ;;
   "--gateway-label") set -- "$@" "-w" ;;
   "--zone-resource-group") set -- "$@" "-r" ;;
-  "--identity-id") set -- "$@" "-i" ;;
   "--location") set -- "$@" "-l" ;;
   "--"*)
     set -- usage
@@ -326,7 +314,6 @@ while getopts "hg:f:z:m:c:w:r:i:l:" opt; do
   "c") adminLabel="$OPTARG" ;;
   "w") gatewayLabel="$OPTARG" ;;
   "r") zoneResourceGroup="$OPTARG" ;;
-  "i") identity="$OPTARG" ;;
   "l") location="$OPTARG" ;;
   esac
 done

@@ -34,9 +34,6 @@
             },
             "defaultValue": true
         },
-        "identity": {
-            "type": "object"
-        },
         "location": {
             "type": "string",
             "metadata": {
@@ -116,9 +113,6 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "identity": {
-                        "value": "[parameters('identity')]"
-                    },
                     "keyvaultName": {
                         "value": "[parameters('keyVaultName')]"
                     },

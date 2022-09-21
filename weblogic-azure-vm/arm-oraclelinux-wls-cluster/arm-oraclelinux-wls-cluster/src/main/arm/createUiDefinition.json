@@ -921,30 +921,13 @@
                         "visible": "[equals(steps('section_appGateway').certificateOption, 'haveKeyVault')]"
                     },
                     {
-                        "name": "infoGatewayIndentity",
+                        "name": "infoGenerateCertIndentity",
                         "type": "Microsoft.Common.InfoBox",
-                        "visible": "[and(equals(steps('section_appGateway').certificateOption, 'generateCert'), less(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities), 1))]",
+                        "visible": "[equals(steps('section_appGateway').certificateOption, 'generateCert')]",
                         "options": {
-                            "icon": "Error",
-                            "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. This option requires at least one user-assigned identity to access Azure resources.",
-                            "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
+                            "icon": "Info",
+                            "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
                         }
-                    },
-                    {
-                        "name": "gatewayIdentity",
-                        "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                        "label": "Managed Identity Configuration",
-                        "toolTip": {
-                            "userAssignedIdentity": "Add user-assigned identities to enable creation of TLS/SSL certificate."
-                        },
-                        "defaultValue": {
-                            "systemAssignedIdentity": "Off"
-                        },
-                        "options": {
-                            "hideSystemAssignedIdentity": true,
-                            "hideUserAssignedIdentity": false
-                        },
-                        "visible": "[equals(steps('section_appGateway').certificateOption, 'generateCert')]"
                     }
                 ],
                 "visible": true
@@ -1190,12 +1173,13 @@
                                 }
                             },
                             {
-                                "name": "deplymentScriptInfo",
-                                "type": "Microsoft.Common.TextBlock",
+                                "name": "infoDNSIndentity",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]",
                                 "options": {
-                                    "text": "If you choose to use an existing Azure DNS Zone, you must select a user-assigned managed identity to enable the necessary configuration."
-                                },
-                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
+                                    "icon": "Info",
+                                    "text": "This option will add/update records in your Azure DNS Zone. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+                                }
                             },
                             {
                                 "name": "dnszoneName",
@@ -1262,52 +1246,6 @@
                                     ]
                                 },
                                 "visible": "[and(bool(steps('section_appGateway').enableAppGateway), bool(steps('section_networkingConfiguration').enableCustomDNS))]"
-                            },
-                            {
-                                "name": "reuseIdentity",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use the Managed Identity seleted previousely?",
-                                "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to reuse the Managed Identity seleted previousely, 'No' to input a new identity.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
-                                },
-                                "visible": "[and(greater(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities),0), bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone))]"
-                            },
-                            {
-                                "name": "infoDNSIndentity",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone), less(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities),1), less(length(steps('section_networkingConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user-assigned identity to access Azure resources.",
-                                    "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
-                                }
-                            },
-                            {
-                                "name": "dnsIdentity",
-                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                                "label": "Managed Identity Configuration",
-                                "toolTip": {
-                                    "userAssignedIdentity": "Add user-assigned identities to grant the resource access to Azure resources."
-                                },
-                                "defaultValue": {
-                                    "systemAssignedIdentity": "Off"
-                                },
-                                "options": {
-                                    "hideSystemAssignedIdentity": true,
-                                    "hideUserAssignedIdentity": false
-                                },
-                                "visible": "[if(greater(length(steps('section_appGateway').gatewayIdentity.userAssignedIdentities),0),and(equals(steps('section_networkingConfiguration').customDNSSettings.reuseIdentity, false), bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)), bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone))]"
                             }
                         ]
                     }
@@ -1943,7 +1881,6 @@
             "adminUsername": "[basics('basicsRequired').adminUsername]",
 			"addressPrefixes": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.addressPrefixes, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.addressPrefixes)]",
             "appGatewayCertificateOption": "[steps('section_appGateway').certificateOption]",
-            "appGatewayIdentity": "[steps('section_appGateway').gatewayIdentity]",
             "appGatewaySSLCertData": "[steps('section_appGateway').keyVaultSSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appGatewaySSLCertPassword]",
             "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
@@ -1952,7 +1889,6 @@
             "denyPublicTrafficForAdminServer": "[steps('section_networkingConfiguration').denyPublicTrafficForAdminServer]",
             "denyPublicTrafficForManagedServer": "[steps('section_networkingConfiguration').denyPublicTrafficForManagedServer]",
             "dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
-            "dnszoneIdentity": "[if(greater(length(steps('section_networkingConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities),0),steps('section_networkingConfiguration').customDNSSettings.dnsIdentity, steps('section_appGateway').gatewayIdentity)]",
             "dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
             "dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
             "dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
