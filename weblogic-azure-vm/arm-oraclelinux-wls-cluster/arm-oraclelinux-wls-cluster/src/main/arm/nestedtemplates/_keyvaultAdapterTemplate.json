@@ -89,8 +89,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.appgateway.keyvault.start}",
+            "apiVersion": "2021-04-01",
+            "name": "ed922d8d-975f-55d4-b33a-28fbace13f76",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -102,7 +102,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "2020-10-01",
             "type": "Microsoft.Resources/deployments",
             "name": "keyVaultwithSelfSignedAppGatewaySSLCert",
             "condition": "[not(parameters('useExistingAppGatewaySSLCertificate'))]",
@@ -132,7 +132,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "2020-10-01",
             "type": "Microsoft.Resources/deployments",
             "name": "keyVaultwithExistingAppGatewaySSLCert",
             "condition": "[parameters('useExistingAppGatewaySSLCertificate')]",
@@ -172,8 +172,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.appgateway.keyvault.end}",
+            "apiVersion": "2021-04-01",
+            "name": "b29b66f4-5623-586e-96a2-663ac0d84e35",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -192,15 +192,15 @@
         },
         "keyVaultName": {
             "type": "string",
-            "value": "[if(parameters('useExistingAppGatewaySSLCertificate'), reference('keyVaultwithExistingAppGatewaySSLCert', '${azure.apiVersion}').outputs.keyvaultName.value, reference('keyVaultwithSelfSignedAppGatewaySSLCert', '${azure.apiVersion}').outputs.keyvaultName.value)]"
+            "value": "[if(parameters('useExistingAppGatewaySSLCertificate'), reference('keyVaultwithExistingAppGatewaySSLCert', '2021-04-01').outputs.keyvaultName.value, reference('keyVaultwithSelfSignedAppGatewaySSLCert', '2021-04-01').outputs.keyvaultName.value)]"
         },
         "sslCertDataSecretName": {
             "type": "string",
-            "value": "[if(parameters('useExistingAppGatewaySSLCertificate'), reference('keyVaultwithExistingAppGatewaySSLCert', '${azure.apiVersion}').outputs.sslCertDataSecretName.value, reference('keyVaultwithSelfSignedAppGatewaySSLCert', '${azure.apiVersion}').outputs.secretName.value)]"
+            "value": "[if(parameters('useExistingAppGatewaySSLCertificate'), reference('keyVaultwithExistingAppGatewaySSLCert', '2021-04-01').outputs.sslCertDataSecretName.value, reference('keyVaultwithSelfSignedAppGatewaySSLCert', '2021-04-01').outputs.secretName.value)]"
         },
         "sslCertPwdSecretName": {
             "type": "string",
-            "value": "[if(parameters('useExistingAppGatewaySSLCertificate'), reference('keyVaultwithExistingAppGatewaySSLCert', '${azure.apiVersion}').outputs.sslCertPwdSecretName.value, '')]"
+            "value": "[if(parameters('useExistingAppGatewaySSLCertificate'), reference('keyVaultwithExistingAppGatewaySSLCert', '2021-04-01').outputs.sslCertPwdSecretName.value, '')]"
         }
     }
 }
