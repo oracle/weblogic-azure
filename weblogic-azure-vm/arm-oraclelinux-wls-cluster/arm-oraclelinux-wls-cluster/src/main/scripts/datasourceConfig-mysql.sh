@@ -61,19 +61,19 @@ function validateInput()
 
    if [ -z "$dsConnectionURL" ];
    then
-        echo _stderr "Please provide Oracle Database URL in the format 'jdbc:oracle:thin:@<db host name>:<db port>/<database name>'"
+        echo _stderr "Please provide Azure database of MySQL URL in the format 'jdbc:oracle:thin:@<db host name>:<db port>/<database name>'"
         exit 1
    fi
 
    if [ -z "$dsUser" ];
    then
-       echo _stderr "Please provide Oracle Database user name"
+       echo _stderr "Please provide Azure database of MySQL user name"
        exit 1
    fi
 
    if [ -z "$dsPassword" ];
    then
-       echo _stderr "Please provide Oracle Database password"
+       echo _stderr "Please provide Azure database of MySQL password"
        exit 1
    fi
 
@@ -108,7 +108,7 @@ try:
   cmo.setDatasourceType('GENERIC')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName')
   cmo.setUrl('$dsConnectionURL')
-  cmo.setDriverName('oracle.jdbc.OracleDriver')
+  cmo.setDriverName('com.mysql.jdbc.Driver')
   cmo.setPassword('$dsPassword')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCConnectionPoolParams/$jdbcDataSourceName')
   cmo.setTestTableName('SQL ISVALID\r\n\r\n\r\n\r\n')

@@ -1,7 +1,16 @@
+#!/bin/bash
 # Copyright (c) 2021, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
-# Description
-# This script is to configure datasource at WebLogic cluster domain.
+#
+#read arguments from stdin
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro wlsClusterName
+
+if [ -z "$wlsClusterName" ]; then
+   wlsClusterName="cluster1"
+fi
+
+wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+hostName=`hostname`
 
 #Function to output message to StdErr
 function echo_stderr ()
@@ -61,19 +70,19 @@ function validateInput()
 
    if [ -z "$dsConnectionURL" ];
    then
-        echo _stderr "Please provide Oracle Database URL in the format 'jdbc:oracle:thin:@<db host name>:<db port>/<database name>'"
+        echo _stderr "Please provide Azure database of MySQL URL in the format 'jdbc:oracle:thin:@<db host name>:<db port>/<database name>'"
         exit 1
    fi
 
    if [ -z "$dsUser" ];
    then
-       echo _stderr "Please provide Oracle Database user name"
+       echo _stderr "Please provide Azure database of MySQL user name"
        exit 1
    fi
 
    if [ -z "$dsPassword" ];
    then
-       echo _stderr "Please provide Oracle Database password"
+       echo _stderr "Please provide Azure database of MySQL password"
        exit 1
    fi
 
@@ -108,7 +117,7 @@ try:
   cmo.setDatasourceType('GENERIC')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName')
   cmo.setUrl('$dsConnectionURL')
-  cmo.setDriverName('oracle.jdbc.OracleDriver')
+  cmo.setDriverName('com.mysql.jdbc.Driver')
   cmo.setPassword('$dsPassword')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCConnectionPoolParams/$jdbcDataSourceName')
   cmo.setTestTableName('SQL ISVALID\r\n\r\n\r\n\r\n')
@@ -119,7 +128,7 @@ try:
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDataSourceParams/$jdbcDataSourceName')
   cmo.setGlobalTransactionsProtocol('${dbGlobalTranPro}')
   cd('/JDBCSystemResources/$jdbcDataSourceName')
-  set('Targets',jarray.array([ObjectName('com.bea:Name=$wlsClusterName,Type=Cluster')], ObjectName))
+  set('Targets',jarray.array([ObjectName('com.bea:Name=admin,Type=Server')], ObjectName))
   save()
   resolve()
   activate()
@@ -143,20 +152,6 @@ function createTempFolder()
     sudo rm -rf $scriptPath/*
 }
 
-#main
-
-#read arguments from stdin
-read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro wlsClusterName
-
-if [ -z "$wlsClusterName" ];
-then
-   wlsClusterName="cluster1"
-fi
-
-wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-hostName=`hostname`
-
-
 createTempFolder
 validateInput
 createJDBCSource_model
@@ -173,5 +168,3 @@ fi
 
 echo "Cleaning up temporary files..."
 rm -f -r ${scriptPath}
-
-

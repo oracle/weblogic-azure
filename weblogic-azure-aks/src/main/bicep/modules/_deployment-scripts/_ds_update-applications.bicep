@@ -15,6 +15,7 @@ param appPackageFromStorageBlob object = {
 }
 param azCliVersion string = ''
 param identity object = {}
+param isSSOSupportEntitled bool
 param location string
 
 @secure()
@@ -28,10 +29,8 @@ param wlsImageTag string = '12.2.1.4'
 param userProvidedImagePath string = 'null'
 param useOracleImage bool = true
 
-var const_arguments = '${ocrSSOUser} ${ocrSSOPSW} ${aksClusterRGName} ${aksClusterName} ${wlsImageTag} ${acrName} ${wlsDomainName} ${wlsDomainUID} ${resourceGroup().name} ${string(appPackageUrls)} ${const_scriptLocation} ${appPackageFromStorageBlob.storageAccountName} ${appPackageFromStorageBlob.containerName} ${userProvidedImagePath} ${useOracleImage} '
 var const_buildDockerImageScript='createVMAndBuildImage.sh'
 var const_commonScript = 'common.sh'
-var const_invokeScript = 'invokeUpdateApplications.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_updateAppScript= 'updateApplications.sh'
 var const_utilityScript= 'utility.sh'
@@ -43,10 +42,75 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    arguments: const_arguments
-    primaryScriptUri: uri(const_scriptLocation, '${const_invokeScript}${_artifactsLocationSasToken}')
+    environmentVariables: [
+      {
+        name: 'ACR_NAME'
+        value: acrName
+      }
+      {
+        name: 'AKS_CLUSTER_NAME'
+        value: aksClusterName
+      }
+      {
+        name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
+        value: aksClusterRGName
+      }
+      {
+        name: 'CURRENT_RESOURCEGROUP_NAME'
+        value: resourceGroup().name
+      }
+      {
+        name: 'ORACLE_ACCOUNT_ENTITLED'
+        value: string(isSSOSupportEntitled)
+      }
+      {
+        name: 'ORACLE_ACCOUNT_NAME'
+        value: ocrSSOUser
+      }
+      {
+        name: 'ORACLE_ACCOUNT_PASSWORD'
+        secureValue: ocrSSOPSW
+      }
+      {
+        name: 'STORAGE_ACCOUNT_NAME'
+        value: appPackageFromStorageBlob.storageAccountName
+      }
+      {
+        name: 'STORAGE_ACCOUNT_CONTAINER_NAME'
+        value: appPackageFromStorageBlob.containerName
+      }
+      {
+        name: 'SCRIPT_LOCATION'
+        value: const_scriptLocation
+      }
+      {
+        name: 'USE_ORACLE_IMAGE'
+        value: string(useOracleImage)
+      }
+      {
+        name: 'USER_PROVIDED_IMAGE_PATH'
+        value: userProvidedImagePath
+      }
+      {
+        name: 'WLS_APP_PACKAGE_URLS'
+        value: string(appPackageUrls)
+      }
+      {
+        name: 'WLS_DOMAIN_NAME'
+        value: wlsDomainName
+      }
+      {
+        name: 'WLS_DOMAIN_UID'
+        value: wlsDomainUID
+      }
+      {
+        name: 'WLS_IMAGE_TAG'
+        value: wlsImageTag
+      }
+      
+    ]
+    primaryScriptUri: uri(const_scriptLocation, '${const_updateAppScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
-      uri(const_scriptLocation, '${const_updateAppScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_buildDockerImageScript}${_artifactsLocationSasToken}')
@@ -57,4 +121,4 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   }
 }
 
-output image string = reference('ds-wls-update-applications').outputs.image
+output image string = deploymentScript.properties.outputs.image

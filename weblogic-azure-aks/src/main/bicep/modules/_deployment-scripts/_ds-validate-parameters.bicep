@@ -62,6 +62,10 @@ param vnetForApplicationGateway object
 param utcValue string = utcNow()
 param wlsImageTag string
 
+// To mitigate arm-ttk error: Unreferenced variable: $fxv#0
+var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
+var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
+var base64_validateParameters = loadFileAsBase64('../../../arm/scripts/inline-scripts/validateParameters.sh')
 var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone}'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
 var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
@@ -220,12 +224,11 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: string(vnetForApplicationGateway)
       }
     ]
-    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}', loadTextContent('../../../arm/scripts/common.sh'), loadTextContent('../../../arm/scripts/utility.sh'), loadTextContent('../../../arm/scripts/inline-scripts/validateParameters.sh'))
+    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}', base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_validateParameters))
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue
   }
 }
 
-
-output aksVersion string = reference(const_deploymentName).outputs.aksVersion
+output aksVersion string = deploymentScript.properties.outputs.aksVersion

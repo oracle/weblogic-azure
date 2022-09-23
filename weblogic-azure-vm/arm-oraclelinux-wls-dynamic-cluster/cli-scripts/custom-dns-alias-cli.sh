@@ -24,7 +24,6 @@ Options:
         -z   --zone-name          (Required)       DNS Zone name
         --ohs-vm-name             (Optional)       Specify name of the VM that hosts the Oracle HTTP Server Load Balancer.
         --loadbalancer-label      (Optional)       Specify a lable to generate the DNS alias for Load Balancer
-        --identity-id             (Optional)       Specify an Azure Managed User Identity to update DNS Zone
         --zone-resource-group     (Optional)       The name of resource group that has WebLogic cluster deployed
         -h   --help
 
@@ -39,7 +38,6 @@ Samples:
             --zone-name contoso.com \\
             --ohs-vm-name ohsVM \\
             --loadbalancer-label application \\
-            --identity-id <your-identity-id> \\
             --zone-resource-group haiche-dns-test1
 
         2. Configure DNS alias on a new DNS Zone
@@ -212,14 +210,6 @@ EOF
         "hasDNSZones": {
             "value": ${hasDNSZone}
         },
-        "identity": {
-            "value": {
-              "type": "UserAssigned",
-              "userAssignedIdentities": {
-                "${identity}": {}
-              }
-            }
-        },
         "location": {
             "value": "${location}"
         },
@@ -294,7 +284,6 @@ Custom DNS alias:
 # default value
 enableLB=false
 hasDNSZone=false
-identity=/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1
 
 # Transform long options to short ones
 for arg in "$@"; do
@@ -308,7 +297,6 @@ for arg in "$@"; do
   "--admin-console-label") set -- "$@" "-c" ;;
   "--loadbalancer-label") set -- "$@" "-w" ;;
   "--zone-resource-group") set -- "$@" "-r" ;;
-  "--identity-id") set -- "$@" "-i" ;;
   "--location") set -- "$@" "-l" ;;
   "--ohs-vm-name") set -- "$@" "-o" ;;
   "--"*)
@@ -334,7 +322,6 @@ while getopts "hg:f:z:m:c:w:r:i:l:o:" opt; do
   "c") adminLabel="$OPTARG" ;;
   "w") lbLabel="$OPTARG" ;;
   "r") zoneResourceGroup="$OPTARG" ;;
-  "i") identity="$OPTARG" ;;
   "l") location="$OPTARG" ;;
   "o") ohsVMName="$OPTARG" ;;
   esac

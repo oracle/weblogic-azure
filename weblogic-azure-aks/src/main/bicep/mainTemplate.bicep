@@ -83,6 +83,7 @@ param createDNSZone bool = false
   'oracle'
   'postgresql'
   'sqlserver'
+  'mysql'
   'otherdb'
 ])
 @description('One of the supported database types')
@@ -304,7 +305,7 @@ var const_createNewAcr = useOracleImage && createACR
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
 var const_enablePV = enableCustomSSL || enableAzureFileShare
-var const_hasStorageAccount = !createAKSCluster && reference('query-existing-storage-account').outputs.storageAccount.value != 'null'
+var const_hasStorageAccount = !createAKSCluster && queryStorageAccount.outputs.storageAccount != 'null'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
 var const_showAdminConsoleExUrl = (length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForAdminServer)
@@ -326,19 +327,18 @@ var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCe
 var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
 var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
 var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
-var name_storageAccountName = const_hasStorageAccount ? reference('query-existing-storage-account').outputs.storageAccount.value : 'wls${uniqueString(utcValue)}'
+var name_storageAccountName = const_hasStorageAccount ? queryStorageAccount.outputs.storageAccount : 'wls${uniqueString(utcValue)}'
 var name_tagNameForKeyVault = 'wlsKeyVault'
 var name_tagNameForStorageAccount = 'wlsStorageAccount'
 var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData'
 var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw'
-var ref_wlsDomainDeployment = reference(resourceId('Microsoft.Resources/deployments', (_enableCustomSSL) ? 'setup-wls-cluster-with-custom-ssl-enabled' : 'setup-wls-cluster'))
+var ref_wlsDomainDeployment = _enableCustomSSL ? wlsDomainWithCustomSSLDeployment : wlsDomainDeployment
 var obj_uamiForDeploymentScript = {
   type: 'UserAssigned'
   userAssignedIdentities: {
     '${uamiDeployment.outputs.uamiIdForDeploymentScript}': {}
   }
 }
-
 
 /*
 * Beginning of the offer deployment
@@ -683,8 +683,8 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     _artifactsLocationSasToken: _artifactsLocationSasToken
     _pidNetworkingEnd: pids.outputs.networkingEnd == '' ? name_defaultPidDeployment : pids.outputs.networkingEnd
     _pidNetworkingStart: pids.outputs.networkingStart == '' ? name_defaultPidDeployment : pids.outputs.networkingStart
-    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
-    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     appGatewayName: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewayName : ''
     appGatewayAlias: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewayAlias : ''
     appGatewaySecuredURL: _enableAppGWIngress ? appgatewayDeployment.outputs.appGatewaySecuredURL : ''
@@ -728,8 +728,8 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     _artifactsLocationSasToken: _artifactsLocationSasToken
     _pidEnd: pids.outputs.dbEnd
     _pidStart: pids.outputs.dbStart
-    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
-    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     azCliVersion: const_azcliVersion
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
@@ -760,8 +760,8 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
-    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     azCliVersion: const_azcliVersion
     identity: obj_uamiForDeploymentScript
     location: location
@@ -783,8 +783,8 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
 module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-configurations.bicep' = {
   name: 'query-wls-domain-configurations'
   params: {
-    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName.value
-    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName.value
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     azCliVersion: const_azcliVersion
     identity: obj_uamiForDeploymentScript
     location: location
@@ -796,21 +796,21 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
   ]
 }
 
-output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName.value
-output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerEndpoint.value
+output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName
+output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerEndpoint
 output adminConsoleExternalUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalEndpoint : ''
 output adminConsoleExternalSecuredUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalSecuredEndpoint : ''
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
 output adminRemoteConsoleUrl string = const_showRemoteAdminConsoleExUrl ? networkingDeployment.outputs.adminRemoteConsoleEndpoint : ''
 output adminRemoteConsoleSecuredUrl string = const_showRemoteAdminConsoleSecuredExUrl ? networkingDeployment.outputs.adminRemoteConsoleSecuredEndpoint : ''
-output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalEndpoint.value
+output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalEndpoint
 output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.adminServerT3ChannelEndpoint : ''
-output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterEndpoint.value
+output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterEndpoint
 output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalEndpoint : ''
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredEndpoint : ''
-output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalEndpoint.value
+output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalEndpoint
 output clusterT3ExternalEndpoint string = enableClusterT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.clusterT3ChannelEndpoint : ''
-output shellCmdtoConnectAks string = format('az account set --subscription {0}; az aks get-credentials --resource-group {1} --name {2}', split(subscription().id, '/')[2], ref_wlsDomainDeployment.outputs.aksClusterRGName.value, ref_wlsDomainDeployment.outputs.aksClusterName.value)
+output shellCmdtoConnectAks string = format('az account set --subscription {0}; az aks get-credentials --resource-group {1} --name {2}', split(subscription().id, '/')[2], ref_wlsDomainDeployment.outputs.aksClusterRGName, ref_wlsDomainDeployment.outputs.aksClusterName)
 output shellCmdtoOutputWlsDomainYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsDomainYaml
 output shellCmdtoOutputWlsImageModelYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageModelYaml
 output shellCmdtoOutputWlsImageProperties string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageProperties

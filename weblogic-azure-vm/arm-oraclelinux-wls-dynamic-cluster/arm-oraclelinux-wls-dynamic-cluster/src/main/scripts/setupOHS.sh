@@ -90,6 +90,57 @@ function validateInput()
     fi    
 }
 
+# This function verifies whether certificate is valid and not expired
+function verifyCertValidity()
+{
+    KEYSTORE=$1
+    PASSWORD=$2
+    CURRENT_DATE=$3
+    MIN_CERT_VALIDITY=$4
+    KEY_STORE_TYPE=$5
+    VALIDITY=$(($CURRENT_DATE + ($MIN_CERT_VALIDITY*24*60*60)))
+    
+    echo "Verifying $KEYSTORE is valid at least $MIN_CERT_VALIDITY day from the OHS deployment time"
+    
+    if [ $VALIDITY -le $CURRENT_DATE ];
+    then
+        echo_stderr "Error : Invalid minimum validity days supplied"
+  		exit 1
+  	fi 
+
+	# Check whether KEYSTORE supplied can be opened for reading
+	# Redirecting as no need to display the contents
+	runuser -l oracle -c "keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE > /dev/null 2>&1"
+	if [ $? != 0 ];
+	then
+		echo_stderr "Error opening the keystore : $KEYSTORE"
+		exit 1
+	fi
+
+	aliasList=`runuser -l oracle -c "keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE | grep Alias" |awk '{print $3}'`
+	if [[ -z $aliasList ]]; 
+	then 
+		echo_stderr "Error : No alias found in supplied certificate $KEYSTORE"
+		exit 1
+	fi
+	
+	for alias in $aliasList 
+	do
+		VALIDITY_PERIOD=`runuser -l oracle -c "keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE -alias $alias | grep Valid"`
+		echo "$KEYSTORE is \"$VALIDITY_PERIOD\""
+		CERT_UNTIL_DATE=`echo $VALIDITY_PERIOD | awk -F'until:|\r' '{print $2}'`
+		CERT_UNTIL_SECONDS=`date -d "$CERT_UNTIL_DATE" +%s`
+		VALIDITY_REMIANS_SECONDS=`expr $CERT_UNTIL_SECONDS - $VALIDITY`
+		if [[ $VALIDITY_REMIANS_SECONDS -le 0 ]];
+		then
+			echo_stderr "$KEYSTORE is \"$VALIDITY_PERIOD\""
+			echo_stderr "Error : Supplied certificate $KEYSTORE is either expired or expiring soon within $MIN_CERT_VALIDITY day"
+			exit 1
+		fi		
+	done
+	echo "$KEYSTORE validation is successful"
+}
+
 # Setup Domain path
 function setupDomainPath()
 {
@@ -413,6 +464,8 @@ function addCertficateToOracleVault()
           echo "$ohsKeyStoreData" | base64 --decode > ${OHS_VAULT_PATH}/ohsKeystore.jks
           sudo chown -R $username:$groupname ${OHS_VAULT_PATH}/ohsKeystore.jks
           # Validate JKS file
+          verifyCertValidity ${OHS_VAULT_PATH}/ohsKeystore.jks $ohsKeyStorePassPhrase $CURRENT_DATE $MIN_CERT_VALIDITY "JKS" 
+          
           KEY_TYPE=`keytool -list -v -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -storepass ${ohsKeyStorePassPhrase} | grep 'Keystore type:'`
           if [[ $KEY_TYPE == *"jks"* ]]; then
               runuser -l oracle -c  "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet  jks_to_pkcs12  -wallet ${OHS_VAULT_PATH}  -pwd ${ORACLE_VAULT_PASSWORD} -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -jkspwd ${ohsKeyStorePassPhrase}"
@@ -431,6 +484,9 @@ function addCertficateToOracleVault()
      "PKCS12")  	
           echo "$ohsKeyStoreData" | base64 --decode > ${OHS_VAULT_PATH}/ohsCert.p12
           sudo chown -R $username:$groupname ${OHS_VAULT_PATH}/ohsCert.p12
+          # Validate PKCS12 file
+          verifyCertValidity ${OHS_VAULT_PATH}/ohsCert.p12 $ohsKeyStorePassPhrase $CURRENT_DATE $MIN_CERT_VALIDITY "PKCS12"
+          
           runuser -l oracle -c "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet import_pkcs12 -wallet ${OHS_VAULT_PATH} -pwd ${ORACLE_VAULT_PASSWORD} -pkcs12file ${OHS_VAULT_PATH}/ohsCert.p12  -pkcs12pwd ${ohsKeyStorePassPhrase}"
           if [[ $? == 0 ]]; then
               echo "Successfully added certificate to Oracle Wallet"
@@ -471,6 +527,12 @@ function verifyService()
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
+
+# Used for certificate expiry validation
+CURRENT_DATE=`date +%s`
+# Supplied certificate to have minimum days validity for the deployment
+# In this case set for 1 day
+MIN_CERT_VALIDITY="1"
 
 read OHS_DOMAIN_NAME OHS_COMPONENT_NAME OHS_NM_USER OHS_NM_PSWD OHS_HTTP_PORT OHS_HTTPS_PORT WLS_REST_URL WLS_USER WLS_PASSWORD OHS_KEY_STORE_DATA OHS_KEY_STORE_PASSPHRASE ORACLE_VAULT_PASSWORD OHS_KEY_TYPE
 

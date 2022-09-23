@@ -7,7 +7,7 @@
             "value": "https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/"
         },
         "aksAgentPoolNodeCount": {
-            "value": 2
+            "value": 3
         },
         "aksAgentPoolVMSize": {
             "value": "Standard_DS2_v2"

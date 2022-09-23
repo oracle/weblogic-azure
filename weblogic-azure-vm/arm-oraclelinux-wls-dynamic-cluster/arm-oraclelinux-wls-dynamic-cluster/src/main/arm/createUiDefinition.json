@@ -1279,12 +1279,13 @@
                                 }
                             },
                             {
-                                "name": "deplymentScriptInfo",
-                                "type": "Microsoft.Common.TextBlock",
+                                "name": "infoDNSIndentity",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]",
                                 "options": {
-                                    "text": "If you choose to use an existing Azure DNS Zone, you must select a user-assigned managed identity to enable the necessary configuration."
-                                },
-                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
+                                    "icon": "Info",
+                                    "text": "This option will add/update records in your Azure DNS Zone. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+                                }
                             },
                             {
                                 "name": "dnszoneName",
@@ -1351,32 +1352,6 @@
                                     ]
                                 },
                                 "visible": "[and(bool(steps('section_ohs').enableOHS), bool(steps('section_networkingConfiguration').enableCustomDNS))]"
-                            },
-                            {
-                                "name": "infoDNSIndentity",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone), less(length(steps('section_networkingConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user-assigned identity to access Azure resources.",
-                                    "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
-                                }
-                            },
-                            {
-                                "name": "dnsIdentity",
-                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                                "label": "Managed Identity Configuration",
-                                "toolTip": {
-                                    "userAssignedIdentity": "Add user-assigned identities to grant the resource access to Azure resources."
-                                },
-                                "defaultValue": {
-                                    "systemAssignedIdentity": "Off"
-                                },
-                                "options": {
-                                    "hideSystemAssignedIdentity": true,
-                                    "hideUserAssignedIdentity": false
-                                },
-                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]"
                             }
                         ]
                     }
@@ -1444,11 +1419,25 @@
                                         {
                                             "label": "Azure SQL",
                                             "value": "sqlserver"
+                                        },
+                                        {
+                                            "label": "MySQL",
+                                            "value": "mysql"
                                         }
                                     ],
                                     "required": true
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "dbDriverWarningInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[and(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), or(equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest'), equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest')))]",
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "Your current selection of WebLogic Server version, Java version, and MySQL database has a known problem. Please see the link for important information on how to solve it.",
+                                    "uri": "https://aka.ms/wls-vms-mysql-12213"
+                                }
                             },
                             {
                                 "name": "jdbcDataSourceName",
@@ -1471,8 +1460,16 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                    "validations": [
+                                        {
+                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                        },
+                                        {
+                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), and(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols=TLSv1.2')), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain server time zone and enable TLS v1.2, for an example, 'jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2'."
+                                        }
+                                    ]
                                 },
                                 "visible": true
                             },
@@ -1539,7 +1536,7 @@
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
-                                    "validationMessage": "The password must be between five and 128 characters long and have at least one number."
+                                    "validationMessage": "The password must be between 5 and 128 characters long and have at least one number."
                                 },
                                 "options": {
                                     "hideConfirmation": false
@@ -1995,7 +1992,6 @@
             "denyPublicTrafficForManagedServer": "[steps('section_networkingConfiguration').denyPublicTrafficForManagedServer]",
             "dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "dnszoneIdentity": "[steps('section_networkingConfiguration').customDNSSettings.dnsIdentity]",
             "dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
             "dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
             "dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",

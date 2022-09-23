@@ -9,8 +9,9 @@ param identity object = {}
 param location string
 param utcValue string = utcNow()
 
-var const_arguments = '${aksClusterRGName} ${aksClusterName}'
-var const_deploymentName='ds-query-storage-account'
+// To mitigate arm-ttk error: Unreferenced variable: $fxv#0
+var base64_queryStorageAccount = loadFileAsBase64('../../../arm/scripts/queryStorageAccount.sh')
+var const_deploymentName = 'ds-query-storage-account'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: const_deploymentName
@@ -19,12 +20,21 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    arguments: const_arguments
-    scriptContent: loadTextContent('../../../arm/scripts/queryStorageAccount.sh')
+    environmentVariables: [
+      {
+        name: 'AKS_CLUSTER_NAME'
+        value: aksClusterName
+      }
+      {
+        name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
+        value: aksClusterRGName
+      }
+    ]
+    scriptContent: base64ToString(base64_queryStorageAccount)
     cleanupPreference: 'OnSuccess'
     retentionInterval: 'P1D'
     forceUpdateTag: utcValue
   }
 }
 
-output storageAccount string = string(reference(const_deploymentName).outputs.storageAccount)
+output storageAccount string = string(deploymentScript.properties.outputs.storageAccount)

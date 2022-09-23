@@ -111,15 +111,6 @@
 				"description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
 			}
 		},
-		"dnszoneIdentity": {
-			"type": "Object",
-			"defaultValue": {
-				"type": "UserAssigned",
-				"userAssignedIdentities": {
-					"/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1": {}
-				}
-			}
-		},
 		"dnszoneName": {
 			"defaultValue": "contoso.xyz",
 			"type": "string",
@@ -1842,9 +1833,6 @@
 					"hasDNSZones": {
 						"value": "[parameters('hasDNSZones')]"
 					},
-					"identity": {
-						"value": "[parameters('dnszoneIdentity')]"
-					},
 					"location": {
 						"value": "[parameters('location')]"
 					},
@@ -1896,11 +1884,11 @@
 		},
 		"adminConsole": {
 			"type": "string",
-			"value": "[if(parameters('enableCustomDNS'), format('http://{0}.{1}:7001/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.adminConsole.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.adminConsole.value)]"
 		},
 		"adminSecuredConsole": {
 			"type": "string",
-			"value": "[if(parameters('enableCustomDNS'), format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.adminSecuredConsole.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.adminSecuredConsole.value)]"
 		},
 		"logIndex": {
 			"type": "string",

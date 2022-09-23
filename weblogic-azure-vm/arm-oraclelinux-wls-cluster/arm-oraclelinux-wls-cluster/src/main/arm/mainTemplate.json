@@ -66,15 +66,6 @@
                 "generateCert"
             ]
         },
-        "appGatewayIdentity": {
-            "type": "Object",
-            "defaultValue": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                    "/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1": {}
-                }
-            }
-        },
         "appGatewaySSLCertData": {
             "defaultValue": "",
             "type": "securestring",
@@ -155,15 +146,6 @@
             "type": "string",
             "metadata": {
                 "description": "DNS for ApplicationGateway"
-            }
-        },
-        "dnszoneIdentity": {
-            "type": "Object",
-            "defaultValue": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                    "/subscriptions/subscriptionId/resourceGroups/TestResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/TestUserIdentity1": {}
-                }
             }
         },
         "dnszoneName": {
@@ -1090,9 +1072,6 @@
                     "certificatePasswordValue": {
                         "value": "[parameters('appGatewaySSLCertPassword')]"
                     },
-                    "identity": {
-                        "value": "[parameters('appGatewayIdentity')]"
-                    },
                     "location": {
                         "value": "[parameters('location')]"
                     },
@@ -1271,9 +1250,6 @@
                     },
                     "hasDNSZones": {
                         "value": "[parameters('hasDNSZones')]"
-                    },
-                    "identity": {
-                        "value": "[parameters('dnszoneIdentity')]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -1861,11 +1837,11 @@
         },
         "adminConsole": {
             "type": "string",
-            "value": "[if(parameters('enableDNSConfiguration'), format('http://{0}.{1}:7001/console', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminConsole.value)]"
+            "value": "[if(parameters('enableDNSConfiguration'), uri(format('http://{0}.{1}:7001/console/', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminConsole.value)]"
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[if(parameters('enableDNSConfiguration'), format('https://{0}.{1}:7002/console', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminSecuredConsole.value)]"
+            "value": "[if(parameters('enableDNSConfiguration'), uri(format('https://{0}.{1}:7002/console/', parameters('dnszoneAdminConsoleLabel'), parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'), '${azure.apiVersion}').outputs.adminSecuredConsole.value)]"
         },
         "appGatewayURL": {
             "type": "string",
