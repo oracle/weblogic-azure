@@ -402,7 +402,7 @@
                 "description": "Returns the current (UTC) datetime value in the ISO 8601 format."
             }
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "defaultValue": "Standard_A3",
             "type": "string",
             "metadata": {
@@ -696,6 +696,8 @@
         "const_sslConfigurationAccessOptionKeyVaultStoredConfig": "keyVaultStoredConfig",
         "const_azureSubjectName": "[format('{0}.{1}.{2}', variables('name_domainLabelforApplicationGateway'), parameters('location'),'.cloudapp.azure.com')]",
         "const_guidValue": "[parameters('guidValue')]",
+        "const_vmSize": "[parameters('vmSize')]",
+        "const_vmSizeCoherence": "[parameters('vmSizeSelectForCoherence')]",
         "name_aadLinkedTemplateName": "aadNestedTemplate.json",
         "name_appGatewayConnector": "_keyvaultAppGatewayConnectorTemplate.json",
         "name_clusterLinkedTemplateName": "clusterTemplate.json",
@@ -798,8 +800,8 @@
                     "useSystemAssignedManagedIdentity": {
                         "value": "[parameters('useSystemAssignedManagedIdentity')]"
                     },
-                    "vmSizeSelect": {
-                        "value": "[parameters('vmSizeSelect')]"
+                    "vmSize": {
+                        "value": "[variables('const_vmSize')]"
                     },
                     "virtualNetworkNewOrExisting": {
                         "value": "[parameters('virtualNetworkNewOrExisting')]"
@@ -948,8 +950,8 @@
                     "useSystemAssignedManagedIdentity": {
                         "value": "[parameters('useSystemAssignedManagedIdentity')]"
                     },
-                    "vmSizeSelect": {
-                        "value": "[parameters('vmSizeSelect')]"
+                    "vmSize": {
+                        "value": "[variables('const_vmSize')]"
                     },
                     "virtualNetworkNewOrExisting": {
                         "value": "[parameters('virtualNetworkNewOrExisting')]"
@@ -1616,7 +1618,7 @@
                         "value": "[parameters('usePreviewImage')]"
                     },
                     "vmSizeSelectForCoherence": {
-                        "value": "[parameters('vmSizeSelectForCoherence')]"
+                        "value": "[variables('const_vmSizeCoherence')]"
                     },
                     "virtualNetworkResourceGroupName": {
                         "value": "[parameters('virtualNetworkResourceGroupName')]"
@@ -1721,7 +1723,7 @@
                         "value": "[parameters('usePreviewImage')]"
                     },
                     "vmSizeSelectForCoherence": {
-                        "value": "[parameters('vmSizeSelectForCoherence')]"
+                        "value": "[variables('const_vmSizeCoherence')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"

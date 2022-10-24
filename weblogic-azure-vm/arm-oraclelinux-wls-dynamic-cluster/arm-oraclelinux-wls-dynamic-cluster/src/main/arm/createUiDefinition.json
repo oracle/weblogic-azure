@@ -2019,7 +2019,7 @@
             "portsToExpose": "[steps('section_networkingConfiguration').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
             "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
-            "vmSizeSelect": "[basics('vmSizeSelect')]",
+            "vmSize": "[basics('vmSizeSelect')]",
             "vmSizeSelectForCoherence": "[steps('section_coherence').coherenceInfo.coherenceVMSizeSelect]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
             "wlsLDAPGroupBaseDN": "[steps('section_aad').aadInfo.wlsLDAPGroupBaseDN]",
