@@ -40,8 +40,6 @@ env:
   numberOfInstances: 2
   offerName: arm-oraclelinux-wls-cluster
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
-  refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
-  refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
@@ -77,6 +75,11 @@ jobs:
           echo "##[set-output name=ref;]${ref}"
           echo "enableELK=${enableELK}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
+      - uses: actions/checkout@v2.3.4
+      - name: Set dependency reference
+        uses: ./.github/actions/setvars
+        with:
+          varFilePath: ./.github/variables/vm-dependencies.env
       - name: Checkout azure-javaee-iaas
         uses: actions/checkout@v2
         with:

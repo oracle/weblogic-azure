@@ -17,7 +17,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' exis
   scope: resourceGroup(aksClusterRGName)
 }
 
-resource agicUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource agicUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: name_appGwContributorRoleAssignmentName
   properties: {
     description: 'Assign Resource Group Contributor role to User Assigned Managed Identity '

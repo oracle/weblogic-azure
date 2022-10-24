@@ -18,8 +18,6 @@ on:
   # Sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "vms-admin-package",  "client_payload": {"pidType": "microsoft", "ref": "refs/heads/main"}}'
 env:
-  refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
-  refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
   offerName: "arm-oraclelinux-wls-admin"
   repoName: "weblogic-azure"
   repoOwner: ${{ secrets.USER_NAME }}
@@ -51,6 +49,11 @@ jobs:
           echo "##[set-output name=ref;]${ref}"
           echo "pidType=${pidType}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
+      - uses: actions/checkout@v2.3.4
+      - name: Set dependency reference
+        uses: ./.github/actions/setvars
+        with:
+          varFilePath: ./.github/variables/vm-dependencies.env
       - name: Checkout azure-javaee-iaas
         uses: actions/checkout@v2
         with:

@@ -102,7 +102,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "${azure.apiVersion}",
             "type": "Microsoft.Resources/deployments",
             "name": "keyVaultwithSelfSignedAppGatewaySSLCert",
             "condition": "[not(parameters('useExistingAppGatewaySSLCertificate'))]",
@@ -132,7 +132,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "${azure.apiVersion}",
             "type": "Microsoft.Resources/deployments",
             "name": "keyVaultwithExistingAppGatewaySSLCert",
             "condition": "[parameters('useExistingAppGatewaySSLCertificate')]",

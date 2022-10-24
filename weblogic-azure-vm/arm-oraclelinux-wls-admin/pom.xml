@@ -15,7 +15,7 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.16</version>
+        <version>1.0.18</version>
         <relativePath></relativePath>
     </parent>
     <packaging>pom</packaging>

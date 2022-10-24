@@ -21,9 +21,6 @@ on:
     types: [aks-integration-test-with-dependency-creation,integration-test-all]
 
 env:
-    refArmttk: bad2965565e2e69318039bc15c2496844d55a59d
-    refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
-    azCliVersion: 2.30.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus
     resourceGroupForWlsAks: wlsd-aks-${{ github.run_id }}-${{ github.run_number }}
@@ -46,8 +43,19 @@ jobs:
           isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
           gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
           testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
+          azCliVersion: ${{steps.get-external-dependencies-version.outputs.azCliVersion}}
         runs-on: ubuntu-latest
         steps:
+            - name: Get versions of external dependencies
+              id: get-external-dependencies-version
+              run: |
+                curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
+                source external-deps-versions.properties
+                echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
+                echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
+                echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
+                echo "refJavaee=${AZURE_JAVAEE_IAAS_REFERENCE}" >> $GITHUB_ENV
+                echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_OUTPUT
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
@@ -74,7 +82,7 @@ jobs:
                 java-version: 1.8
             - name: Set up bicep
               run: |
-                curl -Lo bicep https://github.com/Azure/bicep/releases/download/v0.8.9/bicep-linux-x64
+                curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version
@@ -116,6 +124,9 @@ jobs:
         needs: preflight
         runs-on: ubuntu-latest
         steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -154,6 +165,9 @@ jobs:
         needs: preflight
         runs-on: ubuntu-latest
         steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
             - name: Checkout Azure-Samples/cargotracker-azure
               uses: actions/checkout@v2
               with:
@@ -205,6 +219,9 @@ jobs:
         needs: [deploy-storage-account, deploy-db, preflight]
         runs-on: ubuntu-latest
         steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
             - name: Checkout weblogic-azure
               uses: actions/checkout@v2
               with:
@@ -393,6 +410,9 @@ jobs:
       if: ${{ needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
+      - name: Get AZ CLI Version
+        run: |
+          echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
       - uses: azure/login@v1
         id: azure-login
         with:

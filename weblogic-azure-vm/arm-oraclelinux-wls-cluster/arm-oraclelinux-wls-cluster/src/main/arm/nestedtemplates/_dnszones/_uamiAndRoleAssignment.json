@@ -23,7 +23,7 @@
       },
       {
         "type": "Microsoft.Resources/deployments",
-        "apiVersion": "${azure.apiVersionForDeploymentScript}",
+        "apiVersion": "${azure.apiVersion}",
         "name": "[variables('name_deploymentScriptContributorRoleAssignmentName')]",
         "subscriptionId": "[subscription().subscriptionId]",
         "location": "[parameters('location')]",

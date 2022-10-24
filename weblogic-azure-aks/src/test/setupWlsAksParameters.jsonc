@@ -9,7 +9,7 @@
         "aksAgentPoolNodeCount": {
             "value": 3
         },
-        "aksAgentPoolVMSize": {
+        "vmSize": {
             "value": "Standard_DS2_v2"
         },
         "appGatewayCertificateOption": {

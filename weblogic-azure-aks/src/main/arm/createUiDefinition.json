@@ -2098,7 +2098,6 @@
         "outputs": {
             "acrName": "[last(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'))]",
             "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
-            "aksAgentPoolVMSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
@@ -2175,6 +2174,7 @@
             "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
             "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
             "vnetRGNameForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.resourceGroup]",
+            "vmSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
