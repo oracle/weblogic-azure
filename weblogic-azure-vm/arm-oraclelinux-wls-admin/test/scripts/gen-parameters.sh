@@ -28,7 +28,7 @@ cat <<EOF > ${parametersPath}
         "enableDB": {
             "value": false
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },        
         "wlsPassword": {

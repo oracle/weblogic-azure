@@ -52,7 +52,7 @@ cat <<EOF > ${parametersPath}
         "jdbcDataSourceName": {
             "value": "jdbc/postgresql"
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },        
         "wlsLDAPGroupBaseDN": {

@@ -73,7 +73,7 @@ cat <<EOF > ${parametersPath}
         "numberOfInstances": {
             "value": 4
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },
         "wlsLDAPGroupBaseDN": {
