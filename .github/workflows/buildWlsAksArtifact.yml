@@ -8,9 +8,6 @@ on:
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-package"}'
 
 env:
-    refArmttk: bad2965565e2e69318039bc15c2496844d55a59d
-    refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
-    azCliVersion: 2.30.0
     location: eastus
     aksRepoUserName: oracle
     aksRepoBranchName: main
@@ -19,13 +16,21 @@ jobs:
     preflight:
         runs-on: ubuntu-latest
         steps:
+            - name: Get versions of external dependencies
+              run: |
+                curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
+                source external-deps-versions.properties
+                echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
+                echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
+                echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
+                echo "refJavaee=${AZURE_JAVAEE_IAAS_REFERENCE}" >> $GITHUB_ENV
             - name: Set up JDK 1.8
               uses: actions/setup-java@v1
               with:
                 java-version: 1.8
             - name: Set up bicep
               run: |
-                curl -Lo bicep https://github.com/Azure/bicep/releases/download/v0.8.9/bicep-linux-x64
+                curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version

@@ -28,7 +28,7 @@ cat <<EOF >${parametersPath}
         "enableCoherence": {
             "value": true
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },
         "wlsPassword": {

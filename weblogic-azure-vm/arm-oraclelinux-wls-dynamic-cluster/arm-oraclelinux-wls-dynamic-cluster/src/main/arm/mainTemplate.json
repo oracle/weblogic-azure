@@ -533,7 +533,7 @@
 				"description": "SSL Certificate Data type"
 			}
 		},
-		"vmSizeSelect": {
+		"vmSize": {
 			"defaultValue": "Standard_A2_v2",
 			"type": "string",
 			"metadata": {
@@ -896,8 +896,8 @@
 					"useSystemAssignedManagedIdentity": {
 						"value": "[parameters('useSystemAssignedManagedIdentity')]"
 					},
-					"vmSizeSelect": {
-						"value": "[parameters('vmSizeSelect')]"
+					"vmSize": {
+						"value": "[parameters('vmSize')]"
 					},
 					"virtualNetworkNewOrExisting": {
 						"value": "[parameters('virtualNetworkNewOrExisting')]"
@@ -995,8 +995,8 @@
 					"useSystemAssignedManagedIdentity": {
 						"value": "[parameters('useSystemAssignedManagedIdentity')]"
 					},
-					"vmSizeSelect": {
-						"value": "[parameters('vmSizeSelect')]"
+					"vmSize": {
+						"value": "[parameters('vmSize')]"
 					},
 					"virtualNetworkNewOrExisting": {
 						"value": "[parameters('virtualNetworkNewOrExisting')]"
@@ -1785,8 +1785,8 @@
 					"virtualNetworkName": {
 						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.virtualNetworkName.value]"
 					},
-					"vmSizeSelect": {
-						"value": "[parameters('vmSizeSelect')]"
+					"vmSize": {
+						"value": "[parameters('vmSize')]"
 					},
 					"adminRestMgmtURL": {
 						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersion}').outputs.adminRestMgmtURL.value]"

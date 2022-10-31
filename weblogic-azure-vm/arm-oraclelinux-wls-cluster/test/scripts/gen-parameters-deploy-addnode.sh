@@ -40,7 +40,7 @@ cat <<EOF > ${parametersPath}
       "storageAccountName": {
         "value": "${storageAccountName}"
       },
-      "vmSizeSelect": {
+      "vmSize": {
         "value": "Standard_B2ms"
       },
       "wlsDomainName": {

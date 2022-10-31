@@ -261,7 +261,7 @@
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
             "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
-            "vmSizeSelect": "[basics('vmSizeSelect')]",
+            "vmSize": "[basics('vmSizeSelect')]",
             "Location": "[location()]"
         }
     }

@@ -34,7 +34,7 @@ cat <<EOF >${parametersPath}
         "storageAccountName": {
             "value": "GEN-UNIQUE"
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },
         "wlsPassword": {

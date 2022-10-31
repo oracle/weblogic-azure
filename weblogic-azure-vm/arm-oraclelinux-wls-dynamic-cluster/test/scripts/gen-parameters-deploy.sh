@@ -41,7 +41,7 @@ cat <<EOF >${parametersPath}
     "adminVMName": {
       "value": "$adminvmname"
     },
-    "vmSizeSelect": {
+    "vmSize": {
       "value": "Standard_B2ms"
     },
     "location": {

@@ -32,7 +32,7 @@ cat <<EOF > ${parametersPath}
       "storageAccountName": {
         "value": "${storageAccountName}"
       },
-      "vmSizeSelectForCoherence": {
+      "vmSize": {
             "value": "Standard_B2ms"
       },
       "wlsDomainName": {

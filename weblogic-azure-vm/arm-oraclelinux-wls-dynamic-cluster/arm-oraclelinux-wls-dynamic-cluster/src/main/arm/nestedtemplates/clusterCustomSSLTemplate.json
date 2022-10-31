@@ -129,7 +129,7 @@
                 "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
             }
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "type": "string",
             "defaultValue": "Standard_A3",
             "metadata": {
@@ -304,7 +304,7 @@
         "const_storageAccountType": "Standard_LRS",
         "const_subnetPrefix": "[parameters('subnetPrefix')]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
-        "const_vmSize": "[parameters('vmSizeSelect')]",
+        "const_vmSize": "[parameters('vmSize')]",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
         "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",

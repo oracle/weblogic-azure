@@ -40,7 +40,7 @@ cat <<EOF >${parametersPath}
         "enableELK": {
             "value": true
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },
         "wlsPassword": {

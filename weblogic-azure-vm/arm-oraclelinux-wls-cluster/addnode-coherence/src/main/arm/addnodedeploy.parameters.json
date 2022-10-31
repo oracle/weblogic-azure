@@ -29,7 +29,7 @@
     "usePreviewImage": {
       "value": "GEN-UNIQUE"
     },
-    "vmSizeSelectForCoherence": {
+    "vmSize": {
       "value": "GEN-UNIQUE"
     },
     "wlsDomainName": {

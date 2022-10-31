@@ -20,8 +20,6 @@ on:
 env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
-  refArmttk: 500a3a612ef51d4421c114183f97b425c9bfaab8
-  refJavaee: f25ab89a2a8848da39b84e5d6c927f4c4cb47200
   repoName: "weblogic-azure"
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
@@ -54,7 +52,11 @@ jobs:
           echo "##[set-output name=ref;]${ref}"
           echo "tagname=${tagname}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
-
+      - uses: actions/checkout@v2.3.4
+      - name: Set dependency reference
+        uses: ./.github/actions/setvars
+        with:
+          varFilePath: ./.github/variables/vm-dependencies.env
       - name: Checkout ${{ env.repoName }}
         uses: actions/checkout@v2
         with:

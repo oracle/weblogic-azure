@@ -43,7 +43,7 @@ cat <<EOF > ${parametersPath}
         "dynamicClusterSize": {
             "value": 2
         },
-        "vmSizeSelect": {
+        "vmSize": {
             "value": "Standard_B2ms"
         },
         "wlsLDAPGroupBaseDN": {

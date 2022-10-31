@@ -416,7 +416,7 @@
             "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
          }
       },
-      "vmSizeSelect": {
+      "vmSize": {
          "type": "string",
          "defaultValue": "Standard_A3",
          "metadata": {
@@ -629,8 +629,8 @@
                "useSystemAssignedManagedIdentity": {
                   "value": "[parameters('useSystemAssignedManagedIdentity')]"
                },
-               "vmSizeSelect": {
-                  "value": "[parameters('vmSizeSelect')]"
+               "vmSize": {
+                  "value": "[parameters('vmSize')]"
                },
                "virtualNetworkNewOrExisting": {
                   "value": "[parameters('virtualNetworkNewOrExisting')]"
@@ -818,8 +818,8 @@
                "useSystemAssignedManagedIdentity": {
                   "value": "[parameters('useSystemAssignedManagedIdentity')]"
                },
-               "vmSizeSelect": {
-                  "value": "[parameters('vmSizeSelect')]"
+               "vmSize": {
+                  "value": "[parameters('vmSize')]"
                },
                "virtualNetworkNewOrExisting": {
                   "value": "[parameters('virtualNetworkNewOrExisting')]"

@@ -14,7 +14,7 @@
     "skuUrnVersion": {
       "value":"#skuUrnVersion#"
     },
-    "vmSizeSelect": {
+    "vmSize": {
       "value": "Standard_D2as_v4"
     },
     "location": {

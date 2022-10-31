@@ -46,7 +46,7 @@
     "usePreviewImage": {
       "value": "GEN-UNIQUE"
     },
-    "vmSizeSelect": {
+    "vmSize": {
       "value": "GEN-UNIQUE"
     },
     "wlsDomainName": {
