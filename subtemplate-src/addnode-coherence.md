@@ -114,7 +114,7 @@ You must construct a parameters JSON file containing the parameters to `addnode-
   <td colspan="2">The name of an existing storage account.</td>
  </tr>
  <tr>
-  <td><code>vmSizeSelectForCoherence</code></td>
+  <td><code>vmSize</code></td>
   <td colspan="2">Select appropriate VM Size for Coherence cache servers.</td>
  </tr>
  <tr>
@@ -194,7 +194,7 @@ $ az resource list -g 'yourResourceGroup' --resource-type Microsoft.Storage/stor
 
 #### Example Parameters JSON
 
-Here is a fully filled out parameters file. We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`,  `usePreviewImage` and `vmSizeSelectForCoherence` as default value. 
+Here is a fully filled out parameters file. We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`,  `usePreviewImage` and `vmSize` as default value. 
 
 {{ site.data.var.passwordInFileNote }}
 
@@ -453,7 +453,7 @@ This is an example output of successful deployment.  Look for `"provisioningStat
         "type": "Bool",
         "value": false
       },
-      "vmSizeSelectForCoherence": {
+      "vmSize": {
         "type": "String",
         "value": "Standard_A1"
       },

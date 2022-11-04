@@ -287,7 +287,7 @@ $ az resource list -g 'yourResourceGroup' --resource-type Microsoft.Storage/stor
 
 #### Example Parameters JSON
 
-Here is a fully filled out parameters file, with Azure Active Directory enabled. We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`, `managedServerPrefix`, `skuUrnVersion`, `usePreviewImage` and `vmSizeSelect` as default value. 
+Here is a fully filled out parameters file, with Azure Active Directory enabled. We will leave values of `adminUsername`, `authenticationType`, `dnsLabelPrefix`, `managedServerPrefix`, `skuUrnVersion`, `usePreviewImage` and `vmSize` as default value. 
 
 {{ site.data.var.passwordInFileNote }}
 
@@ -571,7 +571,7 @@ This is an example output of successful deployment.  Look for `"provisioningStat
         "type": "Bool",
         "value": false
       },
-      "vmSizeSelect": {
+      "vmSize": {
         "type": "String",
         "value": "Standard_A3"
       },
