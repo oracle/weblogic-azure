@@ -1918,6 +1918,12 @@
                                 "visible": "[and(bool(steps('section_database').enableDB), or(bool(steps('section_aks').imageInfo.isSSOSupportEntitled),equals(steps('section_aks').imageInfo.oracleImageSelector, '14.1.1.0-11')))]"
                             },
                             {
+                                "name": "enablePasswordlessConnection",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use passwordless JDBC connection.",
+                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'))]"
+                            },
+                            {
                                 "name": "jdbcDataSourceName",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "JNDI Name",
@@ -1953,7 +1959,7 @@
                                         }
                                     ]
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb'))))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), not(bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection)), not(or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb'))))]"
                             },
                             {
                                 "name": "dsConnectionURL2",
@@ -1967,6 +1973,35 @@
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
                                 },
                                 "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
+                            },
+                            {
+                                "name": "dsConnectionURLForPasswordless",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DataSource Connection String",
+                                "toolTip": "The JDBC connection string for the database",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                        },
+                                        {
+                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain server time zone, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC\"."
+                                        },
+                                        {
+                                            "isValid": "[if(and(not(bool(steps('section_aks').imageInfo.isSSOSupportEntitled)), equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'), equals(steps('section_aks').imageInfo.oracleImageSelector, '14.1.1.0-11')), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols'), bool('true'))]",
+                                            "message": "The connection string of MySQL must contain enabled TLS protocols, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2\"."
+                                        },
+                                        {
+                                            "isValid": "[contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'azure.clientId')]",
+                                            "message": "The connection string must contain Azure client Id, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/checklist?useSSL=true&requireSSL=true&defaultAuthenticationPlugin=com.azure.jdbc.msi.extension.mysql.AzureMySqlMSIAuthenticationPlugin&authenticationPlugins=com.azure.jdbc.msi.extension.mysql.AzureMySqlMSIAuthenticationPlugin&azure.clientId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"."
+                                        }
+                                    ]
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection))]"
                             },
                             {
                                 "name": "dbGlobalTranPro",
@@ -2036,7 +2071,7 @@
                                 "options": {
                                     "hideConfirmation": false
                                 },
-                                "visible": true
+                                "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection))]"
                             },
                             {
                                 "name": "dbDriverLibraries",
@@ -2125,7 +2160,7 @@
             "dnszoneClusterT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel]",
             "dnszoneName": "[steps('section_dnsConfiguration').dnszoneName]",
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
-            "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
+            "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, steps('section_database').databaseConnectionInfo.dsConnectionURLForPasswordless, 'null')]",
             "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
             "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
             "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
