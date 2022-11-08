@@ -1920,7 +1920,7 @@
                             {
                                 "name": "enablePasswordlessConnection",
                                 "type": "Microsoft.Common.CheckBox",
-                                "label": "Use passwordless JDBC connection.",
+                                "label": "Use passwordless JDBC connection",
                                 "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'))]"
                             },
                             {
@@ -1959,7 +1959,7 @@
                                         }
                                     ]
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection)), not(or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb'))))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), not(or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb'))))]"
                             },
                             {
                                 "name": "dsConnectionURL2",
@@ -1973,35 +1973,6 @@
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
                                 },
                                 "visible": "[and(bool(steps('section_database').enableDB), or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'otherdb'),equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'otherdb')))]"
-                            },
-                            {
-                                "name": "dsConnectionURLForPasswordless",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DataSource Connection String",
-                                "toolTip": "The JDBC connection string for the database",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                            "message": "A valid JDBC URL for the chosen database type must be provided"
-                                        },
-                                        {
-                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), bool('true'))]",
-                                            "message": "The connection string of MySQL must contain server time zone, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC\"."
-                                        },
-                                        {
-                                            "isValid": "[if(and(not(bool(steps('section_aks').imageInfo.isSSOSupportEntitled)), equals(steps('section_database').databaseConnectionInfo.databaseTypewithMySQL, 'mysql'), equals(steps('section_aks').imageInfo.oracleImageSelector, '14.1.1.0-11')), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols'), bool('true'))]",
-                                            "message": "The connection string of MySQL must contain enabled TLS protocols, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2\"."
-                                        },
-                                        {
-                                            "isValid": "[contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'azure.clientId')]",
-                                            "message": "The connection string must contain Azure client Id, for example, \"jdbc:mysql://contoso.mysql.database.azure.com:3306/checklist?useSSL=true&requireSSL=true&defaultAuthenticationPlugin=com.azure.jdbc.msi.extension.mysql.AzureMySqlMSIAuthenticationPlugin&authenticationPlugins=com.azure.jdbc.msi.extension.mysql.AzureMySqlMSIAuthenticationPlugin&azure.clientId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"."
-                                        }
-                                    ]
-                                },
-                                "visible": "[and(bool(steps('section_database').enableDB), bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection))]"
                             },
                             {
                                 "name": "dbGlobalTranPro",
@@ -2050,8 +2021,16 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^(?=.{1,128}$)[a-zA-Z](?!.*--)(?!.*@@)(?!.*-@)(?!.*@-)[a-zA-Z0-9-@]*[a-zA-Z0-9]$",
-                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                    "validations": [
+                                        {
+                                            "regex": "^(?=.{1,128}$)[a-zA-Z](?!.*--)(?!.*@@)(?!.*-@)(?!.*@-)[a-zA-Z0-9-@]*[a-zA-Z0-9]$",
+                                            "message": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                        },
+                                        {
+                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+                                            "message": "You must select at least one managed identity that has access to your database."
+                                        }
+                                    ]
                                 },
                                 "visible": true
                             },
@@ -2072,6 +2051,22 @@
                                     "hideConfirmation": false
                                 },
                                 "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection))]"
+                            },
+                            {
+                                "name": "dbIdentity",
+                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                                "label": "Connect database with Managed Identity",
+                                "toolTip": {
+                                    "userAssignedIdentity": "Select a user assigned identity that has access to your database."
+                                },
+                                "defaultValue": {
+                                    "systemAssignedIdentity": "Off"
+                                },
+                                "options": {
+                                    "hideSystemAssignedIdentity": true,
+                                    "hideUserAssignedIdentity": false
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), steps('section_database').databaseConnectionInfo.enablePasswordlessConnection)]"
                             },
                             {
                                 "name": "dbDriverLibraries",
@@ -2150,6 +2145,7 @@
             "dbDriverLibrariesUrls": "[steps('section_database').databaseConnectionInfo.dbDriverLibraries]",
             "dbDriverName": "[steps('section_database').databaseConnectionInfo.dbDriverName]",
             "dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
+            "dbIdentity": "[steps('section_database').databaseConnectionInfo.dbIdentity]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbTestTableName": "[steps('section_database').databaseConnectionInfo.dbTestTableName]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
@@ -2160,7 +2156,7 @@
             "dnszoneClusterT3ChannelLabel": "[steps('section_dnsConfiguration').dnszoneClusterT3ChannelLabel]",
             "dnszoneName": "[steps('section_dnsConfiguration').dnszoneName]",
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
-            "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, steps('section_database').databaseConnectionInfo.dsConnectionURLForPasswordless, 'null')]",
+            "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
             "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
             "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
             "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
