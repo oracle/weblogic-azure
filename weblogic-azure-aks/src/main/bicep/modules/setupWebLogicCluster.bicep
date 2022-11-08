@@ -52,6 +52,7 @@ param azCliVersion string = ''
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
+param databaseType string = 'oracle'
 param dbDriverLibrariesUrls array = []
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
@@ -59,6 +60,7 @@ param enableAzureMonitoring bool = false
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
+param enablePasswordlessConnection bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object = {}
@@ -177,10 +179,12 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: azCliVersion
+    databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
+    enablePasswordlessConnection: enablePasswordlessConnection
     enablePV: enablePV
     identity: identity
     isSSOSupportEntitled: isSSOSupportEntitled

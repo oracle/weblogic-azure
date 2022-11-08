@@ -118,6 +118,8 @@ function initialize() {
     mkdir wlsdeploy/config
     mkdir wlsdeploy/applications
     mkdir wlsdeploy/domainLibraries
+    mkdir wlsdeploy/classpathLibraries
+    mkdir wlsdeploy/sharedLibraries
 }
 
 function download_wdt_wit() {
@@ -141,6 +143,50 @@ function download_wdt_wit() {
 
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL ${witDownloadURL} -o imagetool.zip
     validate_status "Check status of imagetool.zip."
+}
+
+function download_mysql_passwordless_jdbc_libs() {
+    local mySQLPom=mysql-pom.xml
+    cat <<EOF >mysql-pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mvn dependency:copy-dependencies -f mysql-pom.xml -->>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.oracle.weblogic.azure</groupId>
+    <artifactId>passwordless-mysql</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-identity-providers-jdbc-mysql</artifactId>
+            <version>${constAzureIdentityProvidersJdbcMysqlVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${constMysqlConnectorJavaVersion}</version>
+        </dependency>
+    </dependencies>
+</project>
+EOF
+
+    echo "download dependencies"
+    mvn dependency:copy-dependencies -f mysql-pom.xml
+    if [ $? -eq 0 ]; then
+        # The jar will be added to PRE_CLASSPATH
+        mv target/dependency/mysql-connector-java-*.jar wlsdeploy/sharedLibraries/
+        # Thoes jars will be extracted
+        mv target/dependency/*.jar wlsdeploy/classpathLibraries/
+    else
+        echo "Failed to download dependencies for azure-identity-providers-jdbc-mysql"
+        exit 1
+    fi
 }
 
 # Install docker, zip, unzip and java
@@ -198,6 +244,16 @@ function install_utilities() {
 
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
+
+    if [[ "${enablePasswordlessConnection}" == "true" ]]; then
+        sudo apt -y -q install maven
+        mvn --help
+        validate_status "Check status of mvn."
+
+        if [[ "${dbType}" == "mysql" ]]; then
+            download_mysql_passwordless_jdbc_libs
+        fi
+    fi
 }
 
 function install_db_drivers() {
@@ -346,6 +402,8 @@ export enableAdminT3Tunneling=$9
 export enableClusterT3Tunneling=${10}
 export useOracleImage=${11}
 export dbDriversUrls=${12}
+export enablePasswordlessConnection=${13}
+export dbType=${14}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export dbDriverPaths=""

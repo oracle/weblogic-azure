@@ -11,10 +11,12 @@ param acrName string = ''
 param appPackageUrls array = []
 param appReplicas int = 2
 param azCliVersion string = ''
+param databaseType string = 'oracle'
 param dbDriverLibrariesUrls array = []
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
+param enablePasswordlessConnection bool = false
 param enablePV bool = false
 param identity object = {}
 param isSSOSupportEntitled bool
@@ -99,6 +101,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: resourceGroup().name
       }
       {
+        name: 'DB_TYPE'
+        value: databaseType
+      }
+      {
         name: 'ENABLE_ADMIN_CUSTOM_T3'
         value: string(enableAdminT3Tunneling)
       }
@@ -109,6 +115,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       {
         name: 'ENABLE_CUSTOM_SSL'
         value: string(enableCustomSSL)
+      }
+      {
+        name: 'ENABLE_PASSWORDLESS_DB_CONNECTION'
+        value: string(enablePasswordlessConnection)
       }
       {
         name: 'ENABLE_PV'

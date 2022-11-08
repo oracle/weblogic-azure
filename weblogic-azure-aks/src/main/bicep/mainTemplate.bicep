@@ -100,6 +100,8 @@ param dbDriverLibrariesUrls array = []
 param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@description('Managed identity that has access to database')
+param dbIdentity object
 @secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
@@ -136,6 +138,8 @@ param enableDNSConfiguration bool = false
 param enableAdminT3Tunneling bool = false
 @description('Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling')
 param enableClusterT3Tunneling bool = false
+@description('Enable passwordless datasource connection.')
+param enablePasswordlessConnection bool = false
 @description('Is the specified SSO account associated with an active Oracle support contract?')
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
@@ -551,11 +555,13 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
+    databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
+    enablePasswordlessConnection: enablePasswordlessConnection
     enablePV: const_enablePV
     identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
@@ -617,11 +623,13 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
+    databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
+    enablePasswordlessConnection: enablePasswordlessConnection
     enablePV: const_enablePV
     identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
@@ -721,7 +729,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
   ]
 }
 
-module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
+module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB && !enablePasswordlessConnection) {
   name: 'datasource-deployment'
   params: {
     _artifactsLocation: _artifactsLocation
@@ -745,6 +753,15 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    networkingDeployment
+  ]
+}
+
+module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.bicep' = if (enableDB && enablePasswordlessConnection) {
+  name: 'passwordless-datasource-deployment'
+  params: {
   }
   dependsOn: [
     networkingDeployment
