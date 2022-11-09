@@ -16,6 +16,7 @@ export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'
 export constClusterName='cluster-1'
 export constClusterT3AddressEnvName="T3_TUNNELING_CLUSTER_ADDRESS"
+export constDBTypeMySQL="mysql"
 export constDefaultJavaOptions="-Dlog4j2.formatMsgNoLookups=true -Dweblogic.StdoutDebugEnabled=false" # the java options will be applied to the cluster
 export constDefaultJVMArgs="-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m -XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=50.0 " # the JVM options will be applied to the cluster
 export constDefaultAKSVersion="default"
@@ -26,6 +27,7 @@ export constPostgreDriverName="postgresql-42.3.6.jar"
 export constMSSQLDriverName="mssql-jdbc-10.2.1.jre8.jar"
 export constAzureIdentityProvidersJdbcMysqlVersion="1.0.0-beta.1"
 export constMysqlConnectorJavaVersion="8.0.30"
+export constDbPodIdentityName="db-pod-identity"
 
 export curlMaxTime=120 # seconds
 export ocrLoginServer="container-registry.oracle.com"

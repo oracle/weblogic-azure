@@ -82,8 +82,15 @@ spec:
       value: "${WLS_MANAGED_SERVER_PREFIX}"
 EOF
 
+if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" && "${DB_TYPE}" == "${constDBTypeMySQL}" ]]; then
+    cat <<EOF >>$filePath
+    - name: PRE_CLASSPATH
+      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/mysql-connector-java-${constMysqlConnectorJavaVersion}.jar"
+EOF
+fi
+
 if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
-        cat <<EOF >>$filePath
+    cat <<EOF >>$filePath
     - name: SSL_IDENTITY_PRIVATE_KEY_ALIAS
       valueFrom:
         secretKeyRef:
@@ -125,7 +132,7 @@ if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
           key: ssltruststorepassword
           name: ${WLS_DOMAIN_UID}-weblogic-ssl-credentials
 EOF
-    fi
+fi
 
 if [[ "${ENABLE_ADMIN_CUSTOM_T3,,}" == "true" ]]; then
   cat <<EOF >>$filePath
@@ -163,6 +170,13 @@ if [[ "${ENABLE_PV,,}" == "true" ]]; then
     volumeMounts:
     - mountPath: /shared
       name: ${WLS_DOMAIN_UID}-pv-azurefile
+EOF
+fi
+
+if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
+  cat <<EOF >>$filePath
+    labels:
+      aadpodidbinding: ${constDbPodIdentityName}
 EOF
 fi
 

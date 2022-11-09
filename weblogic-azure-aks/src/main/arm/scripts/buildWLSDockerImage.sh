@@ -149,7 +149,7 @@ function download_mysql_passwordless_jdbc_libs() {
     local mySQLPom=mysql-pom.xml
     cat <<EOF >mysql-pom.xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- mvn dependency:copy-dependencies -f mysql-pom.xml -->>
+<!-- mvn dependency:copy-dependencies -f mysql-pom.xml -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -177,8 +177,9 @@ function download_mysql_passwordless_jdbc_libs() {
 EOF
 
     echo "download dependencies"
-    mvn dependency:copy-dependencies -f mysql-pom.xml
+    mvn dependency:copy-dependencies -f ${mySQLPom}
     if [ $? -eq 0 ]; then
+        ls -l target/dependency/
         # The jar will be added to PRE_CLASSPATH
         mv target/dependency/mysql-connector-java-*.jar wlsdeploy/sharedLibraries/
         # Thoes jars will be extracted
@@ -245,12 +246,12 @@ function install_utilities() {
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
 
-    if [[ "${enablePasswordlessConnection}" == "true" ]]; then
+    if [[ "${enablePasswordlessConnection,,}" == "true" ]]; then
         sudo apt -y -q install maven
         mvn --help
         validate_status "Check status of mvn."
 
-        if [[ "${dbType}" == "mysql" ]]; then
+        if [[ "${dbType}" == "${constDBTypeMySQL}" ]]; then
             download_mysql_passwordless_jdbc_libs
         fi
     fi

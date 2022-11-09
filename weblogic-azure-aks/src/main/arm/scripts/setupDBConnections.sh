@@ -44,8 +44,8 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ -z "$DB_PASSWORD" || -z "${DB_USER}" ]]; then
-        echo_stderr "DB_PASSWORD and DB_USER are required. "
+    if [ -z "${DB_USER}" ]; then
+        echo_stderr "DB_USER are required. "
         usage 1
     fi
 

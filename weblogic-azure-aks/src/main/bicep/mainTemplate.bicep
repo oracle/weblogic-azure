@@ -762,6 +762,25 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB &&
 module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.bicep' = if (enableDB && enablePasswordlessConnection) {
   name: 'passwordless-datasource-deployment'
   params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    _pidEnd: pids.outputs.pswlessDbEnd
+    _pidStart: pids.outputs.pswlessDbStart
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
+    azCliVersion: const_azcliVersion
+    databaseType: databaseType
+    dbConfigurationType: dbConfigurationType
+    dbGlobalTranPro: dbGlobalTranPro
+    dbUser: dbUser
+    dbIdentity: dbIdentity
+    dsConnectionURL: dsConnectionURL
+    identity: obj_uamiForDeploymentScript
+    jdbcDataSourceName: jdbcDataSourceName
+    location: location
+    wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
   }
   dependsOn: [
     networkingDeployment
@@ -788,6 +807,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   }
   dependsOn: [
     datasourceDeployment
+    passwordlessDatasourceDeployment
   ]
 }
 

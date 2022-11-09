@@ -2166,7 +2166,7 @@
             "enableDNSConfiguration": "[bool(steps('section_dnsConfiguration').enableDNSConfiguration)]",
             "enableAdminT3Tunneling": "[basics('basicsOptional').enableAdminT3Tunneling]",
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
-            "enablePasswordlessConnection": "[steps('section_database').databaseConnectionInfo.enablePasswordlessConnection]",
+            "enablePasswordlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
             "lbSvcValues": "[if(not(empty(first(if(empty(steps('section_appGateway').lbSVCInfo.lbSVC),parse('[{\"colName\":\"\"}]'), steps('section_appGateway').lbSVCInfo.lbSVC)).colName)),steps('section_appGateway').lbSVCInfo.lbSVC, parse('[]'))]",
