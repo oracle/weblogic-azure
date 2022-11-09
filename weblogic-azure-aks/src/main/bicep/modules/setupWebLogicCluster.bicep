@@ -35,7 +35,7 @@ param aksAgentPoolName string = 'agentpool'
 @description('The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.')
 param aksAgentPoolNodeCount int = 3
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
-param vmSize string = 'Standard_DS2_v2'
+param aksAgentPoolVMSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
 param aksClusterNamePrefix string = 'wlsonaks'
 @description('Resource group name of an existing AKS cluster.')
@@ -140,7 +140,7 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
     aciWorkspaceSku: aciWorkspaceSku
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
-    vmSize: vmSize
+    aksAgentPoolVMSize: aksAgentPoolVMSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksVersion: aksVersion
     enableAzureMonitoring: enableAzureMonitoring

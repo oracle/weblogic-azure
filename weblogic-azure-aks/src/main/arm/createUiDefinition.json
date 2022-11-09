@@ -2174,7 +2174,7 @@
             "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
             "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
             "vnetRGNameForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.resourceGroup]",
-            "vmSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
+            "aksAgentPoolVMSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
             "wdtRuntimePassword": "[basics('basicsRequired').wdtRuntimePassword]",
             "wlsClusterSize": "[basics('basicsOptional').wlsClusterSize]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",

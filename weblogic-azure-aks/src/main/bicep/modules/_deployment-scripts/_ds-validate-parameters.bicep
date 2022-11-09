@@ -3,7 +3,7 @@
 
 param acrName string
 param aksAgentPoolNodeCount int
-param aksAgentPoolVMSize string
+param aksAgentPoolVMSize string = 'Standard_DS2_v2'
 param aksClusterRGName string
 param aksClusterName string
 param aksVersion string = 'default'
