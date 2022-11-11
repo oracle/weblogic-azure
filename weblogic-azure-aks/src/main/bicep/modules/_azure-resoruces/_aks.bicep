@@ -107,3 +107,4 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
 }
 
 output aksClusterName string = name_aksClusterNameForSV
+output aksNodeRgName string = aksCluster.properties.nodeResourceGroup

@@ -16,6 +16,7 @@ DB_PASSWORD: password for Database.
 DB_USER: user id of Database.
 DB_CONNECTION_STRING: JDBC Connection String.
 DB_DRIVER_NAME: datasource driver name, must be specified if database type is otherdb.
+ENABLE_PASSWORDLESS_CONNECTION: true to enable passwordless connection
 GLOBAL_TRANSATION_PROTOCOL: Determines the transaction protocol (global transaction processing behavior) for the data source.
 JDBC_DATASOURCE_NAME: JNDI Name for JDBC Datasource.
 TEST_TABLE_NAME: the name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.

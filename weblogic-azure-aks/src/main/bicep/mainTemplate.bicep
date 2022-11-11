@@ -296,7 +296,7 @@ var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_azcliVersion = '2.33.1'
+var const_azcliVersion = '2.41.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_hasTags = contains(resourceGroup(), 'tags')
 // If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
@@ -768,6 +768,7 @@ module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.
     _pidStart: pids.outputs.pswlessDbStart
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
+    aksNodeRGName: ref_wlsDomainDeployment.outputs.aksNodeRgName
     azCliVersion: const_azcliVersion
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType

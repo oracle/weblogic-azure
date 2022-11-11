@@ -84,8 +84,10 @@ EOF
 
 if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" && "${DB_TYPE}" == "${constDBTypeMySQL}" ]]; then
     cat <<EOF >>$filePath
+    - name: CLASSPATH
+      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"
     - name: PRE_CLASSPATH
-      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/mysql-connector-java-${constMysqlConnectorJavaVersion}.jar"
+      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/sharedLibraries/mysql-connector-java-${constMysqlConnectorJavaVersion}.jar"
 EOF
 fi
 

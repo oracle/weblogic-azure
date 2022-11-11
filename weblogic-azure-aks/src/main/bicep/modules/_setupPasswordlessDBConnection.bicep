@@ -25,7 +25,7 @@ param dbConfigurationType string = 'createOrUpdate'
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 @description('User id of Database')
 param dbUser string = 'contosoDbUser'
-param dbIdentity object
+param dbIdentity object = {}
 @description('JDBC Connection String')
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 
@@ -34,7 +34,6 @@ param identity object = {}
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
 param location string
-param utcValue string = utcNow()
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -43,9 +42,8 @@ param wlsPassword string
 param wlsUserName string = 'weblogic'
 
 var const_APIVersion = '2022-01-31-PREVIEW'
-var const_podIdentityName = 'db-pod-identity' // do not change the value
+// https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfVMContributor = '9980e02c-c2be-4d73-94e8-173b1dc7cf3c'
-var name_vmContributorRoleAssignmentName = guid('${resourceGroup().id}${utcValue}')
 var name_jdbcPlugins = {
   mysql: 'defaultAuthenticationPlugin=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin'
 }
@@ -57,29 +55,44 @@ module pidStart './_pids/_pid.bicep' = {
   }
 }
 
-module dbUamiRoleAssignment '_rolesAssignment/_roleAssignmentinRgScope.bicep' = {
-  name: name_vmContributorRoleAssignmentName
+module dbIdentityVMContributorRoleAssignment '_rolesAssignment/_roleAssignmentinRgScope.bicep' = {
+  name: 'assign-db-identity-vm-contributor-role'
   scope: resourceGroup(aksNodeRGName)
   params: {
-    principalId: reference(items(dbIdentity.userAssignedIdentities)[0].key, const_APIVersion, 'full').properties.clientId
+    principalId: reference(items(dbIdentity.userAssignedIdentities)[0].key, const_APIVersion, 'full').properties.principalId
     roleDefinitionId: const_roleDefinitionIdOfVMContributor
   }
 }
 
-module configPodIdentity '_deployment-scripts/_ds-create-pod-identity.bicep' = {
-  name: 'create-pod-identity-for-db-connection'
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' existing = {
+  name: aksClusterName
+  scope: resourceGroup(aksClusterRGName)
+} 
+
+module grantAKSClusterMioRoleOverDBIdentity '_rolesAssignment/_aksClusterMioRoleOverDbIdentity.bicep' = {
+  name: 'grant-aks-cluster-mio-role-over-db-identity'
+  scope: resourceGroup(split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[4])
   params: {
-    aadPodIdentityName: const_podIdentityName
-    aadPodIdentityNameSpace: format('{0}-ns', wlsDomainUID)
-    aadPodIdentityResourceId: items(dbIdentity.userAssignedIdentities)[0].key
-    aksClusterRGName: aksClusterRGName
+    clusterIdentityPrincipalId: existingAKSCluster.identity.principalId
+    dbIdentityName: split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[8]
+  }
+  dependsOn: [
+    dbIdentityVMContributorRoleAssignment
+    existingAKSCluster
+  ]
+}
+
+module configAKSPodIdentity '_azure-resoruces/_aksPodIdentity.bicep' = {
+  name: 'configure-pod-identity'
+  scope: resourceGroup(aksClusterRGName)
+  params: {
     aksClusterName: aksClusterName
-    azCliVersion: azCliVersion
-    identity: identity
+    dbIdentity: dbIdentity
+    wlsDomainUID: wlsDomainUID
     location: location
   }
   dependsOn: [
-    dbUamiRoleAssignment
+    grantAKSClusterMioRoleOverDBIdentity
   ]
 }
 
@@ -97,6 +110,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     dbPassword: ''
     dbUser: dbUser
     dsConnectionURL: format('{0}&{1}&azure.clientId={2}', dsConnectionURL, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_APIVersion, 'full').properties.clientId)
+    enablePasswordlessConnection: true
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
     location: location
@@ -105,7 +119,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     wlsUserName: wlsUserName
   }
   dependsOn: [
-    configPodIdentity
+    configAKSPodIdentity
   ]
 }
 

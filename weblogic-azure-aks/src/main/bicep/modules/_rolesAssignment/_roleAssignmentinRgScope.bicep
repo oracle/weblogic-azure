@@ -19,8 +19,9 @@ Usage:
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 param roleDefinitionId string = ''
 param principalId string = ''
+param utcValue string = utcNow()
 
-var name_roleAssignmentName = guid('${subscription().id}${principalId}Role assignment in subscription scope')
+var name_roleAssignmentName = guid('${subscription().id}${principalId}${utcValue}Role assignment in resource group scope')
 
 // Get role resource id in subscription
 resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
@@ -31,7 +32,7 @@ resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2018-01
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: name_roleAssignmentName
   properties: {
-    description: 'Assign subscription scope role to User Assigned Managed Identity '
+    description: 'Assign resource group scope role to User Assigned Managed Identity '
     principalId: principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: roleResourceDefinition.id

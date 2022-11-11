@@ -131,6 +131,11 @@ module pidStart './_pids/_pid.bicep' = {
   }
 }
 
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' existing = if (!createAKSCluster) {
+  name: aksClusterName
+  scope: resourceGroup(aksClusterRGName)
+}
+
 /*
 * Deploy AKS cluster
 */
@@ -238,6 +243,7 @@ module pidEnd './_pids/_pid.bicep' = {
 
 output aksClusterName string = createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
 output aksClusterRGName string = createAKSCluster ? resourceGroup().name : aksClusterRGName
+output aksNodeRgName string = createAKSCluster? aksClusterDeployment.outputs.aksNodeRgName : existingAKSCluster.properties.nodeResourceGroup
 output adminServerEndPoint string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console', wlsDomainUID)
 output adminServerT3InternalEndPoint string = enableAdminT3Tunneling ? format('{0}://{1}-admin-server.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelAdminPort): ''
 output clusterEndPoint string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)

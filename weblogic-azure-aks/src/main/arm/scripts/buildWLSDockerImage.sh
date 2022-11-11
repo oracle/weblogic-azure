@@ -183,7 +183,8 @@ EOF
         # The jar will be added to PRE_CLASSPATH
         mv target/dependency/mysql-connector-java-*.jar wlsdeploy/sharedLibraries/
         # Thoes jars will be extracted
-        mv target/dependency/*.jar wlsdeploy/classpathLibraries/
+        mkdir wlsdeploy/classpathLibraries/azureLibraries
+        mv target/dependency/*.jar wlsdeploy/classpathLibraries/azureLibraries/
     else
         echo "Failed to download dependencies for azure-identity-providers-jdbc-mysql"
         exit 1
