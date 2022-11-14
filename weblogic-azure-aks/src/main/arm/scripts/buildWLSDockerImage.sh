@@ -167,11 +167,6 @@ function download_mysql_passwordless_jdbc_libs() {
             <artifactId>azure-identity-providers-jdbc-mysql</artifactId>
             <version>${constAzureIdentityProvidersJdbcMysqlVersion}</version>
         </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${constMysqlConnectorJavaVersion}</version>
-        </dependency>
     </dependencies>
 </project>
 EOF
@@ -180,8 +175,6 @@ EOF
     mvn dependency:copy-dependencies -f ${mySQLPom}
     if [ $? -eq 0 ]; then
         ls -l target/dependency/
-        # The jar will be added to PRE_CLASSPATH
-        mv target/dependency/mysql-connector-java-*.jar wlsdeploy/sharedLibraries/
         # Thoes jars will be extracted
         mkdir wlsdeploy/classpathLibraries/azureLibraries
         mv target/dependency/*.jar wlsdeploy/classpathLibraries/azureLibraries/
@@ -246,6 +239,9 @@ function install_utilities() {
 
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
+
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMySQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/sharedLibraries/${constMySQLLibName}
+    validate_status "Install mysql driver."
 
     if [[ "${enablePasswordlessConnection,,}" == "true" ]]; then
         sudo apt -y -q install maven

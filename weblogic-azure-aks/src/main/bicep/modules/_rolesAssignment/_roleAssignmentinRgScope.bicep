@@ -6,7 +6,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 /*
 Description: assign roles cross resource group.
 Usage:
-  module roleAssignment '_roleAssignmentinSubscription.bicep' = {
+  module roleAssignment '_roleAssignmentinRgScope.bicep' = {
     name: 'assign-role'
     scope: resourceGroup(<your-resource-group-name)
     params: {
@@ -23,7 +23,7 @@ param utcValue string = utcNow()
 
 var name_roleAssignmentName = guid('${subscription().id}${principalId}${utcValue}Role assignment in resource group scope')
 
-// Get role resource id in subscription
+// Get role resource id
 resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   name: roleDefinitionId
 }

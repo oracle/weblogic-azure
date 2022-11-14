@@ -132,6 +132,8 @@ function apply_datasource_to_domain() {
     kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         -p '[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/configuration/model/configMap", "value":'${wlsConfigmapName}'}, {"op": "replace", "path": "/spec/configuration/secrets", "value": '${secretStrings}'}]'
+
+    utility_validate_status "Patch DB configuration."
 }
 
 function remove_datasource_from_domain() {
@@ -179,6 +181,8 @@ function remove_datasource_from_domain() {
     kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         -p '[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/configuration/model/configMap", "value":'${wlsConfigmapName}'}, {"op": "replace", "path": "/spec/configuration/secrets", "value": '${secretStrings}'}]'
+
+    utility_validate_status "Patch DB configuration."
 }
 
 function wait_for_operation_completed() {

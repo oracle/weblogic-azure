@@ -80,14 +80,14 @@ spec:
       value: "${constDefaultJVMArgs}"
     - name: MANAGED_SERVER_PREFIX
       value: "${WLS_MANAGED_SERVER_PREFIX}"
+    - name: PRE_CLASSPATH
+      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/sharedLibraries/${constMySQLLibName}"
 EOF
 
-if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" && "${DB_TYPE}" == "${constDBTypeMySQL}" ]]; then
+if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
     cat <<EOF >>$filePath
     - name: CLASSPATH
       value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"
-    - name: PRE_CLASSPATH
-      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/sharedLibraries/mysql-connector-java-${constMysqlConnectorJavaVersion}.jar"
 EOF
 fi
 
@@ -162,6 +162,14 @@ cat <<EOF >>$filePath
         memory: "${WLS_RESOURCE_REQUEST_MEMORY}"
 EOF
 
+# enable db pod identity, all of the selector of pod identities are "db-pod-idenity"
+if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
+    cat <<EOF >>$filePath
+    labels:
+      aadpodidbinding: "${constDbPodIdentitySelector}"
+EOF
+fi
+
 if [[ "${ENABLE_PV,,}" == "true" ]]; then
       cat <<EOF >>$filePath
     # Optional volumes and mounts for the domain's pods. See also 'logHome'.
@@ -172,13 +180,6 @@ if [[ "${ENABLE_PV,,}" == "true" ]]; then
     volumeMounts:
     - mountPath: /shared
       name: ${WLS_DOMAIN_UID}-pv-azurefile
-EOF
-fi
-
-if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
-  cat <<EOF >>$filePath
-    labels:
-      aadpodidbinding: ${constDbPodIdentityName}
 EOF
 fi
 

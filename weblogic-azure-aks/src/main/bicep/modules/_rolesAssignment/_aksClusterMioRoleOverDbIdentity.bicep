@@ -3,19 +3,6 @@
 Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 */
 
-/*
-Description: assign roles cross resource group.
-Usage:
-  module roleAssignment '_roleAssignmentinSubscription.bicep' = {
-    name: 'assign-role'
-    scope: resourceGroup(<db-identity-resource-group-name)
-    params: {
-      dbIdentityName: dbIdentityName
-      dbIdentityPrincipalId: dbIdentityPrincipalId
-    }
-  }
-*/
-
 param clusterIdentityPrincipalId string = ''
 param dbIdentityName string = ''
 
@@ -27,7 +14,7 @@ resource dbIdentityResource 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   name: dbIdentityName
 }
 
-// Get role resource id in subscription
+// Get role resource id
 resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   name: const_roleDefinitionIdOfManagedIdentityOperator
 }

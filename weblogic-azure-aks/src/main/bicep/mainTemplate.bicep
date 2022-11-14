@@ -101,7 +101,7 @@ param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
 @description('Managed identity that has access to database')
-param dbIdentity object
+param dbIdentity object = {}
 @secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
