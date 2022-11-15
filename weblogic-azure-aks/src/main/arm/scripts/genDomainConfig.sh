@@ -11,6 +11,15 @@ export javaOptions=$3
 export adminServiceUrl="${WLS_DOMAIN_UID}-admin-server.${WLS_DOMAIN_UID}-ns.svc.cluster.local"
 export clusterServiceUrl="${WLS_DOMAIN_UID}-cluster-${constClusterName}.${WLS_DOMAIN_UID}-ns.svc.cluster.local"
 
+# set classpath
+preClassPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/sharedLibraries/${constMySQLLibName}"
+classPath=""
+if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
+  # append jackson libraries to pre-classpath to upgrade existing libs in GA images
+  preClassPath="${preClassPath}:/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/jackson/*"
+  classPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"
+fi
+
 cat <<EOF >$filePath
 # Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
@@ -81,15 +90,10 @@ spec:
     - name: MANAGED_SERVER_PREFIX
       value: "${WLS_MANAGED_SERVER_PREFIX}"
     - name: PRE_CLASSPATH
-      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/sharedLibraries/${constMySQLLibName}"
-EOF
-
-if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
-    cat <<EOF >>$filePath
+      value: "${preClassPath}"
     - name: CLASSPATH
-      value: "/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"
+      value: "${classPath}"
 EOF
-fi
 
 if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
     cat <<EOF >>$filePath

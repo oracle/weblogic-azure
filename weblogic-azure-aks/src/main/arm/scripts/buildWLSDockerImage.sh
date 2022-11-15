@@ -175,8 +175,15 @@ EOF
     mvn dependency:copy-dependencies -f ${mySQLPom}
     if [ $? -eq 0 ]; then
         ls -l target/dependency/
-        # Thoes jars will be extracted
+        
         mkdir wlsdeploy/classpathLibraries/azureLibraries
+        mkdir wlsdeploy/classpathLibraries/jackson
+        # fix JARs conflict issue in GA images, put jackson libraries to PRE_CLASSPATH to upgrade the existing libs.
+        mv target/dependency/jackson-annotations-*.jar wlsdeploy/classpathLibraries/jackson/
+        mv target/dependency/jackson-core-*.jar wlsdeploy/classpathLibraries/jackson/
+        mv target/dependency/jackson-databind-*.jar wlsdeploy/classpathLibraries/jackson/
+        mv target/dependency/jackson-dataformat-xml-*.jar wlsdeploy/classpathLibraries/jackson/
+        # Thoes jars will be appended to CLASSPATH
         mv target/dependency/*.jar wlsdeploy/classpathLibraries/azureLibraries/
     else
         echo "Failed to download dependencies for azure-identity-providers-jdbc-mysql"
@@ -243,7 +250,7 @@ function install_utilities() {
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMySQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/sharedLibraries/${constMySQLLibName}
     validate_status "Install mysql driver."
 
-    if [[ "${enablePasswordlessConnection,,}" == "true" ]]; then
+    if [[ "${enablePswlessConnection,,}" == "true" ]]; then
         sudo apt -y -q install maven
         mvn --help
         validate_status "Check status of mvn."
@@ -400,7 +407,7 @@ export enableAdminT3Tunneling=$9
 export enableClusterT3Tunneling=${10}
 export useOracleImage=${11}
 export dbDriversUrls=${12}
-export enablePasswordlessConnection=${13}
+export enablePswlessConnection=${13}
 export dbType=${14}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"

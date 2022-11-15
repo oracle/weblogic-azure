@@ -117,7 +117,6 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
     dbGlobalTranPro: dbGlobalTranPro
-    dbPassword: guid(utcValue)
     dbUser: dbUser
     dsConnectionURL: uri(format('{0}&{1}&azure.clientId={2}', dsConnectionURL, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId), '')
     enablePswlessConnection: true
