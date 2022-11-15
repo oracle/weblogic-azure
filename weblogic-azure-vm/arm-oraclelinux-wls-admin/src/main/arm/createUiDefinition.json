@@ -1309,7 +1309,7 @@
                     {
                         "name": "enableELK",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Export logs to Elasticsearch server?",
+                        "label": "Export logs to Elasticsearch?",
                         "defaultValue": "No",
                         "toolTip": "Select 'Yes' and provide required info to configure the connection to Elasticsearch.",
                         "constraints": {
