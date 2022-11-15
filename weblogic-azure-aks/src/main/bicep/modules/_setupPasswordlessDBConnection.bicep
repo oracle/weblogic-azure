@@ -46,6 +46,7 @@ var const_identityAPIVersion = '2022-01-31-PREVIEW'
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfVMContributor = '9980e02c-c2be-4d73-94e8-173b1dc7cf3c'
 var const_podIdentitySelector = 'db-pod-identity' // Do not change this value. 
+var name_dbIdentityName = split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[8]
 // Azure JDBC plugins, used to generate connection string.
 var name_jdbcPlugins = {
   mysql: 'defaultAuthenticationPlugin=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin'
@@ -64,7 +65,7 @@ module dbIdentityVMContributorRoleAssignment '_rolesAssignment/_roleAssignmentin
   name: 'assign-db-identity-vm-contributor-role'
   scope: resourceGroup(aksNodeRGName)
   params: {
-    principalId: reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.principalId
+    identity: dbIdentity
     roleDefinitionId: const_roleDefinitionIdOfVMContributor
   }
 }
@@ -80,7 +81,7 @@ module grantAKSClusterMioRoleOverDBIdentity '_rolesAssignment/_aksClusterMioRole
   scope: resourceGroup(split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[4])
   params: {
     clusterIdentityPrincipalId: existingAKSCluster.identity.principalId
-    dbIdentityName: split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[8]
+    dbIdentityName: name_dbIdentityName
   }
   dependsOn: [
     dbIdentityVMContributorRoleAssignment
@@ -116,10 +117,10 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     databaseType: databaseType
     dbConfigurationType: dbConfigurationType
     dbGlobalTranPro: dbGlobalTranPro
-    dbPassword: ''
+    dbPassword: guid(utcValue)
     dbUser: dbUser
-    dsConnectionURL: format('{0}&{1}&azure.clientId={2}', dsConnectionURL, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId)
-    enablePasswordlessConnection: true
+    dsConnectionURL: uri(format('{0}&{1}&azure.clientId={2}', dsConnectionURL, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId), '')
+    enablePswlessConnection: true
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
     location: location

@@ -60,7 +60,7 @@ param enableAzureMonitoring bool = false
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
-param enablePasswordlessConnection bool = false
+param enablePswlessConnection bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object = {}
@@ -147,7 +147,7 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
     aciWorkspaceSku: aciWorkspaceSku
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
-    vmSize: vmSize
+    aksAgentPoolVMSize: vmSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksVersion: aksVersion
     enableAzureMonitoring: enableAzureMonitoring
@@ -189,7 +189,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
-    enablePasswordlessConnection: enablePasswordlessConnection
+    enablePswlessConnection: enablePswlessConnection
     enablePV: enablePV
     identity: identity
     isSSOSupportEntitled: isSSOSupportEntitled

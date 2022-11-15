@@ -1889,9 +1889,10 @@
                                 "visible": true
                             },
                             {
-                                "name": "enablePasswordlessConnection",
+                                "name": "enablePswlessConnection",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Use passwordless datasource connection",
+                                "toolTip": "Use passwordless datasource connection.",
                                 "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]"
                             },
                             {
@@ -1990,7 +1991,7 @@
                                             "message": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
                                         },
                                         {
-                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
                                             "message": "You must select at least one managed identity that has access to your database."
                                         }
                                     ]
@@ -2013,7 +2014,7 @@
                                 "options": {
                                     "hideConfirmation": false
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePswlessConnection))]"
                             },
                             {
                                 "name": "dbIdentity",
@@ -2029,7 +2030,7 @@
                                     "hideSystemAssignedIdentity": true,
                                     "hideUserAssignedIdentity": false
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), steps('section_database').databaseConnectionInfo.enablePasswordlessConnection)]"
+                                "visible": "[and(bool(steps('section_database').enableDB), steps('section_database').databaseConnectionInfo.enablePswlessConnection)]"
                             },
                             {
                                 "name": "dbDriverLibraries",
@@ -2129,7 +2130,7 @@
             "enableDNSConfiguration": "[bool(steps('section_dnsConfiguration').enableDNSConfiguration)]",
             "enableAdminT3Tunneling": "[basics('basicsOptional').enableAdminT3Tunneling]",
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
-            "enablePasswordlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePasswordlessConnection)]",
+            "enablePswlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
             "lbSvcValues": "[if(not(empty(first(if(empty(steps('section_appGateway').lbSVCInfo.lbSVC),parse('[{\"colName\":\"\"}]'), steps('section_appGateway').lbSVCInfo.lbSVC)).colName)),steps('section_appGateway').lbSVCInfo.lbSVC, parse('[]'))]",

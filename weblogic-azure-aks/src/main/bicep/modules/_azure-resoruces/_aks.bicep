@@ -16,7 +16,7 @@ param aksAgentPoolName string = 'agentpool'
 @description('The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.')
 param aksAgentPoolNodeCount int = 3
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
-param vmSize string = 'Standard_DS2_v2'
+param aksAgentPoolVMSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
 param aksClusterNamePrefix string = 'wlsonaks'
 param aksVersion string = 'default'
@@ -71,7 +71,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
       {
         name: aksAgentPoolName
         count: aksAgentPoolNodeCount
-        vmSize: vmSize
+        vmSize: aksAgentPoolVMSize
         osDiskSizeGB: const_aksAgentPoolOSDiskSizeGB
         osDiskType: 'Managed'
         kubeletDiskType: 'OS'

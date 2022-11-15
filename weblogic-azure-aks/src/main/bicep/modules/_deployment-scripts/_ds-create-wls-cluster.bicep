@@ -16,7 +16,7 @@ param dbDriverLibrariesUrls array = []
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
-param enablePasswordlessConnection bool = false
+param enablePswlessConnection bool = false
 param enablePV bool = false
 param identity object = {}
 param isSSOSupportEntitled bool
@@ -118,7 +118,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       }
       {
         name: 'ENABLE_PASSWORDLESS_DB_CONNECTION'
-        value: string(enablePasswordlessConnection)
+        value: string(enablePswlessConnection)
       }
       {
         name: 'ENABLE_PV'

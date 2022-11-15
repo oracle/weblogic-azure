@@ -45,8 +45,8 @@ function validate_input() {
         usage 1
     fi
 
-    if [ -z "${DB_USER}" ]; then
-        echo_stderr "DB_USER are required. "
+    if [[ -z "${DB_PASSWORD}" || -z "${DB_USER}" ]]; then
+        echo_stderr "DB_PASSWORD and DB_USER are required. "
         usage 1
     fi
 
@@ -68,6 +68,11 @@ function validate_input() {
     if [[ -z "$WLS_DOMAIN_USER" || -z "${WLS_DOMAIN_PASSWORD}" ]]; then
         echo_stderr "WLS_DOMAIN_USER and WLS_DOMAIN_PASSWORD are required. "
         usage 1
+    fi
+
+    # reset password
+    if [[ "${ENABLE_PASSWORDLESS_CONNECTION,,}" == "true" ]]; then
+        DB_PASSWORD=""
     fi
 }
 
