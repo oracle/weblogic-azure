@@ -1876,7 +1876,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL",
+                                            "label": "MySQL (Support passwordless connection)",
                                             "value": "mysql"
                                         },
                                         {
@@ -1887,6 +1887,15 @@
                                     "required": true
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "mysqlJDBCDriverInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "To support passwordless connection and various functionalities, the offer will upgrade the <a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
+                                }
                             },
                             {
                                 "name": "enablePswlessConnection",
@@ -1920,6 +1929,10 @@
                                         {
                                             "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
                                             "message": "A valid JDBC URL for the chosen database type must be provided"
+                                        },
+                                        {
+                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
                                         }
                                     ]
                                 },
