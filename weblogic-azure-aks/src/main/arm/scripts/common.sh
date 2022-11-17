@@ -27,6 +27,7 @@ export constPostgreDriverName="postgresql-42.3.6.jar"
 export constMSSQLDriverName="mssql-jdbc-10.2.1.jre8.jar"
 export constMySQLLibName="mysql-connector-java-8.0.30.jar"
 export constAzureIdentityProvidersJdbcMysqlVersion="1.0.0-beta.1"
+export constAzureCoreVersion="1.34.0"
 export constDbPodIdentitySelector="db-pod-identity" # do not change the value
 
 export curlMaxTime=120 # seconds

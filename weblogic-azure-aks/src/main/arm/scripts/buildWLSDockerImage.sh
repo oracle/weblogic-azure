@@ -166,6 +166,17 @@ function download_mysql_passwordless_jdbc_libs() {
             <groupId>com.azure</groupId>
             <artifactId>azure-identity-providers-jdbc-mysql</artifactId>
             <version>${constAzureIdentityProvidersJdbcMysqlVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>com.azure</artifactId>
+                    <groupId>azure-core</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+            <version>${constAzureCoreVersion}</version>
         </dependency>
     </dependencies>
 </project>
