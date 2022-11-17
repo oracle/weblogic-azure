@@ -2034,7 +2034,7 @@
                                 "type": "Microsoft.ManagedIdentity.IdentitySelector",
                                 "label": "Connect database with Managed Identity",
                                 "toolTip": {
-                                    "userAssignedIdentity": "Select a user assigned identity that has access to your database. For how to create a database user for your Managed Identity, see https://aka.ms/javaee-db-identity."
+                                    "userAssignedIdentity": "Select a user assigned identity that has access to your database. For how to create a database user for your managed identity, see https://aka.ms/javaee-db-identity."
                                 },
                                 "defaultValue": {
                                     "systemAssignedIdentity": "Off"
