@@ -147,41 +147,9 @@ function download_wdt_wit() {
 
 function download_mysql_passwordless_jdbc_libs() {
     local mySQLPom=mysql-pom.xml
-    cat <<EOF >mysql-pom.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- mvn dependency:copy-dependencies -f mysql-pom.xml -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.oracle.weblogic.azure</groupId>
-    <artifactId>passwordless-mysql</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-identity-providers-jdbc-mysql</artifactId>
-            <version>${constAzureIdentityProvidersJdbcMysqlVersion}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>com.azure</artifactId>
-                    <groupId>azure-core</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-core</artifactId>
-            <version>${constAzureCoreVersion}</version>
-        </dependency>
-    </dependencies>
-</project>
-EOF
-
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4AzureMySQLJDBCPomFile}" -o ${mySQLPom}
+    validate_status "Check status of downloading Azure Identity Provider JDBC MySQL Pom file."
+    
     echo "download dependencies"
     mvn dependency:copy-dependencies -f ${mySQLPom}
     if [ $? -eq 0 ]; then
