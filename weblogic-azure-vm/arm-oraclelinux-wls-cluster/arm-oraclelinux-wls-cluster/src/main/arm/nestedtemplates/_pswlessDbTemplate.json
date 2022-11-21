@@ -43,13 +43,6 @@
                 "description": "Managed identity that has access to the data source."
             }
         },
-        "dbPassword": {
-            "defaultValue": "[newGuid()]",
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for Database"
-            }
-        },
         "dbUser": {
             "defaultValue": "",
             "type": "string",
@@ -62,13 +55,6 @@
             "type": "string",
             "metadata": {
                 "description": "JDBC Connection String"
-            }
-        },
-        "enablePswlessConnection": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "True to enable passwordless connection."
             }
         },
         "jdbcDataSourceName": {
@@ -121,131 +107,105 @@
         }
     },
     "variables": {
-        "name_dbLinkedTemplateName": "_dbTemplate.json",
-        "name_dbPswlessTemplateName": "_pswlessDbTemplate.json",
-        "name_dbUpgradeMySQLDriver": "_installJdbcLibsTemplate.json"
+        "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
+        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
+        "name_dbTemplate": "_dbTemplate.json",
+        "array_azureJdbcPlugins": {
+            "mysql": "defaultAuthenticationPlugin=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin"
+        }
     },
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "pswlessDbTemplate",
-            "condition": "[parameters('enablePswlessConnection')]",
+            "name": "${cluster.pswless.database.start}",
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbPswlessTemplateName')))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
-                    "_artifactsLocationSasToken": {
-                        "value": "[parameters('_artifactsLocationSasToken')]"
-                    },
-                    "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
-                    },
-                    "databaseType": {
-                        "value": "[parameters('databaseType')]"
-                    },
-                    "dbGlobalTranPro": {
-                        "value": "[parameters('dbGlobalTranPro')]"
-                    },
-                    "dbIdentity": {
-                        "value": "[parameters('dbIdentity')]"
-                    },
-                    "dbUser": {
-                        "value": "[parameters('dbUser')]"
-                    },
-                    "dsConnectionURL": {
-                        "value": "[parameters('dsConnectionURL')]"
-                    },
-                    "jdbcDataSourceName": {
-                        "value": "[parameters('jdbcDataSourceName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('location')]"
-                    },
-                    "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
-                    },
-                    "numberOfManagedApplicationInstances": {
-                        "value": "[parameters('numberOfManagedApplicationInstances')]"
-                    },
-                    "wlsDomainName": {
-                        "value": "[parameters('wlsDomainName')]"
-                    },
-                    "wlsPassword": {
-                        "value": "[parameters('wlsPassword')]"
-                    },
-                    "wlsUserName": {
-                        "value": "[parameters('wlsUserName')]"
-                    }
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+        {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "virtualMachineIdentityLoop",
+                "count": "[parameters('numberOfManagedApplicationInstances')]"
+            },
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
                 }
             }
         },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "upgradeMySQLJdbcDriverTemplate",
-            "condition": "[and(not(parameters('enablePswlessConnection')), equals(parameters('databaseType'),'mysql'))]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbUpgradeMySQLDriver')))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
-                    "_artifactsLocationSasToken": {
-                        "value": "[parameters('_artifactsLocationSasToken')]"
-                    },
-                    "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
-                    },
-                    "databaseType": {
-                        "value": "[parameters('databaseType')]"
-                    },
-                    "enablePswlessConnection": {
-                        "value": "[parameters('enablePswlessConnection')]"
-                    },
-                    "location": {
-                        "value": "[parameters('location')]"
-                    },
-                    "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
-                    },
-                    "numberOfManagedApplicationInstances": {
-                        "value": "[parameters('numberOfManagedApplicationInstances')]"
-                    },
-                    "wlsDomainName": {
-                        "value": "[parameters('wlsDomainName')]"
-                    },
-                    "wlsPassword": {
-                        "value": "[parameters('wlsPassword')]"
-                    },
-                    "wlsUserName": {
-                        "value": "[parameters('wlsUserName')]"
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "dbLinkedTemplate",
-            "condition": "[not(parameters('enablePswlessConnection'))]",
+            "name": "installJdbcLibsTemplate",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'upgradeMySQLJdbcDriverTemplate')]"
+                "virtualMachineIdentityLoop"
             ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbLinkedTemplateName')))]",
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_installJdbcLibsTemplate')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "enablePswlessConnection": {
+                        "value": true
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "managedServerPrefix": {
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "numberOfManagedApplicationInstances": {
+                        "value": "[parameters('numberOfManagedApplicationInstances')]"
+                    },
+                    "wlsDomainName": {
+                        "value": "[parameters('wlsDomainName')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "dbTemplate",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbTemplate')))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -264,17 +224,14 @@
                     "dbGlobalTranPro": {
                         "value": "[parameters('dbGlobalTranPro')]"
                     },
-                    "dbPassword": {
-                        "value": "[parameters('dbPassword')]"
+                    "dsConnectionURL": {
+                        "value": "[uri(format('{0}&{1}&azure.clientId={2}', parameters('dsConnectionURL'), variables('array_azureJdbcPlugins')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId), '')]"
                     },
                     "dbUser": {
                         "value": "[parameters('dbUser')]"
                     },
-                    "dsConnectionURL": {
-                        "value": "[parameters('dsConnectionURL')]"
-                    },
                     "enablePswlessConnection": {
-                        "value": "[parameters('enablePswlessConnection')]"
+                        "value": true
                     },
                     "jdbcDataSourceName": {
                         "value": "[parameters('jdbcDataSourceName')]"
@@ -288,6 +245,22 @@
                     "wlsUserName": {
                         "value": "[parameters('wlsUserName')]"
                     }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.pswless.database.end}",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'dbTemplate')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
                 }
             }
         }
