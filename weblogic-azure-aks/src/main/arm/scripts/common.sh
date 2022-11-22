@@ -37,7 +37,7 @@ export ocrCpuImagePath="middleware/weblogic_cpu"
 export gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
 export gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
 export gitUrl4WLSToolingFamilyJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_tooling_family.json"
-export gitUrl4AzureMySQLJDBCPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-provider-jdbc-mysql.pom"
+export gitUrl4AzureMySQLJDBCPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-provider-jdbc-mysql.xml"
 
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
 export optUninstallInterval=10
