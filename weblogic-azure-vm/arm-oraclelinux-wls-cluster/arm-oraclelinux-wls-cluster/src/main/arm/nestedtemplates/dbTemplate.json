@@ -237,7 +237,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "dbLinkedTemplate",
+            "name": "dbDeploymentTemplate",
             "condition": "[not(parameters('enablePswlessConnection'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'upgradeMySQLJdbcDriverTemplate')]"
