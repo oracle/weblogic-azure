@@ -1320,7 +1320,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL (Support passwordless connection)",
+                                            "label": "MySQL (With support for passwordless connection)",
                                             "value": "mysql"
                                         }
                                     ],
