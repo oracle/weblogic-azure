@@ -1876,7 +1876,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL (Support passwordless connection)",
+                                            "label": "MySQL (with support for passwordless connection)",
                                             "value": "mysql"
                                         },
                                         {
