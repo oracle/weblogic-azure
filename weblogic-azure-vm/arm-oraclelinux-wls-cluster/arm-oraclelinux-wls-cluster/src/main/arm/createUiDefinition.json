@@ -34,15 +34,15 @@
                         },
                         {
                             "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Red Hat Enterprise Linux 7.6",
-                            "value": "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest"                            
+                            "value": "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest"
                         },
                         {
                             "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Red Hat Enterprise Linux 7.6",
-                            "value": "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest"                            
+                            "value": "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest"
                         },
                         {
                             "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Red Hat Enterprise Linux 7.6",
-                            "value": "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"                            
+                            "value": "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
                         }
                     ],
                     "required": true
@@ -287,7 +287,7 @@
                                 "label": "Issue tracker",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=${project.version}"
                             }
-                        }   
+                        }
                     },
                     {
                         "name": "howToJoinSlack",
@@ -312,47 +312,49 @@
                                 "uri": "https://aka.ms/wls-on-azure-survey"
                             }
                         }
-                    }                    
+                    }
                 ],
                 "visible": true
-            }            
+            }
         ],
         "steps": [
-{
-				"name": "section_sslConfiguration",
-				"type": "Microsoft.Common.Section",
-				"label": "TLS/SSL Configuration",
-				"elements": [{
-						"name": "sslConfigurationText",
-						"type": "Microsoft.Common.TextBlock",
-						"visible": true,
-						"options": {
-							"text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate.",
-							"link": {
-								"label": "Learn more",
-								"uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
-							}
-						}
-					},
-					{
-						"name": "enableCustomSSL",
-						"type": "Microsoft.Common.OptionsGroup",
-						"label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate?",
-						"defaultValue": "No",
-						"toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own SSL Certificate.",
-						"constraints": {
-							"allowedValues": [{
-									"label": "Yes",
-									"value": true
-								},
-								{
-									"label": "No",
-									"value": false
-								}
-							],
-							"required": false
-						}
-					},
+            {
+                "name": "section_sslConfiguration",
+                "type": "Microsoft.Common.Section",
+                "label": "TLS/SSL Configuration",
+                "elements": [
+                    {
+                        "name": "sslConfigurationText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
+                            }
+                        }
+                    },
+                    {
+                        "name": "enableCustomSSL",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL Certificate?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own SSL Certificate.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": false
+                        }
+                    },
                     {
                         "name": "sslText00",
                         "type": "Microsoft.Common.TextBlock",
@@ -562,11 +564,11 @@
                         ]
                     },
                     {
-						"name": "keyVaultStoredCustomSSLSettings",
-						"type": "Microsoft.Common.Section",
+                        "name": "keyVaultStoredCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
-						"label": "TLS/SSL Configuration Settings",
-						"elements": [
+                        "label": "TLS/SSL Configuration Settings",
+                        "elements": [
                             {
                                 "name": "sslKeystoreInfo1",
                                 "type": "Microsoft.Common.InfoBox",
@@ -649,7 +651,8 @@
                                 "defaultValue": "JKS",
                                 "toolTip": "One of the supported KeyStore types",
                                 "constraints": {
-                                    "allowedValues": [{
+                                    "allowedValues": [
+                                        {
                                             "label": "JKS",
                                             "value": "JKS"
                                         },
@@ -721,7 +724,8 @@
                                 "defaultValue": "JKS",
                                 "toolTip": "One of the supported KeyStore types",
                                 "constraints": {
-                                    "allowedValues": [{
+                                    "allowedValues": [
+                                        {
                                             "label": "JKS",
                                             "value": "JKS"
                                         },
@@ -733,10 +737,10 @@
                                     "required": true
                                 }
                             }
-                     ]
-                  }
-				]
-			},
+                        ]
+                    }
+                ]
+            },
             {
                 "name": "section_appGateway",
                 "type": "Microsoft.Common.Section",
@@ -833,7 +837,8 @@
                             ],
                             "required": true
                         },
-                        "visible": "[steps('section_appGateway').enableAppGateway]"                    },
+                        "visible": "[steps('section_appGateway').enableAppGateway]"
+                    },
                     {
                         "name": "keyVaultSSLCertData",
                         "type": "Microsoft.Common.FileUpload",
@@ -1315,7 +1320,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL",
+                                            "label": "MySQL (With support for passwordless connection)",
                                             "value": "mysql"
                                         }
                                     ],
@@ -1324,14 +1329,20 @@
                                 "visible": true
                             },
                             {
-                                "name": "dbDriverWarningInfo",
+                                "name": "mysqlJDBCDriverInfo",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), or(equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest'), equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest')))]",
+                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]",
                                 "options": {
-                                    "icon": "Warning",
-                                    "text": "Your current selection of WebLogic Server version, Java version, and MySQL uses a problematic JDBC driver. Consult the certification matrix at https://aka.ms/wls-vms-12213-certification-matrix and use the instructions in the the link below to replace the JDBC driver with the correct version after deployment.",
-                                    "uri": "https://aka.ms/wls-vms-mysql-12213"
+                                    "icon": "Info",
+                                    "text": "To support passwordless connection and various functionalities, the offer will upgrade the <a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
                                 }
+                            },
+                            {
+                                "name": "enablePswlessConnection",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use passwordless datasource connection",
+                                "toolTip": "Use passwordless datasource connection.",
+                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]"
                             },
                             {
                                 "name": "jdbcDataSourceName",
@@ -1354,14 +1365,14 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-									"validations": [
+                                    "validations": [
                                         {
                                             "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
                                             "message": "A valid JDBC URL for the chosen database type must be provided"
                                         },
                                         {
-                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), and(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols=TLSv1.2')), bool('true'))]",
-                                            "message": "When using MySQL, the connection string must contain server time zone and enable TLS v1.2. For example, see the last two query parameters here: 'jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2'."
+                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
                                         }
                                     ]
                                 },
@@ -1413,9 +1424,17 @@
                                 "toolTip": "Use only letters and numbers",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
-                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
+                                            "message": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                        },
+                                        {
+                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+                                            "message": "You must select at least one managed identity that has access to your database."
+                                        }
+                                    ]
                                 },
                                 "visible": true
                             },
@@ -1435,7 +1454,23 @@
                                 "options": {
                                     "hideConfirmation": false
                                 },
-                                "visible": true
+                                "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePswlessConnection))]"
+                            },
+                            {
+                                "name": "dbIdentity",
+                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                                "label": "Connect database with Managed Identity",
+                                "toolTip": {
+                                    "userAssignedIdentity": "Select a user assigned identity that has access to your database. For how to create a database user for your managed identity, see https://aka.ms/javaee-db-identity."
+                                },
+                                "defaultValue": {
+                                    "systemAssignedIdentity": "Off"
+                                },
+                                "options": {
+                                    "hideSystemAssignedIdentity": true,
+                                    "hideUserAssignedIdentity": false
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), steps('section_database').databaseConnectionInfo.enablePswlessConnection)]"
                             }
                         ],
                         "visible": "[bool(steps('section_database').enableDB)]"
@@ -1879,7 +1914,7 @@
             "aadsServerHost": "[steps('section_aad').aadInfo.aadsServerHost]",
             "adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
-			"addressPrefixes": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.addressPrefixes, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.addressPrefixes)]",
+            "addressPrefixes": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.addressPrefixes, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.addressPrefixes)]",
             "appGatewayCertificateOption": "[steps('section_appGateway').certificateOption]",
             "appGatewaySSLCertData": "[steps('section_appGateway').keyVaultSSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appGatewaySSLCertPassword]",
@@ -1895,6 +1930,7 @@
             "dnszoneAppGatewayLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneGatewayLabel]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
             "dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
+            "dbIdentity": "[steps('section_database').databaseConnectionInfo.dbIdentity]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "elasticsearchEndpoint": "[steps('section_elk').elkInfo.elasticsearchEndpoint]",
@@ -1906,6 +1942,7 @@
             "enableCoherenceWebLocalStorage": "[bool(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.enableCoherenceWebLocalStorage,'false'))]",
             "enableDNSConfiguration": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
+            "enablePswlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection)]",
             "hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",
@@ -1931,9 +1968,9 @@
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]",
             "enableHTTPAdminListenPort": "[basics('basicsOptional').enableAdminHTTPListenPort]",
-            "enableCustomSSL":"[steps('section_sslConfiguration').enableCustomSSL]",
+            "enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
             "sslConfigurationAccessOption": "[steps('section_sslConfiguration').sslConfigurationAccessOption]",
-			"subnetName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.subnets.subnet1.name, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.subnets.subnet1.name)]",
+            "subnetName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.subnets.subnet1.name, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.subnets.subnet1.name)]",
             "subnetPrefix": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.subnets.subnet1.addressPrefix, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.subnets.subnet1.addressPrefix)]",
             "subnetForAppGateway": "[steps('section_networkingConfiguration').virtualNetworkWithAppGateway.subnets.subnet2.name]",
             "subnetPrefixForAppGateway": "[steps('section_networkingConfiguration').virtualNetworkWithAppGateway.subnets.subnet2.addressPrefix]",
@@ -1955,7 +1992,7 @@
             "uploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
             "uploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
             "uploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
-			"virtualNetworkName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.name, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.name)]",
+            "virtualNetworkName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.name, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.name)]",
             "virtualNetworkResourceGroupName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.resourceGroup, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.resourceGroup)]",
             "virtualNetworkNewOrExisting": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.newOrExisting, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.newOrExisting)]"
         }
