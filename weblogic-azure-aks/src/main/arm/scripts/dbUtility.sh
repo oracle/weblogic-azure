@@ -15,6 +15,10 @@ function generate_ds_model() {
     elif [[ "${DATABASE_TYPE}" == "${dbTypeMySQL}" ]]; then
         databaseDriver=${driverMySQL}
         databaseTestTableName=${testTableMySQL}
+
+        if [[ "${ENABLE_PASSWORDLESS_CONNECTION,,}" == "true" ]]; then
+            databaseDriver=${driverMySQLCj}
+        fi
     elif [[ "${DATABASE_TYPE}" == "${dbTypeOthers}" ]]; then
         databaseDriver=${DB_DRIVER_NAME}
         databaseTestTableName=${TEST_TABLE_NAME}
@@ -156,6 +160,7 @@ export driverOracle="oracle.jdbc.OracleDriver"
 export driverPostgre="org.postgresql.Driver"
 export driverSQLServer="com.microsoft.sqlserver.jdbc.SQLServerDriver"
 export driverMySQL="com.mysql.jdbc.Driver"
+export driverMySQLCj="com.mysql.cj.jdbc.Driver"
 export optTypeDelete='delete'
 export testTableOracle="SQL ISVALID"
 export testTablePostgre="SQL SELECT 1"

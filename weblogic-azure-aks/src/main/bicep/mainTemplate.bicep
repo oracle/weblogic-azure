@@ -100,6 +100,8 @@ param dbDriverLibrariesUrls array = []
 param dbDriverName string = 'org.contoso.Driver'
 @description('Determines the transaction protocol (global transaction processing behavior) for the data source.')
 param dbGlobalTranPro string = 'EmulateTwoPhaseCommit'
+@description('Managed identity that has access to database')
+param dbIdentity object = {}
 @secure()
 @description('Password for Database')
 param dbPassword string = newGuid()
@@ -136,6 +138,8 @@ param enableDNSConfiguration bool = false
 param enableAdminT3Tunneling bool = false
 @description('Configure a custom channel in WebLogic cluster for the T3 protocol that enables HTTP tunneling')
 param enableClusterT3Tunneling bool = false
+@description('Enable passwordless datasource connection.')
+param enablePswlessConnection bool = false
 @description('Is the specified SSO account associated with an active Oracle support contract?')
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
@@ -292,7 +296,7 @@ var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_azcliVersion = '2.33.1'
+var const_azcliVersion = '2.41.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_hasTags = contains(resourceGroup(), 'tags')
 // If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
@@ -551,11 +555,13 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
+    databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
+    enablePswlessConnection: enablePswlessConnection
     enablePV: const_enablePV
     identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
@@ -617,11 +623,13 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
+    databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
+    enablePswlessConnection: enablePswlessConnection
     enablePV: const_enablePV
     identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
@@ -721,7 +729,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
   ]
 }
 
-module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
+module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB && !enablePswlessConnection) {
   name: 'datasource-deployment'
   params: {
     _artifactsLocation: _artifactsLocation
@@ -738,6 +746,35 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB) {
     dbPassword: dbPassword
     dbTestTableName: dbTestTableName
     dbUser: dbUser
+    dsConnectionURL: dsConnectionURL
+    identity: obj_uamiForDeploymentScript
+    jdbcDataSourceName: jdbcDataSourceName
+    location: location
+    wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    networkingDeployment
+  ]
+}
+
+module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.bicep' = if (enableDB && enablePswlessConnection) {
+  name: 'passwordless-datasource-deployment'
+  params: {
+    _artifactsLocation: _artifactsLocation
+    _artifactsLocationSasToken: _artifactsLocationSasToken
+    _pidEnd: pids.outputs.pswlessDbEnd
+    _pidStart: pids.outputs.pswlessDbStart
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
+    aksNodeRGName: ref_wlsDomainDeployment.outputs.aksNodeRgName
+    azCliVersion: const_azcliVersion
+    databaseType: databaseType
+    dbConfigurationType: dbConfigurationType
+    dbGlobalTranPro: dbGlobalTranPro
+    dbUser: dbUser
+    dbIdentity: dbIdentity
     dsConnectionURL: dsConnectionURL
     identity: obj_uamiForDeploymentScript
     jdbcDataSourceName: jdbcDataSourceName
@@ -771,6 +808,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   }
   dependsOn: [
     datasourceDeployment
+    passwordlessDatasourceDeployment
   ]
 }
 

@@ -16,11 +16,6 @@ resource uamiForDeploymentScript 'Microsoft.ManagedIdentity/userAssignedIdentiti
   location: location
 }
 
-resource contributorRoleDefinitioninSubScope 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
-  scope: subscription()
-  name: const_roleDefinitionIdOfContributor
-}
-
 // Assign Contributor role in subscription scope, we need the permission to get/update resource cross resource group.
 module deploymentScriptUAMICotibutorRoleAssignment '_rolesAssignment/_roleAssignmentinSubscription.bicep' = {
   name: name_deploymentScriptContributorRoleAssignmentName

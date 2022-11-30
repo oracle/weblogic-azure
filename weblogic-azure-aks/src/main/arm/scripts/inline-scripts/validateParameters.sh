@@ -487,6 +487,20 @@ function validate_aks_version() {
   fi
 }
 
+function enable_aks_managed_identity() {
+  local identityLength=$(az aks show -g ${AKS_CLUSTER_RESOURCEGROUP_NAME} -n ${AKS_CLUSTER_NAME} | jq '.identity | length')
+  echo "identityLength ${identityLength}"
+
+  if [ $identityLength -lt 1 ]; then
+      echo "enable managed identity..."
+      # Your cluster is using service principal, and you are going to update the cluster to use systemassigned managed identity.
+      # After updating, your cluster's control plane and addon pods will switch to use managed identity, but kubelet will KEEP USING SERVICE PRINCIPAL until you upgrade your agentpool.
+      az aks update -y -g ${AKS_CLUSTER_RESOURCEGROUP_NAME} -n ${AKS_CLUSTER_NAME} --enable-managed-identity
+
+      validate_status "Enable Applciation Gateway Ingress Controller for ${AKS_CLUSTER_NAME}."
+  fi
+}
+
 # VNET input sample:
 # {
 #     "name": "wlsaks-vnet",
@@ -572,6 +586,10 @@ validate_dns_zone
 
 if [[ "${createAKSCluster,,}" == "true" ]]; then
   validate_aks_version
+fi
+
+if [[ "${createAKSCluster,,}" != "true" ]]; then
+  enable_aks_managed_identity
 fi
 
 validate_appgateway_vnet

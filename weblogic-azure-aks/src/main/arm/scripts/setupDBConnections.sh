@@ -16,6 +16,7 @@ DB_PASSWORD: password for Database.
 DB_USER: user id of Database.
 DB_CONNECTION_STRING: JDBC Connection String.
 DB_DRIVER_NAME: datasource driver name, must be specified if database type is otherdb.
+ENABLE_PASSWORDLESS_CONNECTION: true to enable passwordless connection
 GLOBAL_TRANSATION_PROTOCOL: Determines the transaction protocol (global transaction processing behavior) for the data source.
 JDBC_DATASOURCE_NAME: JNDI Name for JDBC Datasource.
 TEST_TABLE_NAME: the name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.
@@ -44,7 +45,7 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ -z "$DB_PASSWORD" || -z "${DB_USER}" ]]; then
+    if [[ -z "${DB_PASSWORD}" || -z "${DB_USER}" ]]; then
         echo_stderr "DB_PASSWORD and DB_USER are required. "
         usage 1
     fi
@@ -67,6 +68,11 @@ function validate_input() {
     if [[ -z "$WLS_DOMAIN_USER" || -z "${WLS_DOMAIN_PASSWORD}" ]]; then
         echo_stderr "WLS_DOMAIN_USER and WLS_DOMAIN_PASSWORD are required. "
         usage 1
+    fi
+
+    # reset password
+    if [[ "${ENABLE_PASSWORDLESS_CONNECTION,,}" == "true" ]]; then
+        DB_PASSWORD=""
     fi
 }
 
@@ -131,6 +137,8 @@ function apply_datasource_to_domain() {
     kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         -p '[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/configuration/model/configMap", "value":'${wlsConfigmapName}'}, {"op": "replace", "path": "/spec/configuration/secrets", "value": '${secretStrings}'}]'
+
+    utility_validate_status "Patch DB configuration."
 }
 
 function remove_datasource_from_domain() {
@@ -178,6 +186,8 @@ function remove_datasource_from_domain() {
     kubectl -n ${wlsDomainNS} patch domain ${WLS_DOMAIN_UID} \
         --type=json \
         -p '[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "replace", "path": "/spec/configuration/model/configMap", "value":'${wlsConfigmapName}'}, {"op": "replace", "path": "/spec/configuration/secrets", "value": '${secretStrings}'}]'
+
+    utility_validate_status "Patch DB configuration."
 }
 
 function wait_for_operation_completed() {

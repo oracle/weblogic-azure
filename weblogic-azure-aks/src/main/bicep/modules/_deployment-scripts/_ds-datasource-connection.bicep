@@ -17,6 +17,7 @@ param dbPassword string = newGuid()
 param dbTestTableName string = 'Null'
 param dbUser string
 param dsConnectionURL string
+param enablePswlessConnection bool = false
 param identity object = {}
 param jdbcDataSourceName string
 param location string
@@ -73,6 +74,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       {
         name: 'DB_DRIVER_NAME'
         value:  dbDriverName
+      }
+      {
+        name: 'ENABLE_PASSWORDLESS_CONNECTION'
+        value: string(enablePswlessConnection)
       }
       {
         name: 'GLOBAL_TRANSATION_PROTOCOL'

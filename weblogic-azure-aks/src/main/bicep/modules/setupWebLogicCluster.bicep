@@ -52,6 +52,7 @@ param azCliVersion string = ''
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
+param databaseType string = 'oracle'
 param dbDriverLibrariesUrls array = []
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
@@ -59,6 +60,7 @@ param enableAzureMonitoring bool = false
 param enableCustomSSL bool = false
 param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
+param enablePswlessConnection bool = false
 param enablePV bool = false
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object = {}
@@ -129,6 +131,11 @@ module pidStart './_pids/_pid.bicep' = {
   }
 }
 
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' existing = if (!createAKSCluster) {
+  name: aksClusterName
+  scope: resourceGroup(aksClusterRGName)
+}
+
 /*
 * Deploy AKS cluster
 */
@@ -140,7 +147,7 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
     aciWorkspaceSku: aciWorkspaceSku
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
-    vmSize: vmSize
+    aksAgentPoolVMSize: vmSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksVersion: aksVersion
     enableAzureMonitoring: enableAzureMonitoring
@@ -177,10 +184,12 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: azCliVersion
+    databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableCustomSSL: enableCustomSSL
     enableAdminT3Tunneling: enableAdminT3Tunneling
     enableClusterT3Tunneling: enableClusterT3Tunneling
+    enablePswlessConnection: enablePswlessConnection
     enablePV: enablePV
     identity: identity
     isSSOSupportEntitled: isSSOSupportEntitled
@@ -234,6 +243,7 @@ module pidEnd './_pids/_pid.bicep' = {
 
 output aksClusterName string = createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
 output aksClusterRGName string = createAKSCluster ? resourceGroup().name : aksClusterRGName
+output aksNodeRgName string = createAKSCluster? aksClusterDeployment.outputs.aksNodeRgName : existingAKSCluster.properties.nodeResourceGroup
 output adminServerEndPoint string = format('http://{0}-admin-server.{0}-ns.svc.cluster.local:7001/console', wlsDomainUID)
 output adminServerT3InternalEndPoint string = enableAdminT3Tunneling ? format('{0}://{1}-admin-server.{1}-ns.svc.cluster.local:{2}', enableCustomSSL ? 't3s' : 't3', wlsDomainUID, t3ChannelAdminPort): ''
 output clusterEndPoint string = format('http://{0}-cluster-cluster-1.{0}-ns.svc.cluster.local:8001/', wlsDomainUID)

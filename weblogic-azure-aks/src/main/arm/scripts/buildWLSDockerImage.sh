@@ -118,6 +118,8 @@ function initialize() {
     mkdir wlsdeploy/config
     mkdir wlsdeploy/applications
     mkdir wlsdeploy/domainLibraries
+    mkdir wlsdeploy/classpathLibraries
+    mkdir wlsdeploy/sharedLibraries
 }
 
 function download_wdt_wit() {
@@ -141,6 +143,31 @@ function download_wdt_wit() {
 
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL ${witDownloadURL} -o imagetool.zip
     validate_status "Check status of imagetool.zip."
+}
+
+function download_mysql_passwordless_jdbc_libs() {
+    local mySQLPom=mysql-pom.xml
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4AzureMySQLJDBCPomFile}" -o ${mySQLPom}
+    validate_status "Check status of downloading Azure Identity Provider JDBC MySQL Pom file."
+    
+    echo "download dependencies"
+    mvn dependency:copy-dependencies -f ${mySQLPom}
+    if [ $? -eq 0 ]; then
+        ls -l target/dependency/
+        
+        mkdir wlsdeploy/classpathLibraries/azureLibraries
+        mkdir wlsdeploy/classpathLibraries/jackson
+        # fix JARs conflict issue in GA images, put jackson libraries to PRE_CLASSPATH to upgrade the existing libs.
+        mv target/dependency/jackson-annotations-*.jar wlsdeploy/classpathLibraries/jackson/
+        mv target/dependency/jackson-core-*.jar wlsdeploy/classpathLibraries/jackson/
+        mv target/dependency/jackson-databind-*.jar wlsdeploy/classpathLibraries/jackson/
+        mv target/dependency/jackson-dataformat-xml-*.jar wlsdeploy/classpathLibraries/jackson/
+        # Thoes jars will be appended to CLASSPATH
+        mv target/dependency/*.jar wlsdeploy/classpathLibraries/azureLibraries/
+    else
+        echo "Failed to download dependencies for azure-identity-providers-jdbc-mysql"
+        exit 1
+    fi
 }
 
 # Install docker, zip, unzip and java
@@ -198,6 +225,19 @@ function install_utilities() {
 
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
     validate_status "Install mssql driver."
+
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMySQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/sharedLibraries/${constMySQLLibName}
+    validate_status "Install mysql driver."
+
+    if [[ "${enablePswlessConnection,,}" == "true" ]]; then
+        sudo apt -y -q install maven
+        mvn --help
+        validate_status "Check status of mvn."
+
+        if [[ "${dbType}" == "${constDBTypeMySQL}" ]]; then
+            download_mysql_passwordless_jdbc_libs
+        fi
+    fi
 }
 
 function install_db_drivers() {
@@ -346,6 +386,8 @@ export enableAdminT3Tunneling=$9
 export enableClusterT3Tunneling=${10}
 export useOracleImage=${11}
 export dbDriversUrls=${12}
+export enablePswlessConnection=${13}
+export dbType=${14}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 export dbDriverPaths=""
