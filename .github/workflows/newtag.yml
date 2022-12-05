@@ -57,6 +57,12 @@ jobs:
         uses: ./.github/actions/setvars
         with:
           varFilePath: ./.github/variables/vm-dependencies.env
+      - name: Get versions of external dependencies
+        id: get-external-dependencies-version
+        run: |
+          curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
+          source external-deps-versions.properties
+          echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
       - name: Checkout ${{ env.repoName }}
         uses: actions/checkout@v2
         with:
@@ -77,7 +83,7 @@ jobs:
           ref: ${{ env.refArmttk }}
       - name: Set up bicep
         run: |
-          curl -Lo bicep https://github.com/Azure/bicep/releases/download/v0.4.613/bicep-linux-x64
+          curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
           chmod +x ./bicep
           sudo mv ./bicep /usr/local/bin/bicep
           bicep --version
