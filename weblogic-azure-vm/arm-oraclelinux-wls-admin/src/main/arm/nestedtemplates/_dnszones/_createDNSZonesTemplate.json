@@ -60,7 +60,7 @@
     "resources": [
         {
             "type": "Microsoft.Network/dnszones",
-            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "apiVersion": "2018-05-01",
             "name": "[parameters('dnszoneName')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -69,7 +69,7 @@
         },
         {
             "type": "Microsoft.Network/dnszones/A",
-            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "apiVersion": "2018-05-01",
             "condition": "[variables('const_hasARecords')]",
             "name": "[concat(parameters('dnszoneName'), '/', variables('const_dnszonesARecordSetNames')[copyIndex()])]",
             "copy": {
@@ -88,7 +88,7 @@
         },
         {
             "type": "Microsoft.Network/dnszones/CNAME",
-            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "apiVersion": "2018-05-01",
             "condition": "[variables('const_hasCNAMERecords')]",
             "name": "[concat(parameters('dnszoneName'),'/', variables('const_dnszonesCNAMERecordSetNames')[copyIndex()])]",
             "location": "[parameters('location')]",

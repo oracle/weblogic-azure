@@ -107,7 +107,7 @@
         }
     },
     "variables": {
-        "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
+        "const_identityAPIVersion": "2022-01-31-preview",
         "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
         "name_dbTemplate": "_dbTemplate.json",
@@ -118,8 +118,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.pswless.database.start}",
+            "apiVersion": "2021-04-01",
+            "name": "340f5265-6de7-5b6f-aad3-9f179736cde0",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -130,7 +130,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2021-11-01",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]",
             "location": "[parameters('location')]",
@@ -147,7 +147,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "installJdbcLibsTemplate",
             "dependsOn": [
                 "virtualMachineIdentityLoop"
@@ -197,7 +197,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "dbTemplate",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
@@ -250,8 +250,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.pswless.database.end}",
+            "apiVersion": "2021-04-01",
+            "name": "b4d91140-fb26-50de-9358-147b9dd25f7a",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'dbTemplate')]"
             ],
