@@ -327,17 +327,7 @@
                         "managedDisk": {
                             "storageAccountType": "StandardSSD_LRS"
                         }
-                    },
-                    "dataDisks": [
-                        {
-                            "lun": 0,
-                            "createOption": "FromImage",
-                            "diskSizeGB": 900,
-                            "managedDisk": {
-                                "storageAccountType": "StandardSSD_LRS"
-                            }
-                        }
-                    ]
+                    }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
