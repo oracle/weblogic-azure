@@ -110,14 +110,14 @@ function verifyCertValidity()
 
 	# Check whether KEYSTORE supplied can be opened for reading
 	# Redirecting as no need to display the contents
-	runuser -l oracle -c "keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE > /dev/null 2>&1"
+	runuser -l oracle -c "$JAVA_HOME/bin/keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE > /dev/null 2>&1"
 	if [ $? != 0 ];
 	then
 		echo_stderr "Error opening the keystore : $KEYSTORE"
 		exit 1
 	fi
 
-	aliasList=`runuser -l oracle -c "keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE | grep Alias" |awk '{print $3}'`
+	aliasList=`runuser -l oracle -c "$JAVA_HOME/bin/keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE | grep Alias" |awk '{print $3}'`
 	if [[ -z $aliasList ]]; 
 	then 
 		echo_stderr "Error : No alias found in supplied certificate $KEYSTORE"
@@ -126,7 +126,7 @@ function verifyCertValidity()
 	
 	for alias in $aliasList 
 	do
-		VALIDITY_PERIOD=`runuser -l oracle -c "keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE -alias $alias | grep Valid"`
+		VALIDITY_PERIOD=`runuser -l oracle -c "$JAVA_HOME/bin/keytool -list -v -keystore $KEYSTORE  -storepass $PASSWORD -storetype $KEY_STORE_TYPE -alias $alias | grep Valid"`
 		echo "$KEYSTORE is \"$VALIDITY_PERIOD\""
 		CERT_UNTIL_DATE=`echo $VALIDITY_PERIOD | awk -F'until:|\r' '{print $2}'`
 		CERT_UNTIL_SECONDS=`date -d "$CERT_UNTIL_DATE" +%s`
@@ -466,7 +466,7 @@ function addCertficateToOracleVault()
           # Validate JKS file
           verifyCertValidity ${OHS_VAULT_PATH}/ohsKeystore.jks $ohsKeyStorePassPhrase $CURRENT_DATE $MIN_CERT_VALIDITY "JKS" 
           
-          KEY_TYPE=`keytool -list -v -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -storepass ${ohsKeyStorePassPhrase} | grep 'Keystore type:'`
+          KEY_TYPE=`$JAVA_HOME/bin/keytool -list -v -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -storepass ${ohsKeyStorePassPhrase} | grep 'Keystore type:'`
           if [[ $KEY_TYPE == *"jks"* ]]; then
               runuser -l oracle -c  "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet  jks_to_pkcs12  -wallet ${OHS_VAULT_PATH}  -pwd ${ORACLE_VAULT_PASSWORD} -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -jkspwd ${ohsKeyStorePassPhrase}"
               if [[ $? == 0 ]]; then
@@ -537,7 +537,7 @@ MIN_CERT_VALIDITY="1"
 read OHS_DOMAIN_NAME OHS_COMPONENT_NAME OHS_NM_USER OHS_NM_PSWD OHS_HTTP_PORT OHS_HTTPS_PORT WLS_REST_URL WLS_USER WLS_PASSWORD OHS_KEY_STORE_DATA OHS_KEY_STORE_PASSPHRASE ORACLE_VAULT_PASSWORD OHS_KEY_TYPE
 
 JDK_PATH="/u01/app/jdk"
-JDK_VERSION="jdk1.8.0_271"
+JDK_VERSION="jdk1.8.0_291"
 JAVA_HOME=$JDK_PATH/$JDK_VERSION
 PATH=$JAVA_HOME/bin:$PATH
 OHS_PATH="/u01/app/ohs"
