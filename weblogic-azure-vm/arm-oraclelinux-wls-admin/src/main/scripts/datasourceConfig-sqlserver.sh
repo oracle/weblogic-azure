@@ -90,6 +90,17 @@ function validateInput()
        echo _stderr "Please provide Weblogic target cluster name"
        exit 1
    fi
+
+   if [ -z "${enablePswlessConnection}" ];
+   then
+       echo _stderr "Please provide enablePswlessConnection to identity if enabling passwordless connection."
+       exit 1
+   fi
+
+   # reset password
+   if [[ "${enablePswlessConnection,,}" == "true" ]]; then
+       dsPassword=""
+   fi
 }
 
 function createJDBCSource_model()
@@ -148,7 +159,7 @@ function createTempFolder()
 #main
 
 #read arguments from stdin
-read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro wlsClusterName
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro enablePswlessConnection wlsClusterName
 
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 hostName=`hostname`

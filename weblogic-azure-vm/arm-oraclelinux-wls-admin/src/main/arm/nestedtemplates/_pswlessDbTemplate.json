@@ -1,0 +1,248 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        },
+        "adminVMName": {
+            "type": "string",
+            "defaultValue": "adminVM",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "databaseType": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "One of the supported database types"
+            }
+        },
+        "dbGlobalTranPro": {
+            "defaultValue": "OnePhaseCommit",
+            "type": "string",
+            "metadata": {
+                "description": "Determines the transaction protocol (global transaction processing behavior) for the data source."
+            }
+        },
+        "dbIdentity": {
+            "defaultValue": {},
+            "type": "object",
+            "metadata": {
+                "description": "Managed identity that has access to the data source."
+            }
+        },
+        "dbUser": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Userid of Database"
+            }
+        },
+        "dsConnectionURL": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "JDBC Connection String"
+            }
+        },
+        "jdbcDataSourceName": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "JNDI Name for JDBC Datasource"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "defaultValue": "wlsd",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        }
+    },
+    "variables": {
+        "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
+        "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
+        "name_dbTemplate": "_dbTemplate.json",
+        "array_azureJdbcPlugins": {
+            "mysql": "defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin",
+            "postgresql": "authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.pswless.database.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+        {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('adminVMName')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "installJdbcLibsTemplate",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('adminVMName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_installJdbcLibsTemplate')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "enablePswlessConnection": {
+                        "value": true
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "wlsDomainName": {
+                        "value": "[parameters('wlsDomainName')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "dbTemplate",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbTemplate')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "dbGlobalTranPro": {
+                        "value": "[parameters('dbGlobalTranPro')]"
+                    },
+                    "dsConnectionURL": {
+                        "value": "[uri(format('{0}&{1}&azure.clientId={2}', parameters('dsConnectionURL'), variables('array_azureJdbcPlugins')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId), '')]"
+                    },
+                    "dbUser": {
+                        "value": "[parameters('dbUser')]"
+                    },
+                    "enablePswlessConnection": {
+                        "value": true
+                    },
+                    "jdbcDataSourceName": {
+                        "value": "[parameters('jdbcDataSourceName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.pswless.database.end}",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'dbTemplate')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "artifactsLocationPassedIn": {
+            "type": "string",
+            "value": "[parameters('_artifactsLocation')]"
+        }
+    }
+}
