@@ -88,20 +88,26 @@ function uninstall_maven() {
     sudo rm -f ${MAVEN_HOME} -R
 }
 
-function install_azure_mysql_libraries() {
-    local mySQLPom=mysql-pom.xml
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fksL "${gitUrl4AzureMySQLJDBCPomFile}" -o ${mySQLPom}
+function install_azure_identity_extension() {
+    local myPomFile=pom.xml
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fksL "${gitUrl4AzureIdentityExtensionPomFile}" -o ${myPomFile}
     if [ $? != 0 ]; then
-        echo_stderr "Failed to download ${gitUrl4AzureMySQLJDBCPomFile}."
+        echo_stderr "Failed to download ${gitUrl4AzureIdentityExtensionPomFile}."
     fi
 
-    install_maven
     echo "download dependencies"
-    mvn dependency:copy-dependencies -f ${mySQLPom}
+    mvn dependency:copy-dependencies -f ${myPomFile}
     if [ $? -eq 0 ]; then
         ls -l target/dependency/
 
         domainBase=$(dirname $domainPath)
+
+        # check if azure identity extension has been installed, if so, remove old version
+        if [ -d "${domainBase}/azure-libraries/identity" ]; then
+            sudo rm ${domainBase}/azure-libraries/identity -f -r
+            sudo rm ${domainBase}/azure-libraries/jackson -f -r
+        fi
+
         sudo mkdir -p ${domainBase}/azure-libraries/identity
         sudo mkdir -p ${domainBase}/azure-libraries/jackson
         # fix JARs conflict issue, put jackson libraries to PRE_CLASSPATH to upgrade the existing libs.
@@ -109,33 +115,59 @@ function install_azure_mysql_libraries() {
         sudo mv target/dependency/jackson-core-*.jar ${domainBase}/azure-libraries/jackson
         sudo mv target/dependency/jackson-databind-*.jar ${domainBase}/azure-libraries/jackson
         sudo mv target/dependency/jackson-dataformat-xml-*.jar ${domainBase}/azure-libraries/jackson
-        # Thoes jars will be appended to CLASSPATH
+        # Those jars will be appended to CLASSPATH
         sudo mv target/dependency/*.jar ${domainBase}/azure-libraries/identity
         sudo chown -R oracle:oracle ${domainBase}/azure-libraries
     else
-        echo "Failed to download dependencies for azure-identity-providers-jdbc-mysql"
+        echo "Failed to download dependencies for azure-identity-extension"
         exit 1
     fi
 
-    rm ${mySQLPom} -f
-    uninstall_maven
-    
-    sed -i 's;^export DOMAIN_HOME;&\nCLASSPATH="'${domainBase}'/azure-libraries/identity/*:${CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
-    sed -i 's;^export DOMAIN_HOME;&\nPRE_CLASSPATH="'${domainBase}'/azure-libraries/jackson/*:${PRE_CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
+    rm ${myPomFile} -f
+    rm target -f -r
+    if ! grep -q 'CLASSPATH="'${domainBase}'/azure-libraries/identity/*:${CLASSPATH}"' "${domainPath}/bin/setDomainEnv.sh"; then
+        sed -i 's;^export DOMAIN_HOME;&\nCLASSPATH="'${domainBase}'/azure-libraries/identity/*:${CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
+    fi
+
+    if ! grep -q 'PRE_CLASSPATH="'${domainBase}'/azure-libraries/jackson/*:${PRE_CLASSPATH}"' "${domainPath}/bin/setDomainEnv.sh"; then
+        sed -i 's;^export DOMAIN_HOME;&\nPRE_CLASSPATH="'${domainBase}'/azure-libraries/jackson/*:${PRE_CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
+    fi
 }
 
 function upgrade_mysql_driver() {
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fksL "${wlsMySQLDriverUrl}" -o ${mysqlDriverJarName}
+    local mysqlPomFile=mysql-pom.xml
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fksL "${gitUrl4MySQLDriverPomFile}" -o ${mysqlPomFile}
     if [ $? != 0 ]; then
-        echo_stderr "Failed to download ${wlsMySQLDriverUrl}."
+        echo_stderr "Failed to download ${gitUrl4MySQLDriverPomFile}."
     fi
 
-    local domainBase=$(dirname $domainPath)
-    sudo mkdir ${domainBase}/external-libraries
-    sudo mv ${mysqlDriverJarName} ${domainBase}/external-libraries/
-    sudo chown -R oracle:oracle ${domainBase}/external-libraries
+    echo "download dependencies"
+    mvn dependency:copy-dependencies -f ${mysqlPomFile}
+    if [ $? -eq 0 ]; then
+        ls -l target/dependency/
 
-    sed -i 's;^export DOMAIN_HOME;&\nPRE_CLASSPATH="'${domainBase}'/external-libraries/'${mysqlDriverJarName}':${PRE_CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
+        local domainBase=$(dirname $domainPath)
+        local preClassLibsFolderName=preclasspath-libraries
+
+        # check if the driver has been upgraded, if so, remove old driver
+        if [ -e ${domainBase}/${preClassLibsFolderName}/mysql-connector-*.jar ]; then
+            sudo rm ${domainBase}/${preClassLibsFolderName} -f -r
+        fi
+
+        sudo mkdir ${domainBase}/${preClassLibsFolderName}
+        sudo mv target/dependency/mysql-connector-*.jar ${domainBase}/${preClassLibsFolderName}/
+        sudo chown -R oracle:oracle ${domainBase}/${preClassLibsFolderName}
+    else
+        echo "Failed to download mysql driver."
+        exit 1
+    fi
+
+    rm ${mysqlPomFile} -f
+    rm target -f -r
+
+    if ! grep -q 'PRE_CLASSPATH="'${domainBase}'/preclasspath-libraries/*:${PRE_CLASSPATH}"' "${domainPath}/bin/setDomainEnv.sh"; then
+        sed -i 's;^export DOMAIN_HOME;&\nPRE_CLASSPATH="'${domainBase}'/preclasspath-libraries/*:${PRE_CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
+    fi
 }
 
 #This function to wait for admin server
@@ -205,26 +237,29 @@ EOF
 read oracleHome domainPath wlsServerName wlsAdminHost wlsAdminPort wlsUserName wlsPassword databaseType enablePswlessConnection
 
 export curlMaxTime=120 # seconds
-export gitUrl4AzureMySQLJDBCPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/azure-lib-versions/weblogic-azure-aks/src/main/resources/azure-identity-provider-jdbc-mysql.xml"
+export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/azure-identity-extensions/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
+export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/azure-identity-extensions/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 export mvnVersion="3.8.6"
 export mvnInstaller="apache-maven-${mvnVersion}-bin.tar.gz"
-export mysqlDriverJarName="mysql-connector-java-8.0.30.jar"
 export retryMaxAttempt=5 # retry attempt for curl command
 export url4MavenInstaller="https://dlcdn.apache.org/maven/maven-3/${mvnVersion}/binaries/${mvnInstaller}"
-export wlsMySQLDriverUrl="https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar"
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
 validate_input
+
+install_maven
 
 if [ $databaseType == "mysql" ]; then
     upgrade_mysql_driver
 fi
 
 if [ "${enablePswlessConnection,,}" == "true" ]; then
-    if [ $databaseType == "mysql" ]; then
-        install_azure_mysql_libraries
+    if [[ $databaseType == "mysql" || $databaseType == "postgresql" ]]; then
+        install_azure_identity_extension
     fi
 fi
+
+uninstall_maven
 
 if [ $wlsServerName == "admin" ]; then
     restart_admin_service

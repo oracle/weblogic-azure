@@ -112,7 +112,8 @@
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
         "name_dbTemplate": "_dbTemplate.json",
         "array_azureJdbcPlugins": {
-            "mysql": "defaultAuthenticationPlugin=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin"
+            "mysql": "defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin",
+            "postgresql": "authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin"
         }
     },
     "resources": [
