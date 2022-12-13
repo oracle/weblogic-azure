@@ -3,7 +3,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 #read arguments from stdin
-read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro wlsClusterName
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro enablePswlessConnection wlsClusterName
 
 if [ -z "$wlsClusterName" ]; then
    wlsClusterName="cluster1"
@@ -92,17 +92,33 @@ function validateInput()
        exit 1
    fi
 
+   if [ -z "${enablePswlessConnection}" ];
+   then
+       echo _stderr "Please provide enablePswlessConnection to identity if enabling passwordless connection."
+       exit 1
+   fi
+
    if [ -z "$wlsClusterName" ];
    then
        echo _stderr "Please provide Weblogic target cluster name"
        exit 1
    fi
+
+   # reset password
+   if [[ "${enablePswlessConnection,,}" == "true" ]]; then
+       dsPassword=""
+   fi
 }
 
 function createJDBCSource_model()
 {
-echo "Creating JDBC data source with name $jdbcDataSourceName"
-cat <<EOF >${scriptPath}/create_datasource.py
+    local driverName="com.mysql.jdbc.Driver"
+    if [[ "${enablePswlessConnection,,}" == "true" ]]; then
+       driverName="com.mysql.cj.jdbc.Driver"
+    fi
+
+    echo "Creating JDBC data source with name $jdbcDataSourceName"
+    cat <<EOF >${scriptPath}/create_datasource.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 edit("$hostName")
 startEdit()
@@ -117,7 +133,7 @@ try:
   cmo.setDatasourceType('GENERIC')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName')
   cmo.setUrl('$dsConnectionURL')
-  cmo.setDriverName('com.mysql.jdbc.Driver')
+  cmo.setDriverName('$driverName')
   cmo.setPassword('$dsPassword')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCConnectionPoolParams/$jdbcDataSourceName')
   cmo.setTestTableName('SQL ISVALID\r\n\r\n\r\n\r\n')

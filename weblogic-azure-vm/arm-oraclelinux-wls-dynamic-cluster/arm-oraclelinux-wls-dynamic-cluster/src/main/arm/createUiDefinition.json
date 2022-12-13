@@ -1409,7 +1409,7 @@
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Azure database for PostgreSQL",
+                                            "label": "Azure database for PostgreSQL (with support for passwordless connection)",
                                             "value": "postgresql"
                                         },
                                         {
@@ -1421,7 +1421,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL",
+                                            "label": "MySQL (with support for passwordless connection)",
                                             "value": "mysql"
                                         }
                                     ],
@@ -1430,13 +1430,12 @@
                                 "visible": true
                             },
                             {
-                                "name": "dbDriverWarningInfo",
+                                "name": "mysqlJDBCDriverInfo",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), or(equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest'), equals(basics('skuUrnVersion'), 'owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest')))]",
+                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]",
                                 "options": {
-                                    "icon": "Warning",
-                                    "text": "Your current selection of WebLogic Server version, Java version, and MySQL database has a known problem. Please see the link for important information on how to solve it.",
-                                    "uri": "https://aka.ms/wls-vms-mysql-12213"
+                                    "icon": "Info",
+                                    "text": "To support passwordless connection and various functionalities, the offer will upgrade the <a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
                                 }
                             },
                             {
@@ -1446,7 +1445,7 @@
                                 "toolTip": "The JNDI name for the database JDBC connection",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "regex": "^[a-z0-9A-Z/]{1,30}$",
                                     "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
                                 },
@@ -1459,15 +1458,23 @@
                                 "toolTip": "The JDBC connection string for the database",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "validations": [
                                         {
-                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                            "regex": "^jdbc:.*$",
+                                            "message": "A valid JDBC URL must start with 'jdbc:'."
                                         },
                                         {
-                                            "isValid": "[if(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'), and(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'serverTimezone'), contains(steps('section_database').databaseConnectionInfo.dsConnectionURL,'enabledTLSProtocols=TLSv1.2')), bool('true'))]",
-                                            "message": "The connection string of MySQL must contain server time zone and enable TLS v1.2, for an example, 'jdbc:mysql://contoso.mysql.database.azure.com:3306/guest?useSSL=true&requireSSL=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2'."
+                                            "isValid": "[startsWith(steps('section_database').databaseConnectionInfo.dsConnectionURL, concat('jdbc:', steps('section_database').databaseConnectionInfo.databaseType))]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPluginClassName')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "message": "The offer will append authenticationPluginClassName with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
                                         }
                                     ]
                                 },
@@ -1519,11 +1526,26 @@
                                 "toolTip": "Use only letters and numbers",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^(?=.{1,128}$)(?!\\-)([a-z0-9A-Z@\\-]){1,128}([^\\-])$",
-                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
+                                            "message": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+                                        },
+                                        {
+                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+                                            "message": "You must select at least one managed identity that has access to your database."
+                                        }
+                                    ]
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "enablePswlessConnection",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use passwordless datasource connection",
+                                "toolTip": "Use passwordless datasource connection.",
+                                "visible": "[and(bool(steps('section_database').enableDB),or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'),equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')))]"
                             },
                             {
                                 "name": "dbPassword",
@@ -1541,7 +1563,23 @@
                                 "options": {
                                     "hideConfirmation": false
                                 },
-                                "visible": true
+                                "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePswlessConnection))]"
+                            },
+                            {
+                                "name": "dbIdentity",
+                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                                "label": "Connect database with Managed Identity",
+                                "toolTip": {
+                                    "userAssignedIdentity": "Select a user assigned identity that has access to your database. For how to create a database user for your managed identity, see https://aka.ms/javaee-db-identity."
+                                },
+                                "defaultValue": {
+                                    "systemAssignedIdentity": "Off"
+                                },
+                                "options": {
+                                    "hideSystemAssignedIdentity": true,
+                                    "hideUserAssignedIdentity": false
+                                },
+                                "visible": "[and(bool(steps('section_database').enableDB), steps('section_database').databaseConnectionInfo.enablePswlessConnection)]"
                             }
                         ],
                         "visible": "[bool(steps('section_database').enableDB)]"
@@ -1990,6 +2028,7 @@
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "denyPublicTrafficForAdminServer": "[steps('section_networkingConfiguration').denyPublicTrafficForAdminServer]",
             "denyPublicTrafficForManagedServer": "[steps('section_networkingConfiguration').denyPublicTrafficForManagedServer]",
+            "dbIdentity": "[steps('section_database').databaseConnectionInfo.dbIdentity]",
             "dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
             "dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
@@ -2010,6 +2049,7 @@
             "enableCustomDNS": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
             "enableOHS": "[bool(steps('section_ohs').enableOHS)]",
+            "enablePswlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection)]",
             "hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",

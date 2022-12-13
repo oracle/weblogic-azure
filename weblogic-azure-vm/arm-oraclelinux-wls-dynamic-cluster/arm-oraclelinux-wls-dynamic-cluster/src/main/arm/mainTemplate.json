@@ -79,6 +79,13 @@
 				"description": "Determines the transaction protocol (global transaction processing behavior) for the data source."
 			}
 		},
+		"dbIdentity": {
+			"defaultValue": {},
+			"type": "object",
+			"metadata": {
+				"description": "Managed identity that has access to the data source."
+			}
+		},
 		"dbPassword": {
 			"defaultValue": "",
 			"type": "securestring",
@@ -221,6 +228,13 @@
 			"type": "bool",
 			"metadata": {
 				"description": "Bool value, if it's set to true, it will setup OHS and configures for WebLogic Server cluster"
+			}
+		},
+		"enablePswlessConnection": {
+			"defaultValue": false,
+			"type": "bool",
+			"metadata": {
+				"description": "True to enable passwordless JDBC connection."
 			}
 		},
 		"hasDNSZones": {
@@ -1182,6 +1196,9 @@
 					"dbGlobalTranPro": {
 						"value": "[parameters('dbGlobalTranPro')]"
 					},
+					"dbIdentity": {
+						"value": "[parameters('dbIdentity')]"
+					},
 					"dbPassword": {
 						"value": "[parameters('dbPassword')]"
 					},
@@ -1191,11 +1208,20 @@
 					"dsConnectionURL": {
 						"value": "[parameters('dsConnectionURL')]"
 					},
+					"enablePswlessConnection": {
+						"value": "[parameters('enablePswlessConnection')]"
+					},
 					"jdbcDataSourceName": {
 						"value": "[parameters('jdbcDataSourceName')]"
 					},
 					"location": {
 						"value": "[parameters('location')]"
+					},
+					"managedServerPrefix": {
+						"value": "[parameters('managedServerPrefix')]"
+					},
+					"numberOfManagedApplicationInstances": {
+						"value": "[parameters('dynamicClusterSize')]"
 					},
 					"wlsPassword": {
 						"value": "[parameters('wlsPassword')]"

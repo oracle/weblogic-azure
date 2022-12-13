@@ -1,0 +1,121 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+            }
+        },
+        "_artifactsLocationInstallJdbcLibsTemplate": {
+            "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
+            "type": "string",
+            "metadata": {
+                "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+            }
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        },
+        "adminVMName": {
+            "type": "string",
+            "defaultValue": "adminVM",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "databaseType": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "One of the supported database types"
+            }
+        },
+        "enablePswlessConnection": {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "True to enable passwordless connection."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "managedServerPrefix": {
+            "type": "string",
+            "defaultValue": "msp",
+            "metadata": {
+                "description": "Provide managed server prefix name"
+            }
+        },
+        "numberOfManagedApplicationInstances": {
+            "type": "int",
+            "defaultValue": 2,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of VMs that have been deployed to host managed application server."
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "defaultValue": "wlsd",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for your Weblogic domain name"
+            }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
+        }
+    },
+    "variables": {
+        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_wlsAdminPort": "7005",
+        "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
+        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+        "name_scriptInstallJdbcLibs": "installJdbcDrivers.sh"
+    },
+    "resources": [
+        {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
+            "location": "[parameters('location')]",
+            "copy": {
+                "name": "appVirtualMachineExtensionLoop",
+                "count": "[parameters('numberOfManagedApplicationInstances')]"
+            },
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationInstallJdbcLibsTemplate'), concat('../scripts/', variables('name_scriptInstallJdbcLibs'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptInstallJdbcLibs'),' <<< \"',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ',parameters('managedServerPrefix'), copyIndex(1), ' ', parameters('adminVMName'), ' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',base64(parameters('wlsPassword')),' ',parameters('databaseType'),' ',parameters('enablePswlessConnection'), '\"')]"
+                }
+            }
+        }
+    ]
+}
