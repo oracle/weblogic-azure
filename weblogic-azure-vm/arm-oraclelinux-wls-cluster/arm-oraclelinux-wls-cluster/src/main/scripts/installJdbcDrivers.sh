@@ -125,11 +125,11 @@ function install_azure_identity_extension() {
 
     rm ${myPomFile} -f
     rm target -f -r
-    if ! grep -q 'CLASSPATH="'${domainBase}'/azure-libraries/identity/*:${CLASSPATH}"' "${domainPath}/bin/setDomainEnv.sh"; then
+    if ! grep -q "${domainBase}/azure-libraries/identity/" "${domainPath}/bin/setDomainEnv.sh"; then
         sed -i 's;^export DOMAIN_HOME;&\nCLASSPATH="'${domainBase}'/azure-libraries/identity/*:${CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
     fi
 
-    if ! grep -q 'PRE_CLASSPATH="'${domainBase}'/azure-libraries/jackson/*:${PRE_CLASSPATH}"' "${domainPath}/bin/setDomainEnv.sh"; then
+    if ! grep -q "${domainBase}/azure-libraries/jackson/" "${domainPath}/bin/setDomainEnv.sh"; then
         sed -i 's;^export DOMAIN_HOME;&\nPRE_CLASSPATH="'${domainBase}'/azure-libraries/jackson/*:${PRE_CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
     fi
 }
@@ -165,7 +165,7 @@ function upgrade_mysql_driver() {
     rm ${mysqlPomFile} -f
     rm target -f -r
 
-    if ! grep -q 'PRE_CLASSPATH="'${domainBase}'/preclasspath-libraries/*:${PRE_CLASSPATH}"' "${domainPath}/bin/setDomainEnv.sh"; then
+    if ! grep -q "${domainBase}/preclasspath-libraries/" "${domainPath}/bin/setDomainEnv.sh"; then
         sed -i 's;^export DOMAIN_HOME;&\nPRE_CLASSPATH="'${domainBase}'/preclasspath-libraries/*:${PRE_CLASSPATH}";' ${domainPath}/bin/setDomainEnv.sh
     fi
 }
