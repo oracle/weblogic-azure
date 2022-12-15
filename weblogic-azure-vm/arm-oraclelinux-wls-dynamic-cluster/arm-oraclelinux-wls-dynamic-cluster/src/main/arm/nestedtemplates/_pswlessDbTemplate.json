@@ -120,7 +120,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.pswless.database.start}",
+            "name": "${dynamic.pswless.database.start}",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -252,7 +252,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.pswless.database.end}",
+            "name": "${dynamic.pswless.database.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'passwordlessDatasourceDeployment')]"
             ],
