@@ -199,7 +199,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "dbTemplate",
+            "name": "passwordlessDatasourceDeployment",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
             ],
@@ -254,7 +254,7 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "${cluster.pswless.database.end}",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'dbTemplate')]"
+                "[resourceId('Microsoft.Resources/deployments', 'passwordlessDatasourceDeployment')]"
             ],
             "properties": {
                 "mode": "Incremental",
