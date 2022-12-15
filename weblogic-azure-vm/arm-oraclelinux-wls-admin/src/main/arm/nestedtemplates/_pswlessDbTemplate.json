@@ -92,12 +92,17 @@
     },
     "variables": {
         "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
+        "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
         "name_dbTemplate": "_dbTemplate.json",
         "array_azureJdbcPlugins": {
             "mysql": "defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin",
             "postgresql": "authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin"
-        }
+        },
+         "obj_dbIdentity": {
+            "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
+        },
+        "obj_empty": {}
     },
     "resources": [
         {
@@ -114,14 +119,28 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
-            "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('adminVMName')]",
-            "location": "[parameters('location')]",
-            "identity": {
-                "type": "userAssigned",
-                "userAssignedIdentities": {
-                    "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "assignDbIdentityToAdminVM",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_appendIdentityTemplate')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "newIdentities": {
+                        "value": "[variables('obj_dbIdentity')]"
+                    },
+                    "existingIdentities": {
+                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '${azure.apiVersion}', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '${azure.apiVersion}', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    }
                 }
             }
         },
@@ -130,7 +149,7 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "installJdbcLibsTemplate",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('adminVMName'))]"
+                "assignDbIdentityToAdminVM"
             ],
             "properties": {
                 "mode": "Incremental",
