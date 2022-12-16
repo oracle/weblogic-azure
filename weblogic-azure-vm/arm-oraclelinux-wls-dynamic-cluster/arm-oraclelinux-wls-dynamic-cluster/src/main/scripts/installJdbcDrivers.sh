@@ -237,8 +237,8 @@ EOF
 read oracleHome domainPath wlsServerName wlsAdminHost wlsAdminPort wlsUserName wlsPassword databaseType enablePswlessConnection
 
 export curlMaxTime=120 # seconds
-export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/azure-identity-extensions/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
-export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/azure-identity-extensions/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
+export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
+export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 export mvnVersion="3.8.6"
 export mvnInstaller="apache-maven-${mvnVersion}-bin.tar.gz"
 export retryMaxAttempt=5 # retry attempt for curl command
