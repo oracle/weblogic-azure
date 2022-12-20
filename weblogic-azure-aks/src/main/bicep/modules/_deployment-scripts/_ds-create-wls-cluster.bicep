@@ -146,7 +146,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       }
       {
         name: 'URL_3RD_DATASOURCE'
-        value:  base64(string(dbDriverLibrariesUrls))
+        value:  string(dbDriverLibrariesUrls)
       }
       {
         name: 'USE_ORACLE_IMAGE'

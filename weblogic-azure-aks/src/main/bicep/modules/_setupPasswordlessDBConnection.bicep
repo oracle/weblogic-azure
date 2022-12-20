@@ -49,7 +49,8 @@ var const_podIdentitySelector = 'db-pod-identity' // Do not change this value.
 var name_dbIdentityName = split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[8]
 // Azure JDBC plugins, used to generate connection string.
 var name_jdbcPlugins = {
-  mysql: 'defaultAuthenticationPlugin=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.providers.mysql.AzureIdentityMysqlAuthenticationPlugin'
+  mysql: 'defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin'
+  postgresql: 'authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin'
 }
 var name_podIdentity = format('{0}-pod-identity-{1}', databaseType, toLower(utcValue))
 

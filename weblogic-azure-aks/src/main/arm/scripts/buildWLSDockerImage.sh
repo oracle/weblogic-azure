@@ -117,9 +117,8 @@ function initialize() {
     mkdir wlsdeploy
     mkdir wlsdeploy/config
     mkdir wlsdeploy/applications
-    mkdir wlsdeploy/domainLibraries
     mkdir wlsdeploy/classpathLibraries
-    mkdir wlsdeploy/sharedLibraries
+    mkdir wlsdeploy/${externalJDBCLibrariesDirectoryName}
 }
 
 function download_wdt_wit() {
@@ -145,13 +144,13 @@ function download_wdt_wit() {
     validate_status "Check status of imagetool.zip."
 }
 
-function download_mysql_passwordless_jdbc_libs() {
-    local mySQLPom=mysql-pom.xml
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4AzureMySQLJDBCPomFile}" -o ${mySQLPom}
+function download_azure_identity_extensions() {
+    local myPom=pom.xml
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4AzureIdentityExtensionsPomFile}" -o ${myPom}
     validate_status "Check status of downloading Azure Identity Provider JDBC MySQL Pom file."
     
     echo "download dependencies"
-    mvn dependency:copy-dependencies -f ${mySQLPom}
+    mvn dependency:copy-dependencies -f ${myPom}
     if [ $? -eq 0 ]; then
         ls -l target/dependency/
         
@@ -165,7 +164,25 @@ function download_mysql_passwordless_jdbc_libs() {
         # Thoes jars will be appended to CLASSPATH
         mv target/dependency/*.jar wlsdeploy/classpathLibraries/azureLibraries/
     else
-        echo "Failed to download dependencies for azure-identity-providers-jdbc-mysql"
+        echo "Failed to download dependencies for azure-identity-extensions"
+        exit 1
+    fi
+}
+
+function download_mysql_driver() {
+    local myPom=mysqlpom.xml
+    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4MySQLDriverPomFile}" -o ${myPom}
+    validate_status "Check status of downloading MySQL driver Pom file."
+    
+    echo "download dependencies"
+    mvn dependency:copy-dependencies -f ${myPom}
+    if [ $? -eq 0 ]; then
+        ls -l target/dependency/
+        
+        mkdir wlsdeploy/${constPreclassDirectoryName}
+        mv target/dependency/*.jar wlsdeploy/${constPreclassDirectoryName}/
+    else
+        echo "Failed to download dependencies for mysql driver."
         exit 1
     fi
 }
@@ -218,25 +235,34 @@ function install_utilities() {
     jq --help
     validate_status "Check status of unzip."
 
+    sudo apt -y -q install maven
+    mvn --help
+    validate_status "Check status of mvn."
+
     download_wdt_wit
 
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsPostgresqlDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constPostgreDriverName}
-    validate_status "Install postgresql driver."
+    if [[ "${dbType}" == "postgresql" ]]; then
+        curl -m ${curlMaxTime} \
+            --retry ${retryMaxAttempt} \
+            -fL ${wlsPostgresqlDriverUrl} \
+            -o ${scriptDir}/model-images/wlsdeploy/${externalJDBCLibrariesDirectoryName}/${constPostgreDriverName}
+        validate_status "Install postgresql driver."
+    fi
 
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMSSQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${constMSSQLDriverName}
-    validate_status "Install mssql driver."
-
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL ${wlsMySQLDriverUrl} -o ${scriptDir}/model-images/wlsdeploy/sharedLibraries/${constMySQLLibName}
-    validate_status "Install mysql driver."
+    if [[ "${dbType}" == "sqlserver" ]]; then
+        curl -m ${curlMaxTime} \
+            --retry ${retryMaxAttempt} \
+            -fL ${wlsMSSQLDriverUrl} \
+            -o ${scriptDir}/model-images/wlsdeploy/${externalJDBCLibrariesDirectoryName}/${constMSSQLDriverName}
+        validate_status "Install mssql driver."
+    fi
+    
+    if [[ "${dbType}" == "mysql" ]]; then
+        download_mysql_driver
+    fi
 
     if [[ "${enablePswlessConnection,,}" == "true" ]]; then
-        sudo apt -y -q install maven
-        mvn --help
-        validate_status "Check status of mvn."
-
-        if [[ "${dbType}" == "${constDBTypeMySQL}" ]]; then
-            download_mysql_passwordless_jdbc_libs
-        fi
+        download_azure_identity_extensions
     fi
 }
 
@@ -256,13 +282,11 @@ function install_db_drivers() {
         local fileName="${urlWithoutQueryString##*/}"
         echo $fileName
 
-        curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/domainLibraries/${fileName}
+        curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fL "$item" -o ${scriptDir}/model-images/wlsdeploy/${externalJDBCLibrariesDirectoryName}/${fileName}
         if [ $? -ne 0 ];then
           echo "Failed to download $item"
           exit 1
         fi
-
-        dbDriverPaths="${dbDriverPaths},'wlsdeploy/domainLibraries/${fileName}'"
     done
 }
 
@@ -390,7 +414,6 @@ export enablePswlessConnection=${13}
 export dbType=${14}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
-export dbDriverPaths=""
 
 read_sensitive_parameters_from_stdin
 

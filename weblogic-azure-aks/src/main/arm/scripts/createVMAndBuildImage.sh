@@ -130,6 +130,7 @@ function build_docker_image() {
 
     echo "wlsImagePath: ${wlsImagePath}"
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | tr -d "\"") # remove " from the string
+    URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | base64 -w0)
     az vm extension set --name CustomScript \
         --extension-instance-name wls-image-script \
         --resource-group ${CURRENT_RESOURCEGROUP_NAME} \

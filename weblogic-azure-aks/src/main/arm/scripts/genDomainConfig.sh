@@ -12,12 +12,17 @@ export adminServiceUrl="${WLS_DOMAIN_UID}-admin-server.${WLS_DOMAIN_UID}-ns.svc.
 export clusterServiceUrl="${WLS_DOMAIN_UID}-cluster-${constClusterName}.${WLS_DOMAIN_UID}-ns.svc.cluster.local"
 
 # set classpath
-preClassPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/sharedLibraries/${constMySQLLibName}"
-classPath=""
+preClassPath=""
+classPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/${externalJDBCLibrariesDirectoryName}/*"
+
+if [[ "${DB_TYPE}" == "mysql" ]]; then
+  preClassPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/${constPreclassDirectoryName}/*:"
+fi
+
 if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
   # append jackson libraries to pre-classpath to upgrade existing libs in GA images
-  preClassPath="${preClassPath}:/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/jackson/*"
-  classPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"
+  preClassPath="${preClassPath}/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/jackson/*"
+  classPath="${classPath}:/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"
 fi
 
 cat <<EOF >$filePath
