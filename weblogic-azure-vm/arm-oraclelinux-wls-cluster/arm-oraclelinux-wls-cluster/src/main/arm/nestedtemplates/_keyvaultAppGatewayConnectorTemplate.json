@@ -48,6 +48,13 @@
                 "description": "Azure DNS for Application Gateway"
             }
         },
+        "enableCookieBasedAffinity": {
+            "defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "true to enable cookie based affinity."
+            }
+        },
         "gatewayPublicIPAddressName": {
             "defaultValue": "gwip",
             "type": "string",
@@ -237,6 +244,9 @@
                     "dnsNameforApplicationGateway": {
                         "value": "[parameters('domainLabelforApplicationGateway')]"
                     },
+                    "enableCookieBasedAffinity": {
+                        "value": "[parameters('enableCookieBasedAffinity')]"
+                    },
                     "gatewayPublicIPAddressName": {
                         "value": "[parameters('gatewayPublicIPAddressName')]"
                     },
@@ -319,6 +329,9 @@
                     "dnsNameforApplicationGateway": {
                         "value": "[parameters('domainLabelforApplicationGateway')]"
                     },
+                    "enableCookieBasedAffinity": {
+                        "value": "[parameters('enableCookieBasedAffinity')]"
+                    },
                     "gatewayPublicIPAddressName": {
                         "value": "[parameters('gatewayPublicIPAddressName')]"
                     },
@@ -395,6 +408,9 @@
                     },
                     "dnsNameforApplicationGateway": {
                         "value": "[parameters('domainLabelforApplicationGateway')]"
+                    },
+                    "enableCookieBasedAffinity": {
+                        "value": "[parameters('enableCookieBasedAffinity')]"
                     },
                     "gatewayPublicIPAddressName": {
                         "value": "[parameters('gatewayPublicIPAddressName')]"

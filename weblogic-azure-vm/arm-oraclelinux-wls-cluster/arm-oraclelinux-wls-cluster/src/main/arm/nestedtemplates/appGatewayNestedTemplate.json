@@ -49,6 +49,13 @@
 				"description": "DNS for ApplicationGateway"
 			}
 		},
+		"enableCookieBasedAffinity": {
+            "defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "true to enable cookie based affinity."
+            }
+        },
 		"gatewayPublicIPAddressName": {
 			"defaultValue": "gwip",
 			"type": "string",
@@ -169,7 +176,7 @@
 			"provisioningState": "Succeeded",
 			"port": "[int(variables('const_backendPort'))]",
 			"protocol": "Http",
-			"cookieBasedAffinity": "Enabled",
+			"cookieBasedAffinity": "[if(parameters('enableCookieBasedAffinity'), 'Enabled', 'Disabled')]",
 			"pickHostNameFromBackendAddress": true,
 			"affinityCookieName": "ApplicationGatewayAffinity",
 			"requestTimeout": 20,
@@ -181,7 +188,7 @@
 			"provisioningState": "Succeeded",
 			"port": "[int(variables('const_backendPort'))]",
 			"protocol": "Http",
-			"cookieBasedAffinity": "Enabled",
+			"cookieBasedAffinity": "[if(parameters('enableCookieBasedAffinity'), 'Enabled', 'Disabled')]",
 			"hostName": "[parameters('customDomainName')]",
 			"pickHostNameFromBackendAddress": false,
 			"affinityCookieName": "ApplicationGatewayAffinity",

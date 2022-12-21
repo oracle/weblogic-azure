@@ -779,6 +779,13 @@
                         }
                     },
                     {
+                        "name": "enableCookieBasedAffinity",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "Enable cookie based affinity",
+                        "toolTip": "If checked, enable cookie based affinity",
+                        "visible": "[steps('section_appGateway').enableAppGateway]"
+                    },
+                    {
                         "name": "keyVaultText00",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": "[steps('section_appGateway').enableAppGateway]",
@@ -1948,6 +1955,7 @@
             "enableAppGateway": "[steps('section_appGateway').enableAppGateway]",
             "enableCoherence": "[bool(steps('section_coherence').enableCoherence)]",
             "enableCoherenceWebLocalStorage": "[bool(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.enableCoherenceWebLocalStorage,'false'))]",
+            "enableCookieBasedAffinity": "[bool(steps('section_appGateway').enableCookieBasedAffinity)]",
             "enableDNSConfiguration": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
             "enablePswlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection)]",
