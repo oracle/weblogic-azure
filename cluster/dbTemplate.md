@@ -26,11 +26,7 @@ you must have an existing database instance to use.  This template
 supports three popular Azure databases: [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/), [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) and [MySQL](https://learn.microsoft.com/en-us/azure/mysql/single-server/quickstart-create-mysql-server-database-using-azure-portal).  If you do not have an instance, please
 create one from the Azure portal.
 
-### Connect database with Managed Identity
-
-The template supports to connect [Azure Database for MySQL](https://learn.microsoft.com/en-us/azure/mysql/single-server/quickstart-create-mysql-server-database-using-azure-portal) with Managed Identity.  
-
-You can follow [Creating a MySQL user for your Managed Identity](https://learn.microsoft.com/en-us/azure/mysql/single-server/how-to-connect-with-managed-identity#creating-a-mysql-user-for-your-managed-identity) to create a database user for your Managed Identity in MySQL instance. Once you finish that, you are able to connect the database without password.
+{% include sub-template-connect-db-with-msi.md %}
 
 ### Apply multiple databases 
 
@@ -82,30 +78,7 @@ The parameter `dsConnectionURL` stands for JDBC connection string. The connectio
 
 {% include sub-template-datasource-connection-url.md %}
 
-### Obtain the Managed Identity
-
-The parameter `dbIdentity` stands for Managed Identity that can connect to database. 
-
-Firstly, obtain Managed Identity Id with command:
-
-```bash
-resourceID=$(az identity show --resource-group myResourceGroup --name myManagedIdentity --query id --output tsv)
-```
-
-The value muse be the following:
-
-```json
-{
-    "dbIdentity": {
-        "value": {
-            "type": "UserAssigned",
-            "userAssignedIdentities": {
-                "${resourceID}": {}
-            }
-        }
-    }
-}
-```
+{% include sub-template-obtain-msi.md%}
 
 #### Example Parameters JSON
 

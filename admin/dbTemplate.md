@@ -23,8 +23,10 @@ The database ARM template will be applied to an existing {{ site.data.var.wlsFul
 
 To apply configure a database with {{ site.data.var.wlsFullBrandName }},
 you must have an existing database instance to use.  This template
-supports three popular Azure databases: [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/) and [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal).  If you do not have an instance, please
+supports three popular Azure databases: [Oracle](https://ms.portal.azure.com/#blade/Microsoft_Azure_Marketplace/MarketplaceOffersBlade/selectedMenuItemId/home/searchQuery/oracle%20database), [Azure SQL Server](https://docs.microsoft.com/en-us/azure/azure-sql/), [Azure Database for PostgreSQL](https://docs.microsoft.com/en-us/azure/azure-sql/database/single-database-create-quickstart?WT.mc_id=gallery&tabs=azure-portal) and [MySQL](https://learn.microsoft.com/en-us/azure/mysql/single-server/quickstart-create-mysql-server-database-using-azure-portal).  If you do not have an instance, please
 create one from the Azure portal.
+
+{% include sub-template-connect-db-with-msi.md %}
 
 ### Apply multiple databases 
 
@@ -47,13 +49,17 @@ You must construct a parameters JSON file containing the parameters to the datab
 |----------------|-------------|
 | `_artifactsLocation`| See below for details. |
 | `adminVMName`| At deployment time, if this value was changed from its default value, the value used at deployment time must be used.  Otherwise, this parameter should be omitted. |
-| `databaseType`| Must be one of `postgresql`, `oracle` or `sqlserver` |
+| `databaseType`| Must be one of `postgresql`, `oracle`, `sqlserver` and `mysql` |
+| `dbIdentity` | See below for details. You must provide this value if `enablePswlessConnection` is `true`.| 
 | `dbGlobalTranPro` | Determines the transaction protocol (global transaction processing behavior) for the data source. Must be one of `TwoPhaseCommit`, `LoggingLastResource`, `EmulateTwoPhaseCommit`, `OnePhaseCommit` or `None`. |
-| `dbPassword`| See below for details. |
+| `dbIdentity` | See below for details. You must provide this value if `enablePswlessConnection` is `true`.| 
+| `dbPassword`| See below for details. You don't need to input this value if `enablePswlessConnection` is `false`.|
 | `dbUser` | See below for details. |
 | `dsConnectionURL`| See below for details. |
+| `enablePswlessConnection` | True to enable passwordless datasource connection. Default value is `false`.|
 | `jdbcDataSourceName`| Must be the JNDI name for the JDBC data source. |
 | `location` | Must be the same region into which the server was initially deployed. |
+| `wlsDomainName` | Must be the same value provided at deployment time. |
 | `wlsPassword` | Must be the same value provided at deployment time. |
 | `wlsUserName` | Must be the same value provided at deployment time. |
 
@@ -71,9 +77,11 @@ The parameter `dsConnectionURL` stands for JDBC connection string. The connectio
 
 {% include sub-template-datasource-connection-url.md %}
 
+{% include sub-template-obtain-msi.md%}
+
 #### Example Parameters JSON
 
-Here is a fully filled out parameters file.   Note that we did not include `adminVMName`.
+Here is a fully filled out parameters file.   Note that we keep default value for `adminVMName` and `wlsDomainName`.
 
 {{ site.data.var.passwordInFileNote }}
 
@@ -112,6 +120,8 @@ Here is a fully filled out parameters file.   Note that we did not include `admi
     }
 }
 ```
+
+
 
 ## Invoke the ARM template
 

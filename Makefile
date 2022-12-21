@@ -16,8 +16,8 @@ all:
 	cp subtemplate-src/cluster-nsgRulesTemplate.md cluster/nsgRulesTemplate.md
 	cp subtemplate-src/coherenceTemplate.md cluster/coherenceTemplate.md
 	cp subtemplate-src/coherenceTemplate.md dynamic-cluster/coherenceTemplate.md
-	cp subtemplate-src/dbTemplate.md admin
-	cp subtemplate-src/cluster-dbTemplate.md cluster/dbTemplate.md
+	cp subtemplate-src/admin-dbTemplate.md admin/dbTemplate.md
+	cp subtemplate-src/dbTemplate.md cluster
 	cp subtemplate-src/dbTemplate.md dynamic-cluster
 	cp subtemplate-src/dynamic-cluster-aadNestedTemplate.md dynamic-cluster/aadNestedTemplate.md
 	cp subtemplate-src/dynamic-cluster-addnode.md dynamic-cluster/addnode.md
