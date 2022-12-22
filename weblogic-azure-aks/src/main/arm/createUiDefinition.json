@@ -452,7 +452,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Select the type of WebLogic Server Images.",
                                 "defaultValue": "General WebLogic Server Images",
-                                "toolTip": "If 'Patched WebLogic Server Images' is selected, the deployment process will pull from the Patched WebLogic Server Images repository. If 'Patched WebLogic Server Images' is selected the deployment process will pull from the General WebLogic Server Images repository.",
+                                "toolTip": "If 'Patched WebLogic Server Images' is selected, the deployment process will pull from the Patched WebLogic Server Images repository. If 'General WebLogic Server Images' is selected the deployment process will pull from the General WebLogic Server Images repository.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
