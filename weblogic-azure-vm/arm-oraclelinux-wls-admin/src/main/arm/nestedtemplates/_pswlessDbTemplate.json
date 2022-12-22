@@ -91,7 +91,7 @@
         }
     },
     "variables": {
-        "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
+        "const_identityAPIVersion": "2022-01-31-preview",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
         "name_dbTemplate": "_dbTemplate.json",
@@ -107,8 +107,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${admin.pswless.database.start}",
+            "apiVersion": "2021-04-01",
+            "name": "53e099bf-8148-5463-a51d-0272520bac60",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -120,7 +120,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "assignDbIdentityToAdminVM",
             "properties": {
                 "mode": "Incremental",
@@ -136,7 +136,7 @@
                         "value": "[variables('obj_dbIdentity')]"
                     },
                     "existingIdentities": {
-                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '${azure.apiVersion}', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '${azure.apiVersion}', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
+                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '2021-04-01', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '2021-04-01', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -146,7 +146,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "installJdbcLibsTemplate",
             "dependsOn": [
                 "assignDbIdentityToAdminVM"
@@ -190,7 +190,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "name": "passwordlessDatasourceDeployment",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
@@ -243,8 +243,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${admin.pswless.database.end}",
+            "apiVersion": "2021-04-01",
+            "name": "89d5d2a9-16b8-5b3d-b5f7-1fb8a6cfdfc5",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'passwordlessDatasourceDeployment')]"
             ],

@@ -239,7 +239,7 @@
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "[concat( variables('name_networkSecurityGroup'),'/','OHSPorts')]",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2021-04-01",
             "properties": {
                 "protocol": "TCP",
                 "sourcePortRange": "*",
@@ -252,7 +252,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+            "apiVersion": "2021-08-01",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[concat(parameters('ohsVMName'),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
@@ -264,13 +264,13 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForVirtualNetworks}",
+            "apiVersion": "2021-08-01",
             "type": "Microsoft.Network/virtualNetworks/subnets",
             "name": "[concat(parameters('virtualNetworkName'), '/', variables('name_subnet'))]",
             "condition": "[and(empty(parameters('virtualNetworkName')), empty(variables('name_subnet')))]"
         },
         {
-            "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
+            "apiVersion": "2021-08-01",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[concat(parameters('ohsVMName'), variables('name_nic'))]",
             "location": "[parameters('location')]",
@@ -298,7 +298,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2021-11-01",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[parameters('ohsVMName')]",
             "location": "[parameters('location')]",
@@ -339,7 +339,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '${azure.apiVersion2}').primaryEndpoints.blob]"
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('storageAccountName')), '2021-06-01').primaryEndpoints.blob]"
                     }
                 }
             },
@@ -350,7 +350,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2021-11-01",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('ohsVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
@@ -380,15 +380,15 @@
         },
         "ohsHostName": {
             "type": "string",
-            "value": "[reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn]"
+            "value": "[reference(variables('name_outputOHSHost'), '2021-04-01').dnsSettings.fqdn]"
         },
         "ohsAccessURL": {
             "type": "string",
-            "value": "[uri(format('http://{0}:{1}',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,parameters('ohshttpPort')),'')]"
+            "value": "[uri(format('http://{0}:{1}',reference(variables('name_outputOHSHost'), '2021-04-01').dnsSettings.fqdn,parameters('ohshttpPort')),'')]"
         },
         "ohsSecureAccessURL": {
             "type": "string",
-            "value": "[uri(format('https://{0}:{1}',reference(variables('name_outputOHSHost'), '${azure.apiVersion}').dnsSettings.fqdn,parameters('ohshttpsPort')),'')]"
+            "value": "[uri(format('https://{0}:{1}',reference(variables('name_outputOHSHost'), '2021-04-01').dnsSettings.fqdn,parameters('ohshttpsPort')),'')]"
         }
     }
 }

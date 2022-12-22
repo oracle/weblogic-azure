@@ -94,7 +94,7 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2021-11-01",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
