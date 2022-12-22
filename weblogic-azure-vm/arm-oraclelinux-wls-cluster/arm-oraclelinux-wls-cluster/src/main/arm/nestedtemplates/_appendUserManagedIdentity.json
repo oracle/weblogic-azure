@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string"
+        },
+        "existingIdentities": {
+            "type": "object"
+        },
+        "newIdentities": {
+            "type": "object"
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": "[union(parameters('existingIdentities'),parameters('newIdentities'))]"
+            }
+        }
+    ]
+}

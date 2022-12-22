@@ -779,6 +779,13 @@
                         }
                     },
                     {
+                        "name": "enableCookieBasedAffinity",
+                        "type": "Microsoft.Common.CheckBox",
+                        "label": "Enable cookie based affinity",
+                        "toolTip": "If checked, enable cookie based affinity",
+                        "visible": "[steps('section_appGateway').enableAppGateway]"
+                    },
+                    {
                         "name": "keyVaultText00",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": "[steps('section_appGateway').enableAppGateway]",
@@ -1308,7 +1315,7 @@
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Azure database for PostgreSQL",
+                                            "label": "Azure database for PostgreSQL (with support for passwordless connection)",
                                             "value": "postgresql"
                                         },
                                         {
@@ -1320,7 +1327,7 @@
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL (With support for passwordless connection)",
+                                            "label": "MySQL (with support for passwordless connection)",
                                             "value": "mysql"
                                         }
                                     ],
@@ -1338,20 +1345,13 @@
                                 }
                             },
                             {
-                                "name": "enablePswlessConnection",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Use passwordless datasource connection",
-                                "toolTip": "Use passwordless datasource connection.",
-                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]"
-                            },
-                            {
                                 "name": "jdbcDataSourceName",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "JNDI Name",
                                 "toolTip": "The JNDI name for the database JDBC connection",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "regex": "^[a-z0-9A-Z/]{1,30}$",
                                     "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
                                 },
@@ -1364,15 +1364,23 @@
                                 "toolTip": "The JDBC connection string for the database",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "validations": [
                                         {
-                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                            "regex": "^jdbc:.*$",
+                                            "message": "A valid JDBC URL must start with 'jdbc:'."
                                         },
                                         {
-                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "isValid": "[startsWith(steps('section_database').databaseConnectionInfo.dsConnectionURL, concat('jdbc:', steps('section_database').databaseConnectionInfo.databaseType))]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
                                             "message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPluginClassName')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "message": "The offer will append authenticationPluginClassName with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
                                         }
                                     ]
                                 },
@@ -1439,6 +1447,13 @@
                                 "visible": true
                             },
                             {
+                                "name": "enablePswlessConnection",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use passwordless datasource connection",
+                                "toolTip": "Use passwordless datasource connection.",
+                                "visible": "[and(bool(steps('section_database').enableDB),or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'),equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')))]"
+                            },
+                            {
                                 "name": "dbPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
@@ -1447,7 +1462,7 @@
                                 },
                                 "toolTip": "Database Password",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').enableDB)]",
+                                    "required": true,
                                     "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
                                     "validationMessage": "The password must be between 5 and 128 characters long and have at least one number."
                                 },
@@ -1940,6 +1955,7 @@
             "enableAppGateway": "[steps('section_appGateway').enableAppGateway]",
             "enableCoherence": "[bool(steps('section_coherence').enableCoherence)]",
             "enableCoherenceWebLocalStorage": "[bool(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.enableCoherenceWebLocalStorage,'false'))]",
+            "enableCookieBasedAffinity": "[bool(steps('section_appGateway').enableCookieBasedAffinity)]",
             "enableDNSConfiguration": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
             "enablePswlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection)]",

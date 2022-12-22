@@ -232,6 +232,13 @@
                 "description": "Specifies whether Local Storage is enabled for the Coherence*Web cluster tier."
             }
         },
+        "enableCookieBasedAffinity": {
+            "defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "true to enable cookie based affinity."
+            }
+        },
         "enableDB": {
             "defaultValue": false,
             "type": "bool",
@@ -1165,6 +1172,9 @@
                     },
                     "domainLabelforApplicationGateway": {
                         "value": "[variables('name_domainLabelforApplicationGateway')]"
+                    },
+                    "enableCookieBasedAffinity": {
+                        "value": "[parameters('enableCookieBasedAffinity')]"
                     },
                     "gatewayPublicIPAddressName": {
                         "value": "[parameters('gatewayPublicIPAddressName')]"

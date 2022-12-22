@@ -8,23 +8,16 @@
                 "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
             }
         },
-        "_artifactsLocationDbTemplate": {
-            "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
-            "type": "string",
-            "metadata": {
-                "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
-            }
-        },
         "_artifactsLocationSasToken": {
-            "defaultValue": "",
             "type": "securestring",
             "metadata": {
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
-            }
+            },
+            "defaultValue": ""
         },
         "adminVMName": {
-            "defaultValue": "adminVM",
             "type": "string",
+            "defaultValue": "adminVM",
             "metadata": {
                 "description": "Admin Server hosting VM name."
             }
@@ -43,8 +36,15 @@
                 "description": "Determines the transaction protocol (global transaction processing behavior) for the data source."
             }
         },
+        "dbIdentity": {
+            "defaultValue": {},
+            "type": "object",
+            "metadata": {
+                "description": "Managed identity that has access to the data source."
+            }
+        },
         "dbPassword": {
-            "defaultValue": "",
+            "defaultValue": "[newGuid()]",
             "type": "securestring",
             "metadata": {
                 "description": "Password for Database"
@@ -64,6 +64,13 @@
                 "description": "JDBC Connection String"
             }
         },
+        "enablePswlessConnection": {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata": {
+                "description": "True to enable passwordless connection."
+            }
+        },
         "jdbcDataSourceName": {
             "defaultValue": "",
             "type": "string",
@@ -77,11 +84,27 @@
                 "description": "Location for all resources."
             }
         },
-        "wlsUserName": {
-            "defaultValue": "weblogic",
+        "managedServerPrefix": {
             "type": "string",
+            "defaultValue": "msp",
             "metadata": {
-                "description": "Username for your Weblogic domain name"
+                "description": "Provide managed server prefix name"
+            }
+        },
+        "numberOfManagedApplicationInstances": {
+            "type": "int",
+            "defaultValue": 2,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Number of VMs that have been deployed to host managed application server."
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "defaultValue": "wlsd",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
             }
         },
         "wlsPassword": {
@@ -89,141 +112,182 @@
             "metadata": {
                 "description": "Password for your Weblogic domain name"
             }
+        },
+        "wlsUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for your Weblogic domain name"
+            }
         }
     },
     "variables": {
-        "const_wlsAdminPort": "7005",
-        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
-        "name_scriptFilePrefix": "datasourceConfig-",
-        "name_scriptFileSuffix-sqlserver": "sqlserver.sh",
-        "name_scriptFileSuffix-oracle": "oracle.sh",
-        "name_scriptFileSuffix-postgresql": "postgresql.sh",
-        "name_scriptFileSuffix-mysql": "mysql.sh"
+        "name_dbLinkedTemplateName": "_dbTemplate.json",
+        "name_dbPswlessTemplateName": "_pswlessDbTemplate.json",
+        "name_dbUpgradeMySQLDriver": "_installJdbcLibsTemplate.json"
     },
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${dynamic.database.start}",
+            "name": "pswlessDbTemplate",
+            "condition": "[parameters('enablePswlessConnection')]",
             "properties": {
                 "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
-                }
-            }
-        },
-        {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-sqlserver'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-oracle'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-postgresql'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-mysql'), parameters('_artifactsLocationSasToken')))]"
-                    ]
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbPswlessTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
                 },
-                "protectedSettings": {
-                     "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh <<< \"',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',base64(parameters('wlsPassword')),' ',base64(parameters('jdbcDataSourceName')),' ',base64(parameters('dsConnectionURL')),' ',parameters('dbUser'),' ',base64(parameters('dbPassword')),' ',parameters('dbGlobalTranPro'),'\"')]"
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "dbGlobalTranPro": {
+                        "value": "[parameters('dbGlobalTranPro')]"
+                    },
+                    "dbIdentity": {
+                        "value": "[parameters('dbIdentity')]"
+                    },
+                    "dbUser": {
+                        "value": "[parameters('dbUser')]"
+                    },
+                    "dsConnectionURL": {
+                        "value": "[parameters('dsConnectionURL')]"
+                    },
+                    "jdbcDataSourceName": {
+                        "value": "[parameters('jdbcDataSourceName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "managedServerPrefix": {
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "numberOfManagedApplicationInstances": {
+                        "value": "[parameters('numberOfManagedApplicationInstances')]"
+                    },
+                    "wlsDomainName": {
+                        "value": "[parameters('wlsDomainName')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
                 }
             }
         },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${dynamic.database.end}",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-            ],
+            "name": "upgradeMySQLJdbcDriverTemplate",
+            "condition": "[and(not(parameters('enablePswlessConnection')), equals(parameters('databaseType'),'mysql'))]",
             "properties": {
                 "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbUpgradeMySQLDriver')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "enablePswlessConnection": {
+                        "value": "[parameters('enablePswlessConnection')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "managedServerPrefix": {
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "numberOfManagedApplicationInstances": {
+                        "value": "[parameters('numberOfManagedApplicationInstances')]"
+                    },
+                    "wlsDomainName": {
+                        "value": "[parameters('wlsDomainName')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
                 }
             }
         },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${database.oracle}",
-            "condition": "[if(contains(parameters('databaseType'), 'oracle'), bool('true'), bool('false'))]",
+            "name": "passwordDatasourceDeployment",
+            "condition": "[not(parameters('enablePswlessConnection'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+                "[resourceId('Microsoft.Resources/deployments', 'upgradeMySQLJdbcDriverTemplate')]"
             ],
             "properties": {
                 "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${database.postgresql}",
-            "condition": "[if(contains(parameters('databaseType'), 'postgresql'), bool('true'), bool('false'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${database.mysql}",
-            "condition": "[if(contains(parameters('databaseType'), 'mysql'), bool('true'), bool('false'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "${database.sqlserver}",
-            "condition": "[if(contains(parameters('databaseType'), 'sqlserver'), bool('true'), bool('false'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "adminVMName": {
+                        "value": "[parameters('adminVMName')]"
+                    },
+                    "databaseType": {
+                        "value": "[parameters('databaseType')]"
+                    },
+                    "dbGlobalTranPro": {
+                        "value": "[parameters('dbGlobalTranPro')]"
+                    },
+                    "dbPassword": {
+                        "value": "[parameters('dbPassword')]"
+                    },
+                    "dbUser": {
+                        "value": "[parameters('dbUser')]"
+                    },
+                    "dsConnectionURL": {
+                        "value": "[parameters('dsConnectionURL')]"
+                    },
+                    "enablePswlessConnection": {
+                        "value": "[parameters('enablePswlessConnection')]"
+                    },
+                    "jdbcDataSourceName": {
+                        "value": "[parameters('jdbcDataSourceName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    }
                 }
             }
         }

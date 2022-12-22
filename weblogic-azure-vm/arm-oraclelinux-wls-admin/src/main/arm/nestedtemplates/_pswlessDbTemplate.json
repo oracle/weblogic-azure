@@ -70,22 +70,6 @@
                 "description": "Location for all resources."
             }
         },
-        "managedServerPrefix": {
-            "type": "string",
-            "defaultValue": "msp",
-            "metadata": {
-                "description": "Provide managed server prefix name"
-            }
-        },
-        "numberOfManagedApplicationInstances": {
-            "type": "int",
-            "defaultValue": 2,
-            "minValue": 1,
-            "maxValue": 20,
-            "metadata": {
-                "description": "Number of VMs that have been deployed to host managed application server."
-            }
-        },
         "wlsDomainName": {
             "type": "string",
             "defaultValue": "wlsd",
@@ -108,7 +92,6 @@
     },
     "variables": {
         "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
         "name_dbTemplate": "_dbTemplate.json",
@@ -116,7 +99,7 @@
             "mysql": "defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin",
             "postgresql": "authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin"
         },
-        "obj_dbIdentity": {
+         "obj_dbIdentity": {
             "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
         },
         "obj_empty": {}
@@ -125,7 +108,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.pswless.database.start}",
+            "name": "${admin.pswless.database.start}",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -138,11 +121,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "[concat('assignDbIdentityTo',variables('const_managedVMPrefix'), copyIndex(1))]",
-            "copy": {
-                "name": "virtualMachineIdentityLoop",
-                "count": "[parameters('numberOfManagedApplicationInstances')]"
-            },
+            "name": "assignDbIdentityToAdminVM",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -151,13 +130,13 @@
                 },
                 "parameters": {
                     "vmName": {
-                        "value": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]"
+                        "value": "[parameters('adminVMName')]"
                     },
                     "newIdentities": {
                         "value": "[variables('obj_dbIdentity')]"
                     },
                     "existingIdentities": {
-                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',concat(variables('const_managedVMPrefix'), copyIndex(1))), '${azure.apiVersion}', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',concat(variables('const_managedVMPrefix'), copyIndex(1))), '${azure.apiVersion}', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
+                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '${azure.apiVersion}', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',parameters('adminVMName')), '${azure.apiVersion}', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -170,7 +149,7 @@
             "apiVersion": "${azure.apiVersion}",
             "name": "installJdbcLibsTemplate",
             "dependsOn": [
-                "virtualMachineIdentityLoop"
+                "assignDbIdentityToAdminVM"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -196,12 +175,6 @@
                     },
                     "location": {
                         "value": "[parameters('location')]"
-                    },
-                    "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
-                    },
-                    "numberOfManagedApplicationInstances": {
-                        "value": "[parameters('numberOfManagedApplicationInstances')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
@@ -271,7 +244,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${cluster.pswless.database.end}",
+            "name": "${admin.pswless.database.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'passwordlessDatasourceDeployment')]"
             ],
