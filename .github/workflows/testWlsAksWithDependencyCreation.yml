@@ -297,7 +297,7 @@ jobs:
               run: |
                 appgatewayname=$(az resource list --resource-group ${{ env.resourceGroupForWlsAks }} --query "[?type=='Microsoft.Network/applicationGateways'].name|[0]" -o tsv)
                 echo $appgatewayname
-                publicIpAddressId=$(az network application-gateway show --resource-group ${{ env.resourceGroupForWlsAks }} --name ${appgatewayname} --query frontendIpConfigurations[0].publicIpAddress.id -o tsv)
+                publicIpAddressId=$(az network application-gateway show --resource-group ${{ env.resourceGroupForWlsAks }} --name ${appgatewayname} --query frontendIPConfigurations[0].publicIPAddress.id -o tsv)
                 echo $publicIpAddressId
                 appGatewayURL=$(az network public-ip show --resource-group ${{ env.resourceGroupForWlsAks }} --ids ${publicIpAddressId} --query dnsSettings.fqdn -o tsv)
                 echo $appGatewayURL

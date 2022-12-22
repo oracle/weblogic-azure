@@ -374,9 +374,6 @@ module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' =
     createNewAcr: const_createNewAcr
     location: location
   }
-  dependsOn: [
-    partnerCenterPid
-  ]
 }
 
 module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep' = {

@@ -1864,7 +1864,7 @@
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Azure database for PostgreSQL",
+                                            "label": "Azure database for PostgreSQL (with support for passwordless connection)",
                                             "value": "postgresql"
                                         },
                                         {
@@ -1898,13 +1898,6 @@
                                 }
                             },
                             {
-                                "name": "enablePswlessConnection",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Use passwordless datasource connection",
-                                "toolTip": "Use passwordless datasource connection.",
-                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]"
-                            },
-                            {
                                 "name": "jdbcDataSourceName",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "JNDI Name",
@@ -1927,12 +1920,20 @@
                                     "required": true,
                                     "validations": [
                                         {
-                                            "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
-                                            "message": "A valid JDBC URL for the chosen database type must be provided"
+                                            "regex": "^jdbc:.*$",
+                                            "message": "A valid JDBC URL must start with 'jdbc:'."
                                         },
                                         {
-                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "isValid": "[startsWith(steps('section_database').databaseConnectionInfo.dsConnectionURL, concat('jdbc:', steps('section_database').databaseConnectionInfo.databaseType))]",
+                                            "message": "A valid JDBC URL for the chosen database type must be provided."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
                                             "message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPluginClassName')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+                                            "message": "The offer will append authenticationPluginClassName with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
                                         }
                                     ]
                                 },
@@ -2010,6 +2011,13 @@
                                     ]
                                 },
                                 "visible": true
+                            },
+                            {
+                                "name": "enablePswlessConnection",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use passwordless datasource connection",
+                                "toolTip": "Use passwordless datasource connection.",
+                                "visible": "[and(bool(steps('section_database').enableDB),or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'),equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')))]"
                             },
                             {
                                 "name": "dbPassword",
