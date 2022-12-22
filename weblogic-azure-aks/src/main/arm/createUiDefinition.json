@@ -2167,7 +2167,7 @@
             "useOracleImage": "[if(bool(steps('section_aks').aksAdvancedInfo.useAcrImage), false, true)]",
             "userProvidedAcr": "[last(split(steps('section_aks').aksAdvancedInfo.userProvidedAcrSelector.id, '/'))]",
             "userProvidedImagePath": "[steps('section_aks').aksAdvancedInfo.userProvidedImagePath]",
-            "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
+            "validateApplications": true,
             "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
             "vnetRGNameForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.resourceGroup]",
             "vmSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
