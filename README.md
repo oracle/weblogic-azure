@@ -12,6 +12,52 @@ Please refer to the README for [documentation on WebLogic Server running on an A
 
 Please refer to the README for [documentation on WebLogic Server running on an Azure Virtual Machine](https://docs.oracle.com/en/middleware/standalone/weblogic-server/wlazu/get-started-oracle-weblogic-server-microsoft-azure-iaas.html#GUID-E0B24A45-F496-4509-858E-103F5EBF67A7)
 
+## Deployment Description
+
+### WLS on VMs
+
+#### Oracle WebLogic Server with Admin Server
+
+The offer provisions the following Azure resources based on Oracle WebLogic Server base images and an Oracle WebLogic Server Enterprise Edition with a domain and the Administration Server set up.
+
+* Oracle WebLogic Server base images
+    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3.
+    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4.
+    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6.
+    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6.
+    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6.
+    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
+    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
+    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6.
+* Computing resources
+    * A VM with the followings configurations:
+        * The operation system is consistent with the selected base image, e.g., if you select **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3**, the operation system is Oracle Linux 7.3.
+        * VM size.
+        * VM administrator authentication type and the related credential.
+    * An OS disk attached to the VM.
+* Network resources
+    * A virtual network and a subnet. You can also select to bring your own virtual network.
+    * A network security group if you select to create a new virtual network.
+    * A network interface.
+    * A public IP address assigned to the network interface if you select to create a new virtual network.
+    * A public DNS Zone if user selects to enable custom DNS and create a new DNS zone. You can also bring your own DNS Zone.
+    * An A record (Alias record to IPV4 address) to the VM if you select to enable custom DNS.
+* Storage resources
+    * An Azure Storage Account and a file share named `wlsshare`. The mount point is `/mnt/wlsshare`.
+* Key software components
+    * Oracle WebLogic Server Enterprise Edition. The version is consistent with the selected base image, e.g., if you select **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3**, the version is 12.2.1.3.0. The oracle home is `/u01/app/wls/install/oracle/middleware/oracle_home`.
+    * Oracle JDK. The version is consistent with the selected base image, e.g., if a user selects **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3**, the version is JDK 8. The Java home is `/u01/app/jdk/jdk-${version}`.
+    * The recent PostgreSQL JDBC driver and Microsoft SQL JDBC driver. The drivers are stored in `/u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/`. 
+    * An domain with the WebLogic Administration Server up configured based on the inputting Administrator user name and credentials. The default domain name is `adminDomain`, the domain path is `/u01/domains/adminDomain/`. You are able to access the Administration Server and manage the domain via URL `http://<vm-ip-address>:7001/console/`. By default, the offer configures the Administration Server with a self-signed certificate, you are able to access it with HTTPS `https://<vm-ip-address>:7002/console/`.
+    * TLS/SSL termination if you select to configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate. The offer sets up the Administration Server with the inputting identity key store and trust key store, and the default secure port is `7002`. The user also can upload the key stores directly or use key stores from Azure Key Vault. You have to configure the Custom DNS to make the HTTPS URL accessible.
+* Database connectivity
+    * Password connections to exiting Azure database for PostgreSQL, Oracle database, Azure SQL and MySQL. You can create data source connectivity to the database using connection string, database user name and password. For MySQL, the offer upgrades the built-in [Oracle WebLogic Server MySQL driver](https://aka.ms/wls-jdbc-drivers) with recent [MySQL Connector Java driver](https://mvnrepository.com/artifact/mysql/mysql-connector-java). The MySQL Connector Java driver is stored in `/u01/domains/preclasspath-libraries/` and loaded by setting the **PRE_CLASSPATH**.
+    * Passwordless connections to Azure database for PostgreSQL and MySQL. Passwordless connection requires PostgreSQL or MySQL instance with Azure Managed Identity connection enabled. The offer downloads [Azure Identity Extension Libraries](https://azuresdkdocs.blob.core.windows.net/$web/java/azure-identity-extensions/1.0.0/index.html) to `/u01/domains/azure-libraries/` and loads them to the WLS runtime by setting **PRE_CLASSPATH** and **CLASS_PATH**. The offer also assigns the managed identity that has access to the database to user managed identity of VM.
+
+#### Oracle WebLogic Server cluster
+
+### WLS on AKS
+
 ## Examples
 
 To get details of how to run Oracle WebLogic Server on Azure Virtual Machines refer to the blog [WebLogic on Azure Virtual Machines Major Release Now Available](https://blogs.oracle.com/weblogicserver/weblogic-on-azure-virtual-machines-major-release-now-available).
