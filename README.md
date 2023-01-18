@@ -99,45 +99,24 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
 
 The offer provisions the following Azure resources based on Oracle WebLogic Server base images and an Oracle WebLogic Server Enterprise Edition (WLS) with a domain, the Administration Server and a configured cluster set up.
 
-* The offer includes the choice of the following Oracle WebLogic Server base images
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3.
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
+* The offer includes a choice of operating system, JDK, Oracle WebLogic Server versions.
+   * OS: Oracle Linux or Red Hat Enterprise Linux
+   * JDK: Oracle JDK 8, or 11
+   * WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
 * Computing resources
     * VMs with the followings configurations:
-        * A VM to run the Administration Server named `adminVM` and an arbitrary number of VMs named `mspVM${index}` to run Managed Servers. The maximum number of VMs is 5. You can add nodes following [the post deployment guidance](https://oracle.github.io/weblogic-azure/cluster/addnode.html).
-        * VMs to run Coherence Cache servers. You can add nodes for cache server following [the post deployment guidance](https://oracle.github.io/weblogic-azure/cluster/addnode-coherence.html).
-        * Operating system as described in the selected base image.
+        * A VM to run the Administration Server and an arbitrary number of VMs to run Managed Servers.
+        * VMs to run Coherence Cache servers.
         * Choice of VM size.
-        * Choice of VM administrator authentication type and related credential.
     * An OS disk attached to the VM.
 * Network resources
     * A virtual network and a subnet. You can also select to bring your own virtual network.
     * A network security group if you select to create a new virtual network.
     * Network interfaces for VMs.
-    * A public IP address assigned to the network interface of `adminVM` if you select to create a new virtual network.
-    * Public IP addresses assigned to the network interfaces of `mspVM${index}` if you select to create a new virtual network.
-    * Public IP addresses assigned to the network interfaces of cache machines if you select to create a new virtual network and enable Coherence Cache.
+    * Public IP addresses assigned to the network interfaces of admin server and managed servers.
     * A public IP assigned to Application Gateway if you select to enable Application Gateway.
-    * A public DNS Zone if user selects to enable custom DNS and create a new DNS zone. You can also bring your own DNS Zone.
-    * An A record (Alias record to IPV4 address) to the VM if you select to enable custom DNS.
-    * A CNAME record to the application gateway if you select to enable custom DNS and enable Azure Application Gateway.
 * Load Balancer
     * An Azure Application Gateway if you select to enable it. You can upload TLS/SSL certifiacte or use the certificates stored in a key vault. Otherwise, you can assign an auto-generated self-signed certificate to the application gateway.
-* Storage resources
-    * An Azure Storage Account and a file share named `wlsshare`. The mount point is `/mnt/wlsshare`.
-    * The storage account is also used to store the diagnostics profile of the VMs.
-    * A private endpoint in the same subnet with the VM, which allows the VM to access the file share.
-* Security
-    * An Azure Key Vault will be created for the following scenarios:
-        * Select to upload certificates for WLS.
-        * Select to upload certificates for Application Gateway.
-        * Select to enable Application Gateway with self-signed certificate.
 * High Availability
     * An Azure Availability Set for the VMs.
 * Key software components
@@ -146,7 +125,6 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
     * In addition to the database drivers that come standard with WLS, the offer includes the most recent supported PostgreSQL JDBC driver and Microsoft SQL JDBC driver. The drivers are stored in `/u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/`. 
     * A WLS domain with the Administration Server up and running. Sign in to the Administration Server is with the Administrator user name and credentials provided to the offer. The default domain name is `adminDomain`, the domain path is `/u01/domains/adminDomain/`. You are able to access the Administration Server and manage the domain via URL `http://<admin-vm-hostname>:7001/console/`. By default, the offer configures the Administration Server with a self-signed TLS certificate. You are able to access it with HTTPS `https://<admin-vm-hostname>:7002/console/`.
     * A configured cluster with Managed Servers running. The number of managed servers is specified in the UI when deploying the offer.
-    * If you select to configure WebLogic Administration Console on HTTPS (Secure) port, TLS/SSL termination is performed with your own TLS/SSL certificate. The offer sets up the Administration Server with identity key store and trust key store provided to the offer. The default secure port is `7002`. The user also can upload the key stores directly or use key stores from Azure Key Vault. You have to configure the Custom DNS to make the HTTPS URL accessible.
     * Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.
 * Database connectivity
     * The offer provides database connectivity using username/password or Azure passwordless database access.
