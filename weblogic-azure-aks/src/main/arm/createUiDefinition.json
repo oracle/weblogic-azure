@@ -10,7 +10,7 @@
                 "visible": true,
                 "options": {
                     "icon": "Info",
-                    "text": "The Azure identity deploying this offer must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li><br>This offer always deploys WebLogic Server using the 'Model in image' domain home source type, even when the persistent volume checkbox is checked in 'Configure AKS cluster' blade.  Click <a href=https://aka.ms/wls-aks-docs-domain-home-source-type>this link</a> for more information on domain home source types."
+                    "text": "The Azure identity deploying this offer must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
                 }
             },
             {
@@ -253,12 +253,12 @@
         "steps": [
             {
                 "name": "section_aks",
-                "label": "Configure AKS cluster",
+                "label": "AKS",
                 "subLabel": {
                     "preValidation": "Provide required info for AKS cluster configuration",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Configure AKS cluster",
+                "bladeTitle": "AKS",
                 "elements": [
                     {
                         "name": "clusterInfo",
@@ -344,46 +344,6 @@
                                 "osPlatform": "Linux",
                                 "count": "[steps('section_aks').clusterInfo.aksNodeCount]",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
-                            },
-                            {
-                                "name": "enableAzureMonitoringTextBlock",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "If checked, configure the necessary settings to integrate with Container insights. Container insights gives you performance visibility by collecting memory and processor metrics from controllers, nodes, and containers that are available in Kubernetes through the Metrics API. Container logs are also collected. Metrics are written to the metrics store and log data is written to the logs store associated with your Log Analytics workspace.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-container-insights"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "enableAzureMonitoring",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable Container insights",
-                                "toolTip": "If checked, configure the necessary settings to integrate with Container insights.",
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
-                            },
-                            {
-                                "name": "enableAzureFileShareTextBlock",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster. This can be useful for storing log files outside of the AKS cluster, among other possible uses. An Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted to the nodes of the AKS cluster.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-persistent-storage"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "enableAzureFileShare",
-                                "toolTip": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster.",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Create Persistent Volume using Azure File share service",
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             }
                         ]
                     },
@@ -393,66 +353,9 @@
                         "label": "Image selection",
                         "elements": [
                             {
-                                "name": "useOracleImage",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use a pre-existing, WebLogic Server Docker image from Oracle Container Registry?",
-                                "defaultValue": "Yes",
-                                "toolTip": "Select 'Yes' to a use pre-existing, WebLogic Server Docker image from the public Oracle Container Registry. Select 'No' to use a pre-existing Docker image, assumed to be a compatible WebLogic Server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs).",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": "true"
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": "false"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "userProvidedAcrInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[not(bool(steps('section_aks').imageInfo.useOracleImage))]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "Make sure the Azure Container Registry has enabled the admin user.",
-                                    "uri": "https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account"
-                                }
-                            },
-                            {
-                                "name": "userProvidedAcrSelector",
-                                "type": "Microsoft.Solutions.ResourceSelector",
-                                "label": "Select existing ACR instance",
-                                "toolTip": "Select the existing ACR instance.",
-                                "resourceType": "Microsoft.ContainerRegistry/registries",
-                                "options": {
-                                    "filter": {
-                                        "subscription": "onBasics",
-                                        "location": "onBasics"
-                                    }
-                                },
-                                "visible": "[not(bool(steps('section_aks').imageInfo.useOracleImage))]"
-                            },
-                            {
-                                "name": "userProvidedImagePath",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "[not(bool(steps('section_aks').imageInfo.useOracleImage))]",
-                                "label": "Please provide the image path",
-                                "toolTip": "Please provide the image path, the image must be stored in the selected ACR above",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": "[not(bool(steps('section_aks').imageInfo.useOracleImage))]",
-                                    "regex": "[concat(coalesce(last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/')), ''), '.*$')]",
-                                    "validationMessage": "The image must be stored in the selected ACR above"
-                                }
-                            },
-                            {
                                 "name": "oracleCreateACR",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
+                                "visible": true,
                                 "label": "Create a new Azure Container Registry to store application images?",
                                 "defaultValue": "Yes",
                                 "toolTip": "Select 'Yes' to create a new ACR instance, or select 'No' to provide an existing ACR instance.",
@@ -473,7 +376,7 @@
                             {
                                 "name": "oracleAcrInfo",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_aks').imageInfo.useOracleImage),not(bool(steps('section_aks').imageInfo.oracleCreateACR)))]",
+                                "visible": "[not(bool(steps('section_aks').imageInfo.oracleCreateACR))]",
                                 "options": {
                                     "icon": "Info",
                                     "text": "Make sure the Azure Container Registry has enabled the admin user.",
@@ -492,12 +395,12 @@
                                         "location": "onBasics"
                                     }
                                 },
-                                "visible": "[and(bool(steps('section_aks').imageInfo.useOracleImage),not(bool(steps('section_aks').imageInfo.oracleCreateACR)))]"
+                                "visible": "[not(bool(steps('section_aks').imageInfo.oracleCreateACR))]"
                             },
                             {
                                 "name": "ocrSSOInfo",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
+                                "visible": true,
                                 "options": {
                                     "icon": "Info",
                                     "text": "Provide an Oracle Single Sign-On (SSO) account to access the Oracle Registry Server. Select the link to create an Oracle SSO account.",
@@ -515,7 +418,7 @@
                                     "regex": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
                                     "validationMessage": "The value must be an email address."
                                 },
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
+                                "visible": true
                             },
                             {
                                 "name": "ocrSSOPassword",
@@ -533,37 +436,37 @@
                                 "options": {
                                     "hideConfirmation": false
                                 },
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
-                            },
-                            {
-                                "name": "isSSOSupportEntitled",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Is the specified SSO account associated with an active Oracle support contract?",
-                                "defaultValue": "Yes",
-                                "toolTip": "If 'Yes' is selected, the deployment process will pull from the CPU WebLogic Server image repository in the Oracle Container Registry (OCR). If 'No' is selected the deployment process will pull from the WebLogic Server image repository in OCR.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": "true"
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": "false"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
+                                "visible": true
                             },
                             {
                                 "name": "fromImageInfo",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
+                                "visible": true,
                                 "options": {
                                     "icon": "Warning",
-                                    "text": "The Oracle Standard Terms and Restrictions for the WebLogic Server images must be accepted in the Oracle Container Registry.<br><br>To accept the license agreement of available <b>Patched WebLogic Server Images</b>:<li>Log on to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a></li><li>Navigate to <b>middleware/weblogic_cpu</b></li><li>Accept license agreement</li><br>To accept the license agreement of available <b>General WebLogic Server Images</b>:<li>Log on to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a></li><li>Navigate to <b>middleware/weblogic</b></li><li>Accept license agreement</li>"
+                                    "text": "Before moving forward, you must accept the Oracle Standard Terms and Restrictions for the WebLogic Server image in the Oracle Container Registry (OCR). <b>The deployment will fail if you have not accepted the terms.</b><br><br><b>If you have an Oracle support contract, we recommend using the Patched WebLogic Server Images.</b> Otherwise, you can use the General WebLogic Server Images.<br><br>To use the <b>Patched WebLogic Server Images</b>:<ul><li>Sign in to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry.</a></li><li>Navigate to <b>Middleware, weblogic</b>.</li><li>Make sure to fully accept the license agreement.</li></ul>To use the <b>General WebLogic Server Images</b>:<ul><li>Sign in to <a href='https://container-registry.oracle.com/' target='_blank'>Oracle Container Registry</a>.</li><li>Navigate to <b>Middleware, weblogic_cpu</b>.</li><li>Make sure to fully accept the license agreement.</li></ul>Once you have accepted the terms in OCR, make sure to select the right type of image below."
                                 }
+                            },
+                            {
+                                "name": "isSSOSupportEntitled",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Select the type of WebLogic Server Images.",
+                                "defaultValue": "General WebLogic Server Images",
+                                "toolTip": "If 'Patched WebLogic Server Images' is selected, the deployment process will pull from the Patched WebLogic Server Images repository. If 'General WebLogic Server Images' is selected the deployment process will pull from the General WebLogic Server Images repository.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "General WebLogic Server Images",
+                                            "value": "false"
+                                        },
+                                        {
+                                            "label": "Patched WebLogic Server Images",
+                                            "value": "true"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
                             },
                             {
                                 "name": "oracleImageSelector",
@@ -622,12 +525,12 @@
                                     ],
                                     "required": true
                                 },
-                                "visible": "[bool(steps('section_aks').imageInfo.useOracleImage)]"
+                                "visible": true
                             },
                             {
                                 "name": "fromOracleImage",
                                 "type": "Microsoft.Common.TextBox",
-                                "visible": "[and(bool(steps('section_aks').imageInfo.useOracleImage),equals(steps('section_aks').imageInfo.oracleImageSelector, 'others'))]",
+                                "visible": "[equals(steps('section_aks').imageInfo.oracleImageSelector, 'others')]",
                                 "label": "WebLogic Docker tag",
                                 "defaultValue": "14.1.1.0-slim-11",
                                 "toolTip": "Docker tag that comes after 'container-registry.oracle.com/middleware/weblogic:' in the fromOracleImage option to 'imagetool'.",
@@ -647,13 +550,13 @@
                     {
                         "name": "jeeAppInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Java EE Application",
+                        "label": "Application",
                         "elements": [
                             {
                                 "name": "uploadAppPackage",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Deploy your application package?",
-                                "defaultValue": "Yes",
+                                "label": "Deploy an application?",
+                                "defaultValue": "No",
                                 "toolTip": "Select 'Yes' to deploy your application.",
                                 "constraints": {
                                     "allowedValues": [
@@ -697,7 +600,7 @@
                             {
                                 "name": "validateApplicationsInfo",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]",
+                                "visible": false,
                                 "options": {
                                     "icon": "Info",
                                     "text": "If checked, verify the deployed app reaches the ACTIVE state and fail the deployment if it does not. See the documentation link for more information.",
@@ -709,7 +612,7 @@
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Fail deployment if application does not become ACTIVE.",
                                 "toolTip": "If checked, verify the deployed app reaches the ACTIVE state and fail the deployment if it does not. See the documentation link for more information.",
-                                "visible": "[bool(steps('section_aks').jeeAppInfo.uploadAppPackage)]"
+                                "visible": false
                             },
                             {
                                 "name": "appReplicas",
@@ -725,13 +628,104 @@
                             }
                         ],
                         "visible": true
+                    },
+                    {
+                        "name": "aksAdvancedInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Advanced",
+                        "elements": [
+                            {
+                                "name": "enableAzureMonitoringTextBlock",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "If checked, configure the necessary settings to integrate with Container insights. Container insights gives you performance visibility by collecting memory and processor metrics from controllers, nodes, and containers that are available in Kubernetes through the Metrics API. Container logs are also collected. Metrics are written to the metrics store and log data is written to the logs store associated with your Log Analytics workspace.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-container-insights"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "enableAzureMonitoring",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Enable Container insights",
+                                "toolTip": "If checked, configure the necessary settings to integrate with Container insights.",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "enableAzureFileShareTextBlock",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster. This can be useful for storing log files outside of the AKS cluster, among other possible uses. An Azure Storage Account and an Azure Files share will be provisioned; static persistent volume with the Azure Files share will be mounted to the nodes of the AKS cluster.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-persistent-storage"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "enableAzureFileShare",
+                                "toolTip": "If checked, configure the necessary settings to mount a persistent volume to the nodes of the AKS cluster.",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Create Persistent Volume using Azure File share service",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "useAcrImage",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Bring your own WebLogic Server Docker image from Azure Container Registry?",
+                                "toolTip": "Select 'Yes' to use a pre-existing Docker image, assumed to be a compatible WebLogic Server image, from the specified ACR instance. This allows the use of custom images, such as with a specific set of patches (PSUs)."
+                            },
+                            {
+                                "name": "userProvidedAcrInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_aks').aksAdvancedInfo.useAcrImage)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Make sure the Azure Container Registry has enabled the admin user.",
+                                    "uri": "https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication#admin-account"
+                                }
+                            },
+                            {
+                                "name": "userProvidedAcrSelector",
+                                "type": "Microsoft.Solutions.ResourceSelector",
+                                "label": "Select existing ACR instance",
+                                "toolTip": "Select the existing ACR instance.",
+                                "resourceType": "Microsoft.ContainerRegistry/registries",
+                                "options": {
+                                    "filter": {
+                                        "subscription": "onBasics",
+                                        "location": "onBasics"
+                                    }
+                                },
+                                "visible": "[bool(steps('section_aks').aksAdvancedInfo.useAcrImage)]"
+                            },
+                            {
+                                "name": "userProvidedImagePath",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "[bool(steps('section_aks').aksAdvancedInfo.useAcrImage)]",
+                                "label": "Please provide the image path",
+                                "toolTip": "Please provide the image path, the image must be stored in the selected ACR above",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "[concat(coalesce(last(split(steps('section_aks').aksAdvancedInfo.userProvidedAcrSelector.id, '/')), ''), '.*$')]",
+                                    "validationMessage": "The image must be stored in the selected ACR above"
+                                }
+                            }
+                        ],
+                        "visible": true
                     }
                 ]
             },
             {
                 "name": "section_sslConfiguration",
                 "type": "Microsoft.Common.Section",
-                "label": "TLS/SSL configuration",
+                "label": "TLS/SSL",
                 "elements": [
                     {
                         "name": "sslConfigurationText",
@@ -1154,12 +1148,12 @@
             {
                 "name": "section_appGateway",
                 "type": "Microsoft.Common.Section",
-                "label": "Networking",
+                "label": "Load balancing",
                 "subLabel": {
-                    "preValidation": "Provide required information for networking",
+                    "preValidation": "Provide required information for load balancing",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Networking",
+                "bladeTitle": "Load balancing",
                 "elements": [
                     {
                         "name": "connectToAGText",
@@ -1170,28 +1164,289 @@
                         }
                     },
                     {
-                        "name": "lbSVCInfo",
+                        "name": "loadBalancingOptions",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Load Balancing Options",
+                        "defaultValue": "Application Gateway Ingress Controller",
+                        "toolTip": "Select load balancing option.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Application Gateway Ingress Controller",
+                                    "value": "agic"
+                                },
+                                {
+                                    "label": "Standard Load Balancer Service",
+                                    "value": "lbservice"
+                                },
+                                {
+                                    "label": "No Load Balancer",
+                                    "value": "none"
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "appgwIngress",
                         "type": "Microsoft.Common.Section",
-                        "label": "Standard Load Balancer service",
+                        "label": "Application Gateway Ingress Controller",
                         "elements": [
                             {
-                                "name": "enableLBSVCText",
+                                "name": "enableAppGatewayText",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
-                                    "text": "Selecting 'Yes' here will cause the offer to provision the Azure Load Balancer service to expose WebLogic Server Administration Console and cluster.",
+                                    "text": "This option will cause the offer to configure an Application Gateway Ingress Controller",
                                     "link": {
                                         "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-standard-load-balancer"
+                                        "uri": "https://aka.ms/wls-aks-app-gateway-ingress-controller"
                                     }
                                 }
                             },
                             {
-                                "name": "enableLBSVC",
+                                "name": "vnetInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /24 and a minimum subnet size of /24 are required. Additionally, the subnet must be dedicated only for use by the Application Gateway."
+                                }
+                            },
+                            {
+                                "name": "vnetForApplicationGateway",
+                                "type": "Microsoft.Network.VirtualNetworkCombo",
+                                "label": {
+                                    "virtualNetwork": "Virtual network",
+                                    "subnets": "Subnets"
+                                },
+                                "toolTip": {
+                                    "virtualNetwork": "Select a virtual network in which to place the Application Gateway.",
+                                    "subnets": "The subnet must be dedicated only for use by the Application Gateway."
+                                },
+                                "defaultValue": {
+                                    "name": "[concat('wlsaks-vnet',take(guid(), 8))]",
+                                    "addressPrefixSize": "/24"
+                                },
+                                "constraints": {
+                                    "minAddressPrefixSize": "/24"
+                                },
+                                "options": {
+                                    "hideExisting": false
+                                },
+                                "subnets": {
+                                    "gatewaySubnet": {
+                                        "label": "Subnet",
+                                        "defaultValue": {
+                                            "name": "wls-aks-gateway-subnet",
+                                            "addressPrefixSize": "/24"
+                                        },
+                                        "constraints": {
+                                            "minAddressPrefixSize": "/24",
+                                            "minAddressCount": 250,
+                                            "requireContiguousAddresses": false
+                                        }
+                                    }
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "appgwUsePrivateIP",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Configure frontend IP with private IP address",
+                                "toolTip": "If checked, expose WebLogic Server with private IP address.",
+                                "visible": false
+                            },
+                            {
+                                "name": "keyVaultText00",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "Choose an option for providing the TLS/SSL certificate:"
+                                }
+                            },
+                            {
+                                "name": "keyVaultText01",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "    ⁃ Upload a TLS/SSL certificate: Upload the pre-signed certificate now."
+                                }
+                            },
+                            {
+                                "name": "keyVaultText02",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "    ⁃ Identify an Azure Key Vault: The Key Vault must already contain the certificate and its password stored as secrets."
+                                }
+                            },
+                            {
+                                "name": "keyVaultText03",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "    ⁃ Generate a self-signed front-end certificate: Generate a self-signed front-end certificate and apply it during deployment.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-application-gateway-ssl-key-vault"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "certificateOption",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Create Standard Load Balancer services for Oracle WebLogic Server?",
+                                "label": "Select desired TLS/SSL certificate option",
+                                "defaultValue": "Generate a self-signed front-end certificate",
+                                "toolTip": "Select desired TLS/SSL certificate option",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Generate a self-signed front-end certificate",
+                                            "value": "generateCert"
+                                        },
+                                        {
+                                            "label": "Upload a TLS/SSL certificate",
+                                            "value": "haveCert"
+                                        },
+                                        {
+                                            "label": "Identify an Azure Key Vault",
+                                            "value": "haveKeyVault"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "keyVaultSSLCertData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Front-End TLS/SSL certificate(.pfx)",
+                                "toolTip": "TLS/SSL certificate used for App Gateway",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".pfx"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
+                            },
+                            {
+                                "name": "appGatewaySSLCertPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "Front-End TLS/SSL certificate password",
+                                "constraints": {
+                                    "required": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]",
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
+                            },
+                            {
+                                "name": "keyVaultBackendSSLCertData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Trusted root certificate(.cer, .cert)",
+                                "toolTip": "Trusted root certificate (CA certificate) used to set up end to end TLS/SSL",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".cer, .cert"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, not(equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')))]"
+                            },
+                            {
+                                "name": "keyVaultResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Resource group name in current subscription containing the Key Vault",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1}){3,63}$",
+                                    "validationMessage": "[if(greater(length(steps('section_appGateway').appgwIngress.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Name of the Azure Key Vault containing secrets for the certificate for TLS/SSL Termination",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
+                                    "validationMessage": "[if(or(greater(length(steps('section_appGateway').appgwIngress.keyVaultName), 24), less(length(steps('section_appGateway').appgwIngress.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the front-end TLS/SSL certificate data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultSSLCertPasswordSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the password for the front-end TLS/SSL certificate",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
+                            },
+                            {
+                                "name": "keyVaultBackendSSLCertDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "The name of the secret in the specified Key Vault whose value is the trusted root certificate data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault'))]"
+                            },
+                            {
+                                "name": "enableCookieBasedAffinity",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Disable cookie based affinity",
+                                "toolTip": "If checked, disable cookie based affinity",
+                                "visible": true
+                            },
+                            {
+                                "name": "appgwForAdminServer",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
                                 "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to create Standard Load Balancer services for Oracle WebLogic Server.",
+                                "toolTip": "Select 'Yes' to Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -1202,14 +1457,54 @@
                                             "label": "No",
                                             "value": false
                                         }
-                                    ],
-                                    "required": false
+                                    ]
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "appgwForAdminRemote",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
+                                "defaultValue": "No",
+                                "toolTip": "Select 'Yes' to Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ]
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": "[equals(steps('section_appGateway').loadBalancingOptions, 'agic')]"
+                    },
+                    {
+                        "name": "lbSVCInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Standard Load Balancer Service",
+                        "elements": [
+                            {
+                                "name": "enableLBSVCText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "text": "This option will cause the offer to provision the Azure Load Balancer service to expose the WebLogic Server Administration Console and the cluster.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/wls-aks-standard-load-balancer"
+                                    }
                                 }
                             },
                             {
                                 "name": "enableInternalLBText",
                                 "type": "Microsoft.Common.TextBlock",
-                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "visible": true,
                                 "options": {
                                     "text": "If checked, the offer will configure the load balancer as an internal load balancer.",
                                     "link": {
@@ -1223,12 +1518,12 @@
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Use Internal Load Balancer",
                                 "toolTip": "If checked, the offer will configure the load balancer as an internal load balancer.",
-                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]"
+                                "visible": true
                             },
                             {
                                 "name": "infoBoxForLbSvc",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "visible": true,
                                 "options": {
                                     "icon": "info",
                                     "text": "There must be at least one and at most two entries."
@@ -1240,12 +1535,12 @@
                                 "ariaLabel": "Enter information",
                                 "label": "Standard Load Balancer service",
                                 "toolTip": "Create Azure Standard Load Balancer service for Administration Console and cluster.",
-                                "visible": "[steps('section_appGateway').lbSVCInfo.enableLBSVC]",
+                                "visible": true,
                                 "constraints": {
                                     "width": "Full",
                                     "rows": {
                                         "count": {
-                                            "min": 0,
+                                            "min": 1,
                                             "max": 2
                                         }
                                     },
@@ -1323,330 +1618,14 @@
                                 }
                             }
                         ],
-                        "visible": true
-                    },
-                    {
-                        "name": "appgwIngress",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Application Gateway Ingress Controller",
-                        "elements": [
-                            {
-                                "name": "enableAppGatewayText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "text": "Selecting 'Yes' here will cause the offer to configure an Application Gateway Ingress Controller",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-app-gateway-ingress-controller"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "enableAppGateway",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Connect to Azure Application Gateway?",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to create an Azure Application Gateway Ingress as the load balancer for the cluster and admin server.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ],
-                                    "required": false
-                                }
-                            },
-                            {
-                                "name": "vnetInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /24 and a minimum subnet size of /24 are required. Additionally, the subnet must be dedicated only for use by the Application Gateway."
-                                }
-                            },
-                            {
-                                "name": "vnetForApplicationGateway",
-                                "type": "Microsoft.Network.VirtualNetworkCombo",
-                                "label": {
-                                    "virtualNetwork": "Virtual network",
-                                    "subnets": "Subnets"
-                                },
-                                "toolTip": {
-                                    "virtualNetwork": "Select a virtual network in which to place the Application Gateway.",
-                                    "subnets": "The subnet must be dedicated only for use by the Application Gateway."
-                                },
-                                "defaultValue": {
-                                    "name": "[concat('wlsaks-vnet',take(guid(), 8))]",
-                                    "addressPrefixSize": "/24"
-                                },
-                                "constraints": {
-                                    "minAddressPrefixSize": "/24"
-                                },
-                                "options": {
-                                    "hideExisting": false
-                                },
-                                "subnets": {
-                                    "gatewaySubnet": {
-                                        "label": "Subnet",
-                                        "defaultValue": {
-                                            "name": "wls-aks-gateway-subnet",
-                                            "addressPrefixSize": "/24"
-                                        },
-                                        "constraints": {
-                                            "minAddressPrefixSize": "/24",
-                                            "minAddressCount": 250,
-                                            "requireContiguousAddresses": false
-                                        }
-                                    }
-                                },
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
-                            },
-                            {
-                                "name": "appgwUsePrivateIP",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Configure frontend IP with private IP address",
-                                "toolTip": "If checked, expose WebLogic Server with private IP address.",
-                                "visible": false
-                            },
-                            {
-                                "name": "keyVaultText00",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-                                "options": {
-                                    "text": "Choose an option for providing the TLS/SSL certificate:"
-                                }
-                            },
-                            {
-                                "name": "keyVaultText01",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-                                "options": {
-                                    "text": "    ⁃ Upload a TLS/SSL certificate: Upload the pre-signed certificate now."
-                                }
-                            },
-                            {
-                                "name": "keyVaultText02",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-                                "options": {
-                                    "text": "    ⁃ Identify an Azure Key Vault: The Key Vault must already contain the certificate and its password stored as secrets."
-                                }
-                            },
-                            {
-                                "name": "keyVaultText03",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-                                "options": {
-                                    "text": "    ⁃ Generate a self-signed front-end certificate: Generate a self-signed front-end certificate and apply it during deployment.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/wls-aks-application-gateway-ssl-key-vault"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "certificateOption",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Select desired TLS/SSL certificate option",
-                                "defaultValue": "Upload a TLS/SSL certificate",
-                                "toolTip": "Select desired TLS/SSL certificate option",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Upload a TLS/SSL certificate",
-                                            "value": "haveCert"
-                                        },
-                                        {
-                                            "label": "Identify an Azure Key Vault",
-                                            "value": "haveKeyVault"
-                                        },
-                                        {
-                                            "label": "Generate a self-signed front-end certificate",
-                                            "value": "generateCert"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
-                            },
-                            {
-                                "name": "keyVaultSSLCertData",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Front-End TLS/SSL certificate(.pfx)",
-                                "toolTip": "TLS/SSL certificate used for App Gateway",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".pfx"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                },
-                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
-                            },
-                            {
-                                "name": "appGatewaySSLCertPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Front-End TLS/SSL certificate password",
-                                "constraints": {
-                                    "required": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]",
-                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
-                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
-                            },
-                            {
-                                "name": "keyVaultBackendSSLCertData",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Trusted root certificate(.cer, .cert)",
-                                "toolTip": "Trusted root certificate (CA certificate) used to set up end to end TLS/SSL",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".cer, .cert"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                },
-                                "visible": "[and(steps('section_appGateway').appgwIngress.enableAppGateway, steps('section_sslConfiguration').enableCustomSSL, not(equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')))]"
-                            },
-                            {
-                                "name": "keyVaultResourceGroup",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Resource group name in current subscription containing the Key Vault",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1}){3,63}$",
-                                    "validationMessage": "[if(greater(length(steps('section_appGateway').appgwIngress.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                                },
-                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
-                            },
-                            {
-                                "name": "keyVaultName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Name of the Azure Key Vault containing secrets for the certificate for TLS/SSL Termination",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?=.{3,24}$)[a-zA-Z](?!.*--)[a-zA-Z0-9-]*[a-zA-Z0-9]$",
-                                    "validationMessage": "[if(or(greater(length(steps('section_appGateway').appgwIngress.keyVaultName), 24), less(length(steps('section_appGateway').appgwIngress.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
-                                },
-                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
-                            },
-                            {
-                                "name": "keyVaultSSLCertDataSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the front-end TLS/SSL certificate data",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
-                            },
-                            {
-                                "name": "keyVaultSSLCertPasswordSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the password for the front-end TLS/SSL certificate",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault')]"
-                            },
-                            {
-                                "name": "keyVaultBackendSSLCertDataSecretName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "The name of the secret in the specified Key Vault whose value is the trusted root certificate data",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveKeyVault'))]"
-                            },
-                            {
-                                "name": "enableCookieBasedAffinity",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Enable cookie based affinity",
-                                "toolTip": "If checked, enable cookie based affinity",
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
-                            },
-                            {
-                                "name": "appgwForAdminServer",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to Create ingress for Administration Console. Make sure no application with path /console*, it will cause conflict with Administration Console path.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
-                                },
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
-                            },
-                            {
-                                "name": "appgwForAdminRemote",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to Create ingress for WebLogic Remote Console. Make sure no application with path /remoteconsole*, it will cause conflict with WebLogic Remote Console path.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
-                                },
-                                "visible": "[steps('section_appGateway').appgwIngress.enableAppGateway]"
-                            }
-                        ],
-                        "visible": true
+                        "visible": "[equals(steps('section_appGateway').loadBalancingOptions, 'lbservice')]"
                     }
                 ]
             },
             {
                 "name": "section_dnsConfiguration",
                 "type": "Microsoft.Common.Section",
-                "label": "DNS configuration",
+                "label": "DNS",
                 "elements": [
                     {
                         "name": "dnsConfigurationText",
@@ -1663,7 +1642,7 @@
                     {
                         "name": "enableDNSConfiguration",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure Custom DNS Alias",
+                        "label": "Custom DNS Alias",
                         "defaultValue": "No",
                         "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
                         "constraints": {
@@ -1745,7 +1724,7 @@
                                 }
                             ]
                         },
-                        "visible": "[steps('section_dnsConfiguration').enableDNSConfiguration]"
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration, not(equals(steps('section_appGateway').loadBalancingOptions,'none')))]"
                     },
                     {
                         "name": "dnszoneAdminT3ChannelLabel",
@@ -1766,7 +1745,7 @@
                                 }
                             ]
                         },
-                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,basics('basicsOptional').enableAdminT3Tunneling, steps('section_appGateway').lbSVCInfo.enableLBSVC)]"
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,basics('basicsOptional').enableAdminT3Tunneling, equals(steps('section_appGateway').loadBalancingOptions,'lbservice'))]"
                     },
                     {
                         "name": "dnszoneGatewayLabel",
@@ -1787,7 +1766,7 @@
                                 }
                             ]
                         },
-                        "visible": "[steps('section_dnsConfiguration').enableDNSConfiguration]"
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration, not(equals(steps('section_appGateway').loadBalancingOptions,'none')))]"
                     },
                     {
                         "name": "dnszoneClusterT3ChannelLabel",
@@ -1808,7 +1787,7 @@
                                 }
                             ]
                         },
-                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,basics('basicsOptional').enableClusterT3Tunneling, steps('section_appGateway').lbSVCInfo.enableLBSVC)]"
+                        "visible": "[and(steps('section_dnsConfiguration').enableDNSConfiguration,basics('basicsOptional').enableClusterT3Tunneling, equals(steps('section_appGateway').loadBalancingOptions,'lbservice'))]"
                     }
                 ]
             },
@@ -2142,10 +2121,10 @@
             "dnszoneName": "[steps('section_dnsConfiguration').dnszoneName]",
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
             "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
-            "enableAppGWIngress": "[steps('section_appGateway').appgwIngress.enableAppGateway]",
-            "enableAzureMonitoring": "[bool(steps('section_aks').clusterInfo.enableAzureMonitoring)]",
-            "enableAzureFileShare": "[bool(steps('section_aks').clusterInfo.enableAzureFileShare)]",
-            "enableCookieBasedAffinity": "[bool(steps('section_appGateway').appgwIngress.enableCookieBasedAffinity)]",
+            "enableAppGWIngress": "[equals(steps('section_appGateway').loadBalancingOptions, 'agic')]",
+            "enableAzureMonitoring": "[bool(steps('section_aks').aksAdvancedInfo.enableAzureMonitoring)]",
+            "enableAzureFileShare": "[bool(steps('section_aks').aksAdvancedInfo.enableAzureFileShare)]",
+            "enableCookieBasedAffinity": "[not(bool(steps('section_appGateway').appgwIngress.enableCookieBasedAffinity))]",
             "enableCustomSSL": "[bool(steps('section_sslConfiguration').enableCustomSSL)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "enableDNSConfiguration": "[bool(steps('section_dnsConfiguration').enableDNSConfiguration)]",
@@ -2185,10 +2164,10 @@
             "sslUploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
             "sslUploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
             "useInternalLB": "[bool(steps('section_appGateway').lbSVCInfo.enableInternalLB)]",
-            "useOracleImage": "[bool(steps('section_aks').imageInfo.useOracleImage)]",
-            "userProvidedAcr": "[last(split(steps('section_aks').imageInfo.userProvidedAcrSelector.id, '/'))]",
-            "userProvidedImagePath": "[steps('section_aks').imageInfo.userProvidedImagePath]",
-            "validateApplications": "[bool(steps('section_aks').jeeAppInfo.validateApplications)]",
+            "useOracleImage": "[if(bool(steps('section_aks').aksAdvancedInfo.useAcrImage), false, true)]",
+            "userProvidedAcr": "[last(split(steps('section_aks').aksAdvancedInfo.userProvidedAcrSelector.id, '/'))]",
+            "userProvidedImagePath": "[steps('section_aks').aksAdvancedInfo.userProvidedImagePath]",
+            "validateApplications": true,
             "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
             "vnetRGNameForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.resourceGroup]",
             "vmSize": "[steps('section_aks').clusterInfo.nodeVMSizeSelector]",
