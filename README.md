@@ -20,20 +20,14 @@ Please refer to the README for [documentation on WebLogic Server running on an A
 
 The offer provisions the following Azure resources based on Oracle WebLogic Server base images and an Oracle WebLogic Server Enterprise Edition (WLS) without domain configuration.
 
-* The offer includes the choice of the following Oracle WebLogic Server base images
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3.
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
+* The offer includes a choice of operating system, JDK, Oracle WebLogic Server versions.
+   * OS: Oracle Linux or Red Hat Enterprise Linux
+   * JDK: Oracle JDK 8, or 11
+   * WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
 * Computing resources
     * A VM with the following configurations:
         * Operating system as described in the selected base image.
         * Choice of VM size.
-        * Choice of VM administrator authentication type and related credential.
     * An OS disk attached to the VM.
 * Network resources
     * A virtual network and a subnet. 
@@ -51,34 +45,24 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
 
 The offer provisions the following Azure resources based on Oracle WebLogic Server base images and an Oracle WebLogic Server Enterprise Edition (WLS) with a domain and the Administration Server set up.
 
-* The offer includes the choice of the following Oracle WebLogic Server base images
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3.
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
+* The offer includes a choice of operating system, JDK, Oracle WebLogic Server versions.
+   * OS: Oracle Linux or Red Hat Enterprise Linux
+   * JDK: Oracle JDK 8, or 11
+   * WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
 * Computing resources
-    * A VM named `adminVM` with the following configurations:
+    * A VM to run the Administration Server with the following configuration.
         * Operating system as described in the selected base image.
         * Choice of VM size.
-        * Choice of VM administrator authentication type and related credential.
     * An OS disk attached to the VM.
 * Network resources
     * A virtual network and a subnet. You can also select to bring your own virtual network.
     * A network security group if you select to create a new virtual network.
     * A network interface.
     * A public IP address assigned to the network interface if you select to create a new virtual network.
-    * A public DNS Zone if user selects to enable custom DNS and create a new DNS zone. You can also bring your own DNS Zone.
-    * An A record (Alias record to IPV4 address) to the VM if you select to enable custom DNS.
 * Storage resources
     * An Azure Storage Account and a file share named `wlsshare`. The mount point is `/mnt/wlsshare`.
     * The storage account is also used to store the diagnostics profile of the VM.
     * A private endpoint in the same subnet with the VM, which allows the VM to access the file share.
-* Security
-    * An Azure Key Vault to store certificates if you select to upload TLS/SSL certificates.
 * Key software components
     * Oracle WebLogic Server Enterprise Edition. Version as described in the selected base image. The `ORACLE_HOME` is `/u01/app/wls/install/oracle/middleware/oracle_home`.
     * Oracle JDK. The version as described in the selected base image. The `JAVA_HOME` is `/u01/app/jdk/jdk-${version}`.
@@ -144,53 +128,37 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
 
 The offer provisions the following Azure resources based on Oracle WebLogic Server base images and an Oracle WebLogic Server Enterprise Edition (WLS) with a domain, the Administration Server, and a dynamic cluster set up.
 
-* The offer includes the choice of the following Oracle WebLogic Server base images
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.3.
-    * The **WebLogic Server 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4** image has WLS 12.2.1.3.0 and JDK 8 on Oracle Linux 7.4.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 12.2.1.4.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 11 on Red Hat Enterprise Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Oracle Linux 7.6.
-    * The **WebLogic Server 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6** image has WLS 14.1.1.0.0 and JDK 8 on Red Hat Enterprise Linux 7.6.
-* The offer includes the choice of the following Oracle HTTP Server base images
-    * The **OHS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.3** image has Oracle HTTP Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.3.
-    * The **OHS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.4** image has Oracle HTTP Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.4.
-    * The **OHS 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6** image has Oracle HTTP Server 12.2.1.4.0 and JDK 8 on Oracle Linux 7.6.
+* The offer includes a choice of operating system, JDK, Oracle WebLogic Server versions.
+   * OS: Oracle Linux or Red Hat Enterprise Linux
+   * JDK: Oracle JDK 8, or 11
+   * WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+* The offer includes the choice of the following Oracle HTTP Server (OHS) base images
+   * OS: Oracle Linux
+   * OHS version 12.2.1.4.0
 * Computing resources
     * VMs for Oracle WebLogic Server:
-        * A VM to run the Administration Server named `adminVM` and an arbitrary number of VMs named `mspVM${index}` to run Managed Servers. The maximum number of VMs is 5. You can add nodes following [the post deployment guidance](https://oracle.github.io/weblogic-azure/cluster/addnode.html).
-        * VMs to run Coherence Cache servers. You can add nodes for cache server following [the post deployment guidance](https://oracle.github.io/weblogic-azure/cluster/addnode-coherence.html).
+        * A VM to run the Administration Server and an arbitrary number of VMs to run Managed Servers.
+        * VMs to run Coherence Cache servers.
         * Operating system as described in the selected base image.
         * Choice of VM size.
-        * Choice of VM administrator authentication type and related credential.
         * An OS disk attached to the VM.
     * VMs for Oracle HTTP Server:
         * A VM to run the Oracle HTTP Server.
         * Choice of VM size.
-        * Choice of VM administrator authentication type and related credential.
         * An OS disk attached to the VM.
 * Network resources
     * A virtual network and a subnet. You can also select to bring your own virtual network.
     * A network security group if you select to create a new virtual network.
     * Network interfaces for VMs.
-    * A public IP address assigned to the network interface of `adminVM` if you select to create a new virtual network.
-    * Public IP addresses assigned to the network interfaces of `mspVM${index}` if you choose to create a new virtual network.
+    * Public IP addresses assigned to the network interfaces of the admin server and managed servers.
     * Public IP addresses assigned to the network interfaces of cache machines if you select to create a new virtual network and enable Coherence Cache.
     * A public IP assigned to Oracle HTTP Server if you select to enable it.
-    * A public DNS Zone if user selects to enable custom DNS and create a new DNS zone. You can also bring your own DNS Zone.
-    * An A record (Alias record to IPV4 address) to the VM if you select to enable custom DNS.
-    * An A record (Alias record to IPV4 address) to the Oracle HTTP Server if you select to enable custom DNS and enable Oracle HTTP Server.
 * Load Balancer
     * An Oracle HTTP Server if you select to enable it. You can upload TLS/SSL certifiacte or use the certificates stored in a key vault to configure HTTPS.
 * Storage resources
     * An Azure Storage Account and a file share named `wlsshare`. The mount point is `/mnt/wlsshare`.
     * The storage account is also used to store the diagnostics profile of the VMs.
     * A private endpoint in the same subnet with the VM, which allows the VM to access the file share.
-* Security
-    * An Azure Key Vault will be created for the following scenarios:
-        * Select to upload certificates for Oracle WebLogic Server.
-        * Select to upload certificates for Oracle HTTP Server.
 * Key software components for Oracle WebLogic Server
     * Oracle WebLogic Server Enterprise Edition. Version as described in the selected base image. The `ORACLE_HOME` is `/u01/app/wls/install/oracle/middleware/oracle_home`.
     * Oracle JDK. The version as described in the selected base image. The `JAVA_HOME` is `/u01/app/jdk/jdk-${version}`.
