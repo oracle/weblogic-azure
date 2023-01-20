@@ -5,8 +5,8 @@
         {
             "key": "WKO",
             "description": "Oracle WebLogic Kubernetes Operator",
-            "version": "3.4.1",
-            "testedDate": "2022-06-16"
+            "version": "3.4.4",
+            "testedDate": "2023-01-19"
         },
         {
             "key": "WDT",
