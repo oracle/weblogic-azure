@@ -187,62 +187,45 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
 
 ### WLS on AKS
 
-The offer provisions the following Azure resources and an Oracle WebLogic Server Enterprise Edition (WLS) with a domain, the Administration Server and a dynamic cluster set up.
+The offer provisions an Oracle WebLogic Server Enterprise Edition (WLS) and supporting Azure resources. WLS is configured with a domain, the Administration Server and a dynamic cluster set up and running.
 
+- The offer includes the choice of the following WLS container images
+   - Images from Oracle Container Registry (OCR) (General or Patched images)
+      - OS: Oracle Linux or Red Hat Enterprise Linux
+      - JDK: Oracle JDK 8, or 11
+      - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+      - You can specify any arbitrary docker image tag that is available from OCR.
+   - An image from your own Azure Container Registry.
+- Computing resources
+   - Azure Kubernetes Service cluster
+      - Dynamically created AKS cluster with
+         - Choice of Node count.
+         - Choice of Node size.
+         - Network plugin: Azure CNI.
+      - If desired, you can also deploy into a pre-existing AKS cluster.
+   - An Azure Container Registry. If desired, you can select a pre-existing Azure Container Registry.
+- Network resources
+   - A virtual network and a subnet. If desired, you can deploy into a pre-existing virtual network.
+   - Public IP addresses assigned to the managed load balancer and Azure Application Gateway, if selected.
+- Load Balancer
+   - Choice of Azure Application Gateway (agw) or standard load balancer service. With agw, you can upload TLS/SSL certificate, use a certificates stored in a key vault, or allow a self-signed certificate to be generated and installed.
+- Storage resources
+   - An Azure Storage Account and a file share named weblogic if you select to create Persistent Volume using Azure File share service. The mount point is /shared.
+- Monitoring resources
+   - If desired, Azure Container Insights and workspace.
+- Key software components
+   - Oracle WebLogic Server Enterprise Edition. The ORACLE_HOME is /u01/app/wls/install/oracle/middleware/oracle_home.
+   - This offer always deploys WLS using the 'Model in image' domain home source type. For more information, see the documentation from Oracle.
+   - WebLogic Kubernetes Operator
+   - Oracle JDK. The JAVA_HOME is /u01/app/jdk/jdk-${version}.
+   - A WLS domain with the Administration Server up configured based on the provided Administrator user name and credentials. The default domain name is sample-domain1, the domain path is /u01/domains/sample-domain1/.
+   - A dynamic cluster with Managed Servers running. The number of initial and maximum number of Managed Servers are configurable.
+- Database connectivity
+   - The offer provides database connectivity for PostgreSQL, Oracle database, Azure SQL, MySQL, or an arbitrary JDBC compliant database.
+   - Some database options support Azure Passwordless database connection.
+- Access URLs
+   - See the deployment outputs for access URLs.
 
-* The offer includes the choice of the following Oracle WebLogic Server container images
-    * Images from Oracle Container Registry (General or Patched images)
-       * OS: Oracle Linux or Red Hat Enterprise Linux
-       * JDK: Oracle JDK 8, or 11
-       * WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
-       * You can specify any arbitrary docker image tag that is available from Oracle Container Registry. 
-    * Images from your own Azure Container Registry.
-* Computing resources
-    * Azure Kubernetes Service cluster
-        * Dynamically created AKS cluster with
-           * Choice of Node count.
-           * Choice of Node size.
-           * Network plugin: Azure CNI.
-        * You can also bring your own AKS cluster
-    * An Azure Container Registry. You can also bring your own container registry. The registry is used to store the WLS and application image.
-* Network resources
-    * A virtual network and a subnet. You can also select to bring your own virtual network.
-    * Public IP addresses assigned to the managed load balancer and Azure Application Gateway, if selected.
-* Load Balancer
-    * An Azure Application Gateway if you select to enable it. You can upload TLS/SSL certificate or use the certificates stored in a key vault. Otherwise, assign a self-signed certificate to the application gateway.
-    * Load balancer services if you select to enable it.
-* Storage resources
-    * An Azure Storage Account and a file share named `weblogic` if you select to create Persistent Volume using Azure File share service. The mount point is `/shared`.
-* Monitoring resources
-    * Azure Container Insights and workspace for it if you select to enable Container insights.
-* Key software components
-    * Oracle WebLogic Server Enterprise Edition. Version as described in the selected base image. The `ORACLE_HOME` is `/u01/app/wls/install/oracle/middleware/oracle_home`.
-    * Oracle JDK. The version as described in the selected base image. The `JAVA_HOME` is `/u01/app/jdk/jdk-${version}`.
-    * A WLS domain with the Administration Server up configured based on the provided Administrator user name and credentials. The default domain name is `sample-domain1`, the domain path is `/u01/domains/sample-domain1/`.
-    * A dynamic cluster with Managed Servers running. The number of Managed Servers is specified by **Number of WebLogic Managed Server replicas**, and cluster size is specified by **Maximum dynamic cluster size**.
-    * TLS/SSL termination if you select to configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate. The offer sets up the Administration Server with the provided identity key store and trust key store. The user also can upload the key stores directly or use key stores from Azure Key Vault. You have to configure the Custom DNS to make the HTTPS URL accessible.
-* Database connectivity
-    * The offer provides database connectivity using username/password or Azure passwordless database access.
-    * Username/password connections to existing Azure database for PostgreSQL, Oracle database, Azure SQL or MySQL. You can create data source connectivity to the database using connection string, database user name and password. For MySQL, the offer upgrades the built-in [Oracle WebLogic Server MySQL driver](https://aka.ms/wls-jdbc-drivers) with recent [MySQL Connector Java driver](https://mvnrepository.com/artifact/mysql/mysql-connector-java). The MySQL Connector Java driver is stored in `/u01/domains/preclasspath-libraries/` and loaded by setting the **PRE_CLASSPATH**.
-    * Passwordless connections to Azure database for PostgreSQL and MySQL. Passwordless connection requires PostgreSQL or MySQL instance with Azure Managed Identity connection enabled. The offer downloads [Azure Identity Extension Libraries](https://azuresdkdocs.blob.core.windows.net/$web/java/azure-identity-extensions/1.0.0/index.html) to `/u01/domains/azure-libraries/` and loads them to the WLS runtime by setting **PRE_CLASSPATH** and **CLASS_PATH**. The offer also assigns the managed identity that has access to the database.
-* Access URLs
-    * If you select to enable Application Gateway Ingress Controller:
-        * Access the cluster:
-            * The HTTP URLs is `http://<app-gateway-hostname>/<app-context-path>/`.
-            * If you enable Application Gateway with signed certificate and enable custom DNS, the HTTPS URLs is `https://<application-label>.<dns-zone-name>/<app-context-path>/`.
-            * If you enable Application Gateway with self-signed certificate, the HTTPS URLs is `https://<app-gateway-hostname>/<app-context-path>/`.
-        * Access the Administration Server:
-            * If you select to create ingress for the Administration Server, the HTTP URL is `http://<app-gateway-hostname>/console/`.
-            * If you select to create ingress for the Administration Server, enable Application Gateway with self-signed certificate and enable custom DNS, the HTTPs URL is `https://<admin-label>.<dns-zone-name>/console/`. 
-    * If you select to enable Azure Load Balancer Service:
-        * Access the cluster:
-            * Configure the service name and port.
-            * The HTTP URLs is `http://<load-balancer-public-ip-for-cluster>:<port>/<app-context-path>/`.
-            * If you enable WLS TLS/SSL termination and enable custom DNS, the HTTPS URLs is `https://<application-label>.<dns-zone-name>:<port>/<app-context-path>/`.
-        * Access the Administration Server:
-            * Configure the service name and port.
-            * The HTTP URL to access the Administration Server is `http://<load-balancer-public-ip-for-admin-server>:<port>/console/`.
-            * If you enable WLS TLS/SSL termination and enable custom DNS, the HTTPs URL is `https://<admin-label>.<dns-zone-name>:<port>/console/`.
 ## Examples
 
 To get details of how to run Oracle WebLogic Server on Azure Virtual Machines refer to the blog [WebLogic on Azure Virtual Machines Major Release Now Available](https://blogs.oracle.com/weblogicserver/weblogic-on-azure-virtual-machines-major-release-now-available).
