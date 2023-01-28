@@ -37,9 +37,9 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
 - Storage resources
    - An Azure Storage Account to store the VM diagnostics profile.
 - Key Software components
-   - Oracle WebLogic Server Enterprise Edition. Version as described in the selected base image. The ORACLE_HOME is /u01/app/wls/install/oracle/middleware/oracle_home.
-   - Oracle JDK. The version as described in the selected base image. The JAVA_HOME is /u01/app/jdk/jdk-${version}.
-   - In addition to the database drivers that come standard with WLS, the offer includes the most recent supported PostgreSQL JDBC driver and Microsoft SQL JDBC driver. The drivers are stored in /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/.
+   - Oracle WebLogic Server Enterprise Edition. Version as described in the selected base image. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
+   - Oracle JDK. The version as described in the selected base image. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}**.
+   - In addition to the database drivers that come standard with WLS, the offer includes the most recent supported PostgreSQL JDBC driver and Microsoft SQL JDBC driver. The drivers are stored in **/u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/**.
 
 #### Oracle WebLogic Server with Admin Server
 
@@ -60,9 +60,9 @@ The offer provisions Oracle WebLogic Server (WLS) with a domain and Administrati
    - Network interface for VM.
    - Public IP address.
 - Key software components
-   - Oracle WLS Enterprise Edition. Version as described in the selected base image. The ORACLE_HOME is /u01/app/wls/install/oracle/middleware/oracle_home.
-   - Oracle JDK. The version as described in the selected base image. The JAVA_HOME is /u01/app/jdk/jdk-${version}.
-   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is adminDomain, the domain path is /u01/domains/adminDomain/.
+   - Oracle WLS Enterprise Edition. Version as described in the selected base image. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
+   - Oracle JDK. The version as described in the selected base image. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}**.
+   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is **adminDomain**, the domain path is **/u01/domains/adminDomain/**.
 - Database connectivity
    - The offer provides database connectivity for PostgreSQL, Oracle database, Azure SQL, MySQL, or an arbitrary JDBC compliant database.
    - Some database options support Azure Passwordless database connection.
@@ -71,48 +71,39 @@ The offer provisions Oracle WebLogic Server (WLS) with a domain and Administrati
 
 #### Oracle WebLogic Server Cluster
 
-The offer provisions the following Azure resources based on Oracle WebLogic Server base images and an Oracle WebLogic Server Enterprise Edition (WLS) with a domain, the Administration Server and a configured cluster set up.
+The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a domain, the Administration Server and a configured cluster. All supporting Azure resources are automatically provisioned.
 
-* The offer includes a choice of operating system, JDK, Oracle WebLogic Server versions.
-   * OS: Oracle Linux or Red Hat Enterprise Linux
-   * JDK: Oracle JDK 8, or 11
-   * WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
-* Computing resources
-    * VMs with the followings configurations:
-        * A VM to run the Administration Server and an arbitrary number of VMs to run Managed Servers.
-        * VMs to run Coherence Cache servers.
-        * Choice of VM size.
-    * An OS disk attached to the VM.
-* Network resources
-    * A virtual network and a subnet. You can also select to bring your own virtual network.
-    * A network security group if you select to create a new virtual network.
-    * Network interfaces for VMs.
-    * Public IP addresses assigned to the network interfaces of admin server and managed servers.
-    * A public IP assigned to Application Gateway if you select to enable Application Gateway.
-* Load Balancer
-    * An Azure Application Gateway if you select to enable it. You can upload TLS/SSL certifiacte or use the certificates stored in a key vault. Otherwise, you can assign an auto-generated self-signed certificate to the application gateway.
-* High Availability
-    * An Azure Availability Set for the VMs.
-* Key software components
-    * Oracle WebLogic Server Enterprise Edition. Version as described in the selected base image. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
-    * Oracle JDK. The version as described in the selected base image. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}**.
-    * In addition to the database drivers that come standard with WLS, the offer includes the most recent supported PostgreSQL JDBC driver and Microsoft SQL JDBC driver. The drivers are stored in **/u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/**. 
-    * A WLS domain with the Administration Server up and running. Sign in to the Administration Server is with the Administrator user name and credentials provided to the offer. The default domain name is **adminDomain**, the domain path is **/u01/domains/adminDomain/**. You are able to access the Administration Server and manage the domain via URL **http://<admin-vm-hostname>:7001/console/**. By default, the offer configures the Administration Server with a self-signed TLS certificate. You are able to access it with HTTPS **https://<admin-vm-hostname>:7002/console/**.
-    * A configured cluster with Managed Servers running. The number of managed servers is specified in the UI when deploying the offer.
-    * Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.
-* Database connectivity
-    * The offer provides database connectivity using username/password or Azure passwordless database access.
-    * Username/password connections to existing Azure database for PostgreSQL, Oracle database, Azure SQL or MySQL. You can create data source connectivity to the database using connection string, database user name and password. For MySQL, the offer upgrades the built-in [Oracle WebLogic Server MySQL driver](https://aka.ms/wls-jdbc-drivers) with recent [MySQL Connector Java driver](https://mvnrepository.com/artifact/mysql/mysql-connector-java). The MySQL Connector Java driver is stored in **/u01/domains/preclasspath-libraries/** and loaded by setting the **PRE_CLASSPATH**.
-    * Passwordless connections to Azure database for PostgreSQL and MySQL. Passwordless connection requires PostgreSQL or MySQL instance with Azure Managed Identity connection enabled. The offer downloads [Azure Identity Extension Libraries](https://azuresdkdocs.blob.core.windows.net/$web/java/azure-identity-extensions/1.0.0/index.html) to **/u01/domains/azure-libraries/** and loads them to the WLS runtime by setting **PRE_CLASSPATH** and **CLASS_PATH**. The offer also assigns the managed identity that has access to the database to user managed identity of VM.
-* Access URLs
-    * Access to the Administration Server via HTTP. If you enable traffic to the Administration Server, the HTTP URLs is **http://<admin-vm-hostname>:7001/console/**.
-    * Access to the Administration Server via HTTPS. If you enable traffic to the Administration Server, the HTTPS URL is different for the following scenarios:
-        * With TLS/SSL termination enabled and custom DNS enabled, the HTTP URLs is **http://<admin-label>.<dns-zone-name>:7002/console/**. 
-        * With on TLS/SSL termination enabled,  the HTTP URLs is **http://<admin-vm-hostname>:7002/console/**. 
-    * Access to cluster and your application via HTTP. If you enable Application Gateway, the HTTP URLs is **http://<app-gateway-hostname>/<app-context-path>/**.
-    * Access to cluster and your application via HTTPS:
-        * If you enable Application Gateway with signed certificate and custom DNS, the HTTPS URLs is **https://<application-label>.<dns-zone-name>/<app-context-path>/**.
-        * If you enable Application Gateway with self-signed certificate, the HTTPS URLs is **https://<app-gateway-hostname>/<app-context-path>/**.
+- The offer includes a choice of operating system, JDK, WLS versions.
+   - OS: Oracle Linux or Red Hat Enterprise Linux
+   - JDK: Oracle JDK 8, or 11
+   - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+- Computing resources
+   - VMs with the followings configurations:
+      - A VM to run the Administration Server and VMs to run Managed Servers.
+      - VMs to run Coherence Cache servers.
+      - Choice of VM size.
+   - An OS disk attached to the VM.
+- Load Balancer
+   - If desired, an Azure Application Gateway (agw). The TLS/SSL certificate for the agw can be uploaded, retrieved from a key vault, or self-signed auto-generated.
+- Network resources
+   - A virtual network and a subnet. If desired, you can deploy into a pre-existing virtual network.
+   - A network security group if creating a new virtual network.
+   - Network interfaces for VMs.
+   - Public IP addresses assigned to the network interfaces
+   - Public IP assigned for agw, if desired.
+- High Availability
+   - An Azure Availability Set for the VMs.
+- Key software components
+   - WLS Enterprise Edition. Version as described in the selected base image. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
+   - Oracle JDK. The version as described in the selected base image. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}***.
+   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is **adminDomain**, the domain path is **/u01/domains/adminDomain/**.
+   - A configured cluster with Managed Servers running. The number of managed servers is specified in the UI when deploying the offer.
+   - Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.
+- Database connectivity
+   - The offer provides database connectivity for PostgreSQL, Oracle database, Azure SQL, MySQL, or an arbitrary JDBC compliant database.
+   - Some database options support Azure Passwordless database connection.
+- Access URLs
+   - See the deployment outputs for access URLs.
 
 #### Oracle WebLogic Server Dynamic Cluster
 
@@ -200,15 +191,15 @@ The offer provisions an Oracle WebLogic Server Enterprise Edition (WLS) and supp
 - Load Balancer
    - Choice of Azure Application Gateway (agw) or standard load balancer service. With agw, you can upload TLS/SSL certificate, use a certificates stored in a key vault, or allow a self-signed certificate to be generated and installed.
 - Storage resources
-   - An Azure Storage Account and a file share named weblogic if you select to create Persistent Volume using Azure File share service. The mount point is /shared.
+   - An Azure Storage Account and a file share named weblogic if you select to create Persistent Volume using Azure File share service. The mount point is **/shared**.
 - Monitoring resources
    - If desired, Azure Container Insights and workspace.
 - Key software components
-   - Oracle WebLogic Server Enterprise Edition. The ORACLE_HOME is /u01/app/wls/install/oracle/middleware/oracle_home.
+   - Oracle WebLogic Server Enterprise Edition. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
    - This offer always deploys WLS using the 'Model in image' domain home source type. For more information, see the documentation from Oracle.
    - WebLogic Kubernetes Operator
-   - Oracle JDK. The JAVA_HOME is /u01/app/jdk/jdk-${version}.
-   - A WLS domain with the Administration Server up configured based on the provided Administrator user name and credentials. The default domain name is sample-domain1, the domain path is /u01/domains/sample-domain1/.
+   - Oracle JDK. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}**.
+   - A WLS domain with the Administration Server up configured based on the provided Administrator user name and credentials. The default domain name is sample-domain1, the domain path is **/u01/domains/sample-domain1/**.
    - A dynamic cluster with Managed Servers running. The number of initial and maximum number of Managed Servers are configurable.
 - Database connectivity
    - The offer provides database connectivity for PostgreSQL, Oracle database, Azure SQL, MySQL, or an arbitrary JDBC compliant database.
