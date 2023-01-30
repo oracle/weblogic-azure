@@ -1,0 +1,70 @@
+<h1>Name</h1>
+<p>Oracle WebLogic Server Cluster</p>
+<h1>Search results summary</h1>
+<p>Provisions an n-node Oracle WebLogic Server Cluster.</p>
+<h1>Short description</h1>
+<p>Provisions an n-node Oracle WebLogic Server cluster. Supports integration with Azure App Gateway, databases, Azure Active Directory, ELK and Coherence.</p>
+<h1>Description</h1>
+
+<p>The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a domain, the Administration Server and a configured cluster. All supporting Azure resources are automatically provisioned.</p>
+<ul>
+<li>The offer includes a choice of operating system, JDK, WLS versions.<ul>
+<li>OS: Oracle Linux or Red Hat Enterprise Linux</li>
+<li>JDK: Oracle JDK 8, or 11</li>
+<li>WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0</li>
+</ul>
+</li>
+<li>Computing resources<ul>
+<li>VMs with the followings configurations:<ul>
+<li>A VM to run the Administration Server and VMs to run Managed Servers.</li>
+<li>VMs to run Coherence Cache servers.</li>
+<li>Choice of VM size.</li>
+</ul>
+</li>
+<li>An OS disk attached to the VM.</li>
+</ul>
+</li>
+<li>Load Balancer<ul>
+<li>If desired, an Azure Application Gateway (agw). The TLS/SSL certificate for the agw can be uploaded, retrieved from a key vault, or self-signed auto-generated.</li>
+</ul>
+</li>
+<li>Network resources<ul>
+<li>A virtual network and a subnet. If desired, you can deploy into a pre-existing virtual network.</li>
+<li>A network security group if creating a new virtual network.</li>
+<li>Network interfaces for VMs.</li>
+<li>Public IP addresses assigned to the network interfaces</li>
+<li>Public IP assigned for agw, if desired.</li>
+</ul>
+</li>
+<li>High Availability<ul>
+<li>An Azure Availability Set for the VMs.</li>
+</ul>
+</li>
+<li>Key software components<ul>
+<li>WLS Enterprise Edition. Version as described in the selected base image. The <strong>ORACLE_HOME</strong> is <strong>/u01/app/wls/install/oracle/middleware/oracle_home</strong>.</li>
+<li>Oracle JDK. The version as described in the selected base image. The <strong>JAVA_HOME</strong> is <strong>/u01/app/jdk/jdk-${version}</strong>.<ul>
+<li>A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is <strong>adminDomain</strong>, the domain path is <strong>/u01/domains/adminDomain/</strong>.</li>
+</ul>
+</li>
+<li>A configured cluster with Managed Servers running. The number of managed servers is specified in the UI when deploying the offer.</li>
+<li>Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.</li>
+</ul>
+</li>
+<li>Database connectivity<ul>
+<li>The offer provides database connectivity for PostgreSQL, Oracle database, Azure SQL, MySQL, or an arbitrary JDBC compliant database.</li>
+<li>Some database options support Azure Passwordless database connection.</li>
+</ul>
+</li>
+<li>Access URLs<ul>
+    <li>See the deployment outputs for access URLs.</li>
+</ul>
+</li>
+</ul>
+
+<p>WLS on Azure virtual machines offers enable you to embrace cloud computing by providing greater choice and flexibility for WLS migration. The offers enable you to lift and shift WLS workloads to virtual machines. After provisioning, you can customize the resources and focus on deploying your applications.</p>
+<p>Additional offers support different common use cases such as a single working instance with Admin Server enabled as well as highly available clusters.</p>
+<p>This specific offer creates a highly available cluster of WLS Enterprise Edition virtual machines. The Administration Server and all managed servers are started by default, which allow you to manage the domain with a browser. For complete instructions, please follow the <a href="https://aka.ms/wls-vm-docs">official documentation</a>.</p>
+<p>This offer supports a range of operating system, Java and WebLogic versions such as WLS 14 and JDK 11 on Oracle Linux 7.6 through base images. These base images are also available on Azure on their own. The base images are suitable for customers that require very highly customized Azure deployments. The current set of base images are available <a href="https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=oracle%20weblogic%20base%20image&amp;page=1">in the Azure marketplace</a>.</p>
+<p>In addition to the WLS on virtual machines offers, Oracle and Microsoft also provide a similar solution targeting the Azure Kubernetes Service (AKS). All offers are listed in the Useful links section at the bottom of the <a href="https://azuremarketplace.microsoft.com/en-us/marketplace/apps/oracle.oraclelinux-wls-cluster">solution overview</a> page.</p>
+<p><i>These offers are all Bring-Your-Own-License</i>. They assume you have already procured the appropriate licenses with Oracle and are properly licensed to run offers in Microsoft Azure.</p>
+<p><i>If you want to work closely on your migration scenarios with the engineering team developing these offers, just click on the CONTACT ME button on the <a href="https://azuremarketplace.microsoft.com/en-us/marketplace/apps/oracle.oraclelinux-wls-cluster?tab=Overview">solution overview page</a></i>. Program managers, architects and engineers will reach back out to you shortly and initiate collaboration!</p>

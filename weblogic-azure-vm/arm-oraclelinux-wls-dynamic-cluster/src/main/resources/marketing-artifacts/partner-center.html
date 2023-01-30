@@ -1,0 +1,87 @@
+<h1>Name</h1>
+<p>Oracle WebLogic Server Dynamic Cluster</p>
+<h1>Search results summary</h1>
+<p>Provisions an n-node Oracle WebLogic Server dynamic cluster.</p>
+<h1>Short description</h1>
+<p>Provisions an n-node Oracle WebLogic Server Enterprise Edition dynamic cluster. Supports integration with Oracle HTTP Server, databases, Azure Active Directory, ELK and Coherence.</p>
+<h1>Description</h1>
+
+<p>The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a domain, the Administration Server and a dynamic cluster. All supporting Azure resources are automatically provisioned.</p>
+<ul>
+<li>The offer includes a choice of operating system, JDK, WLS versions.<ul>
+<li>OS: Oracle Linux or Red Hat Enterprise Linux</li>
+<li>JDK: Oracle JDK 8, or 11</li>
+<li>WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0</li>
+</ul>
+</li>
+<li>The offer includes the choice of the following Oracle HTTP Server (OHS) base images<ul>
+<li>OS: Oracle Linux</li>
+<li>OHS version 12.2.1.4.0</li>
+</ul>
+</li>
+<li>Computing resources<ul>
+<li>VMs for WLS:<ul>
+<li>A VM to run the Administration Server and VMs to run Managed Servers.</li>
+<li>VMs to run Coherence Cache servers.</li>
+<li>Choice of VM size.</li>
+<li>An OS disk attached to the VM.</li>
+</ul>
+</li>
+<li>VM for OHS, if desired:<ul>
+<li>Choice of VM size.</li>
+<li>An OS disk attached to the VM.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Load Balancer<ul>
+<li>If desired, an OHS. The TLS/SSL certificate for the agw can be uploaded, retrieved from a key vault, or self-signed auto-generated.</li>
+</ul>
+</li>
+<li>Network resources<ul>
+<li>A virtual network and a subnet. If desired, you can deploy into a pre-existing virtual network.</li>
+<li>A network security group if creating a new virtual network.</li>
+<li>Network interfaces for VMs.</li>
+<li>Public IP addresses assigned to the network interfaces.</li>
+<li>A public IP assigned OHS, if desired.</li>
+</ul>
+</li>
+<li>Storage resources<ul>
+<li>An Azure Storage Account and a file share named <strong>wlsshare</strong>. The mount point is <strong>/mnt/wlsshare</strong>.</li>
+<li>The storage account is also used to store the diagnostics profile of the VMs.</li>
+<li>A private endpoint in the same subnet with the VM, which allows the VM to access the file share.</li>
+</ul>
+</li>
+<li>Key software components for WLS<ul>
+<li>WLS Enterprise Edition. Version as described in the selected base image. The <strong>ORACLE_HOME</strong> is <strong>/u01/app/wls/install/oracle/middleware/oracle_home</strong>.</li>
+<li>Oracle JDK. The version as described in the selected base image. The <strong>JAVA_HOME</strong> is <strong>/u01/app/jdk/jdk-${version}*</strong>.</li>
+<li>A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is <strong>adminDomain</strong>, the domain path is <strong>/u01/domains/adminDomain/</strong>.<ul>
+<li>A dynamic cluster with desired number of Managed Servers running. The number of Managed servers is specified by <strong>Initial Dynamic Cluster Size</strong>. The cluster size is specified by <strong>Maximum Dynamic Cluster Size</strong>.</li>
+<li>Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Key software components for OHS<ul>
+<li>Version as described in the selected base image. The <strong>ORACLE_HOME</strong> is <strong>/u01/app/ohs/install/oracle/middleware/oracle_home</strong>.</li>
+<li>Oracle JDK. The version as described in the selected base image. The <strong>JAVA_HOME</strong> is <strong>/u01/app/jdk/jdk-${version}</strong>.</li>
+<li>A domain is configured based on the node manager user name and credentials provided by the user. The default domain name is <strong>ohsStandaloneDomain</strong>, the domain path is <strong>/u01/domains/ohsStandaloneDomain/</strong>.</li>
+<li>An Oracle HTTP Server Component with default name <strong>ohs_component</strong>.</li>
+</ul>
+</li>
+<li>Database connectivity<ul>
+<li>The offer provides database connectivity for PostgreSQL, Oracle database, Azure SQL, MySQL, or an arbitrary JDBC compliant database.</li>
+<li>Some database options support Azure Passwordless database connection.</li>
+</ul>
+</li>
+<li>Access URLs<ul>
+    <li>See the deployment outputs for access URLs.</li>
+</ul>
+</li>
+</ul>
+
+<p>WLS on Azure virtual machines offers enable you to lift and shift WLS workloads to virtual machines. After provisioning, you can customize the resources and focus on deploying your applications.</p>
+<p>Additional offers support different common use cases such as a single working instance with Admin Server enabled as well as highly available clusters.</p>
+<p>For complete instructions, please follow the <a href="https://aka.ms/wls-vm-docs">official documentation</a>.</p>
+<p>Please explore additional offers in the Useful links section at the bottom of the <a href="https://azuremarketplace.microsoft.com/en-us/marketplace/apps/oracle.oraclelinux-wls-cluster">solution overview</a> page.</p>
+<p><i>These offers are all Bring-Your-Own-License</i>. They assume you have already procured the appropriate licenses with Oracle and are properly licensed to run offers in Microsoft Azure.</p>
