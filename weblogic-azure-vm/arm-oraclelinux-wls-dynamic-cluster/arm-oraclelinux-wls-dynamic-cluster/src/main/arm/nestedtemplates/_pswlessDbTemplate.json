@@ -109,12 +109,24 @@
     "variables": {
         "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
         "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_msiDefaultUser": "msiUser",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
         "name_dbTemplate": "_dbTemplate.json",
         "array_azureJdbcPlugins": {
             "mysql": "defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin",
-            "postgresql": "authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin"
+            "postgresql": "authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin",
+            "sqlserver": "authentication=ActiveDirectoryMSI"
+        },
+        "array_urlJoiner": {
+            "mysql": "&",
+            "postgresql": "&",
+            "sqlserver": ";"
+        },
+        "array_msiClientId": {
+            "mysql": "azure.clientId",
+            "postgresql": "azure.clientId",
+            "sqlserver": "msiClientId"
         },
         "obj_dbIdentity": {
             "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
@@ -169,6 +181,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
             "name": "installJdbcLibsTemplate",
+            "condition": "[or(equals(parameters('databaseType'),'mysql'), equals(parameters('databaseType'),'postgresql'))]",
             "dependsOn": [
                 "virtualMachineIdentityLoop"
             ],
@@ -245,10 +258,10 @@
                         "value": "[parameters('dbGlobalTranPro')]"
                     },
                     "dsConnectionURL": {
-                        "value": "[uri(format('{0}&{1}&azure.clientId={2}', parameters('dsConnectionURL'), variables('array_azureJdbcPlugins')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId), '')]"
+                        "value": "[uri(format('{0}{4}{1}{4}{2}={3}', parameters('dsConnectionURL'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')]), '')]"
                     },
                     "dbUser": {
-                        "value": "[parameters('dbUser')]"
+                        "value": "[if(equals(parameters('databaseType'), 'sqlserver'), variables('const_msiDefaultUser'), parameters('dbUser'))]"
                     },
                     "enablePswlessConnection": {
                         "value": true
