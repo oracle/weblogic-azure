@@ -239,7 +239,7 @@ read oracleHome domainPath wlsServerName wlsAdminHost wlsAdminPort wlsUserName w
 export curlMaxTime=120 # seconds
 export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
 export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
-export mvnVersion="3.8.6"
+export mvnVersion="3.9.0"
 export mvnInstaller="apache-maven-${mvnVersion}-bin.tar.gz"
 export retryMaxAttempt=5 # retry attempt for curl command
 export url4MavenInstaller="https://dlcdn.apache.org/maven/maven-3/${mvnVersion}/binaries/${mvnInstaller}"
