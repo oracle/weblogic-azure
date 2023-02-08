@@ -91,6 +91,7 @@
         }
     },
     "variables": {
+        "const_connectionString": "[if(and(equals(parameters('databaseType'),'sqlserver'), equals(last(parameters('dsConnectionURL')),';')), take(parameters('dsConnectionURL'), add(length(parameters('dsConnectionURL')),-1)),parameters('dsConnectionURL'))]",
         "const_identityAPIVersion": "${azure.apiVersionForIndentity}",
         "const_msiDefaultUser": "msiUser",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
@@ -111,7 +112,7 @@
             "postgresql": "&",
             "sqlserver": ";"
         },
-         "obj_dbIdentity": {
+        "obj_dbIdentity": {
             "[items(parameters('dbIdentity').userAssignedIdentities)[0].key]": {}
         },
         "obj_empty": {}
@@ -231,7 +232,7 @@
                         "value": "[parameters('dbGlobalTranPro')]"
                     },
                     "dsConnectionURL": {
-                        "value": "[uri(format('{0}{4}{1}{4}{2}={3}', parameters('dsConnectionURL'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')]), '')]"
+                        "value": "[uri(format('{0}{4}{1}{4}{2}={3}', variables('const_connectionString'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')]), '')]"
                     },
                     "dbUser": {
                         "value": "[if(equals(parameters('databaseType'), 'sqlserver'), variables('const_msiDefaultUser'), parameters('dbUser'))]"
