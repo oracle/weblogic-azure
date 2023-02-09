@@ -35,7 +35,7 @@
 </ul>
 </li>
 <li>Load Balancer<ul>
-<li>If desired, an OHS. The TLS/SSL certificate for the agw can be uploaded, retrieved from a key vault, or self-signed auto-generated.</li>
+<li>If desired, an OHS. The TLS/SSL certificate for the OHS can be uploaded, or retrieved from a key vault.</li>
 </ul>
 </li>
 <li>Network resources<ul>
@@ -55,7 +55,7 @@
 <li>Key software components for WLS<ul>
 <li>WLS Enterprise Edition. Version as described in the selected base image. The <strong>ORACLE_HOME</strong> is <strong>/u01/app/wls/install/oracle/middleware/oracle_home</strong>.</li>
 <li>Oracle JDK. The version as described in the selected base image. The <strong>JAVA_HOME</strong> is <strong>/u01/app/jdk/jdk-${version}*</strong>.</li>
-<li>A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is <strong>adminDomain</strong>, the domain path is <strong>/u01/domains/adminDomain/</strong>.<ul>
+<li>A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is <strong>wlsd</strong>, the domain path is <strong>/u01/domains/wlsd/</strong>.<ul>
 <li>A dynamic cluster with desired number of Managed Servers running. The number of Managed servers is specified by <strong>Initial Dynamic Cluster Size</strong>. The cluster size is specified by <strong>Maximum Dynamic Cluster Size</strong>.</li>
 <li>Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.</li>
 </ul>

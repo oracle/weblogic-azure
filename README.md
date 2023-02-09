@@ -96,7 +96,7 @@ The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a doma
 - Key software components
    - WLS Enterprise Edition. Version as described in the selected base image. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
    - Oracle JDK. The version as described in the selected base image. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}***.
-   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is **adminDomain**, the domain path is **/u01/domains/adminDomain/**.
+   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is **wlsd**, the domain path is **/u01/domains/wlsd/**.
    - A configured cluster with Managed Servers running. The number of managed servers is specified in the UI when deploying the offer.
    - Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.
 - Database connectivity
@@ -126,7 +126,7 @@ The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a doma
       - Choice of VM size.
       - An OS disk attached to the VM.
 - Load Balancer
-   - If desired, an OHS. The TLS/SSL certificate for the agw can be uploaded, retrieved from a key vault, or self-signed auto-generated.
+   - If desired, an OHS. The TLS/SSL certificate for the OHS can be uploaded, or retrieved from a key vault.
 - Network resources
    - A virtual network and a subnet. If desired, you can deploy into a pre-existing virtual network.
    - A network security group if creating a new virtual network.
@@ -140,7 +140,7 @@ The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a doma
 - Key software components for WLS
    - WLS Enterprise Edition. Version as described in the selected base image. The **ORACLE_HOME** is **/u01/app/wls/install/oracle/middleware/oracle_home**.
    - Oracle JDK. The version as described in the selected base image. The **JAVA_HOME** is **/u01/app/jdk/jdk-${version}**.
-   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is **adminDomain**, the domain path is **/u01/domains/adminDomain/**.
+   - A WLS domain with the Administration Server up and running. Admin server sign in with the user name and password provided to the offer. The default domain name is **wlsd**, the domain path is **/u01/domains/wlsd/**.
       - A dynamic cluster with desired number of Managed Servers running. The number of Managed servers is specified by **Initial Dynamic Cluster Size**. The cluster size is specified by **Maximum Dynamic Cluster Size**.
       - Coherence Cache. If you select to enable Coherence Cache, the offer creates a data tier configured with Managed Coherence cache servers.
 - Key software components for OHS
