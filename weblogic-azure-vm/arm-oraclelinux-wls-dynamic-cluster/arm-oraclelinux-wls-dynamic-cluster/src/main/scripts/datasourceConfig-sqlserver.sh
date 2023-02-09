@@ -103,9 +103,10 @@ function validateInput()
        exit 1
    fi
 
-   # reset password
+   # reset password and user
    if [[ "${enablePswlessConnection,,}" == "true" ]]; then
        dsPassword=""
+       dsUser=""
    fi
 }
 
