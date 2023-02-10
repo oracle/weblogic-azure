@@ -398,6 +398,20 @@
             }
         },
         {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.ssl.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
             "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
             "type": "Microsoft.Network/networkSecurityGroups",
             "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
@@ -733,6 +747,23 @@
                 },
                 "protectedSettings": {
                     "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',if(equals(copyIndex(),0),'admin',concat(parameters('managedServerPrefix'), copyIndex())),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersion}').dnsSettings.fqdn), reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ', parameters('virtualNetworkNewOrExisting'),' ',reference(resourceId('Microsoft.Network/privateEndpoints/', variables('name_privateSaEndpoint')), '${azure.apiVersionForPrivateEndpoint}').customDnsConfigs[0].ipAddresses[0],' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.ssl.end}",
+            "dependsOn": [
+                "virtualMachineExtensionLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
                 }
             }
         },
