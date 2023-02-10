@@ -19,6 +19,8 @@ param _artifactsLocation string = deployment().properties.templateLink.uri
 param _artifactsLocationSasToken string = ''
 param _pidEnd string = 'pid-wls-end'
 param _pidStart string = 'pid-wls-start'
+param _pidSSLEnd string = 'pid-ssl-end'
+param _pidSSLStart string = 'pid-ssl-start'
 @description('true to use resource or workspace permissions. false to require workspace permissions.')
 param aciResourcePermissions bool = true
 @description('Number of days to retain data in Azure Monitor workspace.')
@@ -131,6 +133,13 @@ module pidStart './_pids/_pid.bicep' = {
   }
 }
 
+module pidSSLStart './_pids/_pid.bicep' = if (enableCustomSSL) {
+  name: 'wls-ssl-start-pid-deployment'
+  params: {
+    name: _pidSSLStart
+  }
+}
+
 resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' existing = if (!createAKSCluster) {
   name: aksClusterName
   scope: resourceGroup(aksClusterRGName)
@@ -224,6 +233,16 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
   dependsOn: [
     aksClusterDeployment
     storageDeployment
+  ]
+}
+
+module pidSSLEnd './_pids/_pid.bicep' = if (enableCustomSSL) {
+  name: 'wls-ssl-end-pid-deployment'
+  params: {
+    name: _pidSSLEnd
+  }
+  dependsOn: [
+    wlsDomainDeployment
   ]
 }
 

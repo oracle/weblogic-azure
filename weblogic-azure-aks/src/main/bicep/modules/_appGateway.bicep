@@ -3,6 +3,7 @@
 
 param _pidAppgwEnd string = 'pid-networking-appgateway-end'
 param _pidAppgwStart string = 'pid-networking-appgateway-start'
+param _pidAppgwWithCustomCert string = 'pid-networking-appgateway-with-custom-certificate'
 param appgwPublicIPAddressName string = 'gwip'
 param appgwUsePrivateIP bool
 param appgwSslCertName string = 'appGatewaySslCert'
@@ -37,6 +38,13 @@ module pidAppgwStart './_pids/_pid.bicep' = {
     name: _pidAppgwStart
   }
 }
+module pidAppgwWithCustomCertificate './_pids/_pid.bicep' = {
+  name: 'pid-app-gateway-with-custom-certificate'
+  params: {
+    name: _pidAppgwWithCustomCert
+  }
+}
+
 // get key vault object from a resource group
 resource existingKeyvault 'Microsoft.KeyVault/vaults@2021-10-01' existing = {
   name: keyVaultName

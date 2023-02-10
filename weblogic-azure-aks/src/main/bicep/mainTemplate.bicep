@@ -506,6 +506,7 @@ module appgatewayDeployment 'modules/_appGateway.bicep' = if (enableAppGWIngress
   params: {
     _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
     _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
+    _pidAppgwWithCustomCert: pids.outputs.customCertForAppgw == '' ? name_defaultPidDeployment : pids.outputs.customCertForAppgw
     appgwPublicIPAddressName: appGatewayPublicIPAddressName
     appgwUsePrivateIP: appgwUsePrivateIP
     appgwSslCertName: name_appgwFrontendSSLCertName
@@ -535,6 +536,8 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
     _pidEnd: pids.outputs.wlsAKSEnd == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSEnd
+    _pidSSLEnd: pids.outputs.sslEnd == '' ? name_defaultPidDeployment : pids.outputs.sslEnd
+    _pidSSLStart: pids.outputs.sslStart == '' ? name_defaultPidDeployment : pids.outputs.sslStart
     _pidStart: pids.outputs.wlsAKSStart == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSStart
     aciResourcePermissions: aciResourcePermissions
     aciRetentionInDays: aciRetentionInDays

@@ -83,6 +83,7 @@ module configDataSource './_setupDBConnection.bicep' = {
   name: 'create-update-delete-datasource'
   params:{
     _pidEnd: pids.outputs.dbEnd
+    _pidOtherDb: pids.outputs.otherDb
     _pidStart: pids.outputs.dbStart
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
