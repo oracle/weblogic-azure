@@ -12,7 +12,7 @@ param location string
 
 var const_APIVersion = '2022-01-31-PREVIEW'
 
-resource configAKSPodIdentity 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
+resource configAKSPodIdentity 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
   name: aksClusterName
   location: location
   properties: {
