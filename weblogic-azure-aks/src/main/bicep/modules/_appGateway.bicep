@@ -38,7 +38,7 @@ module pidAppgwStart './_pids/_pid.bicep' = {
     name: _pidAppgwStart
   }
 }
-module pidAppgwWithCustomCertificate './_pids/_pid.bicep' = {
+module pidAppgwWithCustomCertificate './_pids/_pid.bicep' = if (_signedFrontendCertAndNoBackendCert || _signedFrontendCertAndBackendCert) {
   name: 'pid-app-gateway-with-custom-certificate'
   params: {
     name: _pidAppgwWithCustomCert
