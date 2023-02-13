@@ -61,7 +61,7 @@ resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@2021
   }
 }
 
-resource aksCluster 'Microsoft.ContainerService/managedClusters@2021-02-01' = {
+resource aksCluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
   name: name_aksClusterNameForSV
   location: location
   properties: {
