@@ -19,7 +19,7 @@ if [[ "${DB_TYPE}" == "mysql" ]]; then
   preClassPath="/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/${constPreclassDirectoryName}/*:"
 fi
 
-if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]]; then
+if [[ "${ENABLE_PASSWORDLESS_DB_CONNECTION,,}" == "true" ]] && [[ "${DB_TYPE}" == "mysql" || "${DB_TYPE}" == "postgresql" ]]; then
   # append jackson libraries to pre-classpath to upgrade existing libs in GA images
   preClassPath="${preClassPath}/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/jackson/*"
   classPath="${classPath}:/u01/domains/${WLS_DOMAIN_UID}/wlsdeploy/classpathLibraries/azureLibraries/*"

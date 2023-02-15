@@ -42,15 +42,27 @@ param wlsPassword string
 @description('User name for WebLogic Administrator.')
 param wlsUserName string = 'weblogic'
 
+var const_connectionString = (databaseType == 'sqlserver') && last(dsConnectionURL) == ';' ? take(dsConnectionURL, length(dsConnectionURL) - 1) : dsConnectionURL
 var const_identityAPIVersion = '2022-01-31-PREVIEW'
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfVMContributor = '9980e02c-c2be-4d73-94e8-173b1dc7cf3c'
 var const_podIdentitySelector = 'db-pod-identity' // Do not change this value. 
 var name_dbIdentityName = split(items(dbIdentity.userAssignedIdentities)[0].key, '/')[8]
+var array_msiClientId = {
+  mysql: 'azure.clientId'
+  postgresql: 'azure.clientId'
+  sqlserver: 'msiClientId'
+}
 // Azure JDBC plugins, used to generate connection string.
 var name_jdbcPlugins = {
   mysql: 'defaultAuthenticationPlugin=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin&authenticationPlugins=com.azure.identity.extensions.jdbc.mysql.AzureMysqlAuthenticationPlugin'
   postgresql: 'authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin'
+  sqlserver: 'authentication=ActiveDirectoryMSI'
+}
+var array_urlJoiner = {
+  mysql: '&'
+  postgresql: '&'
+  sqlserver: ';'
 }
 var name_podIdentity = format('{0}-pod-identity-{1}', databaseType, toLower(utcValue))
 
@@ -119,7 +131,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     dbConfigurationType: dbConfigurationType
     dbGlobalTranPro: dbGlobalTranPro
     dbUser: dbUser
-    dsConnectionURL: uri(format('{0}&{1}&azure.clientId={2}', dsConnectionURL, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId), '')
+    dsConnectionURL: uri(format('{0}{4}{1}{4}{3}={2}', const_connectionString, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId, array_msiClientId[databaseType], array_urlJoiner[databaseType]), '')
     enablePswlessConnection: true
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName

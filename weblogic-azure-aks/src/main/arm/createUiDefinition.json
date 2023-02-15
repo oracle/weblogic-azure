@@ -1851,7 +1851,7 @@
                                             "value": "oracle"
                                         },
                                         {
-                                            "label": "Azure SQL",
+                                            "label": "Azure SQL (with support for passwordless connection)",
                                             "value": "sqlserver"
                                         },
                                         {
@@ -1913,6 +1913,10 @@
                                         {
                                             "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPluginClassName')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
                                             "message": "The offer will append authenticationPluginClassName with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
+                                        },
+                                        {
+                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0),equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver')), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+                                            "message": "You must select at least one managed identity that has access to your database."
                                         }
                                     ]
                                 },
@@ -1971,6 +1975,13 @@
                                 "visible": true
                             },
                             {
+                                "name": "enablePswlessConnection0",
+                                "type": "Microsoft.Common.CheckBox",
+                                "label": "Use passwordless datasource connection",
+                                "toolTip": "Use passwordless datasource connection.",
+                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))]"
+                            },
+                            {
                                 "name": "dbUser",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Database username",
@@ -1989,8 +2000,7 @@
                                         }
                                     ]
                                 },
-                                "visible": true
-                            },
+                                "visible": "[and(bool(steps('section_database').enableDB), not(and(steps('section_database').databaseConnectionInfo.enablePswlessConnection0, equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))))]"                            },
                             {
                                 "name": "enablePswlessConnection",
                                 "type": "Microsoft.Common.CheckBox",
@@ -2014,7 +2024,7 @@
                                 "options": {
                                     "hideConfirmation": false
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(steps('section_database').databaseConnectionInfo.enablePswlessConnection))]"
+                                "visible": "[and(bool(steps('section_database').enableDB), not(or(steps('section_database').databaseConnectionInfo.enablePswlessConnection, steps('section_database').databaseConnectionInfo.enablePswlessConnection0)))]"
                             },
                             {
                                 "name": "dbIdentity",
@@ -2030,7 +2040,7 @@
                                     "hideSystemAssignedIdentity": true,
                                     "hideUserAssignedIdentity": false
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), steps('section_database').databaseConnectionInfo.enablePswlessConnection)]"
+                                "visible": "[and(bool(steps('section_database').enableDB), or(steps('section_database').databaseConnectionInfo.enablePswlessConnection, steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]"
                             },
                             {
                                 "name": "dbDriverLibraries",
@@ -2130,7 +2140,7 @@
             "enableDNSConfiguration": "[bool(steps('section_dnsConfiguration').enableDNSConfiguration)]",
             "enableAdminT3Tunneling": "[basics('basicsOptional').enableAdminT3Tunneling]",
             "enableClusterT3Tunneling": "[basics('basicsOptional').enableClusterT3Tunneling]",
-            "enablePswlessConnection": "[bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection)]",
+            "enablePswlessConnection": "[or(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "isSSOSupportEntitled": "[bool(steps('section_aks').imageInfo.isSSOSupportEntitled)]",
             "lbSvcValues": "[if(not(empty(first(if(empty(steps('section_appGateway').lbSVCInfo.lbSVC),parse('[{\"colName\":\"\"}]'), steps('section_appGateway').lbSVCInfo.lbSVC)).colName)),steps('section_appGateway').lbSVCInfo.lbSVC, parse('[]'))]",

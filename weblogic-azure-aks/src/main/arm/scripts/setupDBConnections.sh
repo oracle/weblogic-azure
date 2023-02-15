@@ -73,6 +73,10 @@ function validate_input() {
     # reset password
     if [[ "${ENABLE_PASSWORDLESS_CONNECTION,,}" == "true" ]]; then
         DB_PASSWORD=""
+
+        if [[ "${DATABASE_TYPE}" == "${constDBTypeSqlServer}" ]]; then
+            DB_USER=""
+        fi
     fi
 }
 
