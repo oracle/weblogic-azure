@@ -49,7 +49,7 @@ You must construct a parameters JSON file containing the parameters to the add-n
  </tr>
  <tr>
   <td rowspan="5"><code>aadsSettings</code></td>
-  <td colspan="2">Optional. <a href="https://docs.microsoft.com/en-us/azure/architecture/building-blocks/extending-templates/objects-as-parameters">JSON object type</a>. You can specify this parameters for Azure Active Directory integration. If <code>enable</code> is true, must specify other properties. See the page <a href="https://docs.microsoft.com/en-us/azure/developer/java/migration/migrate-weblogic-with-aad-ldap">WebLogic to Azure with AAD via LDAP</a> for further information.</td>
+  <td colspan="2">Optional. <a href="https://docs.microsoft.com/en-us/azure/architecture/building-blocks/extending-templates/objects-as-parameters">JSON object type</a>. You can specify this parameters for Azure Active Directory integration. If <code>enable</code> is true, must specify other properties. </td>
  </tr>
  <tr>
 
