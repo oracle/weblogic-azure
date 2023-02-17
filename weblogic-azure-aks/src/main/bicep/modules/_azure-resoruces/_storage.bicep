@@ -9,7 +9,7 @@ var const_shareQuota = 5120
 var const_sku = 'Standard_LRS'
 var name_fileShare = 'weblogic'
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
   location: location
   kind: 'StorageV2'
@@ -39,7 +39,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   }
 }
 
-resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-02-01' = {
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-05-01' = {
   name: '${storageAccount.name}/default/${name_fileShare}'
   properties: {
     accessTier: 'TransactionOptimized'

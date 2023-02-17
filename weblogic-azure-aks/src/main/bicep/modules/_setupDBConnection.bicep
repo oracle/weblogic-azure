@@ -8,6 +8,7 @@ param _artifactsLocation string = deployment().properties.templateLink.uri
 param _artifactsLocationSasToken string = ''
 param _pidEnd string = ''
 param _pidStart string = ''
+param _pidOtherDb string = ''
 
 @description('Name of an existing AKS cluster.')
 param aksClusterName string = ''
@@ -53,6 +54,13 @@ module pidStart './_pids/_pid.bicep' = {
   }
 }
 
+module pidOtherDb './_pids/_pid.bicep' = if (databaseType == 'otherdb') {
+  name: 'wls-other-db-pid-deployment'
+  params: {
+    name: _pidOtherDb
+  }
+}
+
 module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = {
   name: 'create-update-datasource'
   params:{
@@ -78,6 +86,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
   }
   dependsOn:[
     pidStart
+    pidOtherDb
   ]
 }
 
