@@ -261,7 +261,8 @@ function install_utilities() {
         download_mysql_driver
     fi
 
-    if [[ "${enablePswlessConnection,,}" == "true" ]]; then
+    # for sqlserver. no need to install azure identity extensions
+    if [[ "${enablePswlessConnection,,}" == "true" ]] && [[ "${dbType}" == "mysql"  || "${dbType}" == "postgresql"  ]]; then
         download_azure_identity_extensions
     fi
 }
