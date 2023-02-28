@@ -1181,167 +1181,6 @@
                         "visible": "[bool(steps('section_database').enableDB)]"
                     }
                 ]
-            },
-            {
-                "name": "section_elk",
-                "label": "Elasticsearch and Kibana",
-                "subLabel": {
-                    "preValidation": "Configure the connection to Elasticsearch and Kibana.",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Elasticsearch and Kibana",
-                "elements": [
-                    {
-                        "name": "aboutelk",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "icon": "None",
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure Elasticsearch and Kibana to store WLS logs.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-elk-tutorial"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableELK",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Export logs to Elasticsearch?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Elasticsearch.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "elkInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Connection settings",
-                        "elements": [
-                            {
-                                "name": "elkMemoryRequiredText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "icon": "None",
-                                    "text": "To ensure Logstash works correctly, the selected Virtual Machines have at least 2.5GB memory.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/arm-oraclelinux-wls-elk"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "elkMemoryRequired",
-                                "type": "Microsoft.Common.InfoBox",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "Your selected Virtual Machines have less than 2.5GB memory to set up Elasticsearch and Kibana, please go to Basics -> Virtual machine size to change it, recommended size is Standard_A2_v2."
-                                },
-                                "visible": "[and(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')),bool(steps('section_elk').enableELK))]"
-                            },
-                            {
-                                "name": "elasticsearchEndpoint",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Elasticsearch endpoint URL",
-                                "toolTip": "Elasticsearch endpoint.",
-                                "defaultValue": "https://example.location.azure.elastic-cloud.com:9243",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*):[0-9]{1,6}$",
-                                            "message": "The value must be a valid uri."
-                                        },
-                                        {
-                                            "isValid": "[not(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')))]",
-                                            "message": "Your selected Virtual Machines have less than 2.5GB memory to set up Elasticsearch and Kibana, please go to Basics -> Virtual machine size to change it, recommended size is Standard_A2_v2."
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "elasticsearchUserName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Elasticsearch User Name",
-                                "defaultValue": "elastic",
-                                "toolTip": "User name of Elasticsearch account.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
-                                    "validationMessage": "The value must be valid Elasticsearch user name."
-                                }
-                            },
-                            {
-                                "name": "elasticsearchPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password for Elasticsearch account",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Password for Elasticsearch account.",
-                                "constraints": {
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "logsToIntegrate",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "WebLogic Server logs to export",
-                                "toolTip": "The logs selected will be exported to Elasticsearch.",
-                                "defaultValue": [
-                                    "Server Log"
-                                ],
-                                "multiselect": true,
-                                "selectAll": true,
-                                "multiLine": true,
-                                "defaultDescription": "The logs selected will be exported to Elasticsearch",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Data Source Log",
-                                            "description": "Export Datasource logs to Elasticsearch.",
-                                            "value": "DataSourceLog"
-                                        },
-                                        {
-                                            "label": "Domain Log",
-                                            "description": "Export Domain logs to Elasticsearch.",
-                                            "value": "DomainLog"
-                                        },
-                                        {
-                                            "label": "HTTP Access Log",
-                                            "description": "Export HTTP logs to Elasticsearch.",
-                                            "value": "HTTPAccessLog"
-                                        },
-                                        {
-                                            "label": "Server Log",
-                                            "description": "Export Server logs to Elasticsearch.",
-                                            "value": "ServerLog"
-                                        },
-                                        {
-                                            "label": "Standard error and output",
-                                            "description": "Export standard error and output to Elasticsearch.",
-                                            "value": "StandardErrorAndOutput"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            }
-                        ],
-                        "visible": "[bool(steps('section_elk').enableELK)]"
-                    }
-                ]
             }
         ],
         "outputs": {
@@ -1361,16 +1200,11 @@
             "dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
             "dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "elasticsearchEndpoint": "[steps('section_elk').elkInfo.elasticsearchEndpoint]",
-            "elasticsearchPassword": "[steps('section_elk').elkInfo.elasticsearchPassword]",
-            "elasticsearchUserName": "[steps('section_elk').elkInfo.elasticsearchUserName]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "enableCustomDNS": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
-            "enableELK": "[bool(steps('section_elk').enableELK)]",
             "enablePswlessConnection": "[or(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]",
             "hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",
             "portsToExpose": "[steps('section_networkingConfiguration').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
             "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
