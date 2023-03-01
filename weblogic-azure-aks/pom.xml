@@ -17,12 +17,12 @@
 
   <groupId>com.oracle.weblogic.azure</groupId>
   <artifactId>wls-on-aks-azure-marketplace</artifactId>
-  <version>1.0.55</version>
+  <version>1.0.56</version>
 
   <parent>
     <groupId>com.microsoft.azure.iaas</groupId>
     <artifactId>azure-javaee-iaas-parent</artifactId>
-    <version>1.0.19</version>
+    <version>1.0.18</version>
     <relativePath></relativePath>
   </parent>
 
