@@ -630,6 +630,26 @@
                         "visible": true
                     },
                     {
+                        "name": "aksAdvancedConfig",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Show advanced configuration?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to edit advanced configuration.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
                         "name": "aksAdvancedInfo",
                         "type": "Microsoft.Common.Section",
                         "label": "Advanced",
@@ -718,7 +738,7 @@
                                 }
                             }
                         ],
-                        "visible": true
+                        "visible": "[bool(steps('section_aks').aksAdvancedConfig)]"
                     }
                 ]
             },
