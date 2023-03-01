@@ -938,7 +938,7 @@
                         "visible": "[equals(steps('section_appGateway').certificateOption, 'generateCert')]",
                         "options": {
                             "icon": "Info",
-                            "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+                            "text": "This option will create a self-signed TLS/SSL certificate for gateway TLS/SSL termination. The Azure identity deploying<br>this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
                         }
                     }
                 ],
@@ -965,7 +965,7 @@
                         "visible": "true",
                         "options": {
                             "icon": "Info",
-                            "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual network's address prefix. When using an existing virtual network, a minimum virtual network size of /24 and a minimum subnet size of /24 are required. If deploying an Application Gateway, it must be deployed in its own dedicated subnet with a minimum subnet size of /29."
+                            "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual<br>network's address prefix. When using an existing virtual network, a minimum virtual network size of /24 and a<br>minimum subnet size of /24 are required. If deploying an Application Gateway, it must be deployed in its own<br>dedicated subnet with a minimum subnet size of /29."
                         }
                     },
                     {
@@ -1341,7 +1341,7 @@
                                 "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "To support passwordless connection and various functionalities, the offer will upgrade the <a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
+                                    "text": "To support passwordless connection and various functionalities, the offer will upgrade the<br><a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
                                 }
                             },
                             {
