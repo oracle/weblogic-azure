@@ -10,7 +10,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-admin</artifactId>
-    <version>1.0.42</version>
+    <version>1.0.43</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
