@@ -608,7 +608,7 @@
                   "name": "HTTPSRoutingRule",
                   "properties": {
                      "ruleType": "Basic",
-                     "priority": 1000,
+                     "priority": 1001,
                      "httpListener": {
                         "id": "[variables('ref_httpsListener')]"
                      },
