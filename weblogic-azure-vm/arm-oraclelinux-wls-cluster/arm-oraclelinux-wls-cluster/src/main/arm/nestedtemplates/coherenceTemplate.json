@@ -477,7 +477,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('name_vmMachine'), copyIndex(),'/newuserscript'))]",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "virtualMachineExtensionLoop",
