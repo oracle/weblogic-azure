@@ -106,7 +106,7 @@
       {
          "type": "Microsoft.Compute/virtualMachines/extensions",
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "${azure.apiVersionForVirtualMachines}",
          "location": "[parameters('location')]",
          "properties": {
             "publisher": "Microsoft.Azure.Extensions",

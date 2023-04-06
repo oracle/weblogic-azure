@@ -641,7 +641,7 @@
         },
         {
             "type": "Microsoft.Compute/availabilitySets",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForAvailabilitySets}",
             "location": "[parameters('location')]",
             "name": "[variables('name_availabilitySet')]",
             "properties": {
