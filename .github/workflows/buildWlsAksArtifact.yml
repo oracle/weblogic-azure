@@ -22,7 +22,6 @@ jobs:
                 source external-deps-versions.properties
                 echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
                 echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
-                echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
                 echo "refJavaee=${AZURE_JAVAEE_IAAS_REFERENCE}" >> $GITHUB_ENV
             - name: Set up JDK 1.8
               uses: actions/setup-java@v1
@@ -40,12 +39,10 @@ jobs:
                 repository: Azure/azure-javaee-iaas
                 path: azure-javaee-iaas
                 ref: ${{ env.refJavaee }}
-            - name: Checkout arm-ttk
-              uses: actions/checkout@v2
-              with:
-                repository: Azure/arm-ttk
-                path: arm-ttk
-                ref: ${{ env.refArmttk }}
+            - name: Download arm-ttk used in partner center pipeline
+              run: |
+                wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
+                unzip arm-template-toolkit.zip -d arm-ttk
             - name: Build azure-javaee-iaas
               run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
             - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure

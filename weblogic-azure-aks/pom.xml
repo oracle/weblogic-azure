@@ -17,7 +17,7 @@
 
   <groupId>com.oracle.weblogic.azure</groupId>
   <artifactId>wls-on-aks-azure-marketplace</artifactId>
-  <version>1.0.58</version>
+  <version>1.0.59</version>
 
   <parent>
     <groupId>com.microsoft.azure.iaas</groupId>
@@ -30,6 +30,5 @@
   <name>wls-on-aks-azure-marketplace</name>
   <properties>
     <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-    <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
   </properties>
 </project>
