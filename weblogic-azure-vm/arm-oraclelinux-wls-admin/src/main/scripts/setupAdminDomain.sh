@@ -274,7 +274,7 @@ Wants=network-online.target
  
 [Service]
 Type=simple
-WorkingDirectory="/u01/domains/$wlsDomainName"
+WorkingDirectory='/u01/domains/$wlsDomainName'
 Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="${startWebLogicScript}"
 ExecStop="${stopWebLogicScript}"
