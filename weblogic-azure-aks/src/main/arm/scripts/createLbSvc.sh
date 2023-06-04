@@ -158,9 +158,9 @@ EOF
 
 function query_admin_target_port() {
   if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
-    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default-secure')
+    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'internal-t3s')
   else
-    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default')
+    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'internal-t3')
   fi
 
   echo "Admin port of ${adminServerName}: ${adminTargetPort}"
@@ -389,7 +389,7 @@ function validate_admin_console_url() {
   fi
 
   adminTargetPort=$(kubectl get svc ${svcAdminServer} -n ${wlsDomainNS} -o json |
-    jq '.spec.ports[] | select(.name=="default") | .port')
+    jq '.spec.ports[] | select(.name=="internal-t3") | .port')
   local adminConsoleUrl="http://${svcAdminServer}.${wlsDomainNS}:${adminTargetPort}/console/"
 
   kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \

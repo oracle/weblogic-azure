@@ -1,6 +1,6 @@
 {
     "name": "Known-good version of Azure Kubernetes Service",
     "description": "This version is known to work for all the features of Azure WebLogic on AKS offer.",
-    "value": "1.24.10",
-    "testedDate": "2022-5-9"
+    "value": "1.25.6",
+    "testedDate": "2023-06-02"
 }

@@ -282,9 +282,9 @@ EOF
 
 function query_admin_target_port() {
   if [[ "${ENABLE_CUSTOM_SSL,,}" == "true" ]]; then
-    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default-secure')
+    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'internal-t3s')
   else
-    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'default')
+    adminTargetPort=$(utility_query_service_port ${svcAdminServer} ${wlsDomainNS} 'internal-t3')
   fi
 
   echo "Admin port of ${adminServerName}: ${adminTargetPort}"
