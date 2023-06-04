@@ -33,7 +33,7 @@ cat <<EOF >$filePath
 # in https://github.com/oracle/weblogic-kubernetes-operator.
 # This is an example of how to define a Domain resource.
 #
-apiVersion: "weblogic.oracle/v8"
+apiVersion: "weblogic.oracle/v9"
 kind: Domain
 metadata:
   name: "${WLS_DOMAIN_UID}"
@@ -49,7 +49,7 @@ spec:
   # the image for 'Model in Image' domains.
   domainHome: /u01/domains/${WLS_DOMAIN_UID}
 
-  # The WebLogic Server Docker image that the Operator uses to start the domain
+  # The WebLogic Server image that the Operator uses to start the domain
   image: "${wlsImagePath}"
 
   # Defaults to "Always" if image tag (version) is ':latest'
@@ -75,10 +75,10 @@ spec:
   #logHome: /shared/logs/${WLS_DOMAIN_UID}
   
   # Set which WebLogic Servers the Operator will start
-  # - "NEVER" will not start any server in the domain
-  # - "ADMIN_ONLY" will start up only the administration server (no managed servers will be started)
-  # - "IF_NEEDED" will start all non-clustered servers, including the administration server, and clustered servers up to their replica count.
-  serverStartPolicy: "IF_NEEDED"
+  # - "Never" will not start any server in the domain
+  # - "AdminOnly" will start up only the administration server (no managed servers will be started)
+  # - "IfNeeded" will start all non-clustered servers, including the administration server, and clustered servers up to their replica count.
+  serverStartPolicy: IfNeeded
 
   # Settings for all server pods in the domain including the introspector job pod
   serverPod:
@@ -195,10 +195,6 @@ fi
 cat <<EOF >>$filePath
   # The desired behavior for starting the domain's administration server.
   adminServer:
-    # The serverStartState legal values are "RUNNING" or "ADMIN"
-    # "RUNNING" means the listed server will be started up to "RUNNING" mode
-    # "ADMIN" means the listed server will be start up to "ADMIN" mode
-    serverStartState: "RUNNING"
     # Setup a Kubernetes node port for the administration server default channel
     #adminService:
     #  channels:
@@ -208,27 +204,9 @@ cat <<EOF >>$filePath
   # The number of admin servers to start for unlisted clusters
   replicas: 1
 
-  # The desired behavior for starting a specific cluster's member servers
+  # The name of each Cluster resource
   clusters:
-  - clusterName: cluster-1
-    serverStartState: "RUNNING"
-    serverPod:
-      # Instructs Kubernetes scheduler to prefer nodes for new cluster members where there are not
-      # already members of the same cluster.
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: "weblogic.clusterName"
-                      operator: In
-                      values:
-                        - \$(CLUSTER_NAME)
-                topologyKey: "kubernetes.io/hostname"
-    # The number of managed servers to start for unlisted clusters
-    replicas: ${WLS_APP_REPLICAS}
+  - name: ${WLS_DOMAIN_UID}-cluster-1
 
   # Change the restartVersion to force the introspector job to rerun
   # and apply any new model configuration, to also force a subsequent
@@ -252,4 +230,22 @@ cat <<EOF >>$filePath
     # (the model yaml in the optional configMap or in the image)
     #secrets:
     #- ${WLS_DOMAIN_UID}-datasource-secret
+
+---
+
+apiVersion: "weblogic.oracle/v1"
+kind: Cluster
+metadata:
+  name: ${WLS_DOMAIN_UID}-cluster-1
+  # Update this with the namespace your domain will run in:
+  namespace: ${WLS_DOMAIN_UID}-ns
+  labels:
+    # Update this with the domainUID of your domain:
+    weblogic.domainUID: ${WLS_DOMAIN_UID}
+spec:
+  # This must match a cluster name that is  specified in the WebLogic configuration
+  clusterName: cluster-1
+  # The number of managed servers to start for this cluster
+  replicas: 2
+
 EOF

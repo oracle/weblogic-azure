@@ -211,7 +211,7 @@ function utility_validate_application_status() {
         tr -d "\"")
 
     # get non-ssl port
-    local adminTargetPort=$(kubectl get svc ${wlsAdminSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
+    local adminTargetPort=$(kubectl get svc ${wlsAdminSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="internal-t3") | .port')
     local t3ChannelAddress="${podName}.${wlsDomainNS}"
 
     local targetFilePath=/tmp/checkApplicationStatus.py

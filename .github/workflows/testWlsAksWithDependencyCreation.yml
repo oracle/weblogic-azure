@@ -168,10 +168,10 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-            - name: Checkout Azure-Samples/cargotracker-azure
+            - name: Checkout Azure-Samples/cargotracker-wls-aks
               uses: actions/checkout@v2
               with:
-                repository: Azure-Samples/cargotracker-azure
+                repository: Azure-Samples/cargotracker-wls-aks
                 path: cargotracker
             - name: Maven build web app
               run: |
@@ -260,10 +260,10 @@ jobs:
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForWlsAks }}
                     az group create --verbose --name ${{ env.resourceGroupForWlsAks }} --location ${{ env.location }}
-            - name: Checkout Azure-Samples/cargotracker-azure
+            - name: Checkout Azure-Samples/cargotracker-wls-aks
               uses: actions/checkout@v2
               with:
-                repository: Azure-Samples/cargotracker-azure
+                repository: Azure-Samples/cargotracker-wls-aks
                 path: cargotracker
             - name: Prepare parameter file
               run: |

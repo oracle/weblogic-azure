@@ -196,8 +196,11 @@ function remove_datasource_from_domain() {
 
 function wait_for_operation_completed() {
     # Make sure all of the pods are running.
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
-        | jq '. | .spec.clusters[] | .replicas')
+
+    clusterName=$(kubectl get cluster -n ${wlsDomainNS} -o json | jq -r '.items[0].metadata.name')
+
+    replicas=$(kubectl -n ${wlsDomainNS} get cluster ${clusterName} -o json \
+        | jq '. | .spec.replicas')
 
     utility_wait_for_pod_restarted \
         ${timestampBeforePatchingDomain} \
