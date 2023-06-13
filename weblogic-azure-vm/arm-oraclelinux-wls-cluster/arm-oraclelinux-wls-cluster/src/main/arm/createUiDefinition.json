@@ -8,7 +8,7 @@
                 "name": "skuUrnVersion",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Oracle WebLogic Image",
-                "defaultValue": "WebLogic Server 14.1.1.0.0 and JDK11 on Oracle Linux 7.6",
+                "defaultValue": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9.1",
                 "toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
                 "constraints": {
                     "allowedValues": [
