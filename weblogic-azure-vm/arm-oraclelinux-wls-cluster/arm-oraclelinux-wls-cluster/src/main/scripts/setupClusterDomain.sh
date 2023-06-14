@@ -516,7 +516,7 @@ Wants=network-online.target
 Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
-WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+WorkingDirectory=$DOMAIN_PATH/$wlsDomainName
 Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$DOMAIN_PATH/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$DOMAIN_PATH/$wlsDomainName/bin/stopNodeManager.sh"
@@ -545,7 +545,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory="$DOMAIN_PATH/$wlsDomainName"
+WorkingDirectory=$DOMAIN_PATH/$wlsDomainName
 Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="${startWebLogicScript}"
 ExecStop="${stopWebLogicScript}"
