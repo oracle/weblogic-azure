@@ -35,6 +35,7 @@ function install_jdk() {
         echo "Installing openjdk11 ${attempt}"
         ready=true
         # Install Microsoft OpenJDK
+        apk upgrade
         apk add openjdk11 \
             --no-cache \
             -q --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
