@@ -269,7 +269,7 @@ function download_wls_ssl_certificates_from_keyvault() {
     --vault-name ${WLS_SSL_KEYVAULT_NAME} 
   validate_status "download secret ${WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
   # set identity data with values in download file
-  WLS_SSL_IDENTITY_DATA=$(cat ${identityDataFileName})
+  WLS_SSL_IDENTITY_DATA="$(cat ${identityDataFileName} | base64)"
   # remove the data file
   rm -f ${identityDataFileName}
 
@@ -279,7 +279,7 @@ function download_wls_ssl_certificates_from_keyvault() {
     --vault-name ${WLS_SSL_KEYVAULT_NAME} 
   validate_status "download secret ${WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
   # set identity psw with values in download file
-  WLS_SSL_IDENTITY_PASSWORD=$(cat ${identityPswFileName})
+  WLS_SSL_IDENTITY_PASSWORD="$(cat ${identityPswFileName})"
   # remove the data file
   rm -f ${identityPswFileName}
 
@@ -289,7 +289,7 @@ function download_wls_ssl_certificates_from_keyvault() {
     --vault-name ${WLS_SSL_KEYVAULT_NAME} 
   validate_status "download secret ${WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
   # set trust data with values in download file
-  WLS_SSL_TRUST_DATA=$(cat ${trustDataFileName})
+  WLS_SSL_TRUST_DATA="$(cat ${trustDataFileName} | base64)"
   # remove the data file
   rm -f ${trustDataFileName}
 
@@ -299,7 +299,7 @@ function download_wls_ssl_certificates_from_keyvault() {
     --vault-name ${WLS_SSL_KEYVAULT_NAME} 
   validate_status "download secret ${WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
   # set trust psw with values in download file
-  WLS_SSL_TRUST_PASSWORD=$(cat ${trustPswFileName})
+  WLS_SSL_TRUST_PASSWORD="$(cat ${trustPswFileName})"
   # remove the data file
   rm -f ${trustPswFileName}
 
@@ -309,7 +309,7 @@ function download_wls_ssl_certificates_from_keyvault() {
     --vault-name ${WLS_SSL_KEYVAULT_NAME} 
   validate_status "download secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS} from key vault ${WLS_SSL_KEYVAULT_NAME}"
   # set alias with values in download file
-  WLS_SSL_PRIVATE_KEY_ALIAS=$(cat ${privateKeyAliasFileName})
+  WLS_SSL_PRIVATE_KEY_ALIAS="$(cat ${privateKeyAliasFileName})"
   # remove the data file
   rm -f ${privateKeyAliasFileName}
 
@@ -319,12 +319,12 @@ function download_wls_ssl_certificates_from_keyvault() {
     --vault-name ${WLS_SSL_KEYVAULT_NAME} 
   validate_status "download secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD} from key vault ${WLS_SSL_KEYVAULT_NAME}"
   # set private key psw with values in download file
-  WLS_SSL_PRIVATE_KEY_PASSWORD=$(cat ${privateKeyPswFileName})
+  WLS_SSL_PRIVATE_KEY_PASSWORD="$(cat ${privateKeyPswFileName})"
   # remove the data file
   rm -f ${privateKeyPswFileName}
 
-  WLS_SSL_IDENTITY_TYPE=${WLS_SSL_KEYVAULT_IDENTITY_TYPE}
-  WLS_SSL_TRUST_TYPE=${WLS_SSL_KEYVAULT_TRUST_TYPE}
+  WLS_SSL_IDENTITY_TYPE="${WLS_SSL_KEYVAULT_IDENTITY_TYPE}"
+  WLS_SSL_TRUST_TYPE="${WLS_SSL_KEYVAULT_TRUST_TYPE}"
 
   # reset key vault policy
   az keyvault delete-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId}
