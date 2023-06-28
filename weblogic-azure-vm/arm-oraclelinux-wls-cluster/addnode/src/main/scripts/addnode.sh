@@ -419,7 +419,7 @@ Description=WebLogic nodemanager service
 Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
-WorkingDirectory="$wlsDomainPath/$wlsDomainName"
+WorkingDirectory=$wlsDomainPath/$wlsDomainName
 Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
 ExecStart="$wlsDomainPath/$wlsDomainName/bin/startNodeManager.sh"
 ExecStop="$wlsDomainPath/$wlsDomainName/bin/stopNodeManager.sh"
