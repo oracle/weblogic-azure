@@ -25,14 +25,6 @@
         {
             "gaTag": "12.2.1.4-ol8",
             "cpuTag": "12.2.1.4-generic-jdk8-ol8"
-        },
-        {
-            "gaTag": "12.2.1.3",
-            "cpuTag": "12.2.1.3-generic-jdk8-ol7"
-        },
-        {
-            "gaTag": "12.2.1.3-ol8",
-            "cpuTag": "12.2.1.3-generic-jdk8-ol8"
         }
     ]
 }
