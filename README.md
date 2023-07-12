@@ -23,7 +23,7 @@ The offer provisions the following Azure resources based on Oracle WebLogic Serv
 - The offer includes a choice of operating system, JDK, Oracle WebLogic Server versions.
    - OS: Oracle Linux or Red Hat Enterprise Linux
    - JDK: Oracle JDK 8, or 11
-   - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+   - WLS version: 12.2.1.4, 14.1.1.0
 - Computing resources
    - A VM with the following configurations:
       - Operating system as described in the selected base image.
@@ -48,7 +48,7 @@ The offer provisions Oracle WebLogic Server (WLS) with a domain and Administrati
 - The offer includes a choice of operating system, JDK, Oracle WLS versions.
    - OS: Oracle Linux or Red Hat Enterprise Linux
    - JDK: Oracle JDK 8, or 11
-   - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+   - WLS version: 12.2.1.4, 14.1.1.0
 - Computing resources
    - VM with the followings configuration:
       - A VM to run the Administration Server.
@@ -76,7 +76,7 @@ The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a doma
 - The offer includes a choice of operating system, JDK, WLS versions.
    - OS: Oracle Linux or Red Hat Enterprise Linux
    - JDK: Oracle JDK 8, or 11
-   - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+   - WLS version: 12.2.1.4, 14.1.1.0
 - Computing resources
    - VMs with the followings configurations:
       - A VM to run the Administration Server and VMs to run Managed Servers.
@@ -112,7 +112,7 @@ The offer provisions Oracle WebLogic Server (WLS) Enterprise Edition with a doma
 - The offer includes a choice of operating system, JDK, WLS versions.
    - OS: Oracle Linux or Red Hat Enterprise Linux
    - JDK: Oracle JDK 8, or 11
-   - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+   - WLS version: 12.2.1.4, 14.1.1.0
 - The offer includes the choice of the following Oracle HTTP Server (OHS) base images
    - OS: Oracle Linux
    - OHS version 12.2.1.4.0
@@ -162,7 +162,7 @@ The offer provisions an Oracle WebLogic Server Enterprise Edition (WLS) and supp
    - Images from Oracle Container Registry (OCR) (General or Patched images)
       - OS: Oracle Linux or Red Hat Enterprise Linux
       - JDK: Oracle JDK 8, or 11
-      - WLS version: 12.2.1.3, 12.2.1.4, 14.1.1.0
+      - WLS version: 12.2.1.4, 14.1.1.0
       - You can specify any arbitrary docker image tag that is available from OCR.
    - An image from your own Azure Container Registry.
 - Computing resources

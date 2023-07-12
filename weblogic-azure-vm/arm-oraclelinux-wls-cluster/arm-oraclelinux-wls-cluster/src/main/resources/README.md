@@ -23,7 +23,7 @@ oracle
 
 Name 
 
-Oracle WebLogic Server 12.2.1.3 Cluster
+Oracle WebLogic Server Cluster
 
 ## SKU Details
 
@@ -33,7 +33,7 @@ SKU ID
 
 Title
 
-Oracle WebLogic Server 12.2.1.3 Cluster
+Oracle WebLogic Server Cluster
 
 Summary
 
@@ -41,7 +41,7 @@ Provisions an n-node Oracle WebLogic Server Cluster
 
 Description
 
-Provisions an n-node Oracle WebLogic Server cluster on Oracle Linux 7.6
+Provisions an n-node Oracle WebLogic Server cluster on Oracle Linux 9.1, 8.7 and 7.6
 
 SKU Type
 
@@ -59,7 +59,7 @@ No
 
 Title
 
-Oracle WebLogic Server 12.2.1.3 Cluster
+Oracle WebLogic Server Cluster
 
 Summary
 
@@ -67,7 +67,7 @@ Provisions an n-node Oracle WebLogic Server Cluster
 
 Long Summary
 
-Provisions an n-node Oracle WebLogic Server cluster on Oracle Linux 7.6
+Provisions an n-node Oracle WebLogic Server cluster on Oracle Linux 9.1, 8.7 and 7.6
 
 Description
 
