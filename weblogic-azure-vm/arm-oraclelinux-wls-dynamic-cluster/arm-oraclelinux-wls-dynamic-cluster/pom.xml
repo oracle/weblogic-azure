@@ -10,7 +10,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-dynamic-cluster</artifactId>
-    <version>1.0.43</version>
+    <version>1.0.44</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
