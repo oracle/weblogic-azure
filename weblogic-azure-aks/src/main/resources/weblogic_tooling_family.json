@@ -5,15 +5,15 @@
         {
             "key": "WKO",
             "description": "Oracle WebLogic Kubernetes Operator",
-            "version": "4.0.6",
-            "testedDate": "2023-05-16"
+            "version": "4.1.0",
+            "testedDate": "2023-06-11"
         },
         {
             "key": "WDT",
             "description": "Oracle WebLogic Deploy Tooling",
-            "version": "3.2.0",
-            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-3.2.0/weblogic-deploy.zip",
-            "testedDate": "2023-05-16"
+            "version": "3.2.1",
+            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-3.2.1/weblogic-deploy.zip",
+            "testedDate": "2023-06-11"
         },
         {
             "key": "WIT",
