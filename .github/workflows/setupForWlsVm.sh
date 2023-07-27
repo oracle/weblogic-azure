@@ -173,7 +173,7 @@ msg "${GREEN}(3/6) Create service principal and Azure credentials ${SERVICE_PRIN
 SUBSCRIPTION_ID=$(az account show --query id --output tsv --only-show-errors)
 
 ### AZ ACTION CREATE
-Explicitely disable line wrapping for non MacOS 
+# Explicitely disable line wrapping for non MacOS 
 w0=-w0
 if [[ $OSTYPE == 'darwin'* ]]; then
   w0=
