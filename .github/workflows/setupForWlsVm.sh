@@ -173,8 +173,13 @@ msg "${GREEN}(3/6) Create service principal and Azure credentials ${SERVICE_PRIN
 SUBSCRIPTION_ID=$(az account show --query id --output tsv --only-show-errors)
 
 ### AZ ACTION CREATE
+# Explicitely disable line wrapping for non MacOS 
+w0=-w0
+if [[ $OSTYPE == 'darwin'* ]]; then
+  w0=
+fi
 
-SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}" --sdk-auth --only-show-errors | base64 -w0)
+SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}" --sdk-auth --only-show-errors | base64 ${w0})
 AZURE_CREDENTIALS=$(echo $SERVICE_PRINCIPAL | base64 -d)
 
 msg "${GREEN}(6/6) Create secrets in GitHub"
