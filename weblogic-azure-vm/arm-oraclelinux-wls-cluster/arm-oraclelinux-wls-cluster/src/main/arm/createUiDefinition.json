@@ -1331,7 +1331,7 @@
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Azure database for PostgreSQL (with support for passwordless connection)",
+                                            "label": "PostgreSQL (Supports passwordless connection)",
                                             "value": "postgresql"
                                         },
                                         {
@@ -1339,11 +1339,11 @@
                                             "value": "oracle"
                                         },
                                         {
-                                            "label": "Azure SQL (with support for passwordless connection)",
+                                            "label": "Microsoft SQL Server (Supports passwordless connection)",
                                             "value": "sqlserver"
                                         },
                                         {
-                                            "label": "MySQL (with support for passwordless connection)",
+                                            "label": "MySQL (Supports passwordless connection)",
                                             "value": "mysql"
                                         }
                                     ],
