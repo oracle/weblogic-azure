@@ -31,7 +31,7 @@ param utcValue string = utcNow()
 
 var const_identityId = '${substring(string(identity.userAssignedIdentities), indexOf(string(identity.userAssignedIdentities), '"') + 1, lastIndexOf(string(identity.userAssignedIdentities), '"') - (indexOf(string(identity.userAssignedIdentities), '"') + 1))}'
 
-resource keyvault 'Microsoft.KeyVault/vaults@2021-10-01' = {
+resource keyvault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   name: keyVaultName
   location: location
   properties: {

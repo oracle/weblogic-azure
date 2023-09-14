@@ -140,7 +140,7 @@ module pidSSLStart './_pids/_pid.bicep' = if (enableCustomSSL) {
   }
 }
 
-resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2022-09-01' existing = if (!createAKSCluster) {
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' existing = if (!createAKSCluster) {
   name: aksClusterName
   scope: resourceGroup(aksClusterRGName)
 }
