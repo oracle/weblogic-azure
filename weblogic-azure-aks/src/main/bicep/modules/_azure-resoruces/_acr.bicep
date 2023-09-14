@@ -7,7 +7,7 @@ param utcValue string = utcNow()
 
 var name_acr= '${acrNamePrefix}${uniqueString(utcValue)}'
 
-resource registries 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
+resource registries 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: name_acr
   location: location
   sku: {

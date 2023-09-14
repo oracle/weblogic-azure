@@ -118,7 +118,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${admin.elk.start}",
             "properties": {
                 "mode": "Incremental",
@@ -152,7 +152,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${admin.elk.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"

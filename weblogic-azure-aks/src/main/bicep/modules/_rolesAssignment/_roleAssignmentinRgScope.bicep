@@ -25,7 +25,7 @@ var const_identityAPIVersion = '2022-01-31-PREVIEW'
 var name_roleAssignmentName = guid('${subscription().id}${utcValue}Role assignment in resource group scope')
 
 // Get role resource id
-resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: roleDefinitionId
 }
 

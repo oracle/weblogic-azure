@@ -11,7 +11,7 @@ var name_deploymentScriptUserDefinedManagedIdentity = 'wls-aks-deployment-script
 var name_deploymentScriptContributorRoleAssignmentName = guid('${resourceGroup().id}${name_deploymentScriptUserDefinedManagedIdentity}Deployment Script')
 
 // UAMI for deployment script
-resource uamiForDeploymentScript 'Microsoft.ManagedIdentity/userAssignedIdentities@2021-09-30-preview' = {
+resource uamiForDeploymentScript 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: name_deploymentScriptUserDefinedManagedIdentity
   location: location
 }

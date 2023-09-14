@@ -46,7 +46,7 @@ module pidAppgwWithCustomCertificate './_pids/_pid.bicep' = if (_signedFrontendC
 }
 
 // get key vault object from a resource group
-resource existingKeyvault 'Microsoft.KeyVault/vaults@2021-10-01' existing = {
+resource existingKeyvault 'Microsoft.KeyVault/vaults@2023-02-01' existing = {
   name: keyVaultName
   scope: resourceGroup(keyVaultResourceGroup)
 }

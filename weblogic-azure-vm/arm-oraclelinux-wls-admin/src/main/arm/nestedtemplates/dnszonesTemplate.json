@@ -99,7 +99,7 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.dns.start}",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -113,7 +113,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
             "name": "createDNSZone",
             "condition": "[not(parameters('hasDNSZones'))]",
@@ -149,7 +149,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
             "name": "updateDNSZone",
             "condition": "[parameters('hasDNSZones')]",
@@ -197,7 +197,7 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.dns.end}",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -215,7 +215,7 @@
         "dnsZoneNameServers": {
             "type": "array",
             "condition": "[not(parameters('hasDNSZones'))]",
-            "value": "[reference('createDNSZone', '${azure.apiVersion}').outputs.dnsZoneNameServers.value]"
+            "value": "[reference('createDNSZone', '${azure.apiVersionForDeployment}').outputs.dnsZoneNameServers.value]"
         }
     }
 }

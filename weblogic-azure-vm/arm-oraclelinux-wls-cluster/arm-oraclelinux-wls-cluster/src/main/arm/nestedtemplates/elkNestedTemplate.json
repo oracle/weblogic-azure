@@ -145,7 +145,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.elk.start}",
             "properties": {
                 "mode": "Incremental",
@@ -233,7 +233,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.elk.end}",
             "dependsOn": [
                 "appVirtualMachineExtensionLoop",

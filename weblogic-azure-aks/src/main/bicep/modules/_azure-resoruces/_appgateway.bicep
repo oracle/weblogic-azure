@@ -74,7 +74,7 @@ var obj_frontendIPConfigurations2 = [
   }
 ]
 
-resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
+resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2023-06-01' = {
   name: gatewayPublicIPAddressName
   sku: {
     name: 'Standard'
@@ -88,7 +88,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   }
 }
 
-resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2022-01-01' = {
+resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2023-06-01' = {
   name: name_appGateway
   location: location
   tags: {

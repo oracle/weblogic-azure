@@ -107,7 +107,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "uamiDeployment",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
