@@ -39,7 +39,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionFor
   }
 }
 
-resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@${azure.apiVersionForStorageFileService}' = {
   name: '${storageAccount.name}/default/${name_fileShare}'
   properties: {
     accessTier: 'TransactionOptimized'
