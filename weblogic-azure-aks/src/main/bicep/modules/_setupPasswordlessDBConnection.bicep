@@ -83,7 +83,7 @@ module dbIdentityVMContributorRoleAssignment '_rolesAssignment/_roleAssignmentin
   }
 }
 
-resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' existing = {
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersionForManagedClusters}' existing = {
   name: aksClusterName
   scope: resourceGroup(aksClusterRGName)
 }

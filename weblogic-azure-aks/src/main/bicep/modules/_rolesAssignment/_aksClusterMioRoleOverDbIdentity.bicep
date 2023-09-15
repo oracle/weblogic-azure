@@ -15,12 +15,12 @@ resource dbIdentityResource 'Microsoft.ManagedIdentity/userAssignedIdentities@20
 }
 
 // Get role resource id
-resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = {
   name: const_roleDefinitionIdOfManagedIdentityOperator
 }
 
 // Assign role
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = {
   name: name_roleAssignmentName
   scope: dbIdentityResource
   properties: {
