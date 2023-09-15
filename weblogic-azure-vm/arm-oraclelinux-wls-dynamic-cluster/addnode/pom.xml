@@ -11,14 +11,14 @@
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-dynamic-cluster-addnode</artifactId>
     <version>1.0.5</version>
-    
+
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
         <version>1.0.18</version>
         <relativePath></relativePath>
     </parent>
-    
+
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
@@ -29,12 +29,13 @@
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
         <template.validation.tests.directory>${basedir}/../../../../arm-ttk/arm-ttk</template.validation.tests.directory>
         <test.parameters>-TestParameter '@{&quot;SampleName&quot;=&quot;addnode/src/main&quot;;&quot;RawRepoPath&quot;=&quot;${artifactsLocationBase}/arm-oraclelinux-wls-dynamic-cluster/&quot;}'</test.parameters>
+        <template.azure-common.properties.url>file:///${basedir}/../../arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
         <template.pid.properties.url>https://raw.githubusercontent.com/${git.repo.owner}/weblogic-azure/${git.tag}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
         <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/${git.repo.owner}/weblogic-azure/${git.tag}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
     </properties>
 
     <description>
-        
+
     </description>
 
 </project>
