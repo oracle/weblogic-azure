@@ -671,7 +671,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
 /*
  * Update tags to save key vault name and storage account name that are used for current configuration
 */
-resource applyTags 'Microsoft.Resources/tags@2023-07-01' = {
+resource applyTags 'Microsoft.Resources/tags@${azure.apiVersionForTags}' = {
   name: 'default'
   properties: {
     tags: {

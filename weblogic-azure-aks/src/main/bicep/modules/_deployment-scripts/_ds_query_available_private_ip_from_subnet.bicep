@@ -14,7 +14,7 @@ var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_queryPrivateIPForAppGateway = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh')
 var const_deploymentName = 'ds-query-private-ip'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'

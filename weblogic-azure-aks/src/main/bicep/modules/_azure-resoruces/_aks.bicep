@@ -45,7 +45,7 @@ var obj_aciEnableOmsAgent = {
   }
 }
 
-resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = if (enableAzureMonitoring) {
+resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@${azure.apiVersionForInsightsWorkspaces}' = if (enableAzureMonitoring) {
   name: name_aciWorkspace
   location: location
   properties: {

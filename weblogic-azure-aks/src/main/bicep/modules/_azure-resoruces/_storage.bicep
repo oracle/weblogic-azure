@@ -9,7 +9,7 @@ var const_shareQuota = 5120
 var const_sku = 'Standard_LRS'
 var name_fileShare = 'weblogic'
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionForStorage}' = {
   name: storageAccountName
   location: location
   kind: 'StorageV2'

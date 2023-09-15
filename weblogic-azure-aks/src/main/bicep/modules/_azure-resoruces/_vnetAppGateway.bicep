@@ -28,19 +28,19 @@ var name_subnet = vnetForApplicationGateway.subnets.gatewaySubnet.name
 var name_vnet = vnetForApplicationGateway.name
 
 // Get existing VNET.
-resource existingVnet 'Microsoft.Network/virtualNetworks@2023-06-01' existing = if (!const_newVnet) {
+resource existingVnet 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' existing = if (!const_newVnet) {
   name: name_vnet
   scope: resourceGroup(vnetForApplicationGateway.resourceGroup)
 }
 
 // Get existing subnet.
-resource existingSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-06-01' existing = if (!const_newVnet) {
+resource existingSubnet 'Microsoft.Network/virtualNetworks/subnets@${azure.apiVersionForVirtualNetworks}' existing = if (!const_newVnet) {
   name: name_subnet
   parent: existingVnet
 }
 
 // Create new network security group.
-resource nsg 'Microsoft.Network/networkSecurityGroups@2023-06-01' = if (const_newVnet) {
+resource nsg 'Microsoft.Network/networkSecurityGroups@${azure.apiVersionForNetworkSecurityGroups}' = if (const_newVnet) {
   name: name_nsg
   location: location
   properties: {
@@ -79,7 +79,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-06-01' = if (const_ne
 }
 
 // Create new VNET and subnet.
-resource newVnet 'Microsoft.Network/virtualNetworks@2023-06-01' = if (const_newVnet) {
+resource newVnet 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' = if (const_newVnet) {
   name: name_vnet
   location: location
   properties: {

@@ -70,7 +70,7 @@ var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${a
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
 var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'

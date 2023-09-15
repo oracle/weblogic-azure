@@ -58,7 +58,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   }
 }
 
-resource createAddCertificate 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource createAddCertificate 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-create-add-appgw-certificate'
   location: location
   identity: identity

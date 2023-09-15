@@ -43,7 +43,7 @@ var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_primaryScript = 'setupNetworking.sh'
 var const_utilityScript = 'utility.sh'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-networking-deployment'
   location: location
   kind: 'AzureCLI'

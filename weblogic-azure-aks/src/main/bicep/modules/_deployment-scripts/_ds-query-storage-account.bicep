@@ -13,7 +13,7 @@ param utcValue string = utcNow()
 var base64_queryStorageAccount = loadFileAsBase64('../../../arm/scripts/queryStorageAccount.sh')
 var const_deploymentName = 'ds-query-storage-account'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
