@@ -45,7 +45,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   }
 }
 
-resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsIdentityKeyStoreDataSecretName}'
   properties: {
     value: wlsIdentityKeyStoreData
@@ -55,7 +55,7 @@ resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-0
   ]
 }
 
-resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsIdentityKeyStorePassphraseSecretName}'
   properties: {
     value: wlsIdentityKeyStorePassphrase
@@ -65,7 +65,7 @@ resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01
   ]
 }
 
-resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsPrivateKeyAliasSecretName}'
   properties: {
     value: wlsPrivateKeyAlias
@@ -75,7 +75,7 @@ resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = 
   ]
 }
 
-resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsPrivateKeyPassPhraseSecretName}'
   properties: {
     value: wlsPrivateKeyPassPhrase
@@ -85,7 +85,7 @@ resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
   ]
 }
 
-resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsTrustKeyStoreDataSecretName}'
   properties: {
     value: wlsTrustKeyStoreData
@@ -95,7 +95,7 @@ resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' 
   ]
 }
 
-resource trustKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource trustKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsTrustKeyStorePassPhraseSecretName}'
   properties: {
     value: wlsTrustKeyStorePassPhrase

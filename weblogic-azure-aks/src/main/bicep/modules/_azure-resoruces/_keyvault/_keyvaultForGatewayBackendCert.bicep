@@ -37,7 +37,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   }
 }
 
-resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${certificateDataName}'
   properties: {
     value: certificateDataValue
