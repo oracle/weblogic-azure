@@ -92,7 +92,7 @@ jobs:
         id: artifact_file
         run: |
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
-          version=$(awk 'BEGIN {parent=0} /<parent>/ {parent=1} /<\/parent>/ {parent=0; next} /<version>/ {if (!parent) print $0}' pom.xml | sed -n 's/.*<version>\(.*\)<\/version>.*/\1/p')
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           artifactName=${{ env.offerName }}-$version-arm-assembly
           unzip target/$artifactName.zip -d target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}-${{ env.pidType }}"
