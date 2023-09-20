@@ -5,33 +5,25 @@
      https://oss.oracle.com/licenses/upl.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.oracle.weblogic.azure</groupId>
+        <artifactId>weblogic-azure-vm</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-admin</artifactId>
     <version>1.0.47</version>
 
-    <parent>
-        <groupId>com.microsoft.azure.iaas</groupId>
-        <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.18</version>
-        <relativePath></relativePath>
-    </parent>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <properties>
-        <git.tag>main</git.tag>
-        <git.repo>weblogic-azure</git.repo>
-        <git.repo.owner>oracle</git.repo.owner>
-        <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
-        <template.validation.tests.directory>${basedir}/../../../arm-ttk/arm-ttk</template.validation.tests.directory>
-        <template.azure-common.properties.url>file:///${basedir}/../arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
-        <template.pid.properties.url>https://raw.githubusercontent.com/${git.repo.owner}/weblogic-azure/${git.tag}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>https://raw.githubusercontent.com/${git.repo.owner}/weblogic-azure/${git.tag}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
-    </properties>
 
     <modules>
-      <module>admin-ssl-post-deploy</module>
+        <module>admin-ssl-post-deploy</module>
     </modules>
 </project>
