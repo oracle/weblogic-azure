@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.18</version>
+        <version>1.0.19</version>
     </parent>
 
     <groupId>com.oracle.weblogic.azure</groupId>
@@ -28,12 +28,12 @@
         <git.tag>main</git.tag>
         <git.repo>weblogic-azure</git.repo>
         <git.repo.owner>oracle</git.repo.owner>
-        <module.baseidr>${project.parent.basedir}/arm-oraclelinux-wls</module.baseidr>
+        <module.basedir>${project.parent.basedir}/arm-oraclelinux-wls</module.basedir>
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
         <template.validation.tests.directory>${project.parent.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-        <template.azure-common.properties.url>file:///${module.baseidr}/src/main/resources/azure-common.properties</template.azure-common.properties.url>
-        <template.pid.properties.url>file:///${module.baseidr}/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>file:///${module.baseidr}/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+        <template.azure-common.properties.url>file:///${module.basedir}/src/main/resources/azure-common.properties</template.azure-common.properties.url>
+        <template.pid.properties.url>file:///${module.basedir}/src/main/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>file:///${module.basedir}/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
     </properties>
 
     <modules>
