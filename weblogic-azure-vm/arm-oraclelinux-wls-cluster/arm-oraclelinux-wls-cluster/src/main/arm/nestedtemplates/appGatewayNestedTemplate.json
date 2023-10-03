@@ -446,7 +446,7 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForDeployment}').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
+					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
 				}
 			}
 		},
@@ -471,15 +471,15 @@
 	"outputs": {
 		"appGatewayAlias": {
 			"type": "string",
-			"value": "[reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForDeployment}').dnsSettings.fqdn]"
+			"value": "[reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn]"
 		},
 		"appGatewayURL": {
 			"type": "string",
-			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForDeployment}').dnsSettings.fqdn),'')]"
+			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn),'')]"
 		},
 		"appGatewaySecuredURL": {
 			"type": "string",
-			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForDeployment}').dnsSettings.fqdn),'')]"
+			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn),'')]"
 		}
 	}
 }

@@ -76,7 +76,7 @@ var const_setUpDomainScript = 'setupWLSDomain.sh'
 var const_updateDomainConfigScript= 'updateDomainConfig.sh'
 var const_utilityScript= 'utility.sh'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-wls-cluster-creation'
   location: location
   kind: 'AzureCLI'

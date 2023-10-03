@@ -27,7 +27,7 @@ param sku string = 'Standard'
 
 param utcValue string = utcNow()
 
-resource keyvault 'Microsoft.KeyVault/vaults@2023-02-01' = {
+resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   name: keyVaultName
   location: location
   properties: {
@@ -44,7 +44,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   }
 }
 
-resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVault}' = {
   name: '${keyVaultName}/${certificateDataName}'
   properties: {
     value: certificateDataValue
@@ -54,7 +54,7 @@ resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
   ]
 }
 
-resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource secretForCertPassword 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${certificatePswSecretName}'
   properties: {
     value: certificatePasswordValue

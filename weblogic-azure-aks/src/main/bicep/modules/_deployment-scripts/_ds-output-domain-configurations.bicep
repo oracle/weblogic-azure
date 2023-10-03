@@ -13,7 +13,7 @@ param wlsDomainUID string = 'sample-domain1'
 // To mitigate arm-ttk error: Unreferenced variable: $fxv#0
 var base64_queryDomainConfigurations = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryDomainConfigurations.sh')
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-query-wls-configurations'
   location: location
   kind: 'AzureCLI'

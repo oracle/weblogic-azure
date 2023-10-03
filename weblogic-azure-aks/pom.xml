@@ -4,31 +4,33 @@
     Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <!-- mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests -->
-  <!-- Build with development profile
-       If using azure-javaee-iaas-parent earlier than 1.0.13, use:
-         mvn -Pbicep -Passembly -Ddev clean install
-       Otherwise, use
-         mvn -Pbicep-dev -Passembly clean install
-  -->
+    <!-- mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests -->
+    <!-- Build with development profile
+         If using azure-javaee-iaas-parent earlier than 1.0.13, use:
+           mvn -Pbicep -Passembly -Ddev clean install
+         Otherwise, use
+           mvn -Pbicep-dev -Passembly clean install
+    -->
 
-  <groupId>com.oracle.weblogic.azure</groupId>
-  <artifactId>wls-on-aks-azure-marketplace</artifactId>
-  <version>1.0.64</version>
+    <groupId>com.oracle.weblogic.azure</groupId>
+    <artifactId>wls-on-aks-azure-marketplace</artifactId>
+    <version>1.0.65</version>
 
-  <parent>
-    <groupId>com.microsoft.azure.iaas</groupId>
-    <artifactId>azure-javaee-iaas-parent</artifactId>
-    <version>1.0.18</version>
-    <relativePath></relativePath>
-  </parent>
+    <parent>
+        <groupId>com.microsoft.azure.iaas</groupId>
+        <artifactId>azure-javaee-iaas-parent</artifactId>
+        <version>1.0.19</version>
+    </parent>
 
-  <packaging>jar</packaging>
-  <name>wls-on-aks-azure-marketplace</name>
-  <properties>
-    <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-  </properties>
+    <packaging>jar</packaging>
+    <name>wls-on-aks-azure-marketplace</name>
+    <properties>
+        <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <template.azure-common.properties.url>file:///${basedir}/../weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
+    </properties>
+
 </project>
