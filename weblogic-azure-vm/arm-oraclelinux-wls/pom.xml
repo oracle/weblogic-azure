@@ -25,6 +25,10 @@
     <packaging>jar</packaging>
     <name>arm-oraclelinux-wls</name>
 
+    <properties>
+      <module.basedir>${project.parent.basedir}</module.basedir>
+    </properties>
+
     <description>
 
     </description>

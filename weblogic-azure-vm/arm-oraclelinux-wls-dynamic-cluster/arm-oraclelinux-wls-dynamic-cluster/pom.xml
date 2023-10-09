@@ -23,6 +23,10 @@
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
+    <properties>
+        <module.basedir>${project.parent.basedir}</module.basedir>
+    </properties>
+
     <description>
 
     </description>

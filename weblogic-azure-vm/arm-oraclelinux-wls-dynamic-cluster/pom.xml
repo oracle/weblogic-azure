@@ -14,7 +14,7 @@
     <version>1.0.9</version>
     <name>${project.artifactId}</name>
     <description>
-        
+
     </description>
     <url>https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster</url>
 
@@ -24,7 +24,7 @@
         <url>https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster</url>
         <tag>HEAD</tag>
     </scm>
-    
+
     <licenses>
         <license>
             <name>Universal Permissive License Version 1.0</name>
@@ -32,6 +32,10 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <properties>
+        <module.basedir>${project.parent.basedir}</module.basedir>
+    </properties>
 
     <modules>
       <module>addnode</module>

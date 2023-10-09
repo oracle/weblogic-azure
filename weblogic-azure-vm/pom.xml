@@ -28,12 +28,14 @@
         <git.tag>main</git.tag>
         <git.repo>weblogic-azure</git.repo>
         <git.repo.owner>oracle</git.repo.owner>
-        <module.basedir>${project.parent.basedir}/arm-oraclelinux-wls</module.basedir>
+        <module.basedir>${project.basedir}</module.basedir>
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
-        <template.validation.tests.directory>${project.parent.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-        <template.azure-common.properties.url>file:///${module.basedir}/src/main/resources/azure-common.properties</template.azure-common.properties.url>
-        <template.pid.properties.url>file:///${module.basedir}/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>file:///${module.basedir}/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+        <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <template.azure-common.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
+        <template.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+
+
     </properties>
 
     <modules>
