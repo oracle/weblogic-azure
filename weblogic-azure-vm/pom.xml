@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.19</version>
+        <version>1.0.20</version>
     </parent>
 
     <groupId>com.oracle.weblogic.azure</groupId>
@@ -35,7 +35,9 @@
         <template.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
         <template.microsoft.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
 
-
+        <!--  skip configuration  -->
+        <assembly.skipAssembly>true</assembly.skipAssembly>
+        <skip.exec.plugin>true</skip.exec.plugin>
     </properties>
 
     <modules>
