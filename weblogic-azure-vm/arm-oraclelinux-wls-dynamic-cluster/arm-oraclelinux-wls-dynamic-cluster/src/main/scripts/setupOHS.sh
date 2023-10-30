@@ -234,9 +234,9 @@ function create_nodemanager_service()
     Wants=network-online.target
     [Service]
     Type=simple
-    WorkingDirectory="$DOMAIN_PATH/$OHS_DOMAIN_NAME"
-    ExecStart="$DOMAIN_PATH/$OHS_DOMAIN_NAME/bin/startNodeManager.sh"
-    ExecStop="$DOMAIN_PATH/$OHS_DOMAIN_NAME/bin/stopNodeManager.sh"
+    WorkingDirectory=/u01/domains
+    ExecStart=/bin/bash $DOMAIN_PATH/$OHS_DOMAIN_NAME/bin/startNodeManager.sh
+    ExecStop=/bin/bash $DOMAIN_PATH/$OHS_DOMAIN_NAME/bin/stopNodeManager.sh
     User=oracle
     Group=oracle
     KillMode=process

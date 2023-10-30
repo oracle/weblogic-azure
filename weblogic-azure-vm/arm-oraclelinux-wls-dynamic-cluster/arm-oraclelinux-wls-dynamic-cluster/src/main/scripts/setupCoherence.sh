@@ -444,10 +444,10 @@ Wants=network-online.target
 Type=simple
 # Note that the following three parameters should be changed to the correct paths
 # on your own system
-WorkingDirectory=$wlsDomainPath/$wlsDomainName
+WorkingDirectory=/u01/domains
 Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
-ExecStart="$wlsDomainPath/$wlsDomainName/bin/startNodeManager.sh"
-ExecStop="$wlsDomainPath/$wlsDomainName/bin/stopNodeManager.sh"
+ExecStart=/bin/bash $wlsDomainPath/$wlsDomainName/bin/startNodeManager.sh
+ExecStop=/bin/bash $wlsDomainPath/$wlsDomainName/bin/stopNodeManager.sh
 User=oracle
 Group=oracle
 KillMode=process
