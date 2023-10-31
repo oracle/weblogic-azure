@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <groupId>com.oracle.weblogic.azure</groupId>
+
+    <parent>
+        <groupId>com.microsoft.azure.iaas</groupId>
+        <artifactId>azure-javaee-iaas-parent</artifactId>
+        <version>1.0.20</version>
+    </parent>
+
+    <artifactId>weblogic-azure</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <name>${project.artifactId}</name>
+    <url>https://github.com/oracle/weblogic-azure</url>
+
+    <properties>
+        <!--  skip configuration  -->
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <skip.exec.plugin>false</skip.exec.plugin>
+
+        <!--  versions  start -->
+        <!--  weblogic azure aks versions  -->
+        <version.wls-on-aks-azure-marketplace>1.0.65</version.wls-on-aks-azure-marketplace>
+
+        <!--  weblogic azure vm versions  -->
+        <version.arm-oraclelinux-wls>1.0.25</version.arm-oraclelinux-wls>
+        <version.arm-oraclelinux-wls-admin>1.0.47</version.arm-oraclelinux-wls-admin>
+        <version.arm-oraclelinux-wls-cluster>1.0.610000</version.arm-oraclelinux-wls-cluster>
+        <version.arm-oraclelinux-wls-dynamic-cluster>1.0.46</version.arm-oraclelinux-wls-dynamic-cluster>
+        <!--  versions  end -->
+
+    </properties>
+
+    <modules>
+        <module>weblogic-azure-aks</module>
+        <module>weblogic-azure-vm</module>
+    </modules>
+
+</project>

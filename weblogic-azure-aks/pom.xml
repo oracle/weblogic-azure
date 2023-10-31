@@ -16,15 +16,15 @@
            mvn -Pbicep-dev -Passembly clean install
     -->
 
+    <parent>
+        <groupId>com.oracle.weblogic.azure</groupId>
+        <artifactId>weblogic-azure</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>wls-on-aks-azure-marketplace</artifactId>
-    <version>1.0.66</version>
-
-    <parent>
-        <groupId>com.microsoft.azure.iaas</groupId>
-        <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.20</version>
-    </parent>
+    <version>${version.wls-on-aks-azure-marketplace}</version>
 
     <packaging>jar</packaging>
     <name>wls-on-aks-azure-marketplace</name>
