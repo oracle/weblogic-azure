@@ -17,7 +17,7 @@
     "resources": [
       {
         "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-        "apiVersion": "${azure.apiVersionForIndentity}",
+        "apiVersion": "${azure.apiVersionForIdentity}",
         "name": "[parameters('uamiName')]",
         "location": "[parameters('location')]"
       },
