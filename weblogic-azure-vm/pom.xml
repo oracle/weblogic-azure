@@ -38,12 +38,6 @@
         <!--  skip configuration  -->
         <assembly.skipAssembly>true</assembly.skipAssembly>
         <skip.exec.plugin>true</skip.exec.plugin>
-
-        <!--  versions  -->
-        <version.arm-oraclelinux-wls>1.0.25</version.arm-oraclelinux-wls>
-        <version.arm-oraclelinux-wls-admin>1.0.47</version.arm-oraclelinux-wls-admin>
-        <version.arm-oraclelinux-wls-cluster>1.0.610000</version.arm-oraclelinux-wls-cluster>
-        <version.arm-oraclelinux-wls-dynamic-cluster>1.0.46</version.arm-oraclelinux-wls-dynamic-cluster>
     </properties>
 
     <modules>

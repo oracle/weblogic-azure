@@ -18,7 +18,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-admin</artifactId>
-    <version>${version.arm-oraclelinux-wls-admin}</version>
+    <version>1.0.47</version>
 
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
