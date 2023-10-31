@@ -664,10 +664,10 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=$DOMAIN_PATH/$wlsDomainName
+WorkingDirectory=/u01/domains
 Environment="JAVA_OPTIONS=${SERVER_STARTUP_ARGS}"
-ExecStart="${startWebLogicScript}"
-ExecStop="${stopWebLogicScript}"
+ExecStart=/bin/bash ${startWebLogicScript}
+ExecStop=/bin/bash ${stopWebLogicScript}
 User=oracle
 Group=oracle
 KillMode=process
