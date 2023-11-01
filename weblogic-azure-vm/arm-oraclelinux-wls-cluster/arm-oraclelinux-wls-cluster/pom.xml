@@ -20,13 +20,15 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-cluster</artifactId>
-    <version>1.0.610000</version>
+    <version>1.0.620000</version>
 
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
     <properties>
         <module.basedir>${project.parent.basedir}</module.basedir>
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <skip.exec.plugin>false</skip.exec.plugin>
     </properties>
 
     <description>

@@ -465,7 +465,7 @@
       },
       {
          "type": "Microsoft.Network/applicationGateways",
-         "apiVersion": "${azure.apiVersionForDeployment}",
+         "apiVersion": "${azure.apiVersionForApplicationGateways}",
          "condition": "[parameters('appGatewaySettings').enable]",
          "name": "[variables('name_appGateway')]",
          "location": "[parameters('location')]",

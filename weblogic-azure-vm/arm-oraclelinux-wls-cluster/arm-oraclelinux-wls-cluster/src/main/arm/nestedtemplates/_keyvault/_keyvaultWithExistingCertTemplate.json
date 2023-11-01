@@ -73,7 +73,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
             "name": "[concat(parameters('name'), '/', parameters('certificateDataName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -85,7 +85,7 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
+            "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
             "name": "[concat(parameters('name'), '/', parameters('certificatePasswordName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [

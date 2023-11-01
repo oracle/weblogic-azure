@@ -62,7 +62,7 @@
     "resources": [
         {
             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-            "apiVersion": "${azure.apiVersionForIndentity}",
+            "apiVersion": "${azure.apiVersionForIdentity}",
             "name": "[variables('name_deploymentScriptUserDefinedManagedIdentity')]",
             "location": "[parameters('location')]"
         },

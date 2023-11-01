@@ -10,7 +10,7 @@ param dbIdentityName string = ''
 var const_roleDefinitionIdOfManagedIdentityOperator = 'f1a07417-d97a-45cb-824c-7a7467783830'
 var name_roleAssignmentName = guid('${subscription().id}${clusterIdentityPrincipalId}Role assignment in resource scope')
 
-resource dbIdentityResource 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIndentity}' existing = {
+resource dbIdentityResource 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' existing = {
   name: dbIdentityName
 }
 
