@@ -44,4 +44,17 @@
         <skip.exec.plugin>false</skip.exec.plugin>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>assembly</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.microsoft.azure.iaas</groupId>
+                    <artifactId>arm-assembly</artifactId>
+                    <version>1.0.4</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
 </project>
