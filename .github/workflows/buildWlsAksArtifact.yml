@@ -33,14 +33,6 @@ jobs:
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version
-            - name: Checkout azure-javaee-iaas
-              uses: actions/checkout@v2
-              with:
-                repository: Azure/azure-javaee-iaas
-                path: azure-javaee-iaas
-                ref: ${{ env.refJavaee }}
-            - name: Build azure-javaee-iaas
-              run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
             - name: maven-settings
               uses: s4u/maven-settings-action@v2
               with:
