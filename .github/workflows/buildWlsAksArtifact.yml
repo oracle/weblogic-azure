@@ -27,11 +27,6 @@ jobs:
               uses: actions/setup-java@v1
               with:
                 java-version: 1.8
-            - name: Setup tmate session for github debugging
-              uses: mxschmitt/action-tmate@v3
-              timeout-minutes: 180
-              with:
-                detached: true
             - name: Set up bicep
               run: |
                 curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
@@ -53,6 +48,10 @@ jobs:
                 path: weblogic-azure
             - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
+            - name: Setup tmate session for github debugging
+              if: ${{ failure() }}
+              uses: mxschmitt/action-tmate@v3
+              timeout-minutes: 180
             - name: Generate artifact file name and path
               id: artifact_file
               run: |
