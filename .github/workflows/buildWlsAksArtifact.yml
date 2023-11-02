@@ -33,18 +33,15 @@ jobs:
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version
-            - name: Checkout azure-javaee-iaas
-              uses: actions/checkout@v2
+            - name: maven-settings
+              uses: s4u/maven-settings-action@v2
               with:
-                repository: Azure/azure-javaee-iaas
-                path: azure-javaee-iaas
-                ref: ${{ env.refJavaee }}
+                servers: '[{"id": "github", "username": "github", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
+                githubServer: false
             - name: Download arm-ttk used in partner center pipeline
               run: |
                 wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
                 unzip arm-template-toolkit.zip -d arm-ttk
-            - name: Build azure-javaee-iaas
-              run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
             - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
               uses: actions/checkout@v2
               with:
