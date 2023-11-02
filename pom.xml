@@ -55,4 +55,17 @@
         <module>weblogic-azure-vm</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>assembly</id>
+            <repositories>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Packages</name>
+                    <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
 </project>
