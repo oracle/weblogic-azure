@@ -63,31 +63,4 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>assembly</id>
-            <repositories>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-                </repository>
-            </repositories>
-            <distributionManagement>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-                </repository>
-            </distributionManagement>
-            <dependencies>
-                <dependency>
-                    <groupId>com.microsoft.azure.iaas</groupId>
-                    <artifactId>arm-assembly</artifactId>
-                    <version>1.0.4</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
 </project>
