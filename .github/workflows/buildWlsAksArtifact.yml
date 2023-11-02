@@ -48,7 +48,7 @@ jobs:
                 path: weblogic-azure
             - name: mvn dependency resolve
               run: |
-                mvn dependency:purge-local-repository --file weblogic-azure/pom.xml
+                mvn dependency:purge-local-repository -Pbicep -Passembly --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Setup tmate session for github debugging

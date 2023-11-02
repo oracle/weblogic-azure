@@ -53,14 +53,5 @@
         </repository>
     </repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.iaas</groupId>
-            <artifactId>arm-assembly</artifactId>
-            <version>1.0.4</version>
-        </dependency>
-    </dependencies>
-
-
 
 </project>
