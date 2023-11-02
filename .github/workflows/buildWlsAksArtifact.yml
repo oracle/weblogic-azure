@@ -38,6 +38,9 @@ jobs:
               with:
                 servers: '[{"id": "github", "username": "github", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
                 githubServer: false
+            - name: mvn dependency resolve
+              run: |
+                mvn dependency:resolve
             - name: Download arm-ttk used in partner center pipeline
               run: |
                 wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
