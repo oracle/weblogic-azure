@@ -18,6 +18,14 @@
     <name>${project.artifactId}</name>
     <url>https://github.com/oracle/weblogic-azure</url>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <!--  skip configuration  -->
         <assembly.skipAssembly>false</assembly.skipAssembly>
@@ -34,13 +42,6 @@
 
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-        </repository>
-    </distributionManagement>
 
     <modules>
         <module>weblogic-azure-aks</module>
