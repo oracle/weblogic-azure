@@ -38,9 +38,6 @@ jobs:
               with:
                 servers: '[{"id": "github", "username": "github", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
                 githubServer: false
-            - name: mvn dependency resolve
-              run: |
-                mvn dependency:resolve
             - name: Download arm-ttk used in partner center pipeline
               run: |
                 wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
@@ -49,6 +46,9 @@ jobs:
               uses: actions/checkout@v2
               with:
                 path: weblogic-azure
+            - name: mvn dependency resolve
+              run: |
+                mvn dependency:resolve
             - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Setup tmate session for github debugging
