@@ -68,6 +68,10 @@ jobs:
                 unzip weblogic-azure/weblogic-azure-aks/target/$artifactName.zip -d weblogic-azure/weblogic-azure-aks/target/$artifactName
                 echo "##[set-output name=artifactName;]${artifactName}"
                 echo "##[set-output name=artifactPath;]weblogic-azure/weblogic-azure-aks/target/$artifactName"
+            - name: Setup tmate session for github debugging
+              if: ${{ failure() }}
+              uses: mxschmitt/action-tmate@v3
+              timeout-minutes: 180
             - name: Archive weblogic-azure/weblogic-azure-aks template
               uses: actions/upload-artifact@v1
               if: success()
