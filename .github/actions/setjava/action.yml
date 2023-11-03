@@ -3,8 +3,7 @@ description: "Set maven and jdk"
 inputs:
   server-password:
     description: "Server password for github packages maven repository"
-    required: false
-    default: ${{ secrets.GITHUB_TOKEN }}
+    required: true
 runs:
   steps:
     - name: Set up Apache Maven and JDK
