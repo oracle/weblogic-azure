@@ -22,7 +22,6 @@ jobs:
                 source external-deps-versions.properties
                 echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
                 echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
-                echo "refJavaee=${AZURE_JAVAEE_IAAS_REFERENCE}" >> $GITHUB_ENV
             - name: Set up bicep
               run: |
                 curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
@@ -48,7 +47,9 @@ jobs:
               env:
                 MAVEN_USERNAME: github
                 MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: echo "Set maven env."
+              run: |
+                echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+                echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
             - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Setup tmate session for github debugging
