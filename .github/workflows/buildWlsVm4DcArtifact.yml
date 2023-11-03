@@ -49,16 +49,6 @@ jobs:
           echo "pidType=${pidType}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
-      - name: Set dependency reference
-        uses: ./.github/actions/setvars
-        with:
-          varFilePath: ./.github/variables/vm-dependencies.env
-      - name: Checkout azure-javaee-iaas
-        uses: actions/checkout@v2
-        with:
-          repository: Azure/azure-javaee-iaas
-          path: azure-javaee-iaas
-          ref: ${{ env.refJavaee }}
       - name: Download arm-ttk used in partner center pipeline
         run: |
           wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
@@ -68,17 +58,21 @@ jobs:
         with:
           path: ${{ env.repoName }}
           ref: ${{ env.ref }}
-      - name: Set up JDK 1.8
+      - name: Set up Apache Maven and JDK
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build azure-javaee-iaas
-        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username
+          server-password: MAVEN_TOKEN # env variable for token
       - name: Update utilities path location
         run:  |
            cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
            find . -name "*.json" | xargs sed -i 's|../../../../../utilities|../utilities|g' $1
       - name: Build and test ${{ env.offerName }} using ${{ env.pidType }} pids
+        env:
+          MAVEN_USERNAME: github
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}/${{ env.offerName }}
           pidType=${{ env.pidType }}
@@ -94,8 +88,8 @@ jobs:
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${{ env.offerName }}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}/${{ env.offerName }}
-          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           artifactName=${{ env.offerName }}-$version-arm-assembly
           unzip target/$artifactName.zip -d target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}-${{ env.pidType }}"

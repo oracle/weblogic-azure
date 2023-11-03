@@ -37,17 +37,18 @@ jobs:
               uses: actions/checkout@v2
               with:
                 path: weblogic-azure
-            - name: Set up Apache Maven Central
+            - name: Set up Apache Maven and JDK
               uses: actions/setup-java@v1
               with:
                 java-version: 1.8
                 server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
                 server-username: MAVEN_USERNAME # env variable for username
                 server-password: MAVEN_TOKEN # env variable for token
-            - name: Build and test weblogic-azure/weblogic-azure-aks
               env:
                 MAVEN_USERNAME: github
                 MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: echo "Set maven env."
+            - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
             - name: Setup tmate session for github debugging
               if: ${{ failure() }}
