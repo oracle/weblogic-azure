@@ -248,7 +248,7 @@ jobs:
       - name: Get version information from ${{env.offerName}}/pom.xml
         id: version
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/${offerName}/pom.xml)
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${offerName}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           echo "version=${version}" >> $GITHUB_ENV
       - name: Output artifact name for Download action
         id: artifact_file
@@ -558,7 +558,7 @@ jobs:
       - name: Output addnode artifact name
         id: artifact_file_addnode
         run: |
-          addnodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode/pom.xml)
+          addnodeVersion=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           artifactNameOfAddnode=${offerName}-addnode-$addnodeVersion-arm-assembly
           echo "artifactNameOfAddnode=${artifactNameOfAddnode}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfAddnode;]${artifactNameOfAddnode}"

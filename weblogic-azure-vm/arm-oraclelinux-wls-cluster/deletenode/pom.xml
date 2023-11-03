@@ -20,7 +20,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-cluster-deletenode</artifactId>
-    <version>1.0.1</version>
+    <version>${version.arm-oraclelinux-wls-cluster-deletenode}</version>
 
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>

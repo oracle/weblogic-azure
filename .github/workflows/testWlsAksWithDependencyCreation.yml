@@ -109,7 +109,7 @@ jobs:
             - name: Generate artifact file name and path
               id: artifact_file
               run: |
-                version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' weblogic-azure/weblogic-azure-aks/pom.xml)
+                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
                 artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
                 unzip weblogic-azure/weblogic-azure-aks/target/$artifactName.zip -d weblogic-azure/weblogic-azure-aks/target/$artifactName
                 echo "##[set-output name=artifactName;]${artifactName}"
@@ -229,7 +229,7 @@ jobs:
             - name: Get version information from weblogic-azure/weblogic-azure-aks/pom.xml
               id: version
               run: |
-                version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' weblogic-azure/weblogic-azure-aks/pom.xml)
+                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
                 echo "version=${version}" >> $GITHUB_ENV
             - name: Output artifact name for Download action
               id: artifact_file

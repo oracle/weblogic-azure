@@ -46,6 +46,14 @@
         <version.arm-oraclelinux-wls-admin>1.0.47</version.arm-oraclelinux-wls-admin>
         <version.arm-oraclelinux-wls-cluster>1.0.610000</version.arm-oraclelinux-wls-cluster>
         <version.arm-oraclelinux-wls-dynamic-cluster>1.0.46</version.arm-oraclelinux-wls-dynamic-cluster>
+        <!--  node versions  -->
+        <version.arm-oraclelinux-wls-dynamic-cluster-addnode>1.0.5</version.arm-oraclelinux-wls-dynamic-cluster-addnode>
+        <version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>1.0.1</version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>
+        <version.arm-oraclelinux-wls-dynamic-cluster-deletenode>1.0.1</version.arm-oraclelinux-wls-dynamic-cluster-deletenode>
+
+        <version.arm-oraclelinux-wls-cluster-addnode>1.0.26</version.arm-oraclelinux-wls-cluster-addnode>
+        <version.arm-oraclelinux-wls-cluster-addnode-coherence>1.0.1</version.arm-oraclelinux-wls-cluster-addnode-coherence>
+        <version.arm-oraclelinux-wls-cluster-deletenode>1.0.1</version.arm-oraclelinux-wls-cluster-deletenode>
         <!--  versions  end -->
 
     </properties>
