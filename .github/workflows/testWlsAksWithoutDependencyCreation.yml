@@ -67,7 +67,6 @@ jobs:
                 echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
                 echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
                 echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
-                echo "refJavaee=${AZURE_JAVAEE_IAAS_REFERENCE}" >> $GITHUB_ENV
                 echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_OUTPUT
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
@@ -105,30 +104,32 @@ jobs:
                 echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
                 echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
                 echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
-            - name: Set up JDK 1.8
+            - name: Set up Apache Maven and JDK
               uses: actions/setup-java@v1
               with:
                 java-version: 1.8
+                server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+                server-username: MAVEN_USERNAME # env variable for username
+                server-password: MAVEN_TOKEN # env variable for token
+            - name: Set Maven env
+              env:
+                MAVEN_USERNAME: github
+                MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+                echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
             - name: Set up bicep
               run: |
                 curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version
-            - name: Checkout azure-javaee-iaas
-              uses: actions/checkout@v2
-              with:
-                repository: Azure/azure-javaee-iaas
-                path: azure-javaee-iaas
-                ref: ${{ env.refJavaee }}
             - name: Checkout arm-ttk
               uses: actions/checkout@v2
               with:
                 repository: Azure/arm-ttk
                 path: arm-ttk
                 ref: ${{ env.refArmttk }}
-            - name: Build azure-javaee-iaas
-              run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
             - name: Checkout weblogic-azure
               uses: actions/checkout@v2
               with:
