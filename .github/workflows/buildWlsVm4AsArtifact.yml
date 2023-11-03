@@ -70,14 +70,18 @@ jobs:
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_USERNAME # env variable for username
           server-password: MAVEN_TOKEN # env variable for token
+      - name: Set Maven env
+        env:
+          MAVEN_USERNAME: github
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Update utilities path location
         run:  |
            cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
            find . -name "*.json" | xargs sed -i 's|../../../../utilities|../utilities|g' $1
       - name: Build and test ${{ env.offerName }} using ${{ env.pidType }} pids
-        env:
-          MAVEN_USERNAME: github
-          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
           pidType=${{ env.pidType }}

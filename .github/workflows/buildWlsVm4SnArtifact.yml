@@ -66,8 +66,13 @@ jobs:
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_USERNAME # env variable for username
           server-password: MAVEN_TOKEN # env variable for token
-      - name: Build azure-javaee-iaas
-        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+      - name: Set Maven env
+        env:
+          MAVEN_USERNAME: github
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Build and test ${{ env.offerName }} using ${{ env.pidType }} pids
         run: |
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}
