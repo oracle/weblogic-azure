@@ -34,14 +34,12 @@ jobs:
                 unzip arm-template-toolkit.zip -d arm-ttk
             - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
               uses: actions/checkout@v2
-              with:
-                path: weblogic-azure
             - name: Set up Apache Maven and JDK
               uses: ./.github/actions/setjava
               with:
                 server-password: ${{ secrets.GITHUB_TOKEN }}
             - name: Build and test weblogic-azure/weblogic-azure-aks
-              run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
+              run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure-aks/pom.xml
             - name: Setup tmate session for github debugging
               if: ${{ failure() }}
               uses: mxschmitt/action-tmate@v3
