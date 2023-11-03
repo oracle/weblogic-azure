@@ -52,10 +52,6 @@ jobs:
                 echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
             - name: Build and test weblogic-azure/weblogic-azure-aks
               run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
-            - name: Setup tmate session for github debugging
-              if: ${{ failure() }}
-              uses: mxschmitt/action-tmate@v3
-              timeout-minutes: 180
             - name: Generate artifact file name and path
               id: artifact_file
               run: |
