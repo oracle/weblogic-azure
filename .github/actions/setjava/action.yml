@@ -1,5 +1,10 @@
 name: "Set maven and jdk"
 description: "Set maven and jdk"
+inputs:
+  server-password:
+    description: "Server password for github packages maven repository"
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
 runs:
   steps:
     - name: Set up Apache Maven and JDK
@@ -12,7 +17,7 @@ runs:
     - name: Set Maven env
       env:
         MAVEN_USERNAME: github
-        MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MAVEN_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
         echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
         echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
