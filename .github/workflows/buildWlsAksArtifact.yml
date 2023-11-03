@@ -34,6 +34,8 @@ jobs:
                 unzip arm-template-toolkit.zip -d arm-ttk
             - name: Checkout ${{ env.aksRepoUserName }}/weblogic-azure
               uses: actions/checkout@v2
+              with:
+                path: weblogic-azure
             - name: Set up Apache Maven and JDK
               uses: ./.github/actions/setjava
               with:
