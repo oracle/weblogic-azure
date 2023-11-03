@@ -51,7 +51,7 @@ jobs:
             - name: Generate artifact file name and path
               id: artifact_file
               run: |
-                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' weblogic-azure/pom.xml --non-recursive exec:exec)
+                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
                 artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
                 unzip weblogic-azure/weblogic-azure-aks/target/$artifactName.zip -d weblogic-azure/weblogic-azure-aks/target/$artifactName
                 echo "##[set-output name=artifactName;]${artifactName}"
