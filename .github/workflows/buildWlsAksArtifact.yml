@@ -27,17 +27,15 @@ jobs:
               uses: actions/setup-java@v1
               with:
                 java-version: 1.8
+                server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+                server-username: github # env variable for username in deploy
+                server-password: ${{ secrets.GITHUB_TOKEN }} # env variable for token in deploy
             - name: Set up bicep
               run: |
                 curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
                 chmod +x ./bicep
                 sudo mv ./bicep /usr/local/bin/bicep
                 bicep --version
-            - name: maven-settings
-              uses: s4u/maven-settings-action@v2
-              with:
-                servers: '[{"id": "github", "username": "github", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
-                githubServer: false
             - name: Download arm-ttk used in partner center pipeline
               run: |
                 wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
