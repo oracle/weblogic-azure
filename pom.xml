@@ -26,13 +26,13 @@
         </repository>
     </repositories>
 
-    <distributionManagement>
-        <repository>
+    <pluginRepositories>
+        <pluginRepository>
             <id>github</id>
             <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-        </repository>
-    </distributionManagement>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <!--  skip configuration  -->
@@ -54,18 +54,5 @@
         <module>weblogic-azure-aks</module>
         <module>weblogic-azure-vm</module>
     </modules>
-
-    <profiles>
-        <profile>
-            <id>assembly</id>
-            <repositories>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
 
 </project>

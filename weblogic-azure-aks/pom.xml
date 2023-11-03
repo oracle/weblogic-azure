@@ -29,48 +29,11 @@
     <packaging>jar</packaging>
     <name>wls-on-aks-azure-marketplace</name>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
         <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
         <template.azure-common.properties.url>file:///${basedir}/../weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
         <assembly.skipAssembly>false</assembly.skipAssembly>
         <skip.exec.plugin>false</skip.exec.plugin>
     </properties>
-
-
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-        </repository>
-    </repositories>
-
-    <profiles>
-        <profile>
-            <id>assembly</id>
-            <repositories>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-                </repository>
-            </repositories>
-            <distributionManagement>
-                <repository>
-                    <id>github</id>
-                    <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
 
 </project>
