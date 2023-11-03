@@ -5,6 +5,7 @@ inputs:
     description: "Server password for github packages maven repository"
     required: true
 runs:
+  using: "composite"
   steps:
     - name: Set up Apache Maven and JDK
       uses: actions/setup-java@v1
