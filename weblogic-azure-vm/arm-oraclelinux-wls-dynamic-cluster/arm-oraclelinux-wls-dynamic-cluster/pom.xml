@@ -18,8 +18,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-dynamic-cluster</artifactId>
-    <version>1.0.47</version>
-
+    <version>${version.arm-oraclelinux-wls-dynamic-cluster}</version>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 

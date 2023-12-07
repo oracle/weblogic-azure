@@ -79,12 +79,6 @@ jobs:
         uses: ./.github/actions/setvars
         with:
           varFilePath: ./.github/variables/vm-dependencies.env
-      - name: Checkout azure-javaee-iaas
-        uses: actions/checkout@v2
-        with:
-          repository: Azure/azure-javaee-iaas
-          path: azure-javaee-iaas
-          ref: ${{ env.refJavaee }}
       - name: Checkout arm-ttk
         uses: actions/checkout@v2
         with:
@@ -97,12 +91,20 @@ jobs:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           ref: ${{ env.ref }}
           path: ${{env.repoName}}
-      - name: Set up JDK 1.8
+      - name: Set up Apache Maven and JDK
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build azure-javaee-iaas
-        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username
+          server-password: MAVEN_TOKEN # env variable for token
+      - name: Set Maven env
+        env:
+          MAVEN_USERNAME: github
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Build and test ${{ env.offerName }}
         run: |
           ls
@@ -145,7 +147,7 @@ jobs:
       - name: Get version information from pom.xml
         id: version
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.adminOfferPath }}/pom.xml)
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${{ env.offerName }}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           echo "version=${version}" >> $GITHUB_ENV
       - name: Print version
         run: echo $version
@@ -241,7 +243,7 @@ jobs:
       - name: Get version information from ${{ env.offerName }}/pom.xml
         id: version
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${{ env.adminOfferPath }}/pom.xml)
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${{ env.offerName }}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           echo "version=${version}" >> $GITHUB_ENV
       - name: Output artifact name for Download action
         id: artifact_file

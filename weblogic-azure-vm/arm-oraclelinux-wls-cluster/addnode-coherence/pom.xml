@@ -20,7 +20,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-cluster-addnode-coherence</artifactId>
-    <version>1.0.1</version>
+    <version>${version.arm-oraclelinux-wls-cluster-addnode-coherence}</version>
 
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>

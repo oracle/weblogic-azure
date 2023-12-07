@@ -59,12 +59,6 @@ jobs:
         uses: ./.github/actions/setvars
         with:
           varFilePath: ./.github/variables/vm-dependencies.env
-      - name: Checkout azure-javaee-iaas
-        uses: actions/checkout@v2
-        with:
-          repository: Azure/azure-javaee-iaas
-          path: azure-javaee-iaas
-          ref: ${{ env.refJavaee }}
       - name: Checkout arm-ttk
         uses: actions/checkout@v2
         with:
@@ -76,12 +70,20 @@ jobs:
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
-      - name: Set up JDK 1.8
+      - name: Set up Apache Maven and JDK
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build azure-javaee-iaas
-        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username
+          server-password: MAVEN_TOKEN # env variable for token
+      - name: Set Maven env
+        env:
+          MAVEN_USERNAME: github
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Built and test ${{env.offerName}}
         run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
 
@@ -248,7 +250,7 @@ jobs:
       - name: Get version information from ${{env.offerName}}/pom.xml
         id: version
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/${offerName}/pom.xml)
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${offerName}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           echo "version=${version}" >> $GITHUB_ENV
       - name: Output artifact name for Download action
         id: artifact_file
@@ -558,7 +560,7 @@ jobs:
       - name: Output addnode artifact name
         id: artifact_file_addnode
         run: |
-          addnodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode/pom.xml)
+          addnodeVersion=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           artifactNameOfAddnode=${offerName}-addnode-$addnodeVersion-arm-assembly
           echo "artifactNameOfAddnode=${artifactNameOfAddnode}" >> $GITHUB_ENV
           echo "##[set-output name=artifactNameOfAddnode;]${artifactNameOfAddnode}"

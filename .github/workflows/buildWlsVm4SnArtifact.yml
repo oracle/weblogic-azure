@@ -50,16 +50,6 @@ jobs:
           echo "pidType=${pidType}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
-      - name: Set dependency reference
-        uses: ./.github/actions/setvars
-        with:
-          varFilePath: ./.github/variables/vm-dependencies.env
-      - name: Checkout azure-javaee-iaas
-        uses: actions/checkout@v2
-        with:
-          repository: Azure/azure-javaee-iaas
-          path: azure-javaee-iaas
-          ref: ${{ env.refJavaee }}
       - name: Download arm-ttk used in partner center pipeline
         run: |
           wget -O arm-template-toolkit.zip https://aka.ms/arm-ttk-azureapps
@@ -69,13 +59,20 @@ jobs:
         with:
           path: ${{ env.repoName }}
           ref: ${{ env.ref }}
-      - name: Set up JDK 1.8
+      - name: Set up Apache Maven and JDK
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build azure-javaee-iaas
-        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
-
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME # env variable for username
+          server-password: MAVEN_TOKEN # env variable for token
+      - name: Set Maven env
+        env:
+          MAVEN_USERNAME: github
+          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Build and test ${{ env.offerName }} using ${{ env.pidType }} pids
         run: |
           cd ${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}

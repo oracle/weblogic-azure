@@ -20,7 +20,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-cluster-addnode</artifactId>
-    <version>1.0.26</version>
+    <version>${version.arm-oraclelinux-wls-cluster-addnode}</version>
 
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>

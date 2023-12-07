@@ -12,9 +12,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.microsoft.azure.iaas</groupId>
-        <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.20</version>
+        <groupId>com.oracle.weblogic.azure</groupId>
+        <artifactId>weblogic-azure</artifactId>
+        <version>1.0.0</version>
     </parent>
 
     <groupId>com.oracle.weblogic.azure</groupId>
