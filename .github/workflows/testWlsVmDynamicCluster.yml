@@ -55,6 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
+      - name: Set up Maven with GitHub token
+        uses: ./.github/actions/setupmaven
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2.3.4
       - name: Set dependency reference
         uses: ./.github/actions/setvars
         with:
@@ -70,20 +75,6 @@ jobs:
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
-      - name: Set up Apache Maven and JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-          server-username: MAVEN_USERNAME # env variable for username
-          server-password: MAVEN_TOKEN # env variable for token
-      - name: Set Maven env
-        env:
-          MAVEN_USERNAME: github
-          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
-          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Built and test ${{env.offerName}}
         run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
 
@@ -242,6 +233,11 @@ jobs:
             "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
           ]
     steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Set up Maven with GitHub token
+        uses: ./.github/actions/setupmaven
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
