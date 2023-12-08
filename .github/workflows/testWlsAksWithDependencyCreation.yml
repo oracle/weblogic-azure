@@ -215,10 +215,36 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+            - name: Set up Apache Maven and JDK
+              uses: actions/setup-java@v1
+              with:
+                java-version: 1.8
+                server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+                server-username: MAVEN_USERNAME # env variable for username
+                server-password: MAVEN_TOKEN # env variable for token
+            - name: Set Maven env
+              env:
+                MAVEN_USERNAME: github
+                MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
+                echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
             - name: Checkout weblogic-azure
               uses: actions/checkout@v2
               with:
                 path: weblogic-azure
+            - name: Get version information from weblogic-azure/weblogic-azure-aks/pom.xml
+              id: version
+              run: |
+                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
+                echo $version
+                echo "version=${version}" >> $GITHUB_ENV
+            - name: Output artifact name for Download action
+              id: artifact_file
+              run: |
+                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
+                echo "artifactName=${artifactName}" >> $GITHUB_ENV
+                echo "##[set-output name=artifactName;]${artifactName}"
             - name: Download artifact for deployment
               uses: actions/download-artifact@v1
               with:
@@ -268,8 +294,13 @@ jobs:
                   ${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }} \
                   "${cargoTrackerBlobUrl}" \
                   ${dbPassword} \
+<<<<<<< HEAD
                   ${dbAdminUser}@${dbName} \
                   jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres \
+=======
+                  ${dbAdminUser}@${{ needs.preflight.outputs.dbName }} \
+                  jdbc:postgresql:\/\/${{ needs.preflight.outputs.dbName }}.postgres.database.azure.com:5432\/postgres \
+>>>>>>> dcafe92d (Fix pipeline failure that is caused by `az storage` commands)
                   ${location} \
                   ${ocrSSOPSW} \
                   ${ocrSSOUser} \
