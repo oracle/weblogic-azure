@@ -94,10 +94,11 @@ jobs:
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
 
-          echo "build bicep files"
-          bicep build weblogic-azure-aks/src/main/bicep/mainTemplate.bicep --outfile weblogic-azure-aks/src/main/arm/mainTemplate.json
-          bicep build weblogic-azure-aks/src/main/bicep/modules/setupDBConnection.bicep --outfile weblogic-azure-aks/src/main/arm/dbTemplate.json
-          bicep build weblogic-azure-aks/src/main/bicep/modules/updateWebLogicApplications.bicep --outfile weblogic-azure-aks/src/main/arm/updateAppTemplate.json
+          mvn -Ptemplate-validation-tests -Pbicep clean install --file weblogic-azure-aks/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
+          ls weblogic-azure-aks/target/bicep
+          bicep build weblogic-azure-aks/target/bicep/mainTemplate.bicep --outfile weblogic-azure-aks/src/main/arm/mainTemplate.json
+          bicep build weblogic-azure-aks/target/bicep/modules/setupDBConnection.bicep --outfile weblogic-azure-aks/src/main/arm/dbTemplate.json
+          bicep build weblogic-azure-aks/target/bicep/modules/updateWebLogicApplications.bicep --outfile weblogic-azure-aks/src/main/arm/updateAppTemplate.json
 
       - name: Create new tag
         run: |
