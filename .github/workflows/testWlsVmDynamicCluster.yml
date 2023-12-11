@@ -52,6 +52,11 @@ env:
 
 jobs:
   preflight:
+    outputs: 
+      artifactName: ${{steps.artifact_file.outputs.artifactName}}
+      addnodeArtifactName: ${{steps.addnode_artifact_file.outputs.addnode_artifactName}}
+      addCoherenceNodeArtifactName: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactName}}
+      deletenodeArtifactName: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactName}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -115,7 +120,7 @@ jobs:
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
-          version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/${{ env.offerName }}/pom.xml)
+          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${{ env.offerName }}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           artifactName=${{ env.offerName }}-$version-arm-assembly
           unzip ${offerPath}/${{ env.offerName }}/target/$artifactName.zip -d ${offerPath}/${{ env.offerName }}/target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}"
@@ -130,7 +135,7 @@ jobs:
       - name: Generate addnode artifact file name and path
         id: addnode_artifact_file
         run: |
-          addnode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode/pom.xml)
+          addnode_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           addnode_artifactName=${{ env.offerName }}-addnode-$addnode_version-arm-assembly
           unzip ${offerPath}/addnode/target/$addnode_artifactName.zip -d ${offerPath}/addnode/target/$addnode_artifactName
           echo "##[set-output name=addnode_artifactName;]${addnode_artifactName}"
@@ -145,7 +150,7 @@ jobs:
       - name: Generate delete node artifact file name and path
         id: deletenode_artifact_file
         run: |
-          deletenode_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/deletenode/pom.xml)
+          deletenode_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-deletenode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           deletenode_artifactName=${{ env.offerName }}-deletenode-$deletenode_version-arm-assembly
           unzip ${offerPath}/deletenode/target/$deletenode_artifactName.zip -d ${offerPath}/deletenode/target/$deletenode_artifactName
           echo "##[set-output name=deletenode_artifactName;]${deletenode_artifactName}"
@@ -161,7 +166,7 @@ jobs:
       - name: Generate addnode-coherence artifact file name and path
         id: addnode_coherence_artifact_file
         run: |
-          addnode_coherence_version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode-coherence/pom.xml)
+          addnode_coherence_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           addnode_coherence_artifactName=${{ env.offerName }}-addnode-coherence-$addnode_coherence_version-arm-assembly
           unzip ${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName.zip -d ${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName
           echo "##[set-output name=addnode_coherence_artifactName;]${addnode_coherence_artifactName}"
@@ -233,31 +238,15 @@ jobs:
             "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
           ]
     steps:
-      - uses: actions/checkout@v2.3.4
-      - name: Set up Maven with GitHub token
-        uses: ./.github/actions/setupmaven
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
-      - name: Get version information from ${{env.offerName}}/pom.xml
-        id: version
-        run: |
-          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${offerName}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          echo "version=${version}" >> $GITHUB_ENV
-      - name: Output artifact name for Download action
-        id: artifact_file
-        run: |
-          artifactName=${offerName}-$version-arm-assembly
-          echo "artifactName=${artifactName}" >> $GITHUB_ENV
-          echo "##[set-output name=artifactName;]${artifactName}"
       - name: Download artifact for deployment
         uses: actions/download-artifact@v1
         with:
-          name: ${{steps.artifact_file.outputs.artifactName}}
+          name: ${{ needs.preflight.outputs.artifactName }}
       - uses: azure/login@v1
         id: azure-login
         with:
@@ -313,6 +302,9 @@ jobs:
       - name: Deploy WebLogic Server Dynamic Cluster Domain offer
         id: deploy-wls-dycluster
         run: |
+            artifactName=${{ needs.preflight.outputs.artifactName }}
+            echo "artifactName=${{ needs.preflight.outputs.artifactName }}" >> $GITHUB_ENV
+            
             az deployment group create \
               --verbose \
               --resource-group $resourceGroup \
@@ -553,21 +545,16 @@ jobs:
             --parameters @${offerPath}/test/scripts/parameters-deploy-coherence.json \
             --template-file ${artifactName}/nestedtemplates/coherenceTemplate.json
 
-      - name: Output addnode artifact name
-        id: artifact_file_addnode
-        run: |
-          addnodeVersion=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          artifactNameOfAddnode=${offerName}-addnode-$addnodeVersion-arm-assembly
-          echo "artifactNameOfAddnode=${artifactNameOfAddnode}" >> $GITHUB_ENV
-          echo "##[set-output name=artifactNameOfAddnode;]${artifactNameOfAddnode}"
       - name: Download artifact for deployment
         uses: actions/download-artifact@v1
         with:
-          name: ${{steps.artifact_file_addnode.outputs.artifactNameOfAddnode}}
+          name: ${{ needs.preflight.outputs.addnodeArtifactName }}
 
       - name: Add new nodes to existing cluster
         id: add-node
         run: |
+            artifactNameOfAddnode=${{ needs.preflight.outputs.addnodeArtifactName }}
+
             echo "add two new nodes"
             echo "generate add-node parameters"
             bash ${offerPath}/test/scripts/gen-parameters-deploy-addnode.sh  <<< \
@@ -609,21 +596,16 @@ jobs:
             exit 1
           fi
 
-      - name: Output addnode-coherence artifact name
-        id: artifact_file_addnode_coherence
-        run: |
-          addnodeCoherenceVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/addnode-coherence/pom.xml)
-          artifactNameOfAddnodeCo=${offerName}-addnode-coherence-$addnodeCoherenceVersion-arm-assembly
-          echo "artifactNameOfAddnodeCo=${artifactNameOfAddnodeCo}" >> $GITHUB_ENV
-          echo "##[set-output name=artifactNameOfAddnodeCo;]${artifactNameOfAddnodeCo}"
       - name: Download artifact for deployment
         uses: actions/download-artifact@v1
         with:
-          name: ${{steps.artifact_file_addnode_coherence.outputs.artifactNameOfAddnodeCo}}
+          name: ${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
 
       - name: Add new cache node to coherence cluster
         id: add-node-coherence
         run: |
+            artifactNameOfAddnodeCo=${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
+
             echo "add new cache server"
             echo "generate parameters"
             bash ${offerPath}/test/scripts/gen-parameters-deploy-addnode-coherence.sh  <<< \
@@ -662,20 +644,15 @@ jobs:
             exit 1
           fi
 
-      - name: Output delete-node artifact name
-        id: artifact_file_deletenode
-        run: |
-          deleteNodeVersion=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' ${offerPath}/deletenode/pom.xml)
-          artifactNameOfDeleteNode=${offerName}-deletenode-$deleteNodeVersion-arm-assembly
-          echo "artifactNameOfDeleteNode=${artifactNameOfDeleteNode}" >> $GITHUB_ENV
-          echo "##[set-output name=artifactNameOfDeleteNode;]${artifactNameOfDeleteNode}"
       - name: Download artifact for deployment
         uses: actions/download-artifact@v1
         with:
-          name: ${{steps.artifact_file_deletenode.outputs.artifactNameOfDeleteNode}}
+          name: ${{ needs.preflight.outputs.deletenodeArtifactName }}
       - name: Delete nodes from existing cluster
         id: delete-node
         run: |
+            artifactNameOfDeleteNode=${{ needs.preflight.outputs.deletenodeArtifactName }}
+            
             echo "generate delete-node parameters"
             bash ${offerPath}/test/scripts/gen-parameters-deploy-deletenode.sh <<< \
             "${offerPath}/test/scripts/parameters-deploy-deletenode.json \
