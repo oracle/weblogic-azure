@@ -285,13 +285,8 @@ jobs:
                   ${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }} \
                   "${cargoTrackerBlobUrl}" \
                   ${dbPassword} \
-<<<<<<< HEAD
-                  ${dbAdminUser}@${dbName} \
-                  jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres \
-=======
                   ${dbAdminUser}@${{ needs.preflight.outputs.dbName }} \
                   jdbc:postgresql:\/\/${{ needs.preflight.outputs.dbName }}.postgres.database.azure.com:5432\/postgres \
->>>>>>> dcafe92d (Fix pipeline failure that is caused by `az storage` commands)
                   ${location} \
                   ${ocrSSOPSW} \
                   ${ocrSSOUser} \
