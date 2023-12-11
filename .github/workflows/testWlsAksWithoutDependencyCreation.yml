@@ -172,11 +172,6 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-            - uses: actions/checkout@v2.3.4
-            - name: Set up Maven with GitHub token
-              uses: ./.github/actions/setupmaven
-              with:
-                token: ${{ secrets.GITHUB_TOKEN }}
             - name: Checkout weblogic-azure
               uses: actions/checkout@v2
               with:

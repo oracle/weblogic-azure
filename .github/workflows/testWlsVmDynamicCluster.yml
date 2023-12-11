@@ -238,11 +238,6 @@ jobs:
             "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
           ]
     steps:
-      - uses: actions/checkout@v2.3.4
-      - name: Set up Maven with GitHub token
-        uses: ./.github/actions/setupmaven
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:

@@ -227,27 +227,11 @@ jobs:
           ]
 
     steps:
-      - uses: actions/checkout@v2.3.4
-      - name: Set up Maven with GitHub token
-        uses: ./.github/actions/setupmaven
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
-      - name: Get version information from ${{ env.offerName }}/pom.xml
-        id: version
-        run: |
-          version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${{ env.offerName }}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          echo "version=${version}" >> $GITHUB_ENV
-      - name: Output artifact name for Download action
-        id: artifact_file
-        run: |
-          artifactName=${{ env.offerName }}-$version-arm-assembly
-          echo "artifactName=${artifactName}" >> $GITHUB_ENV
-          echo "##[set-output name=artifactName;]${artifactName}"
       - name: Download artifact for deployment
         uses: actions/download-artifact@v1
         with:

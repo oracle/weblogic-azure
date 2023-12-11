@@ -215,27 +215,10 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-            - uses: actions/checkout@v2.3.4
-            - name: Set up Maven with GitHub token
-              uses: ./.github/actions/setupmaven
-              with:
-                token: ${{ secrets.GITHUB_TOKEN }}
             - name: Checkout weblogic-azure
               uses: actions/checkout@v2
               with:
                 path: weblogic-azure
-            - name: Get version information from weblogic-azure/weblogic-azure-aks/pom.xml
-              id: version
-              run: |
-                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-                echo $version
-                echo "version=${version}" >> $GITHUB_ENV
-            - name: Output artifact name for Download action
-              id: artifact_file
-              run: |
-                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
-                echo "artifactName=${artifactName}" >> $GITHUB_ENV
-                echo "##[set-output name=artifactName;]${artifactName}"
             - name: Download artifact for deployment
               uses: actions/download-artifact@v1
               with:
