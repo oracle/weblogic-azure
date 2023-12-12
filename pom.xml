@@ -57,7 +57,22 @@
         <version.arm-oraclelinux-wls-cluster-deletenode>1.0.1</version.arm-oraclelinux-wls-cluster-deletenode>
         <!--  versions  end -->
 
+        <git.tag>main</git.tag>
+        <git.repo>weblogic-azure</git.repo>
+        <git.repo.owner>oracle</git.repo.owner>
+        <module.basedir>${project.basedir}</module.basedir>
+        <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
+        <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <template.azure-common.properties.url>file:///${module.basedir}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
+        <template.pid.properties.url>file:///${module.basedir}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>file:///${module.basedir}/weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+
+        <!--  skip configuration  -->
+        <assembly.skipAssembly>true</assembly.skipAssembly>
+        <skip.exec.plugin>true</skip.exec.plugin>
+
     </properties>
+
 
     <modules>
         <module>weblogic-azure-aks</module>

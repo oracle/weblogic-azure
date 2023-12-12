@@ -25,19 +25,10 @@
     <url>https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm</url>
 
     <properties>
-        <git.tag>main</git.tag>
-        <git.repo>weblogic-azure</git.repo>
-        <git.repo.owner>oracle</git.repo.owner>
-        <module.basedir>${project.basedir}</module.basedir>
-        <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
-        <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-        <template.azure-common.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
-        <template.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
-
+        <module.basedir>${project.parent.basedir}</module.basedir>
         <!--  skip configuration  -->
-        <assembly.skipAssembly>true</assembly.skipAssembly>
-        <skip.exec.plugin>true</skip.exec.plugin>
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <skip.exec.plugin>false</skip.exec.plugin>
     </properties>
 
     <modules>
