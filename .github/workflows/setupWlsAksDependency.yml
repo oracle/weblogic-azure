@@ -8,7 +8,6 @@ on:
     types: [aks-deploy-dependency]
 
 env:
-    azCliVersion: 2.30.0
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
     location: eastus
     dbAdminUser: weblogic
@@ -21,8 +20,16 @@ env:
 
 jobs:
     preflight:
+        outputs: 
+          azCliVersion: ${{steps.get-external-dependencies-version.outputs.azCliVersion}}
         runs-on: ubuntu-latest
         steps:
+            - name: Get versions of external dependencies
+              id: get-external-dependencies-version
+              run: |
+                curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
+                source external-deps-versions.properties
+                echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_OUTPUT
             - name: Set up JDK 1.8
               uses: actions/setup-java@v1
               with:
@@ -31,6 +38,9 @@ jobs:
         needs: preflight
         runs-on: ubuntu-latest
         steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -69,6 +79,9 @@ jobs:
         needs: preflight
         runs-on: ubuntu-latest
         steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -95,7 +108,7 @@ jobs:
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
-                    az storage container create -n ${{ env.storageContainerName }} --public-access container --account-name ${{ env.storageAccountName }}
+                    az storage container create -n ${{ env.storageContainerName }} --account-name ${{ env.storageAccountName }}
     format-db-sa-parameters-for-integration-test:
         needs: [deploy-storage-account, deploy-db]
         runs-on: ubuntu-latest

@@ -39,7 +39,8 @@ env:
 
 jobs:
     preflight:
-        outputs:
+        outputs: 
+          artifactName: ${{steps.artifact_file.outputs.artifactName}}
           isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
           gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
           testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
@@ -75,20 +76,11 @@ jobs:
                 echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
                 echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
                 echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
-            - name: Set up Apache Maven and JDK
-              uses: actions/setup-java@v1
+            - uses: actions/checkout@v2.3.4
+            - name: Set up Maven with GitHub token
+              uses: ./.github/actions/setupmaven
               with:
-                java-version: 1.8
-                server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-                server-username: MAVEN_USERNAME # env variable for username
-                server-password: MAVEN_TOKEN # env variable for token
-            - name: Set Maven env
-              env:
-                MAVEN_USERNAME: github
-                MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
-                echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
+                token: ${{ secrets.GITHUB_TOKEN }}
             - name: Set up bicep
               run: |
                 curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
@@ -209,7 +201,7 @@ jobs:
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
-                    az storage container create -n ${{ env.storageContainerName }} --public-access container --account-name ${{ env.storageAccountName }}
+                    az storage container create -n ${{ env.storageContainerName }}  --account-name ${{ env.storageAccountName }}
             - name: Upload built web app war file
               uses: azure/CLI@v1
               with:
@@ -227,21 +219,10 @@ jobs:
               uses: actions/checkout@v2
               with:
                 path: weblogic-azure
-            - name: Get version information from weblogic-azure/weblogic-azure-aks/pom.xml
-              id: version
-              run: |
-                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-                echo "version=${version}" >> $GITHUB_ENV
-            - name: Output artifact name for Download action
-              id: artifact_file
-              run: |
-                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
-                echo "artifactName=${artifactName}" >> $GITHUB_ENV
-                echo "##[set-output name=artifactName;]${artifactName}"
             - name: Download artifact for deployment
               uses: actions/download-artifact@v1
               with:
-                name: ${{steps.artifact_file.outputs.artifactName}}
+                name: ${{needs.preflight.outputs.artifactName}}
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -251,9 +232,22 @@ jobs:
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
-                    cargoTrackerBlobUrl=$(az storage blob url --account-name ${{ env.storageAccountName }} --container-name ${{ env.storageContainerName }} --name cargo-tracker.war -o tsv)
-                    polishedUrl=$(echo ${cargoTrackerBlobUrl} | sed 's,/,\\\/,g')
-                    echo "cargoTrackerBlobUrl=${polishedUrl}" >> $GITHUB_ENV
+                    sasTokenValidTime=3600
+                    expiryData=$(( `date +%s`+${sasTokenValidTime}))
+                    sasEnd=`date -d@"$expiryData" -u '+%Y-%m-%dT%H:%MZ'`
+                    sasToken=$(az storage account generate-sas \
+                        --permissions r \
+                        --account-name ${{ env.storageAccountName }} \
+                        --services b \
+                        --resource-types sco \
+                        --expiry $sasEnd  -o tsv)
+                    cargoTrackerBlobUrl=$(az storage blob url \
+                        --container-name ${{ env.storageContainerName }} \
+                        --name cargo-tracker.war \
+                        --account-name ${{ env.storageAccountName }} \
+                        --sas-token ${sasToken} -o tsv)
+
+                    echo "cargoTrackerBlobUrl=${cargoTrackerBlobUrl}" >> $GITHUB_ENV
             - name: Create Resource Group
               uses: azure/CLI@v1
               with:
@@ -268,26 +262,29 @@ jobs:
                 path: cargotracker
             - name: Prepare parameter file
               run: |
-                echo "replace placeholders using real parameter"
-                sed -i "s/#location#/${location}/g; \
-                        s/#wlsUserName#/${wlsUserName}/g; \
-                        s/#wlsPassword#/${wlsPassword}/g; \
-                        s/#ocrSSOPSW#/${ocrSSOPSW}/g; \
-                        s/#ocrSSOUser#/${ocrSSOUser}/g; \
-                        s/#appPackageUrls#/${cargoTrackerBlobUrl}/g; \
-                        s/#wdtRuntimePassword#/${wdtRuntimePassword}/g; \
-                        s/#testbranchName#/${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}/g; \
-                        s/#gitUserName#/${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }}/g; \
-                        s/#dbPassword#/${dbPassword}/g; \
-                        s/#dbUser#/${dbAdminUser}@${dbName}/g; \
-                        s/#dsConnectionURL#/jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres/g" \
-                        weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.jsonc
+                echo "generate parameter file"
+                bash weblogic-azure/weblogic-azure-aks/src/test/genWlsAksParameters.sh \
+                  ${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} \
+                  ${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }} \
+                  "${cargoTrackerBlobUrl}" \
+                  ${dbPassword} \
+                  ${dbAdminUser}@${dbName} \
+                  jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres \
+                  ${location} \
+                  ${ocrSSOPSW} \
+                  ${ocrSSOUser} \
+                  ${wdtRuntimePassword} \
+                  ${wlsPassword} \
+                  ${wlsUserName} \
+                  weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.jsonc
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
               uses: azure/CLI@v1
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
+                    artifactName=${{ needs.preflight.outputs.artifactName }}
+                    
                     az deployment group create \
                     --verbose \
                     --resource-group ${{ env.resourceGroupForWlsAks }} \

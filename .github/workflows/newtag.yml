@@ -53,6 +53,11 @@ jobs:
           echo "tagname=${tagname}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
+      - name: Set up Maven with GitHub token
+        uses: ./.github/actions/setupmaven
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2.3.4
       - name: Set dependency reference
         uses: ./.github/actions/setvars
         with:
@@ -81,20 +86,6 @@ jobs:
           chmod +x ./bicep
           sudo mv ./bicep /usr/local/bin/bicep
           bicep --version
-      - name: Set up Apache Maven and JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-          server-username: MAVEN_USERNAME # env variable for username
-          server-password: MAVEN_TOKEN # env variable for token
-      - name: Set Maven env
-        env:
-          MAVEN_USERNAME: github
-          MAVEN_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "MAVEN_USERNAME=${MAVEN_USERNAME}" >> $GITHUB_ENV
-          echo "MAVEN_TOKEN=${MAVEN_TOKEN}" >> $GITHUB_ENV
       - name: Build ${{ env.repoName }}
         run: |
           cd ${{ env.repoName }}
@@ -103,10 +94,11 @@ jobs:
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
           mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
 
-          echo "build bicep files"
-          bicep build weblogic-azure-aks/src/main/bicep/mainTemplate.bicep --outfile weblogic-azure-aks/src/main/arm/mainTemplate.json
-          bicep build weblogic-azure-aks/src/main/bicep/modules/setupDBConnection.bicep --outfile weblogic-azure-aks/src/main/arm/dbTemplate.json
-          bicep build weblogic-azure-aks/src/main/bicep/modules/updateWebLogicApplications.bicep --outfile weblogic-azure-aks/src/main/arm/updateAppTemplate.json
+          mvn -Ptemplate-validation-tests -Pbicep clean install --file weblogic-azure-aks/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
+          ls weblogic-azure-aks/target/bicep
+          bicep build weblogic-azure-aks/target/bicep/mainTemplate.bicep --outfile weblogic-azure-aks/src/main/arm/mainTemplate.json
+          bicep build weblogic-azure-aks/target/bicep/modules/setupDBConnection.bicep --outfile weblogic-azure-aks/src/main/arm/dbTemplate.json
+          bicep build weblogic-azure-aks/target/bicep/modules/updateWebLogicApplications.bicep --outfile weblogic-azure-aks/src/main/arm/updateAppTemplate.json
 
       - name: Create new tag
         run: |
