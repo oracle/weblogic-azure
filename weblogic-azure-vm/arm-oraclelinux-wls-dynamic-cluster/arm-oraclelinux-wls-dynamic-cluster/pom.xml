@@ -22,6 +22,10 @@
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
+    <properties>
+        <module.basedir>${project.basedir}/../../..</module.basedir>
+    </properties>
+
     <description>
 
     </description>
