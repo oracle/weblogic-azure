@@ -26,6 +26,8 @@
 
     <properties>
         <module.basedir>${project.parent.basedir}</module.basedir>
+        <template.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
         <!--  skip configuration  -->
         <assembly.skipAssembly>false</assembly.skipAssembly>
         <skip.exec.plugin>false</skip.exec.plugin>

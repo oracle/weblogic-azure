@@ -64,8 +64,6 @@
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
         <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
         <template.azure-common.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
-        <template.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/pid.properties</template.pid.properties.url>
-        <template.microsoft.pid.properties.url>file:///${module.basedir}/arm-oraclelinux-wls/src/main/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
 
         <!--  skip configuration  -->
         <assembly.skipAssembly>true</assembly.skipAssembly>
