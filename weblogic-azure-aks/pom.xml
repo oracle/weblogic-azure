@@ -30,6 +30,9 @@
     <name>wls-on-aks-azure-marketplace</name>
 
     <properties>
+        <template.pid.properties.url/>
+        <template.microsoft.pid.properties.url/>
+
         <assembly.skipAssembly>false</assembly.skipAssembly>
         <skip.exec.plugin>false</skip.exec.plugin>
     </properties>
