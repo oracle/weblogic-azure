@@ -63,7 +63,7 @@
         <module.basedir>${project.basedir}</module.basedir>
         <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
 
-        <template.azure-common.properties.url>file:///${module.basedir}/azure-common.properties</template.azure-common.properties.url>
+        <template.azure-common.properties.url>file:///${module.basedir}/resources/azure-common.properties</template.azure-common.properties.url>
         <template.pid.properties.url>file:///${module.basedir}/resources/pid.properties</template.pid.properties.url>
         <template.microsoft.pid.properties.url>file:///${module.basedir}/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
 
