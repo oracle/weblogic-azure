@@ -42,6 +42,10 @@
 		</license>
     </licenses>
 
+    <properties>
+        <module.basedir>${project.parent.basedir}/..</module.basedir>
+    </properties>
+
     <modules>
       <module>addnode</module>
       <module>addnode-coherence</module>

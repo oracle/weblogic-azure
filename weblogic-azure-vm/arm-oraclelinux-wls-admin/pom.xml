@@ -23,6 +23,10 @@
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 
+    <properties>
+        <module.basedir>${project.parent.basedir}/..</module.basedir>
+    </properties>
+
     <modules>
         <module>admin-ssl-post-deploy</module>
     </modules>
