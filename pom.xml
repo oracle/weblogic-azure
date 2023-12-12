@@ -61,7 +61,7 @@
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
 
         <module.basedir>${project.basedir}</module.basedir>
-        <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <template.validation.tests.directory>${project.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
 
         <template.azure-common.properties.url>file:///${module.basedir}/resources/azure-common.properties</template.azure-common.properties.url>
         <template.pid.properties.url>file:///${module.basedir}/resources/pid.properties</template.pid.properties.url>
