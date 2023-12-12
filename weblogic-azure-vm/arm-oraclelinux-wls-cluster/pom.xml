@@ -43,7 +43,7 @@
     </licenses>
 
     <properties>
-        <module.basedir>${project.parent.basedir}/..</module.basedir>
+        <module.basedir>${project.basedir}/../..</module.basedir>
     </properties>
 
     <modules>
