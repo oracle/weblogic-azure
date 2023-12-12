@@ -25,6 +25,7 @@
     <url>https://github.com/oracle/weblogic-azure/tree/main/weblogic-azure-vm</url>
 
     <properties>
+        <module.basedir>${project.parent.basedir}</module.basedir>
         <!--  skip configuration  -->
         <assembly.skipAssembly>false</assembly.skipAssembly>
         <skip.exec.plugin>false</skip.exec.plugin>

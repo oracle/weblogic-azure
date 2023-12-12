@@ -60,7 +60,7 @@
         <git.repo.owner>oracle</git.repo.owner>
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
 
-        <module.basedir>${project.parent.basedir}</module.basedir>
+        <module.basedir>${project.basedir}</module.basedir>
         <template.validation.tests.directory>${module.basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
 
         <template.azure-common.properties.url>file:///${module.basedir}/azure-common.properties</template.azure-common.properties.url>
