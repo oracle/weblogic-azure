@@ -25,6 +25,7 @@
 
     <properties>
         <test.parameters>-TestParameter '@{&quot;SampleName&quot;=&quot;admin-ssl-post-deploy/src/main&quot;;&quot;RawRepoPath&quot;=&quot;${artifactsLocationBase}/arm-oraclelinux-wls-admin/&quot;}'</test.parameters>
+        <module.basedir>${project.basedir}/../../..</module.basedir>
     </properties>
 
     <description>
