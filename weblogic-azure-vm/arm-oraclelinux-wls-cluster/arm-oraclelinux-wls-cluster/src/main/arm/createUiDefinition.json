@@ -853,7 +853,7 @@
                         "name": "certificateOption",
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Select desired TLS/SSL certificate option",
-                        "defaultValue": "Upload a TLS/SSL certificate",
+                        "defaultValue": "Generate a self-signed certificate",
                         "toolTip": "Select desired TLS/SSL certificate option",
                         "constraints": {
                             "allowedValues": [
