@@ -810,6 +810,7 @@
                         "name": "enableCookieBasedAffinity",
                         "type": "Microsoft.Common.CheckBox",
                         "label": "Enable cookie based affinity",
+                        "defaultValue": "true",
                         "toolTip": "If checked, enable cookie based affinity",
                         "visible": "[steps('section_appGateway').enableAppGateway]"
                     },
@@ -853,7 +854,7 @@
                         "name": "certificateOption",
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Select desired TLS/SSL certificate option",
-                        "defaultValue": "Upload a TLS/SSL certificate",
+                        "defaultValue": "Generate a self-signed certificate",
                         "toolTip": "Select desired TLS/SSL certificate option",
                         "constraints": {
                             "allowedValues": [
