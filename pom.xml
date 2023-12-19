@@ -41,7 +41,7 @@
 
         <!--  versions  start -->
         <!--  weblogic azure aks versions  -->
-        <version.wls-on-aks-azure-marketplace>1.0.65</version.wls-on-aks-azure-marketplace>
+        <version.wls-on-aks-azure-marketplace>1.0.67</version.wls-on-aks-azure-marketplace>
         <!--  weblogic azure vm versions  -->
         <version.arm-oraclelinux-wls>1.0.25</version.arm-oraclelinux-wls>
         <version.arm-oraclelinux-wls-admin>1.0.48</version.arm-oraclelinux-wls-admin>
