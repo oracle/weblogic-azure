@@ -124,7 +124,7 @@
             "kind": "AzurePowerShell",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
-                "azPowerShellVersion": "5.0",
+                "azPowerShellVersion": "${azure.powershell.version}",
                 "timeout": "PT30M",
                 "arguments": "[format(' -vaultName {0} -certificateName {1} -subjectName {2}', parameters('keyvaultName'), parameters('secretName'), parameters('subjectName'))]",
                 "environmentVariables": [
@@ -186,8 +186,9 @@
                         $DeploymentScriptOutputs['certThumbprint'] = $newCert.Thumbprint
                         $newCert | Out-String
                     }
-
-                    Install-Module -Name Az.ManagedServiceIdentity -AllowClobber -Force
+                    
+                    # Do not load MSI module to resolve issue 288. It's loaded by default in new PowerShell.
+                    # Install-Module -Name Az.ManagedServiceIdentity -AllowClobber -Force
                     # delete user assigned managed identity.
                     $identityName = [System.Environment]::GetEnvironmentVariable('MANAGED_IDENTITY_ID')
                     $resourceGroupName= [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP_NAME')
