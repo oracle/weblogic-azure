@@ -8,6 +8,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests -->
+    <!-- Build with development profile
+         If using azure-javaee-iaas-parent earlier than 1.0.13, use:
+           mvn -Pbicep -Passembly -Ddev clean install
+         Otherwise, use
+           mvn -Pbicep-dev -Passembly clean install
+    -->
+
     <parent>
         <groupId>com.oracle.weblogic.azure</groupId>
         <artifactId>weblogic-azure</artifactId>

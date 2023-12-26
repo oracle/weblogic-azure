@@ -55,20 +55,32 @@
         <version.arm-oraclelinux-wls-cluster-deletenode>1.0.1</version.arm-oraclelinux-wls-cluster-deletenode>
         <!--  versions  end -->
 
+        <!-- This is a reference value for the maven property `artifactsLocationBase`. -->
         <git.tag>main</git.tag>
+        <!-- This is a reference value for the maven property `artifactsLocationBase`. -->
         <git.repo>weblogic-azure</git.repo>
+        <!-- This is a reference value for the maven property `artifactsLocationBase`. -->
         <git.repo.owner>oracle</git.repo.owner>
+        <!-- This artifactsLocationBase property is used in the offers' mainTemplate.json files. -->
         <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
-
+        <!-- This `module.basedir` property is used in other poms within this repository so that file references resolve correctly. -->
         <module.basedir>${project.basedir}</module.basedir>
+        <!-- This property is used to resolve the arm-ttk to where it is actually checked out locally.-->
         <template.validation.tests.directory>${module.basedir}/../arm-ttk/arm-ttk</template.validation.tests.directory>
-
+        <!-- This property is used in the project azure-javaee-iaas,
+             check https://github.com/azure-javaee/azure-javaee-iaas/blob/b7b966b502212c40f23fd391a088da6a9b20bdc3/arm-parent/pom.xml#L361  -->
         <template.azure-common.properties.url>file:///${module.basedir}/resources/azure-common.properties</template.azure-common.properties.url>
         <template.pid.properties.url>file:///${module.basedir}/resources/pid.properties</template.pid.properties.url>
         <template.microsoft.pid.properties.url>file:///${module.basedir}/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
 
         <!--  skip configuration  -->
+        <!--  By default, the maven-assembly-plugin and exec-maven-plugin in azure-javaee-iaas will apply to
+              each offer module(include sub-modules) in current weblogic-azure project, but the root pom.xml of
+              weblogic-azure is not an offer module, it is an aggregation management module, we should skip
+              the two plugins. -->
+        <!--  This property is used by maven-assembly-plugin in azure-javaee-iaas. -->
         <assembly.skipAssembly>true</assembly.skipAssembly>
+        <!--  This property is used by exec-maven-plugin in azure-javaee-iaas. -->
         <skip.exec.plugin>true</skip.exec.plugin>
 
     </properties>
