@@ -30,8 +30,8 @@
     <name>wls-on-aks-azure-marketplace</name>
 
     <properties>
-        <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
-        <template.azure-common.properties.url>file:///${basedir}/../weblogic-azure-vm/arm-oraclelinux-wls/src/main/resources/azure-common.properties</template.azure-common.properties.url>
+        <module.basedir>${project.basedir}/..</module.basedir>
+        <!--  skip configuration  -->
         <assembly.skipAssembly>false</assembly.skipAssembly>
         <skip.exec.plugin>false</skip.exec.plugin>
     </properties>

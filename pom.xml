@@ -3,15 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
-    <groupId>com.oracle.weblogic.azure</groupId>
-
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
         <version>1.0.21</version>
     </parent>
 
+    <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>weblogic-azure</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
@@ -41,23 +39,52 @@
 
         <!--  versions  start -->
         <!--  weblogic azure aks versions  -->
-        <version.wls-on-aks-azure-marketplace>1.0.67</version.wls-on-aks-azure-marketplace>
+        <version.wls-on-aks-azure-marketplace>1.0.68</version.wls-on-aks-azure-marketplace>
         <!--  weblogic azure vm versions  -->
-        <version.arm-oraclelinux-wls>1.0.25</version.arm-oraclelinux-wls>
-        <version.arm-oraclelinux-wls-admin>1.0.48</version.arm-oraclelinux-wls-admin>
-        <version.arm-oraclelinux-wls-cluster>1.0.630000</version.arm-oraclelinux-wls-cluster>
-        <version.arm-oraclelinux-wls-dynamic-cluster>1.0.47</version.arm-oraclelinux-wls-dynamic-cluster>
+        <version.arm-oraclelinux-wls>1.0.26</version.arm-oraclelinux-wls>
+        <version.arm-oraclelinux-wls-admin>1.0.49</version.arm-oraclelinux-wls-admin>
+        <version.arm-oraclelinux-wls-cluster>1.0.640000</version.arm-oraclelinux-wls-cluster>
+        <version.arm-oraclelinux-wls-dynamic-cluster>1.0.48</version.arm-oraclelinux-wls-dynamic-cluster>
         <!--  node versions  -->
-        <version.arm-oraclelinux-wls-dynamic-cluster-addnode>1.0.5</version.arm-oraclelinux-wls-dynamic-cluster-addnode>
-        <version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>1.0.1</version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>
-        <version.arm-oraclelinux-wls-dynamic-cluster-deletenode>1.0.1</version.arm-oraclelinux-wls-dynamic-cluster-deletenode>
+        <version.arm-oraclelinux-wls-dynamic-cluster-addnode>1.0.6</version.arm-oraclelinux-wls-dynamic-cluster-addnode>
+        <version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>1.0.2</version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>
+        <version.arm-oraclelinux-wls-dynamic-cluster-deletenode>1.0.2</version.arm-oraclelinux-wls-dynamic-cluster-deletenode>
 
-        <version.arm-oraclelinux-wls-cluster-addnode>1.0.26</version.arm-oraclelinux-wls-cluster-addnode>
-        <version.arm-oraclelinux-wls-cluster-addnode-coherence>1.0.1</version.arm-oraclelinux-wls-cluster-addnode-coherence>
-        <version.arm-oraclelinux-wls-cluster-deletenode>1.0.1</version.arm-oraclelinux-wls-cluster-deletenode>
+        <version.arm-oraclelinux-wls-cluster-addnode>1.0.27</version.arm-oraclelinux-wls-cluster-addnode>
+        <version.arm-oraclelinux-wls-cluster-addnode-coherence>1.0.2</version.arm-oraclelinux-wls-cluster-addnode-coherence>
+        <version.arm-oraclelinux-wls-cluster-deletenode>1.0.2</version.arm-oraclelinux-wls-cluster-deletenode>
         <!--  versions  end -->
 
+        <!-- This is a reference value for the maven property `artifactsLocationBase`. -->
+        <git.tag>main</git.tag>
+        <!-- This is a reference value for the maven property `artifactsLocationBase`. -->
+        <git.repo>weblogic-azure</git.repo>
+        <!-- This is a reference value for the maven property `artifactsLocationBase`. -->
+        <git.repo.owner>oracle</git.repo.owner>
+        <!-- This artifactsLocationBase property is used in the offers' mainTemplate.json files. -->
+        <artifactsLocationBase>https://raw.githubusercontent.com/${git.repo.owner}/${git.repo}/${git.tag}/weblogic-azure-vm</artifactsLocationBase>
+        <!-- This `module.basedir` property is used in other poms within this repository so that file references resolve correctly. -->
+        <module.basedir>${project.basedir}</module.basedir>
+        <!-- This property is used to resolve the arm-ttk to where it is actually checked out locally.-->
+        <template.validation.tests.directory>${module.basedir}/../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <!-- This property is used in the project azure-javaee-iaas,
+             check https://github.com/azure-javaee/azure-javaee-iaas/blob/b7b966b502212c40f23fd391a088da6a9b20bdc3/arm-parent/pom.xml#L361  -->
+        <template.azure-common.properties.url>file:///${module.basedir}/resources/azure-common.properties</template.azure-common.properties.url>
+        <template.pid.properties.url>file:///${module.basedir}/resources/pid.properties</template.pid.properties.url>
+        <template.microsoft.pid.properties.url>file:///${module.basedir}/resources/microsoft-pid.properties</template.microsoft.pid.properties.url>
+
+        <!--  skip configuration  -->
+        <!--  By default, the maven-assembly-plugin and exec-maven-plugin in azure-javaee-iaas will apply to
+              each offer module(include sub-modules) in current weblogic-azure project, but the root pom.xml of
+              weblogic-azure is not an offer module, it is an aggregation management module, we should skip
+              the two plugins. -->
+        <!--  This property is used by maven-assembly-plugin in azure-javaee-iaas. -->
+        <assembly.skipAssembly>true</assembly.skipAssembly>
+        <!--  This property is used by exec-maven-plugin in azure-javaee-iaas. -->
+        <skip.exec.plugin>true</skip.exec.plugin>
+
     </properties>
+
 
     <modules>
         <module>weblogic-azure-aks</module>
