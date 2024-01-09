@@ -268,8 +268,8 @@ jobs:
                   ${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }} \
                   "${cargoTrackerBlobUrl}" \
                   ${dbPassword} \
-                  ${dbAdminUser}@${{ needs.preflight.outputs.dbName }} \
-                  jdbc:postgresql:\/\/${{ needs.preflight.outputs.dbName }}.postgres.database.azure.com:5432\/postgres \
+                  ${dbAdminUser}@${dbName} \
+                  jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres \
                   ${location} \
                   ${ocrSSOPSW} \
                   ${ocrSSOUser} \
