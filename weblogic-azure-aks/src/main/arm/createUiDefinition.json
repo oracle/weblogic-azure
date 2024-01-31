@@ -2107,6 +2107,146 @@
                         "visible": "[bool(steps('section_database').enableDB)]"
                     }
                 ]
+            },
+            {
+                "name": "section_autoScaling",
+                "type": "Microsoft.Common.Section",
+                "label": "Horizontal Autoscaling",
+                "subLabel": {
+                    "preValidation": "Configure Horizontal Autoscaling",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Horizontal Autoscaling",
+                "elements": [
+                    {
+                        "name": "aboutAutoscaling",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the offer configure metric to scale the WebLogic cluster."
+                        }
+                    },
+                    {
+                        "name": "enableAutoscaling",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Provision resources for horizontal autoscaling?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure horizontal autoscaling.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "autoScalingInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Horizontal autoscaling settings",
+                        "elements": [
+                            {
+                                "name": "metricSource",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Select metric source. Autoscaling based on resource metrics from Kubernetes Metrics Server or exporting by WebLogic Monitoring Exporter. ",
+                                "defaultValue": "Kubernetes Metrics Server",
+                                "toolTip": "If you select Kubernetes Metrics Server, this offer configures WebLogic Server to scale based on CPU and memory utilization. If you select WebLogic Monitoring Exporter, this offer configures WebLogic Server to expose metrics using WebLogic Monitoring Exporter, provisions Prometheus to save the metrics and enables KEDA. You can create KEDA scalers based on Java metrics exported by WebLogic Monitoring Exporter.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Kubernetes Metrics Server",
+                                            "value": "kms"
+                                        },
+                                        {
+                                            "label": "WebLogic Monitoring Exporter",
+                                            "value": "wme"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "infoKms",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms')]",
+                                "options": {
+                                    "icon": "None",
+                                    "text": "This option configures and runs HPA to scale a WebLogic cluster, based on the cpu or memory utilization.",
+                                    "uri": "https://oracle.github.io/weblogic-kubernetes-operator/managing-domains/domain-lifecycle/scaling/#kubernetes-horizontal-pod-autoscaler-hpa"
+                                }
+                            },
+                            {
+                                "name": "infoWme",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'wme')]",
+                                "options": {
+                                    "icon": "None",
+                                    "text": "This option exports metrics using WebLogic Monitoring Exporter, collects metrics using Azure Managed Prometheus Service and exposes metrics using KEDA. After the provisioning is completed, you have to create KEDA scalers based on your requirements to enable autoscaling.",
+                                    "uri": "https://oracle.github.io/weblogic-kubernetes-operator/managing-domains/domain-lifecycle/scaling/#kubernetes-horizontal-pod-autoscaler-hpa"
+                                }
+                            },
+                            {
+                                "name": "kmsMetrics",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Select metric. ",
+                                "defaultValue": "Average CPU Utilization",
+                                "toolTip": "Select metric.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Average CPU Utilization",
+                                            "value": "cpu"
+                                        },
+                                        {
+                                            "label": "Average Memory Utilization",
+                                            "value": "memory"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms')]"
+                            },
+                            {
+                                "name": "averageCpuUtilization",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 10,
+                                "max": 100,
+                                "label": "Average CPU Utilization",
+                                "subLabel": "Percent",
+                                "defaultValue": 60,
+                                "showStepMarkers": false,
+                                "toolTip": "Pick Average CPU Utilization in Percent",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.kmsMetrics, 'cpu')]"
+                            },
+                            {
+                                "name": "averageMemoryUtilization",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 10,
+                                "max": 100,
+                                "label": "Average Memory Utilization",
+                                "subLabel": "Percent",
+                                "defaultValue": 60,
+                                "showStepMarkers": false,
+                                "toolTip": "Pick Average Memory Utilization in Percent",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.kmsMetrics, 'memory')]"
+                            }
+                        ],
+                    "visible": "[bool(steps('section_autoScaling').enableAutoscaling)]"
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -2124,6 +2264,8 @@
             "appgwUsePrivateIP": "[steps('section_appGateway').appgwIngress.appgwUsePrivateIP]",
             "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
+            "averageCpuUtilization": "[steps('section_autoScaling').averageCpuUtilization]",
+            "averageMemoryUtilization": "[steps('section_autoScaling').averageMemoryUtilization]",
             "createACR": "[bool(steps('section_aks').imageInfo.oracleCreateACR)]",
             "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
             "createDNSZone": "[not(bool(steps('section_dnsConfiguration').bringDNSZone))]",
@@ -2143,6 +2285,7 @@
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
             "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
             "enableAppGWIngress": "[equals(steps('section_appGateway').loadBalancingOptions, 'agic')]",
+            "enableAutoscaling": "[bool(steps('section_autoScaling').enableAutoscaling)]",
             "enableAzureMonitoring": "[bool(steps('section_aks').aksAdvancedInfo.enableAzureMonitoring)]",
             "enableAzureFileShare": "[bool(steps('section_aks').aksAdvancedInfo.enableAzureFileShare)]",
             "enableCookieBasedAffinity": "[not(bool(steps('section_appGateway').appgwIngress.enableCookieBasedAffinity))]",
@@ -2161,7 +2304,9 @@
             "keyVaultSSLBackendRootCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertDataSecretName]",
             "keyVaultSSLCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertDataSecretName]",
             "keyVaultSSLCertPasswordSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertPasswordSecretName]",
+            "kmsMetrics": "[steps('section_autoScaling').kmsMetrics]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
+            "metricSource": "[steps('section_autoScaling').metricSource]",
             "newOrExistingVnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.newOrExisting]",
             "ocrSSOPSW": "[steps('section_aks').imageInfo.ocrSSOPassword]",
             "ocrSSOUser": "[steps('section_aks').imageInfo.ocrSSOUserName]",
