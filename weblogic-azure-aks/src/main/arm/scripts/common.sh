@@ -11,6 +11,10 @@ export checkSVCInterval=30 #seconds
 export checkAGICStatusMaxAttempt=10
 export checkAGICStatusInterval=30
 export checkIngressStateMaxAttempt=50
+export checkAcrInterval=30
+export checkAcrMaxAttempt=10
+export checkAgicInterval=30
+export checkAgicMaxAttempt=50
 
 export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'

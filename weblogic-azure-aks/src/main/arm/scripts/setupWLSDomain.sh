@@ -400,6 +400,9 @@ function build_docker_image() {
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
     echo ${ACR_PASSWORD} | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
 
+    # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
+    az provider register -n Microsoft.ContainerRegistry
+
     az acr repository show -n ${ACR_NAME} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
         echo "Failed to create image ${ACR_LOGIN_SERVER}/aks-wls-images:${newImageTag}"
