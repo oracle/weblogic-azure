@@ -27,8 +27,10 @@
     <properties>
         <module.basedir>${project.basedir}/..</module.basedir>
         <!--  skip configuration  -->
-        <assembly.skipAssembly>false</assembly.skipAssembly>
-        <skip.exec.plugin>false</skip.exec.plugin>
+        <assembly.skipAssembly>true</assembly.skipAssembly>
+        <skip.exec.plugin>true</skip.exec.plugin>
+        <!-- This property is to skip arm-ttk test at this level-->
+        <skip.armttk.test>true</skip.armttk.test>
     </properties>
 
     <modules>

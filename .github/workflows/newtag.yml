@@ -89,10 +89,7 @@ jobs:
       - name: Build ${{ env.repoName }}
         run: |
           cd ${{ env.repoName }}
-          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
-          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-admin/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
-          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
-          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
+          mvn -Ptemplate-validation-tests clean install --file weblogic-azure-vm/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
 
           mvn -Ptemplate-validation-tests -Pbicep clean install --file weblogic-azure-aks/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
           ls weblogic-azure-aks/target/bicep
@@ -124,34 +121,13 @@ jobs:
           git checkout -b ${tagbranch}
 
           # replace pids
-          export targetARM="target"
-          for d in weblogic-azure-vm/*/ ; do
-              # for admin offer and single node offer
-              if [ -d ${d}${targetARM} ];then
-                list=$(find ${d}${targetARM} | grep ".json")
-                  for file in ${list}; do
-                      sourcePath=$(echo "$file" | sed "s:target:src/main:g")
-                      if test -f "$sourcePath"; then
-                          echo "Replace ${sourcePath} with ${file}"
-                          cp -f $file $sourcePath
-                      fi
-                  done
+          list=$(find weblogic-azure-vm -name "*.json" | grep "\/target\/")
+          for file in ${list}; do
+              sourcePath=$(echo "$file" | sed "s:target:src/main:g")
+              if test -f "$sourcePath"; then
+                  echo "Replace ${sourcePath} with ${file}"
+                  cp -f $file $sourcePath
               fi
-
-              for d1 in $d*/; do
-                  if [ ! -d ${d1}${targetARM} ];then  
-                      continue;
-                  fi
-
-                  list=$(find ${d1}${targetARM} | grep ".json")
-                  for file in ${list}; do
-                      sourcePath=$(echo "$file" | sed "s:target:src/main:g")
-                      if test -f "$sourcePath"; then
-                          echo "Replace ${sourcePath} with ${file}"
-                          cp -f $file $sourcePath
-                      fi
-                  done
-              done
           done
 
           git status

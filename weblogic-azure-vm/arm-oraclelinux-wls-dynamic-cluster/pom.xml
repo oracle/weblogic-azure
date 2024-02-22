@@ -42,6 +42,8 @@
 
     <properties>
         <module.basedir>${project.parent.basedir}/..</module.basedir>
+        <!-- This property is to skip arm-ttk test at this level-->
+        <skip.armttk.test>true</skip.armttk.test>
     </properties>
 
     <modules>

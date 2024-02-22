@@ -147,6 +147,7 @@ jobs:
                     --public-network-access Enabled \
                     --admin-password ${{ env.dbPassword }} \
                     --sku-name B_Gen5_1
+                    sleep 1m
                     echo "Allow Access To Azure Services"
                     az postgres server firewall-rule create \
                     -g ${{ env.resourceGroupForDB }} \

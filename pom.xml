@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.21</version>
+        <version>1.0.22</version>
     </parent>
 
     <groupId>com.oracle.weblogic.azure</groupId>
@@ -20,7 +20,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+            <url>https://maven.pkg.github.com/galiacheng/azure-javaee-iaas</url>
         </repository>
     </repositories>
 
@@ -28,14 +28,16 @@
         <pluginRepository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+            <url>https://maven.pkg.github.com/galiacheng/azure-javaee-iaas</url>
         </pluginRepository>
     </pluginRepositories>
 
     <properties>
         <!--  skip configuration  -->
-        <assembly.skipAssembly>false</assembly.skipAssembly>
-        <skip.exec.plugin>false</skip.exec.plugin>
+        <assembly.skipAssembly>true</assembly.skipAssembly>
+        <skip.exec.plugin>true</skip.exec.plugin>
+        <!-- This property is to skip arm-ttk test at this level-->
+        <skip.armttk.test>true</skip.armttk.test>
 
         <!--  versions  start -->
         <!--  weblogic azure aks versions  -->
