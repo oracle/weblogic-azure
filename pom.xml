@@ -20,7 +20,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+            <url>https://maven.pkg.github.com/galiacheng/azure-javaee-iaas</url>
         </repository>
     </repositories>
 
@@ -28,17 +28,11 @@
         <pluginRepository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/azure-javaee/azure-javaee-iaas</url>
+            <url>https://maven.pkg.github.com/galiacheng/azure-javaee-iaas</url>
         </pluginRepository>
     </pluginRepositories>
 
-    <properties>
-        <!--  skip configuration  -->
-        <assembly.skipAssembly>true</assembly.skipAssembly>
-        <skip.exec.plugin>true</skip.exec.plugin>
-        <!-- This property is to skip arm-ttk test at this level-->
-        <skip.armttk.test>true</skip.armttk.test>
-
+    <properties>    
         <!--  versions  start -->
         <!--  weblogic azure aks versions  -->
         <version.wls-on-aks-azure-marketplace>1.0.69</version.wls-on-aks-azure-marketplace>
@@ -82,8 +76,10 @@
               the two plugins. -->
         <!--  This property is used by maven-assembly-plugin in azure-javaee-iaas. -->
         <assembly.skipAssembly>true</assembly.skipAssembly>
-        <!--  This property is used by exec-maven-plugin in azure-javaee-iaas. -->
-        <skip.exec.plugin>true</skip.exec.plugin>
+        <!-- This property is to skip arm-ttk test at this level-->
+        <skip.armttk.test>true</skip.armttk.test>
+        <!--  This property is to skip execution of bicep build. -->
+        <skip.bicep.exec>true</skip.bicep.exec>
 
     </properties>
 

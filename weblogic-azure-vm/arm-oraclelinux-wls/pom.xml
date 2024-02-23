@@ -27,6 +27,8 @@
 
     <properties>
         <module.basedir>${project.parent.basedir}/..</module.basedir>
+        <skip.armttk.test>false</skip.armttk.test>
+        <assembly.skipAssembly>false</assembly.skipAssembly>
     </properties>
 
     <description>
