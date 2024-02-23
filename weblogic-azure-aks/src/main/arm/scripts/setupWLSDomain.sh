@@ -380,6 +380,9 @@ function install_wls_operator() {
 
 # Query ACR login server, username, password
 function query_acr_credentials() {
+    # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
+    az provider register -n Microsoft.ContainerRegistry
+    
     ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME --query 'loginServer' -o tsv)
     validate_status ${ACR_LOGIN_SERVER}
     
