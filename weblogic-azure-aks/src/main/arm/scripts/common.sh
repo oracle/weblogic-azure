@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
@@ -11,6 +11,10 @@ export checkSVCInterval=30 #seconds
 export checkAGICStatusMaxAttempt=10
 export checkAGICStatusInterval=30
 export checkIngressStateMaxAttempt=50
+export checkAcrInterval=30
+export checkAcrMaxAttempt=10
+export checkAgicInterval=30
+export checkAgicMaxAttempt=50
 
 export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'

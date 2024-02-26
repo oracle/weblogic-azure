@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 #
@@ -139,6 +139,30 @@ function validate_ocr_account() {
   echo_stdout "Check OCR account: passed!"
 }
 
+function check_acr() {
+  local ready=false
+  local attempt=0
+  while [[ "${ready}" == "false" && $attempt -le ${checkAcrMaxAttempt} ]]; do
+      echo_stdout "Check if ACR ${ACR_NAME} is ready, attempt: ${attempt}."
+      ready=true
+
+      local ret=$(az acr show --name ${ACR_NAME})
+      if [ -z "${ret}" ]; then
+          ready=false
+      fi
+
+      attempt=$((attempt + 1))
+      sleep ${checkAcrInterval}
+  done
+
+  if [ ${attempt} -gt ${checkAcrMaxAttempt} ]; then
+      echo_stderr "ACR ${ACR_NAME} is not ready."
+      exit 1
+  fi
+
+  echo_stdout "Check if ACR ${ACR_NAME} is ready to import image."
+}
+
 function validate_ocr_image() {
   local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${wlsImageTag}"
 
@@ -157,7 +181,12 @@ function validate_ocr_image() {
     ocrImageFullPath="${ocrLoginServer}/${ocrCpuImagePath}:${cpuTag}"
   fi
 
-  echo_stdout "image path: ${ocrImageFullPath}"
+  echo_stdout "image path: ${ocrImageFullPath}"  
+
+  # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
+  az provider register -n Microsoft.ContainerRegistry
+
+  check_acr
 
   # validate the image by importing it to ACR.
   # if failure happens, the image should be unavailable

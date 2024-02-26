@@ -1,4 +1,4 @@
-// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param _artifactsLocation string = deployment().properties.templateLink.uri
@@ -92,8 +92,8 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
   ]
 }
 
-module validateAgic '_deployment-scripts/_ds_ensure_available_agic.bicep' = if (enableAppGWIngress) {
-  name: 'validate-agic'
+module installAgic '_deployment-scripts/_ds_install_agic.bicep' = if (enableAppGWIngress) {
+  name: 'install-agic'
   params: {
     location: location
     identity: identity
@@ -114,7 +114,21 @@ module agicRoleAssignment '_rolesAssignment/_agicRoleAssignment.bicep' = if (ena
     aksClusterRGName: aksClusterRGName
   }
   dependsOn: [
-    validateAgic
+    installAgic
+  ]
+}
+
+module validateAgic '_deployment-scripts/_ds_validate_agic.bicep' = if (enableAppGWIngress) {
+  name: 'validate-agic'
+  params: {
+    location: location
+    identity: identity
+    aksClusterRGName: aksClusterRGName
+    aksClusterName: aksClusterName
+    azCliVersion: azCliVersion
+  }
+  dependsOn: [
+    agicRoleAssignment
   ]
 }
 
@@ -153,7 +167,7 @@ module networkingDeploymentYesAppGW '_deployment-scripts/_ds-create-networking.b
   }
   dependsOn: [
     dnsZoneDeployment
-    agicRoleAssignment
+    validateAgic
   ]
 }
 
@@ -192,7 +206,7 @@ module networkingDeploymentNoAppGW '_deployment-scripts/_ds-create-networking.bi
   }
   dependsOn: [
     dnsZoneDeployment
-    agicRoleAssignment
+    validateAgic
   ]
 }
 

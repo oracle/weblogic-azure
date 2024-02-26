@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 # env inputs:
@@ -380,6 +380,9 @@ function install_wls_operator() {
 
 # Query ACR login server, username, password
 function query_acr_credentials() {
+    # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
+    az provider register -n Microsoft.ContainerRegistry
+    
     ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME --query 'loginServer' -o tsv)
     validate_status ${ACR_LOGIN_SERVER}
     
@@ -399,6 +402,9 @@ function build_docker_image() {
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
     echo ${ACR_PASSWORD} | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
+
+    # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
+    az provider register -n Microsoft.ContainerRegistry
 
     az acr repository show -n ${ACR_NAME} --image aks-wls-images:${newImageTag}
     if [ $? -ne 0 ]; then
