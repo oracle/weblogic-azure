@@ -126,6 +126,8 @@ param dnszoneRGName string = 'dns-contoso-rg'
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 @description('true to set up Application Gateway ingress.')
 param enableAppGWIngress bool = false
+@description('true to enable Horizontal Autoscaling.')
+param enableAutoscaling bool = false
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
@@ -821,6 +823,16 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   ]
 }
 
+module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAutoscaling) {
+  name: 'enable-horizontal-autoscaling'
+  params: {
+    
+  }
+  dependsOn: [
+    validateApplciations
+  ]
+}
+ 
 /*
 * Query and output WebLogic domain configuration, including: 
 *   - domain deployment description
@@ -839,7 +851,7 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    validateApplciations
+    enableAutoscaling
   ]
 }
 

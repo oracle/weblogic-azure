@@ -2178,7 +2178,7 @@
                                 "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms')]",
                                 "options": {
                                     "icon": "None",
-                                    "text": "This option configures and runs HPA to scale a WebLogic cluster, based on the cpu or memory utilization.",
+                                    "text": "This option configures and runs Kubernetes Horizontal Pod Autoscaler (HPA) to scale a WebLogic cluster, based on the CPU or memory utilization. The HPA autoscales WebLogic Server instances from a minimum of 1 cluster members up to maximum of cluster members, and the scale up or down will occur when the average CPU/memory is consistently over the utilization. Default maximum of cluster members is 5. You can set it from **Basics** -> **Optional Basic Configuration** -> **Maximum dynamic cluster size**.",
                                     "uri": "https://oracle.github.io/weblogic-kubernetes-operator/managing-domains/domain-lifecycle/scaling/#kubernetes-horizontal-pod-autoscaler-hpa"
                                 }
                             },
