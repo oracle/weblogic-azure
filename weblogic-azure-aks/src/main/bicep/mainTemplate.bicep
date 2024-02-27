@@ -143,6 +143,12 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 @description('Enable passwordless datasource connection.')
 param enablePswlessConnection bool = false
+@allowed([
+  'cpu'
+  'memory'
+])
+param hpaScaleType string = 'cpu'
+param hpaTargetAverageUtilizationPercentage int = 60
 @description('Is the specified SSO account associated with an active Oracle support contract?')
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
@@ -241,6 +247,8 @@ param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
 @description('True to use latest supported Kubernetes version.')
 param useLatestSupportedAksVersion bool = true
+@description('True to enable HPA for auto scaling.')
+param useHpa bool = true
 @description('True to set up internal load balancer service.')
 param useInternalLB bool = false
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
@@ -837,7 +845,7 @@ module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAuto
     identity: obj_uamiForDeploymentScript
     location: location
     useHpa: useHpa
-    utilizationPercentage: utilizationPercentage
+    utilizationPercentage: hpaTargetAverageUtilizationPercentage
     wlsClusterSize: wlsClusterSize
     wlsDomainUID: wlsDomainUID
 
