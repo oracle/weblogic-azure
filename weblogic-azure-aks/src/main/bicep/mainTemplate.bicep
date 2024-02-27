@@ -826,7 +826,21 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
 module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAutoscaling) {
   name: 'enable-horizontal-autoscaling'
   params: {
-    
+    _pidCPUUtilization: pids.outputs.cpuUtilization
+    _pidEnd: pids.outputs.autoScalingEnd
+    _pidMemoryUtilization: pids.outputs.memoryUtilization
+    _pidStart: pids.outputs.autoScalingStart
+    aksClusterName: aksClusterName
+    aksClusterRGName: aksClusterRGName
+    azCliVersion: const_azcliVersion
+    hpaScaleType: hpaScaleType
+    identity: obj_uamiForDeploymentScript
+    location: location
+    useHpa: useHpa
+    utilizationPercentage: utilizationPercentage
+    wlsClusterSize: wlsClusterSize
+    wlsDomainUID: wlsDomainUID
+
   }
   dependsOn: [
     validateApplciations

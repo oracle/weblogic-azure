@@ -13,7 +13,6 @@ param identity object = {}
 param location string
 param utcValue string = utcNow()
 param utilizationPercentage int
-param wlsClusterName string
 param wlsClusterSize int
 param wlsNamespace string
 
@@ -51,10 +50,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'UTILIZATION_PERSENTAGE'
         value: utilizationPercentage
-      }
-      {
-        name: 'WLS_CLUSTER_NAME'
-        value: wlsClusterName
       }
       {
         name: 'WLS_CLUSTER_SIZE'
