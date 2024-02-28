@@ -73,6 +73,11 @@ module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
   ]
 }
 
+// deploy promethues
+// configure promethues
+// enable weblogic exporter
+// enable keda
+
 module pidAutoScalingEnd './_pids/_pid.bicep' = {
   name: 'pid-auto-scaling-end'
   params: {

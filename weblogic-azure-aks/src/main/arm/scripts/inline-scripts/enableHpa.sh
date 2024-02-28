@@ -24,16 +24,16 @@ function scaling_basedon_cpu(){
 }
 
 function scaling_basedon_memory(){
-    cat <<EOF >scaler-memory.yaml
-apiVersion: autoscaling/v2beta1
+  cat <<EOF >scaler-memory.yaml
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: ${WLS_CLUSTER_UID}
   namespace: ${WLS_NAMESPACE}
 spec:
   scaleTargetRef:
-    apiVersion: weblogic.oracle/v9
-    kind: cluster
+    apiVersion: weblogic.oracle/v1
+    kind: Cluster
     name: ${WLS_CLUSTER_UID}
   minReplicas: 1
   maxReplicas: ${WLS_CLUSTER_SIZE}
@@ -41,7 +41,9 @@ spec:
   - type: Resource
     resource:
       name: memory
-      targetAverageUtilization: ${UTILIZATION_PERSENTAGE}
+      target:
+        averageUtilization: ${UTILIZATION_PERSENTAGE}
+        type: Utilization
 EOF
 
   kubectl apply -f scaler-memory.yaml
@@ -56,6 +58,8 @@ install_kubectl
 connect_aks
 
 get_cluster_uid
+
+#TBD check kms state
 
 if [ "$HPA_SCALE_TYPE" == "cpu" ]; then
   scaling_basedon_cpu
