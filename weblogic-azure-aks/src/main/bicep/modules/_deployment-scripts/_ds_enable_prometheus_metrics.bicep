@@ -1,20 +1,26 @@
 // Copyright (c) 2022, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-param aksClusterName string 
+param aksClusterName string
 param aksClusterRGName string
 param azCliVersion string
 param identity object = {}
 param location string
 param utcValue string = utcNow()
 param wlsClusterSize int
+param wlsDomainUID string
 param wlsNamespace string
+@secure()
+param wlsPassword string
+param wlsUserName string
 
 // To mitigate arm-ttk error: Unreferenced variable: $fxv#0
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_enableHpa = loadFileAsBase64('../../../arm/scripts/inline-scripts/enablePrometheusMetrics.sh')
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
-var const_deploymentName='ds-enable-promethues-metrics'
+var const_deploymentName = 'ds-enable-promethues-metrics'
+var const_kedaNamespace= 'keda'
+var const_kedaSa= 'keda-operator'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
@@ -23,7 +29,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   identity: identity
   properties: {
     azCliVersion: azCliVersion
-    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableHpa))
+    scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}', base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableHpa))
     environmentVariables: [
       {
         name: 'AKS_CLUSTER_RG_NAME'
@@ -42,6 +48,14 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: hpaScaleType
       }
       {
+        name: 'KEDA_NAMESPACE'
+        value: const_kedaNamespace
+      }
+      {
+        name: 'KEDA_SERVICE_ACCOUNT_NAME'
+        value: const_kedaSa
+      }
+      {
         name: 'UTILIZATION_PERSENTAGE'
         value: utilizationPercentage
       }
@@ -50,8 +64,28 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: wlsClusterSize
       }
       {
+        name: 'WLS_ADMIN_PASSWORD'
+        value: wlsPassword
+      }
+      {
+        name: 'WLS_ADMIN_USERNAME'
+        value: wlsUserName
+      }
+      {
+        name: 'WLS_DOMAIN_UID'
+        value: wlsDomainUID
+      }
+      {
         name: 'WLS_NAMESPACE'
         value: wlsNamespace
+      }
+      {
+        name: 'LOCATION'
+        value: location
+      }
+      {
+        name: 'SUBSCRIPTION'
+        value: subscription().id
       }
     ]
     cleanupPreference: 'OnSuccess'
@@ -59,3 +93,5 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
     forceUpdateTag: utcValue
   }
 }
+
+output kedaScalerServerAddress string = deploymentScript.properties.outputs.kedaScalerServerAddress

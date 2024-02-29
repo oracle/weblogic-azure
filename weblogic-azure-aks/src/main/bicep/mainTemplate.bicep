@@ -74,6 +74,10 @@ param appgwUsePrivateIP bool = false
 param appPackageUrls array = []
 @description('The number of managed server to start.')
 param appReplicas int = 2
+@description('Scale up once average cpu utilization is larger then the input number ')
+param averageCpuUtilization int = 60
+@description('Scale up once average memory utilization is larger then the input number ')
+param averageMemoryUtilization int = 60
 @description('true to create a new Azure Container Registry.')
 param createACR bool = false
 @description('true to create a new AKS cluster.')
@@ -148,7 +152,6 @@ param enablePswlessConnection bool = false
   'memory'
 ])
 param hpaScaleType string = 'cpu'
-param hpaTargetAverageUtilizationPercentage int = 60
 @description('Is the specified SSO account associated with an active Oracle support contract?')
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
@@ -845,9 +848,11 @@ module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAuto
     identity: obj_uamiForDeploymentScript
     location: location
     useHpa: useHpa
-    utilizationPercentage: hpaTargetAverageUtilizationPercentage
+    utilizationPercentage: hpaScaleType == 'cpu' ? averageCpuUtilization : averageMemoryUtilization
     wlsClusterSize: wlsClusterSize
     wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
 
   }
   dependsOn: [

@@ -24,6 +24,9 @@ param useHpa bool
 param utilizationPercentage int
 param wlsClusterSize int
 param wlsDomainUID string
+@secure()
+param wlsPassword string
+param wlsUserName string
 
 var const_namespace = '${wlsDomainUID}-ns'
 
@@ -44,11 +47,20 @@ module pidCpuUtilization './_pids/_pid.bicep' = if(useHpa && hpaScaleType == 'cp
   ]
 }
 
-
 module pidMemoryUtilization './_pids/_pid.bicep' = if(useHpa && hpaScaleType == 'memory') {
-  name: 'pid-auto-scaling-based-on-memory-utilization'
+  name: 'pid-auto-scaling-based-on-java-metrics'
   params: {
     name: _pidMemoryUtilization
+  }
+  dependsOn: [
+    pidAutoScalingStart
+  ]
+}
+
+module pidWme './_pids/_pid.bicep' = if(!useHpa) {
+  name: 'pid-auto-scaling-based-on-memory-utilization'
+  params: {
+    name: _pidWme
   }
   dependsOn: [
     pidAutoScalingStart
@@ -73,17 +85,37 @@ module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
   ]
 }
 
-// deploy promethues
-// configure promethues
-// enable weblogic exporter
-// enable keda
+module azureMonitorIntegrationDeployment '_deployment-scripts/_ds_enable_prometheus_metrics.bicep' = if(!useHpa){
+  name: 'azure-monitor-promethues-keda-deployment'
+  params: {
+    aksClusterName: aksClusterName
+    aksClusterRGName: aksClusterRGName
+    azCliVersion: azCliVersion
+    identity: identity
+    location: location
+    wlsClusterSize: wlsClusterSize
+    wlsDomainUID: wlsDomainUID
+    wlsNamespace: const_namespace
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
+  }
+  dependsOn: [
+    pidAutoScalingStart
+  ]
+}
 
 module pidAutoScalingEnd './_pids/_pid.bicep' = {
   name: 'pid-auto-scaling-end'
   params: {
     name: _pidEnd
   }
+  dependsOn: [
+    hapDeployment
+    azureMonitorIntegrationDeployment
+  ]
 }
+
+output kedaScalerServerAddress string = useHpa ? '' : azureMonitorIntegrationDeployment.outputs.kedaScalerServerAddress
 
 
 
