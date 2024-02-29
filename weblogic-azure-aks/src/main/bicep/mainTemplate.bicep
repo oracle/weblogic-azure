@@ -878,7 +878,7 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    enableAutoscaling
+    horizontalAutoscaling
   ]
 }
 
