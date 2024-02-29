@@ -44,20 +44,12 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: resourceGroup().name
       }
       {
-        name: 'HPA_SCALE_TYPE'
-        value: hpaScaleType
-      }
-      {
         name: 'KEDA_NAMESPACE'
         value: const_kedaNamespace
       }
       {
         name: 'KEDA_SERVICE_ACCOUNT_NAME'
         value: const_kedaSa
-      }
-      {
-        name: 'UTILIZATION_PERSENTAGE'
-        value: utilizationPercentage
       }
       {
         name: 'WLS_CLUSTER_SIZE'
