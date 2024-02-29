@@ -287,7 +287,7 @@
                             "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
                             "link": {
                                 "label": "Issue tracker",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=${project.version}"
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=1.0.50"
                             }
                         }
                     },
