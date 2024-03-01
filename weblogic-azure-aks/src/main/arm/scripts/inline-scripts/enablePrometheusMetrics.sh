@@ -2,13 +2,16 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 function connect_aks(){
-    az aks get-credentials -n $AKS_CLUSTER_NAME -g $AKS_CLUSTER_RG_NAME --overwrite-existing
+    az aks get-credentials \
+        -n $AKS_CLUSTER_NAME \
+        -g $AKS_CLUSTER_RG_NAME \
+        --overwrite-existing \
+        --only-show-errors
 }
 
 function create_monitor_account_workspace(){
-    local amaName="ama$(date +%s)"
-    local ret=$(az monitor account create -n $amaName -g $CURRENT_RG_NAME --query "id" | tr -d "\"")
-    utility_validate_status "Create Azure Monitor Account $amaName."
+    local ret=$(az monitor account create -n $AMA_NAME -g $CURRENT_RG_NAME --query "id" | tr -d "\"")
+    utility_validate_status "Create Azure Monitor Account $AMA_NAME."
 
     if [ -z "$ret" ]; then  
         echo_stderr "Failed to create Azure Monitor Account."   
@@ -26,7 +29,8 @@ function enable_promethues_metrics(){
     az aks update --enable-azure-monitor-metrics \
         --name ${AKS_CLUSTER_NAME} \
         --resource-group ${AKS_CLUSTER_RG_NAME} \
-        --azure-monitor-workspace-resource-id "${WORKSPACE_ID}"
+        --azure-monitor-workspace-resource-id "${WORKSPACE_ID}" \
+        --only-show-errors
 
     utility_validate_status "Enable Promethues Metrics."
 
@@ -195,6 +199,8 @@ function wait_for_keda_ready(){
 
 # https://learn.microsoft.com/en-us/azure/azure-monitor/containers/integrate-keda
 function enable_keda_addon() {
+    az extension add -n aks-preview
+
     local oidcEnabled=$(az aks show --resource-group $AKS_CLUSTER_RG_NAME --name $AKS_CLUSTER_NAME --query oidcIssuerProfile.enabled)
     local workloadIdentity=$(az aks show --resource-group $AKS_CLUSTER_RG_NAME --name $AKS_CLUSTER_NAME --query securityProfile.workloadIdentity)
 
@@ -210,7 +216,8 @@ function enable_keda_addon() {
         --name $uamiName \
         --resource-group $CURRENT_RG_NAME \
         --location $LOCATION \
-        --subscription $SUBSCRIPTION
+        --subscription $SUBSCRIPTION \
+        --only-show-errors
     utility_validate_status "Create a user assigned managed identity for keda $uamiName."
 
     local uamiClientId=$(az identity show --resource-group $CURRENT_RG_NAME --name $uamiName --query 'clientId' -otsv)
@@ -255,11 +262,12 @@ EOF
 }
 
 function output(){
-   local result=$(jq -n -c \
-    --arg kedaScalerServerAddress $OIDC_ISSUER_URL} \
-    '{kedaScalerServerAddress: $kedaScalerServerAddress}')
-  echo "result is: $result"
-  echo $result >$AZ_SCRIPTS_OUTPUT_PATH
+    local kedaServerAddress=$(az monitor account show -n ${AMA_NAME} -g ${CURRENT_RG_NAME} --query 'metrics.prometheusQueryEndpoint' -otsv)
+    local result=$(jq -n -c \
+        --arg kedaScalerServerAddress $kedaServerAddress} \
+        '{kedaScalerServerAddress: $kedaScalerServerAddress}')
+    echo "result is: $result"
+    echo $result >$AZ_SCRIPTS_OUTPUT_PATH
 }
 
 # TBD see if we can query some of the metrics

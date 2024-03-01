@@ -21,6 +21,7 @@ var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var const_deploymentName = 'ds-enable-promethues-metrics'
 var const_kedaNamespace= 'keda'
 var const_kedaSa= 'keda-operator'
+var name_azureMonitorAccountName = 'ama${uniqueString(utcValue)}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
@@ -38,6 +39,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'AKS_CLUSTER_NAME'
         value: aksClusterName
+      }
+      {
+        name: 'AMA_NAME'
+        value: name_azureMonitorAccountName
       }
       {
         name: 'CURRENT_RG_NAME'
@@ -77,7 +82,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       }
       {
         name: 'SUBSCRIPTION'
-        value: subscription().id
+        value: split(subscription().id, '/')[2]
       }
     ]
     cleanupPreference: 'OnSuccess'
