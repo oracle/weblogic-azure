@@ -144,7 +144,9 @@ function deploy_webLogic_monitoring_exporter(){
 ]
 EOF
 
-    kubectl apply -f patch-file.json
+    kubectl -n ${WLS_NAMESPACE} patch domain ${WLS_DOMAIN_UID} \
+        --type=json \
+        --patch-file patch-file.json
     utility_validate_status "Enable WebLogic Monitoring Exporter."
 
     local timestampBeforePatchingDomain=$(date +%s)
