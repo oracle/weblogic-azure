@@ -9,18 +9,6 @@ function connect_aks(){
         --only-show-errors
 }
 
-function create_monitor_account_workspace(){
-    local ret=$(az monitor account create -n $AMA_NAME -g $CURRENT_RG_NAME --query "id" | tr -d "\"")
-    utility_validate_status "Create Azure Monitor Account $AMA_NAME."
-
-    if [ -z "$ret" ]; then  
-        echo_stderr "Failed to create Azure Monitor Account."   
-        exit 1     
-    fi
-
-    export WORKSPACE_ID=$ret
-}
-
 function enable_promethues_metrics(){
     az extension remove --name aks-preview
     az extension add --name k8s-extension
@@ -29,7 +17,7 @@ function enable_promethues_metrics(){
     az aks update --enable-azure-monitor-metrics \
         --name ${AKS_CLUSTER_NAME} \
         --resource-group ${AKS_CLUSTER_RG_NAME} \
-        --azure-monitor-workspace-resource-id "${WORKSPACE_ID}" \
+        --azure-monitor-workspace-resource-id "${AMA_WORKSPACE_ID}" \
         --only-show-errors
 
     utility_validate_status "Enable Promethues Metrics."
@@ -210,20 +198,9 @@ function enable_keda_addon() {
     fi
 
     export OIDC_ISSUER_URL=$(az aks show -n $AKS_CLUSTER_NAME -g $AKS_CLUSTER_RG_NAME --query "oidcIssuerProfile.issuerUrl" -otsv)
-    local uamiName="kedausmi$(date +%s)"
 
-    az identity create \
-        --name $uamiName \
-        --resource-group $CURRENT_RG_NAME \
-        --location $LOCATION \
-        --subscription $SUBSCRIPTION \
-        --only-show-errors
-    utility_validate_status "Create a user assigned managed identity for keda $uamiName."
-
-    local uamiClientId=$(az identity show --resource-group $CURRENT_RG_NAME --name $uamiName --query 'clientId' -otsv)
-    local tenantId=$(az identity show --resource-group $CURRENT_RG_NAME --name $uamiName --query 'tenantId' -otsv)
-
-    az role assignment create --assignee $uamiClientId --role "Monitoring Data Reader" --scope ${WORKSPACE_ID}
+    export KEDA_UAMI_CLIENT_ID=$(az identity show --resource-group $CURRENT_RG_NAME --name $KEDA_UAMI_NAME --query 'clientId' -otsv)
+    local tenantId=$(az identity show --resource-group $CURRENT_RG_NAME --name $KEDA_UAMI_NAME --query 'tenantId' -otsv)
 
     kubectl create namespace ${KEDA_NAMESPACE}
 
@@ -232,7 +209,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    azure.workload.identity/client-id: $uamiClientId
+    azure.workload.identity/client-id: $KEDA_UAMI_CLIENT_ID
   name: $KEDA_SERVICE_ACCOUNT_NAME
   namespace: $KEDA_NAMESPACE
 EOF
@@ -254,7 +231,7 @@ EOF
         --set serviceAccount.create=false \
         --set serviceAccount.name=${KEDA_SERVICE_ACCOUNT_NAME} \
         --set podIdentity.azureWorkload.enabled=true \
-        --set podIdentity.azureWorkload.clientId=$uamiClientId \
+        --set podIdentity.azureWorkload.clientId=$KEDA_UAMI_CLIENT_ID \
         --set podIdentity.azureWorkload.tenantId=$tenantId
 
     #validate
@@ -263,9 +240,47 @@ EOF
 
 function output(){
     local kedaServerAddress=$(az monitor account show -n ${AMA_NAME} -g ${CURRENT_RG_NAME} --query 'metrics.prometheusQueryEndpoint' -otsv)
+    local clusterName=$(kubectl get cluster -n ${WLS_NAMESPACE} -o json | jq -r '.items[0].metadata.name')
+    cat <<EOF >kedascalersample.yaml
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: azure-managed-prometheus-trigger-auth
+  namespace: ${WLS_NAMESPACE}
+spec:
+  podIdentity:
+      provider: azure-workload
+      identityId: ${KEDA_UAMI_CLIENT_ID}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: azure-managed-prometheus-scaler
+  namespace: ${WLS_NAMESPACE}
+spec:
+  scaleTargetRef:
+    apiVersion: weblogic.oracle/v1
+    kind: Cluster
+    name: ${clusterName}
+  minReplicaCount: 1
+  maxReplicaCount: ${WLS_CLUSTER_SIZE}
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: ${kedaServerAddress}
+      metricName: webapp_config_open_sessions_high_count
+      query: sum(webapp_config_open_sessions_high_count{app="<your-app-name>"}) # Note: query must return a vector/scalar single element response
+      threshold: '10'
+      activationThreshold: '1'
+    authenticationRef:
+      name: azure-managed-prometheus-trigger-auth
+EOF
+
+    local base64ofKedaScalerSample=$(cat ./kedascalersample.yaml | base64)
     local result=$(jq -n -c \
-        --arg kedaScalerServerAddress $kedaServerAddress} \
-        '{kedaScalerServerAddress: $kedaScalerServerAddress}')
+        --arg kedaScalerServerAddress "$kedaServerAddress}" \
+        --arg base64ofKedaScalerSample "${base64ofKedaScalerSample}" \
+        '{kedaScalerServerAddress: $kedaScalerServerAddress, base64ofKedaScalerSample: $base64ofKedaScalerSample}')
     echo "result is: $result"
     echo $result >$AZ_SCRIPTS_OUTPUT_PATH
 }
@@ -284,8 +299,6 @@ connect_aks
 get_wls_monitoring_exporter_image_url
 
 deploy_webLogic_monitoring_exporter
-
-create_monitor_account_workspace
 
 enable_promethues_metrics
 

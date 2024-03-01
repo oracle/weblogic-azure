@@ -3,8 +3,10 @@
 
 param aksClusterName string
 param aksClusterRGName string
+param amaName string
 param azCliVersion string
 param identity object = {}
+param kedaUamiName string
 param location string
 param utcValue string = utcNow()
 param wlsClusterSize int
@@ -13,6 +15,7 @@ param wlsNamespace string
 @secure()
 param wlsPassword string
 param wlsUserName string
+param workspaceId string
 
 // To mitigate arm-ttk error: Unreferenced variable: $fxv#0
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
@@ -21,7 +24,6 @@ var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var const_deploymentName = 'ds-enable-promethues-metrics'
 var const_kedaNamespace= 'keda'
 var const_kedaSa= 'keda-operator'
-var name_azureMonitorAccountName = 'ama${uniqueString(utcValue)}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
@@ -42,7 +44,11 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       }
       {
         name: 'AMA_NAME'
-        value: name_azureMonitorAccountName
+        value: amaName
+      }
+      {
+        name: 'AMA_WORKSPACE_ID'
+        value: workspaceId
       }
       {
         name: 'CURRENT_RG_NAME'
@@ -51,6 +57,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'KEDA_NAMESPACE'
         value: const_kedaNamespace
+      }
+      {
+        name: 'KEDA_UAMI_NAME'
+        value: kedaUamiName
       }
       {
         name: 'KEDA_SERVICE_ACCOUNT_NAME'
@@ -92,3 +102,4 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
 }
 
 output kedaScalerServerAddress string = deploymentScript.properties.outputs.kedaScalerServerAddress
+output base64ofKedaScalerSample string = deploymentScript.properties.outputs.base64ofKedaScalerSample
