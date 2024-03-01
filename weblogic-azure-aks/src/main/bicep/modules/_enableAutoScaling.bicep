@@ -54,7 +54,7 @@ module pidCpuUtilization './_pids/_pid.bicep' = if(useHpa && hpaScaleType == 'cp
 }
 
 module pidMemoryUtilization './_pids/_pid.bicep' = if(useHpa && hpaScaleType == 'memory') {
-  name: 'pid-auto-scaling-based-on-java-metrics'
+  name: 'pid-auto-scaling-based-on-memory-utilization'
   params: {
     name: _pidMemoryUtilization
   }
@@ -64,7 +64,7 @@ module pidMemoryUtilization './_pids/_pid.bicep' = if(useHpa && hpaScaleType == 
 }
 
 module pidWme './_pids/_pid.bicep' = if(!useHpa) {
-  name: 'pid-auto-scaling-based-on-memory-utilization'
+  name: 'pid-auto-scaling-based-on-java-metrics'
   params: {
     name: _pidWme
   }
@@ -109,6 +109,11 @@ resource uamiForKeda 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.a
   ]
 }
 
+// Get role resource id
+resource monitorDataReaderResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = if(!useHpa){
+  name: const_roleDefinitionIdOfMonitorDataReader
+}
+
 // Assign Monitor Data Reader role we need the permission to read data.
 resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = if(!useHpa){
   name: name_kedaMonitorDataReaderRoleAssignmentName
@@ -117,7 +122,7 @@ resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure
     description: 'Assign Monitor Data Reader role role to KEDA Identity '
     principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_kedaUserDefinedManagedIdentity)).principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: const_roleDefinitionIdOfMonitorDataReader
+    roleDefinitionId: monitorDataReaderResourceDefinition.id
   }
   dependsOn: [
     monitorAccount
@@ -159,4 +164,4 @@ module pidAutoScalingEnd './_pids/_pid.bicep' = {
 }
 
 output kedaScalerServerAddress string = useHpa ? '' : azureMonitorIntegrationDeployment.outputs.kedaScalerServerAddress
-output base64ofKedaScalerSample string = useHpa ? '' : azureMonitorIntegrationDeployment.outputs.base64ofKedaScalerSample
+output base64ofKedaScalerSample string = useHpa ? '' : format('echo -e {0} | base64 -d > scaler.yaml', azureMonitorIntegrationDeployment.outputs.base64ofKedaScalerSample) 

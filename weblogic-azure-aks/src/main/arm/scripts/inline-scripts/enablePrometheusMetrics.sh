@@ -278,7 +278,7 @@ EOF
 
     local base64ofKedaScalerSample=$(cat ./kedascalersample.yaml | base64)
     local result=$(jq -n -c \
-        --arg kedaScalerServerAddress "$kedaServerAddress}" \
+        --arg kedaScalerServerAddress "$kedaServerAddress" \
         --arg base64ofKedaScalerSample "${base64ofKedaScalerSample}" \
         '{kedaScalerServerAddress: $kedaScalerServerAddress, base64ofKedaScalerSample: $base64ofKedaScalerSample}')
     echo "result is: $result"
