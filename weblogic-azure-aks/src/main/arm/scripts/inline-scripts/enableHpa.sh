@@ -50,6 +50,13 @@ EOF
   utility_validate_status "Enable HPA based on memory utilization."
 }
 
+function check_kubernetes_metrics_server(){
+  # $?=1 if there is no running kms pod.
+  kubectl get pod -l k8s-app=metrics-server -n kube-system | grep "Running"
+  # exit if $?=1
+  utility_validate_status "There should be at least one pod of kubernetes metrics server running."
+}
+
 # Main script
 set -Eo pipefail
 
@@ -59,7 +66,7 @@ connect_aks
 
 get_cluster_uid
 
-#TBD check kms state
+check_kubernetes_metrics_server
 
 if [ "$HPA_SCALE_TYPE" == "cpu" ]; then
   scaling_basedon_cpu

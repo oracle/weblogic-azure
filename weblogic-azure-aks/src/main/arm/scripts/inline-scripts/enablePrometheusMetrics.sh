@@ -93,15 +93,15 @@ function get_wls_monitoring_exporter_image_url() {
 
 # https://github.com/oracle/weblogic-monitoring-exporter
 function deploy_webLogic_monitoring_exporter(){
-    local version=$(kubectl -n ${WLS_NAMESPACE} get domain ${WLS_DOMAIN_UID} -o=jsonpath='{.spec.restartVersion}' | tr -d "\"")
-    version=$((VERSION+1))
+    local wlsVersion=$(kubectl -n ${WLS_NAMESPACE} get domain ${WLS_DOMAIN_UID} -o=jsonpath='{.spec.restartVersion}' | tr -d "\"")
+    wlsVersion=$((wlsVersion+1))
 
     cat <<EOF >patch-file.json
 [
     {
         "op": "replace",
         "path": "/spec/restartVersion",
-        "value": "${version}"
+        "value": "${wlsVersion}"
     },
     {
         "op": "add",
