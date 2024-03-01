@@ -198,7 +198,6 @@ function enable_keda_addon() {
     fi
 
     export OIDC_ISSUER_URL=$(az aks show -n $AKS_CLUSTER_NAME -g $AKS_CLUSTER_RG_NAME --query "oidcIssuerProfile.issuerUrl" -otsv)
-
     export KEDA_UAMI_CLIENT_ID=$(az identity show --resource-group $CURRENT_RG_NAME --name $KEDA_UAMI_NAME --query 'clientId' -otsv)
     local tenantId=$(az identity show --resource-group $CURRENT_RG_NAME --name $KEDA_UAMI_NAME --query 'tenantId' -otsv)
 
@@ -217,11 +216,12 @@ EOF
     local kedaFederatedName="kedaFederated$(date +%s)"
     az identity federated-credential create \
         --name $kedaFederatedName \
-        --identity-name $uamiName \
+        --identity-name $KEDA_UAMI_NAME \
         --resource-group $CURRENT_RG_NAME \
         --issuer $OIDC_ISSUER_URL \
         --subject system:serviceaccount:$KEDA_NAMESPACE:$KEDA_SERVICE_ACCOUNT_NAME \
         --audience api://AzureADTokenExchange
+    utility_validate_status "Create keda federated-credential ${kedaFederatedName}."
 
     helm repo add kedacore https://kedacore.github.io/charts
     helm repo update
