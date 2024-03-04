@@ -91,7 +91,7 @@ module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
   ]
 }
 
-resource monitorAccount 'Microsoft.Monitor/accounts@2023-04-03' = if(!useHpa){
+resource monitorAccount 'Microsoft.Monitor/accounts@${azure.apiVersionForMonitorAccount}' = if(!useHpa){
   name: name_azureMonitorAccountName
   location: location
   properties: {}
