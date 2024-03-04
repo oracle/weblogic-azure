@@ -120,7 +120,7 @@ resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure
   scope: monitorAccount
   properties: {
     description: 'Assign Monitor Data Reader role role to KEDA Identity '
-    principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_kedaUserDefinedManagedIdentity)).principalId
+    principalId: reference(uamiForKeda.id, '${azure.apiVersionForIdentity}', 'full').properties.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: monitorDataReaderResourceDefinition.id
   }
