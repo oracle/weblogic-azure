@@ -841,6 +841,7 @@ module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAuto
     _pidEnd: pids.outputs.autoScalingEnd
     _pidMemoryUtilization: pids.outputs.memoryUtilization
     _pidStart: pids.outputs.autoScalingStart
+    _pidWme: pids.outputs.enableWlsMonitoringExporter
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
     azCliVersion: const_azcliVersion
