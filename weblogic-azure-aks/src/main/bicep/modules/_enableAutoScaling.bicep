@@ -20,7 +20,6 @@ param azCliVersion string
 param hpaScaleType string = 'cpu'
 param identity object = {}
 param location string
-param utcValue string = utcNow()
 param useHpa bool 
 param utilizationPercentage int
 param wlsClusterSize int
@@ -30,11 +29,6 @@ param wlsPassword string
 param wlsUserName string
 
 var const_namespace = '${wlsDomainUID}-ns'
-// https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
-var const_roleDefinitionIdOfMonitorDataReader = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-var name_azureMonitorAccountName = 'ama${uniqueString(utcValue)}'
-var name_kedaUserDefinedManagedIdentity = 'kedauami${uniqueString(utcValue)}'
-var name_kedaMonitorDataReaderRoleAssignmentName = guid('${resourceGroup().id}${name_kedaUserDefinedManagedIdentity}')
 
 module pidAutoScalingStart './_pids/_pid.bicep' = {
   name: 'pid-auto-scaling-start'
@@ -91,66 +85,25 @@ module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
   ]
 }
 
-resource monitorAccount 'Microsoft.Monitor/accounts@${azure.apiVersionForMonitorAccount}' = if(!useHpa){
-  name: name_azureMonitorAccountName
-  location: location
-  properties: {}
-  dependsOn: [
-    pidAutoScalingStart
-  ]
-}
-
-// UAMI for KEDA
-resource uamiForKeda 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' = if(!useHpa){
-  name: name_kedaUserDefinedManagedIdentity
-  location: location
-  dependsOn: [
-    pidAutoScalingStart
-  ]
-}
-
-// Get role resource id
-resource monitorDataReaderResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = if(!useHpa){
-  name: const_roleDefinitionIdOfMonitorDataReader
-}
-
-// Assign Monitor Data Reader role we need the permission to read data.
-resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = if(!useHpa){
-  name: name_kedaMonitorDataReaderRoleAssignmentName
-  scope: monitorAccount
-  properties: {
-    description: 'Assign Monitor Data Reader role role to KEDA Identity '
-    principalId: reference(uamiForKeda.id, '${azure.apiVersionForIdentity}', 'full').properties.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: monitorDataReaderResourceDefinition.id
-  }
-  dependsOn: [
-    monitorAccount
-    uamiForKeda
-  ]
-}
-
-module azureMonitorIntegrationDeployment '_deployment-scripts/_ds_enable_prometheus_metrics.bicep' = if(!useHpa){
-  name: 'azure-monitor-promethues-keda-deployment'
+module promethuesKedaDeployment '_enablePromethuesKeda.bicep' = if (!useHpa) {
+  name: 'promethues-keda-weblogic-monitoring-exporter-deployment'
   params: {
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
-    amaName: name_azureMonitorAccountName
     azCliVersion: azCliVersion
     identity: identity
-    kedaUamiName: name_kedaUserDefinedManagedIdentity
     location: location
     wlsClusterSize: wlsClusterSize
     wlsDomainUID: wlsDomainUID
-    wlsNamespace: const_namespace
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
-    workspaceId: monitorAccount.id
   }
   dependsOn: [
-    kedaUamiRoleAssignment
+    pidAutoScalingStart
   ]
 }
+
+
 
 module pidAutoScalingEnd './_pids/_pid.bicep' = {
   name: 'pid-auto-scaling-end'
@@ -159,9 +112,9 @@ module pidAutoScalingEnd './_pids/_pid.bicep' = {
   }
   dependsOn: [
     hapDeployment
-    azureMonitorIntegrationDeployment
+    promethuesKedaDeployment
   ]
 }
 
-output kedaScalerServerAddress string = useHpa ? '' : azureMonitorIntegrationDeployment.outputs.kedaScalerServerAddress
-output base64ofKedaScalerSample string = useHpa ? '' : format('echo -e {0} | base64 -d > scaler.yaml', azureMonitorIntegrationDeployment.outputs.base64ofKedaScalerSample) 
+output kedaScalerServerAddress string = useHpa ? '' : promethuesKedaDeployment.outputs.kedaScalerServerAddress
+output base64ofKedaScalerSample string = useHpa ? '' : promethuesKedaDeployment.outputs.base64ofKedaScalerSample
