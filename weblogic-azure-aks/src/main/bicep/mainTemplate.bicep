@@ -36,8 +36,12 @@ param acrResourceGroupName string = 'acr-contoso-rg'
 param aksAgentPoolName string = 'agentpool'
 @maxValue(10000)
 @minValue(1)
-@description('The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.')
+@description('Set the minimum node count for the cluster..')
 param aksAgentPoolNodeCount int = 3
+@maxValue(1000)
+@minValue(3)
+@description('Set the maximum node count for the cluster.')
+param aksAgentPoolNodeMaxCount int = 5
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
 param vmSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
@@ -564,6 +568,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
+    aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
     vmSize: vmSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
@@ -634,6 +639,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
+    aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
     vmSize: vmSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName

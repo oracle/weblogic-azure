@@ -311,16 +311,30 @@
                                         "uri": "https://aka.ms/wls-aks-well-tested-version"
                                     }
                                 }
-                            },
+                            },                            
                             {
                                 "name": "aksNodeCount",
                                 "type": "Microsoft.Common.Slider",
                                 "min": 1,
-                                "max": 1000,
-                                "label": "Node count",
+                                "max": 100,
+                                "label": "Minimum node count",
                                 "defaultValue": 3,
                                 "showStepMarkers": false,
-                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.",
+                                "toolTip": "Set the minimum node count for the cluster.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "aksNodeMaxCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": "[int(steps('section_aks').clusterInfo.aksNodeCount)]",
+                                "max": 100,
+                                "label": "Maximum node count",
+                                "defaultValue": 5,
+                                "showStepMarkers": false,
+                                "toolTip": "Set the maximum node count for the cluster.",
                                 "constraints": {
                                     "required": true
                                 },
@@ -2253,6 +2267,7 @@
             "acrName": "[last(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'))]",
             "acrResourceGroupName": "[last(take(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'),5))]",
             "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
+            "aksAgentPoolNodeMaxCount": "[steps('section_aks').clusterInfo.aksNodeMaxCount]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
