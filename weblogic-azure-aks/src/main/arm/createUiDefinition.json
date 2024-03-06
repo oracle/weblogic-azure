@@ -2203,7 +2203,7 @@
                                 "options": {
                                     "icon": "None",
                                     "text": "This option exports metrics using WebLogic Monitoring Exporter, collects metrics using Azure Managed Prometheus Service and exposes metrics using KEDA. After the provisioning is completed, you have to create KEDA scalers based on your requirements to enable autoscaling.",
-                                    "uri": "https://oracle.github.io/weblogic-kubernetes-operator/managing-domains/domain-lifecycle/scaling/#kubernetes-horizontal-pod-autoscaler-hpa"
+                                    "uri": "https://aka.ms/wlsaks-autoscaling"
                                 }
                             },
                             {
