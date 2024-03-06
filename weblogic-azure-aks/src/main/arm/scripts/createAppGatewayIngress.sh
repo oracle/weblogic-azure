@@ -320,8 +320,7 @@ function network_peers_aks_appgw() {
 
   local appGatewaySubnetId=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIPConfigurations[0].subnet.id")
   local appGatewayVnetResourceGroup=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIPConfigurations[0].subnet.resourceGroup")
-  local appGatewaySubnetName=$(az resource show --ids ${appGatewaySubnetId} --query "name" -o tsv)
-  local appgwNetworkId=$(echo $appGatewaySubnetId | sed s/"\/subnets\/${appGatewaySubnetName}"//)
+  local appgwNetworkId=${appGatewaySubnetId%\/subnets\/*}
   local appgwVnetName=$(az resource show --ids ${appgwNetworkId} --query "name" -o tsv)
 
   local toPeer=true
