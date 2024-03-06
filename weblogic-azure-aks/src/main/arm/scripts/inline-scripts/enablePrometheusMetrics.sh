@@ -111,18 +111,55 @@ function deploy_webLogic_monitoring_exporter(){
                                 "servlets": {
                                     "key": "servletName",
                                     "prefix": "weblogic_servlet_",
-                                    "values": "invocationTotalCount"
+                                    "values": [
+                                        "invocationTotalCount",
+                                        "reloadTotal",
+                                        "executionTimeAverage",
+                                        "poolMaxCapacity",
+                                        "executionTimeTotal",
+                                        "reloadTotalCount",
+                                        "executionTimeHigh",
+                                        "executionTimeLow"
+                                    ]
                                 },
                                 "type": "WebAppComponentRuntime",
                                 "values": [
                                     "deploymentState",
                                     "contextRoot",
                                     "sourceInfo",
-                                    "openSessionsHighCount"
+                                    "openSessionsHighCount",
+                                    "openSessionsCurrentCount",
+                                    "sessionsOpenedTotalCount",
+                                    "sessionCookieMaxAgeSecs",
+                                    "sessionInvalidationIntervalSecs",
+                                    "sessionTimeoutSecs",
+                                    "singleThreadedServletPoolSize",
+                                    "sessionIDLength",
+                                    "servletReloadCheckSecs",
+                                    "jSPPageCheckSecs"
                                 ]
+                            },
+                            "workManagerRuntimes": {
+                                "prefix": "workmanager_",
+                                "key": "applicationName",
+                                "values": [
+                                    "pendingRequests", 
+                                    "completedRequests", 
+                                    "stuckThreadCount"]
                             },
                             "key": "name",
                             "keyName": "app"
+                        },
+                        "JVMRuntime": {
+                            "key": "name",
+                            "values": [
+                                "heapFreeCurrent", 
+                                "heapFreePercent", 
+                                "heapSizeCurrent", 
+                                "heapSizeMax", 
+                                "uptime", 
+                                "processCpuLoad"
+                            ]
                         },
                         "key": "name",
                         "keyName": "server"
