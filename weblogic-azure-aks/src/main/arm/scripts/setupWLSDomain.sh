@@ -383,13 +383,13 @@ function query_acr_credentials() {
     # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
     az provider register -n Microsoft.ContainerRegistry
     
-    ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME --query 'loginServer' -o tsv)
+    ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME -g ${ACR_RESOURCEGROUP_NAME} --query 'loginServer' -o tsv)
     validate_status ${ACR_LOGIN_SERVER}
     
-    ACR_USER_NAME=$(az acr credential show -n $ACR_NAME --query 'username' -o tsv)
+    ACR_USER_NAME=$(az acr credential show -n $ACR_NAME -g ${ACR_RESOURCEGROUP_NAME} --query 'username' -o tsv)
     validate_status "Query ACR credentials."
 
-    ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query 'passwords[0].value' -o tsv)
+    ACR_PASSWORD=$(az acr credential show -n $ACR_NAME -g ${ACR_RESOURCEGROUP_NAME} --query 'passwords[0].value' -o tsv)
     validate_status "Query ACR credentials."
 }
 

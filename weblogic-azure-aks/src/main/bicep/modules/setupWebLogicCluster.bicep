@@ -28,6 +28,7 @@ param aciRetentionInDays int = 120
 @description('Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.')
 param aciWorkspaceSku string = 'pergb2018'
 param acrName string = ''
+param acrResourceGroupName string = ''
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
@@ -79,6 +80,7 @@ param storageAccountName string = 'stg-contoso'
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
 param userProvidedAcr string = 'null'
+param userProvidedAcrRgName string = 'null'
 param userProvidedImagePath string = 'null'
 param useOracleImage bool = true
 @secure()
@@ -190,6 +192,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
     aksClusterName: createAKSCluster ? aksClusterDeployment.outputs.aksClusterName : aksClusterName
     acrName: useOracleImage ? acrName : userProvidedAcr
+    acrResourceGroupName: useOracleImage ? acrResourceGroupName : userProvidedAcrRgName
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: azCliVersion

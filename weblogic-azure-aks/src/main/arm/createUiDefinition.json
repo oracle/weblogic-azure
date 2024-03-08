@@ -2111,6 +2111,7 @@
         ],
         "outputs": {
             "acrName": "[last(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'))]",
+            "acrResourceGroupName": "[last(take(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'),5))]",
             "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
@@ -2186,6 +2187,7 @@
             "useInternalLB": "[bool(steps('section_appGateway').lbSVCInfo.enableInternalLB)]",
             "useOracleImage": "[if(bool(steps('section_aks').aksAdvancedInfo.useAcrImage), false, true)]",
             "userProvidedAcr": "[last(split(steps('section_aks').aksAdvancedInfo.userProvidedAcrSelector.id, '/'))]",
+            "userProvidedAcrRgName": "[last(take(split(steps('section_aks').aksAdvancedInfo.userProvidedAcrSelector.id, '/'),5))]",
             "userProvidedImagePath": "[steps('section_aks').aksAdvancedInfo.userProvidedImagePath]",
             "validateApplications": true,
             "vnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway]",
