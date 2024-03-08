@@ -8,6 +8,7 @@ param _artifactsLocationSasToken string = ''
 param aksClusterRGName string = ''
 param aksClusterName string = ''
 param acrName string = ''
+param acrResourceGroupName string = ''
 param appPackageUrls array = []
 param appReplicas int = 2
 param azCliVersion string = ''
@@ -87,6 +88,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'ACR_NAME'
         value: acrName
+      }
+      {
+        name: 'ACR_RESOURCEGROUP_NAME'
+        value: acrResourceGroupName
       }
       {
         name: 'AKS_CLUSTER_NAME'

@@ -146,7 +146,7 @@ function check_acr() {
       echo_stdout "Check if ACR ${ACR_NAME} is ready, attempt: ${attempt}."
       ready=true
 
-      local ret=$(az acr show --name ${ACR_NAME})
+      local ret=$(az acr show --name ${ACR_NAME} --resource-group ${ACR_RESOURCE_GROUP})
       if [ -z "${ret}" ]; then
           ready=false
       fi
@@ -192,6 +192,7 @@ function validate_ocr_image() {
   # if failure happens, the image should be unavailable
   local tmpImagePath="tmp$(date +%s):${wlsImageTag}"
   az acr import --name ${ACR_NAME} \
+    --resource-group ${ACR_RESOURCE_GROUP} \
     --source ${ocrImageFullPath} \
     -u ${ORACLE_ACCOUNT_NAME} \
     -p ${ORACLE_ACCOUNT_PASSWORD} \
@@ -220,8 +221,9 @@ function validate_ocr_image() {
 
 function check_acr_admin_enabled() {
   local acrName=$1
+  local acrRgName=$2
   echo_stdout "check if admin user enabled in ACR $acrName "
-  local adminUserEnabled=$(az acr show --name $acrName --query "adminUserEnabled")
+  local adminUserEnabled=$(az acr show --name $acrName --resource-group ${acrRgName} --query "adminUserEnabled")
   validate_status "query 'adminUserEnabled' property of ACR ${acrName}" "Invalid ACR: ${acrName}"
 
   if [[ "${adminUserEnabled}" == "false" ]]; then
@@ -259,9 +261,9 @@ function validate_base_image_path() {
 function validate_acr_admin_enabled()
 {
   if [[ "${useOracleImage,,}" == "true" ]]; then
-    check_acr_admin_enabled ${ACR_NAME}
+    check_acr_admin_enabled "${ACR_NAME}" "${ACR_RESOURCE_GROUP}"
   else
-    check_acr_admin_enabled ${ACR_NAME_FOR_USER_PROVIDED_IMAGE}
+    check_acr_admin_enabled "${ACR_NAME_FOR_USER_PROVIDED_IMAGE}" "${ACR_RG_NAME_FOR_USER_PROVIDED_IMAGE}"
   fi
 }
 

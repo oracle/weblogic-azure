@@ -29,6 +29,7 @@ param aciRetentionInDays int = 120
 @description('Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.')
 param aciWorkspaceSku string = 'pergb2018'
 param acrName string = 'acr-contoso'
+param acrResourceGroupName string = 'acr-contoso-rg'
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
@@ -244,6 +245,7 @@ param useInternalLB bool = false
 param utcValue string = utcNow()
 @description('User provided ACR for base image')
 param userProvidedAcr string = 'null'
+param userProvidedAcrRgName string = 'null'
 @description('User provided base image path')
 param userProvidedImagePath string = 'null'
 @description('Use Oracle images or user provided patched images')
@@ -371,6 +373,7 @@ module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' =
   name: 'pre-azure-resources-deployment'
   params: {
     acrName: acrName
+    acrResourceGroupName: acrResourceGroupName
     createNewAcr: const_createNewAcr
     location: location
   }
@@ -380,6 +383,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
   name: 'validate-parameters-and-fail-fast'
   params: {
     acrName: preAzureResourceDeployment.outputs.acrName
+    acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolVMSize: vmSize
     aksClusterRGName: aksClusterRGName
@@ -426,6 +430,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     sslUploadedPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
     useAksWellTestedVersion: useLatestSupportedAksVersion
     userProvidedAcr: userProvidedAcr // used in user provided images
+    userProvidedAcrRgName: userProvidedAcrRgName
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
     vnetForApplicationGateway: vnetForApplicationGateway
@@ -543,6 +548,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aciRetentionInDays: aciRetentionInDays
     aciWorkspaceSku: aciWorkspaceSku
     acrName: preAzureResourceDeployment.outputs.acrName
+    acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     vmSize: vmSize
@@ -574,6 +580,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     t3ChannelClusterPort: t3ChannelClusterPort
     wdtRuntimePassword: wdtRuntimePassword
     userProvidedAcr: userProvidedAcr
+    userProvidedAcrRgName: userProvidedAcrRgName
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
     wlsClusterSize: wlsClusterSize
@@ -611,6 +618,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aciRetentionInDays: aciRetentionInDays
     aciWorkspaceSku: aciWorkspaceSku
     acrName: preAzureResourceDeployment.outputs.acrName
+    acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     vmSize: vmSize
@@ -641,6 +649,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     t3ChannelAdminPort: t3ChannelAdminPort
     t3ChannelClusterPort: t3ChannelClusterPort
     userProvidedAcr: userProvidedAcr
+    userProvidedAcrRgName: userProvidedAcrRgName
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
     wdtRuntimePassword: wdtRuntimePassword
