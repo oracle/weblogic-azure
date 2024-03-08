@@ -142,8 +142,8 @@ SUBSCRIPTION_ID=$(az account show --query id --output tsv --only-show-errors)
 ### AZ ACTION CREATE
 
 AZURE_CREDENTIALS=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME} --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}" --sdk-auth --only-show-errors)
-SP_ID=$( az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query [0].id -o tsv)
-az role assignment create --assignee ${SP_ID} --role "User Access Administrator"
+SP_ID=$( az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query \[0\].id -o tsv)
+az role assignment create --assignee ${SP_ID} --scope="/subscriptions/${SUBSCRIPTION_ID}" --role "User Access Administrator"
 
 msg "${GREEN}(6/6) Create secrets in GitHub"
 if $USE_GITHUB_CLI; then
