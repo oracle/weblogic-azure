@@ -5,22 +5,22 @@
         {
             "key": "WKO",
             "description": "Oracle WebLogic Kubernetes Operator",
-            "version": "4.1.1",
-            "testedDate": "2023-08-28"
+            "version": "4.1.8",
+            "testedDate": "2024-03-13"
         },
         {
             "key": "WDT",
             "description": "Oracle WebLogic Deploy Tooling",
-            "version": "3.2.3",
-            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-3.2.3/weblogic-deploy.zip",
-            "testedDate": "2023-08-28"
+            "version": "3.5.2",
+            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-3.5.2/weblogic-deploy.zip",
+            "testedDate": "2024-03-13"
         },
         {
             "key": "WIT",
             "description": "Oracle WebLogic Image Tool",
-            "version": "1.11.11",
-            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.11.11/imagetool.zip",
-            "testedDate": "2023-05-16"
+            "version": "1.12.1",
+            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.12.1/imagetool.zip",
+            "testedDate": "2024-03-13"
         }
     ]
 }
