@@ -17,7 +17,7 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2023-07-01",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[parameters('vmName')]",
             "location": "[parameters('location')]",
