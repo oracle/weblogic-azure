@@ -315,7 +315,7 @@ var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_azcliVersion = '2.53.0'
+var const_azcliVersion = '2.54.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_hasTags = contains(resourceGroup(), 'tags')
 // If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
