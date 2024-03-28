@@ -15,6 +15,8 @@ export checkAcrInterval=30
 export checkAcrMaxAttempt=10
 export checkAgicInterval=30
 export checkAgicMaxAttempt=50
+export checkKedaInteval=30
+export checkKedaMaxAttempt=20
 
 export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'

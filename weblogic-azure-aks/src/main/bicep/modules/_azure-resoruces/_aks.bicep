@@ -1,4 +1,4 @@
-// Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+// Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 @description('true to use resource or workspace permissions. false to require workspace permissions.')
@@ -15,6 +15,7 @@ param aksAgentPoolName string = 'agentpool'
 @minValue(1)
 @description('The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.')
 param aksAgentPoolNodeCount int = 3
+param aksAgentPoolNodeMaxCount int = 5
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
 param aksAgentPoolVMSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
@@ -26,7 +27,6 @@ param location string
 param utcValue string = utcNow()
 
 var const_aksAgentPoolOSDiskSizeGB = 128
-var const_aksAgentPoolMaxPods = 110
 var const_aksAvailabilityZones = [
   '1'
   '2'
@@ -70,12 +70,14 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersi
     agentPoolProfiles: [
       {
         name: aksAgentPoolName
+        enableAutoScaling: true
+        minCount: aksAgentPoolNodeCount
+        maxCount: aksAgentPoolNodeMaxCount
         count: aksAgentPoolNodeCount
         vmSize: aksAgentPoolVMSize
         osDiskSizeGB: const_aksAgentPoolOSDiskSizeGB
         osDiskType: 'Managed'
         kubeletDiskType: 'OS'
-        maxPods: const_aksAgentPoolMaxPods
         type: 'VirtualMachineScaleSets'
         availabilityZones: const_aksAvailabilityZones
         mode: 'System'

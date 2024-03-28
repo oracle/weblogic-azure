@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 # Description: to create Azure Application Gateway ingress for the following targets.
@@ -318,10 +318,9 @@ function network_peers_aks_appgw() {
   local aksNetworkRgName=${aksNetWorkId#*\/resourceGroups\/}
   local aksNetworkRgName=${aksNetworkRgName%\/providers\/*}
 
-  local appGatewaySubnetId=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIpConfigurations[0].subnet.id")
-  local appGatewayVnetResourceGroup=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIpConfigurations[0].subnet.resourceGroup")
-  local appGatewaySubnetName=$(az resource show --ids ${appGatewaySubnetId} --query "name" -o tsv)
-  local appgwNetworkId=$(echo $appGatewaySubnetId | sed s/"\/subnets\/${appGatewaySubnetName}"//)
+  local appGatewaySubnetId=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIPConfigurations[0].subnet.id")
+  local appGatewayVnetResourceGroup=$(az network application-gateway show -g ${CURRENT_RG_NAME} --name ${APPGW_NAME} -o tsv --query "gatewayIPConfigurations[0].subnet.resourceGroup")
+  local appgwNetworkId=${appGatewaySubnetId%\/subnets\/*}
   local appgwVnetName=$(az resource show --ids ${appgwNetworkId} --query "name" -o tsv)
 
   local toPeer=true
