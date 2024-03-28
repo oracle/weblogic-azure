@@ -2170,7 +2170,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Select metric source. Autoscaling based on resource metrics from Kubernetes Metrics Server or exporting by WebLogic Monitoring Exporter. ",
                                 "defaultValue": "Kubernetes Metrics Server",
-                                "toolTip": "If you select Kubernetes Metrics Server, this offer configures WebLogic Server to scale based on CPU and memory utilization. If you select WebLogic Monitoring Exporter, this offer configures WebLogic Server to expose metrics using WebLogic Monitoring Exporter, provisions Prometheus to save the metrics and enables KEDA. You can create KEDA scalers based on Java metrics exported by WebLogic Monitoring Exporter.",
+                                "toolTip": "If you select Kubernetes Metrics Server, this offer configures WebLogic Server to scale based on CPU or memory utilization. If you select WebLogic Monitoring Exporter, this offer configures WebLogic Monitoring Exporter to scrape WebLogic Server metrics and feed them to Azure Monitor Managed Service for Prometheus; integrates KEDA with your AKS cluster to monitor Azure Monitor workspace and feed data to AKS. You can create KEDA scaler based on Java metrics from Azure Monitor workspace",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -2192,7 +2192,7 @@
                                 "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms')]",
                                 "options": {
                                     "icon": "None",
-                                    "text": "This option configures and runs Kubernetes Horizontal Pod Autoscaler (HPA) to scale a WebLogic cluster, based on the CPU or memory utilization. The HPA autoscales WebLogic Server instances from a minimum of 1 cluster members up to maximum of cluster members, and the scale up or down will occur when the average CPU/memory is consistently over the utilization. Default maximum of cluster members is 5. You can set it from <b>Basics</b> -> <b>Optional Basic Configuration</b> -> <b>Maximum dynamic cluster size</b>.",
+                                    "text": "This option configures and runs Kubernetes Horizontal Pod Autoscaler (HPA) to scale a WebLogic cluster, based on the CPU or memory utilization. The HPA autoscales WebLogic Server instances from a minimum of 1 cluster members up to maximum of cluster members, and the scale up or down action occur when the average CPU/memory is consistently over the utilization. Default maximum of cluster members is 5. You can set it from <b>Basics</b> -> <b>Optional Basic Configuration</b> -> <b>Maximum dynamic cluster size</b>.",
                                     "uri": "https://aka.ms/wlsoperator-autoscaling-hpa"
                                 }
                             },
@@ -2202,7 +2202,7 @@
                                 "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'wme')]",
                                 "options": {
                                     "icon": "None",
-                                    "text": "This option exports metrics using WebLogic Monitoring Exporter, collects metrics using Azure Managed Prometheus Service and exposes metrics using KEDA. After the provisioning is completed, you have to create KEDA scalers based on your requirements to enable autoscaling.",
+                                    "text": "This option allows you to create KEDA scaler based on Prometheus Metrics by:<br> <li>Configureing WebLogic Monitoring Exporter to scrape WebLogic Server metrics and feed them to Azure Monitor Managed Service for Prometheus</li><li>Integrates KEDA with your AKS cluster to monitor Azure Monitor managed service for Prometheus and feed that data to AKS.</li> <br><br>The offer provisions the following deployments: <br> <li><a href=https://aka.ms/wls-exporter>Install WebLogic Monitoring Exporter to scrape WebLogic Server metrics.</a></li><li><a href=https://aka.ms/aks-enable-monitoring>Install AKS Prometheus metrics addon.</a></li><li><a href=https://aka.ms/aks-prometheus-metrics-scrape-configuration>Feed WebLogic Server metrics to Azure Monitor Managed Service for Prometheus.</a></li><li><a href=https://aka.ms/aks-integrate-keda>Integrate KEDA with AKS cluster.</a></li><br><br> After the provisioning is completed, you can create KEDA scalers from the output sample: <br> <li>Go to the resource group that the offer provisioned.</li><li>In the <b>Settings</b> section, select <b>Deployments</b>.</li><li>Select the oldest deployment, whose name starts with <b>oracle.20210620-wls-on-aks</b></li><li>The <b>shellCmdtoOutputKedaScalerSample</b> value is the base64 string of a scaler sample. Copy the value and run it in your terminal</li>",
                                     "uri": "https://aka.ms/wlsaks-autoscaling"
                                 }
                             },
