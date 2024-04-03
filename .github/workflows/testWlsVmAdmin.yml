@@ -465,6 +465,7 @@ jobs:
             --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
       - name: Delete Resource Group
         id: delete-resource-group
+        if: always()
         run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
