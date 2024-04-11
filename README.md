@@ -27,19 +27,32 @@ Please follow these steps:
    - Click Generate token and make sure to copy the token.
    
 2. Configure Maven Settings
-   - Locate or create the settings.xml file in your .m2 directory.
-   - Add the GitHub Package Registry server configuration with your username and the PAT you just created. It should look something like this:
-      ```xml
-       <settings>
-        <servers>
-          <server>
-            <id>github</id>
-            <username>YOUR_GITHUB_USERNAME</username>
-            <password>YOUR_PERSONAL_ACCESS_TOKEN</password>
-          </server>
-        </servers>
-       </settings>
-      ```
+    - Locate or create the settings.xml file in your .m2 directory(~/.m2/settings.xml).
+    - Add the GitHub Package Registry server configuration with your username and the PAT you just created. It should look something like this:
+       ```xml
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 
+                               https://maven.apache.org/xsd/settings-1.2.0.xsd">
+         
+       <!-- other settings
+       ...
+       -->
+      
+         <servers>
+           <server>
+             <id>github</id>
+             <username>YOUR_GITHUB_USERNAME</username>
+             <password>YOUR_PERSONAL_ACCESS_TOKEN</password>
+           </server>
+         </servers>
+      
+       <!-- other settings
+       ...
+       -->
+      
+        </settings>
+       ```
 
 
 ## Deployment Description
