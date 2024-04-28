@@ -22,12 +22,12 @@ metadata:
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
     appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
     appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
@@ -55,11 +55,11 @@ metadata:
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
     appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
@@ -87,7 +87,6 @@ metadata:
     azure.weblogic.target: "${constClusterName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
     appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
@@ -109,6 +108,7 @@ EOF
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${APPGW_TRUSTED_ROOT_CERT_NAME}"
 
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
@@ -136,10 +136,10 @@ metadata:
     azure.weblogic.target: "${constAdminServerName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
     appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
@@ -165,11 +165,11 @@ metadata:
     azure.weblogic.target: "${constAdminServerName}-remote-console"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
     appgw.ingress.kubernetes.io/use-private-ip: "${APPGW_USE_PRIVATE_IP}"
     appgw.ingress.kubernetes.io/cookie-based-affinity: "${ENABLE_COOKIE_BASED_AFFINITY}"
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
@@ -197,7 +197,6 @@ metadata:
     azure.weblogic.target: "${constAdminServerName}"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
     appgw.ingress.kubernetes.io/appgw-ssl-certificate: "${APPGW_SSL_CERT_NAME}"
@@ -219,6 +218,7 @@ EOF
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${APPGW_TRUSTED_ROOT_CERT_NAME}"
 
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
@@ -244,7 +244,6 @@ metadata:
     azure.weblogic.target: "${constAdminServerName}-remote-console"
     azure.weblogc.createdByWlsOffer: "true"
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/backend-protocol: "https"
@@ -267,6 +266,7 @@ EOF
     appgw.ingress.kubernetes.io/appgw-trusted-root-certificate: "${APPGW_TRUSTED_ROOT_CERT_NAME}"
 
 spec:
+  ingressClassName: azure-application-gateway
   rules:
     - http:
         paths:
