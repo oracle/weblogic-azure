@@ -10,7 +10,7 @@ function connect_aks(){
 }
 
 function enable_promethues_metrics(){
-    az extension remove --name aks-preview
+    # See https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-enable?tabs=cli#enable-prometheus-and-grafana
     az extension add --name k8s-extension
 
     ### Use existing Azure Monitor workspace
@@ -22,6 +22,9 @@ function enable_promethues_metrics(){
 
     utility_validate_status "Enable Promethues Metrics."
 
+    az extension add --name aks-preview
+    az extension remove --name k8s-extension
+
     #Verify that the DaemonSet was deployed properly on the Linux node pools
     #https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-enable?tabs=cli#managed-prometheus
     kubectl get ds ama-metrics-node --namespace=kube-system
@@ -31,6 +34,19 @@ function enable_promethues_metrics(){
 
 # https://learn.microsoft.com/en-us/azure/azure-monitor/containers/prometheus-metrics-scrape-configuration
 function deploy_customize_scraping(){
+    # https://learn.microsoft.com/en-us/azure/azure-monitor/containers/prometheus-metrics-scrape-configuration?tabs=CRDConfig%2CCRDScrapeConfig#basic-authentication
+    local wlsPswBase64=$(echo -n "${WLS_ADMIN_PASSWORD}" | base64)
+    cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ama-metrics-mtls-secret
+  namespace: kube-system
+type: Opaque
+data:
+  password1: ${wlsPswBase64}
+EOF
+
     #create scrape config file
     cat <<EOF >prometheus-config
 global:
@@ -43,7 +59,7 @@ scrape_configs:
       names: [${WLS_NAMESPACE}]
   basic_auth:
     username: ${WLS_ADMIN_USERNAME}
-    password: ${WLS_ADMIN_PASSWORD}
+    password_file: /etc/prometheus/certs/password1
 EOF
 
     #validate the scrape config file
@@ -76,7 +92,7 @@ function get_wls_monitoring_exporter_image_url() {
     curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsL "${gitUrl4WLSToolingFamilyJsonFile}" -o ${wlsToolingFamilyJsonFile}
     if [ $? -eq 0 ]; then
         imageURL=$(cat ${wlsToolingFamilyJsonFile} | jq  ".items[] | select(.key==\"WME\") | .imageURL" | tr -d "\"")
-        echo "well tested monitoring exporter image url: ${imageURL}"
+        echo_stdout "well tested monitoring exporter image url: ${imageURL}"
     fi
 
     echo_stdout "Use monitoring exporter image: ${imageURL} "
@@ -200,6 +216,11 @@ function wait_for_keda_ready(){
         echo_stdout "Check if KEDA is ready, attempt: ${attempt}."
         ready=true
 
+        local podCount=$(kubectl get pods -n ${KEDA_NAMESPACE} -o json | jq -r '.items | length')
+        if [ $podCount -lt 3 ];then
+            ready=false
+        fi
+
         local podnames=$(kubectl get pods -n ${KEDA_NAMESPACE} -o json | jq -r '.items[].metadata.name')
         for podname in ${podnames}
         do 
@@ -219,14 +240,49 @@ function wait_for_keda_ready(){
         exit 1
     fi
 
-    echo "KEDA is running." 
+    echo_stderr "KEDA is running." 
+}
+
+function get_keda_latest_version() {
+    local kedaVersion
+    kedaVersion=$(helm search repo kedacore/keda --versions | awk '/^kedacore\/keda/ {print $2; exit}')
+    export KEDA_VERSION="${kedaVersion}"
+    echo_stderr "Use latest KEDA. KEDA version: ${KEDA_VERSION}"
+}
+
+
+function get_keda_version() {
+    local versionJsonFileName="aks_tooling_well_tested_version.json"
+    local kedaWellTestedVersion
+
+    # Download the version JSON file
+    curl -L "${gitUrl4AksToolingWellTestedVersionJsonFile}" --retry "${retryMaxAttempt}" -o "${versionJsonFileName}"   
+
+    # Extract KEDA version from JSON
+    kedaWellTestedVersion=$(jq -r '.items[] | select(.key == "keda") | .version' "${versionJsonFileName}")
+
+    # Check if version is available
+    if [ $? -ne 0 ]; then
+        get_keda_latest_version
+        return 0
+    fi
+
+    # Print KEDA well-tested version
+    echo_stderr "KEDA well-tested version: ${kedaWellTestedVersion}"
+
+    # Search for KEDA version in Helm repo
+    if ! helm search repo kedacore/keda --versions | grep -q "${kedaWellTestedVersion}"; then
+        get_keda_latest_version
+        return 0
+    fi
+
+    # Export KEDA version
+    export KEDA_VERSION="${kedaWellTestedVersion}"
+    echo_stderr "KEDA version: ${KEDA_VERSION}"
 }
 
 # https://learn.microsoft.com/en-us/azure/azure-monitor/containers/integrate-keda
 function enable_keda_addon() {
-    az extension remove --name k8s-extension
-    az extension add --name aks-preview
-
     local oidcEnabled=$(az aks show --resource-group $AKS_CLUSTER_RG_NAME --name $AKS_CLUSTER_NAME --query oidcIssuerProfile.enabled)
     local workloadIdentity=$(az aks show --resource-group $AKS_CLUSTER_RG_NAME --name $AKS_CLUSTER_NAME --query securityProfile.workloadIdentity)
 
@@ -266,13 +322,19 @@ EOF
     helm repo add kedacore https://kedacore.github.io/charts
     helm repo update
 
+    get_keda_version
+
     helm install keda kedacore/keda \
         --namespace ${KEDA_NAMESPACE} \
-        --set serviceAccount.create=false \
-        --set serviceAccount.name=${KEDA_SERVICE_ACCOUNT_NAME} \
+        --set serviceAccount.operator.create=false \
+        --set serviceAccount.operator.name=${KEDA_SERVICE_ACCOUNT_NAME} \
         --set podIdentity.azureWorkload.enabled=true \
         --set podIdentity.azureWorkload.clientId=$KEDA_UAMI_CLIENT_ID \
-        --set podIdentity.azureWorkload.tenantId=$tenantId
+        --set podIdentity.azureWorkload.tenantId=$tenantId \
+        --set app.kubernetes.io/managed-by=Helm \
+        --set meta.helm.sh/release-name=keda \
+        --set meta.helm.sh/release-namespace=${KEDA_NAMESPACE} \
+        --version ${KEDA_VERSION}
 
     #validate
     wait_for_keda_ready
