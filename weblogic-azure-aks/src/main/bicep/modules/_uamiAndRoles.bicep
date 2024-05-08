@@ -4,11 +4,12 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 */
 
 param location string
+param name_deploymentScriptContributorRoleAssignmentName = newGuid()
 
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfContributor = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-var name_deploymentScriptUserDefinedManagedIdentity = 'wls-aks-deployment-script-user-defined-managed-itentity'
-var name_deploymentScriptContributorRoleAssignmentName = guid('${resourceGroup().id}${name_deploymentScriptUserDefinedManagedIdentity}Deployment Script')
+var name_deploymentScriptUserDefinedManagedIdentity = 'wls-aks-deployment-script-user-defined-managed-itentity-${substring(uniqueString(name_deploymentScriptContributorRoleAssignmentName),0,5)}'
+
 
 // UAMI for deployment script
 resource uamiForDeploymentScript 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' = {
