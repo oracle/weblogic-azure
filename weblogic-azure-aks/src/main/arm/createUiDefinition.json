@@ -2125,7 +2125,7 @@
             {
                 "name": "section_autoScaling",
                 "type": "Microsoft.Common.Section",
-                "label": "Horizontal Autoscaling",
+                "label": "Autoscaling",
                 "subLabel": {
                     "preValidation": "Configure Horizontal Autoscaling",
                     "postValidation": "Done"
@@ -2168,17 +2168,17 @@
                             {
                                 "name": "metricSource",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Select metric source. Autoscaling based on resource metrics from Kubernetes Metrics Server or exporting by WebLogic Monitoring Exporter. ",
-                                "defaultValue": "Kubernetes Metrics Server",
+                                "label": "Select autoscaling option. ",
+                                "defaultValue": "Kubernetes Metrics Server (simple autoscaling)",
                                 "toolTip": "If you select Kubernetes Metrics Server, this offer configures WebLogic Server to scale based on CPU or memory utilization. If you select WebLogic Monitoring Exporter, this offer configures WebLogic Monitoring Exporter to scrape WebLogic Server metrics and feed them to Azure Monitor Managed Service for Prometheus; integrates KEDA with your AKS cluster to monitor Azure Monitor workspace and feed data to AKS. You can create KEDA scaler based on Java metrics from Azure Monitor workspace",
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Kubernetes Metrics Server",
+                                            "label": "Kubernetes Metrics Server (simple autoscaling)",
                                             "value": "kms"
                                         },
                                         {
-                                            "label": "WebLogic Monitoring Exporter",
+                                            "label": "WebLogic Monitoring Exporter (advanced autoscaling)",
                                             "value": "wme"
                                         }
                                     ],
@@ -2202,8 +2202,8 @@
                                 "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'wme')]",
                                 "options": {
                                     "icon": "None",
-                                    "text": "This option allows you to create KEDA scaler based on Prometheus Metrics by:<br> <li>Configuring WebLogic Monitoring Exporter to scrape WebLogic Server metrics and feed them to Azure Monitor Managed Service for Prometheus</li><li>Integrates KEDA with your AKS cluster to monitor Azure Monitor managed service for Prometheus and feed that data to AKS.</li> <br><br>The offer provisions the following deployments: <br> <li><a href=https://aka.ms/wls-exporter>Install WebLogic Monitoring Exporter to scrape WebLogic Server metrics.</a></li><li><a href=https://aka.ms/aks-enable-monitoring>Install AKS Prometheus metrics addon.</a></li><li><a href=https://aka.ms/aks-prometheus-metrics-scrape-configuration>Feed WebLogic Server metrics to Azure Monitor Managed Service for Prometheus.</a></li><li><a href=https://aka.ms/aks-integrate-keda>Integrate KEDA with AKS cluster.</a></li><br><br> After the provisioning is completed, you can create KEDA scalers from the output sample: <br> <li>Go to the resource group that the offer provisioned.</li><li>In the <b>Settings</b> section, select <b>Deployments</b>.</li><li>Select the oldest deployment, whose name starts with <b>oracle.20210620-wls-on-aks</b>.</li><li>The <b>shellCmdtoOutputKedaScalerSample</b> value is the base64 string of a scaler sample. Copy the value and run it in your terminal.</li><li>For guidance on how to complete the configuration, see <a href=https://aka.ms/wls-aks-keda-scaler>Tutorial: Migrate Oracle WebLogic Server to AKS with KEDA scaler based on Prometheus Metrics</a></li>",
-                                    "uri": "https://aka.ms/wlsaks-autoscaling"
+                                    "text": "This option installs all the software necessary to allow you to create Java metric aware KEDA scaling rules.<br>The offer provisions the following deployments. Right-click and select <b>Open Link in New Tab</b> to follow links:<ul><li><a href=https://aka.ms/wls-exporter>Install WebLogic Monitoring Exporter to scrape WebLogic Server metrics.</a><li><a href=https://aka.ms/aks-enable-monitoring>Install AKS Prometheus metrics addon.</a><li><a href=https://aka.ms/aks-prometheus-metrics-scrape-configuration>Feed WebLogic Server metrics to Azure Monitor Managed Service for Prometheus.</a><li><a href=https://aka.ms/aks-integrate-keda>Integrate KEDA with AKS cluster.</a></ul>After the provisioning is completed, you can create KEDA scaling rules. A sample rule is provided in the deployment outputs. The following steps show how to see the sample rule.<ul><li>View the resource group for this deployment in the Azure portal.<li>In the <b>Settings</b> section, select <b>Deployments</b>.<li>Select the oldest deployment. The name of the deployment looks similar to <b>oracle.20210620-wls-on-aks</b>.<li>Select <b>Outputs</b>.<li>The <b>shellCmdtoOutputKedaScalerSample</b> value is the base64 string of a scaler sample. Copy the value and run it in your terminal.<li>For guidance on how to complete the configuration, see <a href=https://aka.ms/wls-aks-keda-scaler>Tutorial: Migrate Oracle WebLogic Server to AKS with KEDA scaler based on Prometheus Metrics</a></ul>",
+                                    "uri": "https://aka.ms/wls-aks-keda-scaler"
                                 }
                             },
                             {
