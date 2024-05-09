@@ -229,6 +229,8 @@ jobs:
           --admin-password ${{ env.wlsPassword }} \
           --sku-name B_Gen5_1
 
+          sleep 2m
+          
           echo "Allow Access To Azure Services"
           az postgres server firewall-rule create \
           -g ${{ env.resourceGroupForDependency }} \
