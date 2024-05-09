@@ -16,7 +16,7 @@ function get_cluster_uid(){
 
 function scaling_basedon_cpu(){
     kubectl autoscale cluster ${WLS_CLUSTER_UID} \
-        --cpu-percent=${UTILIZATION_PERSENTAGE} \
+        --cpu-percent=${UTILIZATION_PERCENTAGE} \
         --min=1 \
         --max=${WLS_CLUSTER_SIZE} \
         -n ${WLS_NAMESPACE}
@@ -42,7 +42,7 @@ spec:
     resource:
       name: memory
       target:
-        averageUtilization: ${UTILIZATION_PERSENTAGE}
+        averageUtilization: ${UTILIZATION_PERCENTAGE}
         type: Utilization
 EOF
 

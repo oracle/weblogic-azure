@@ -284,6 +284,9 @@ export ENABLE_CUSTOM_SSL=${constFalse}
 export WLS_CLUSTER_SIZE=5
 export URL_3RD_DATASOURCE=$(echo "[]" | base64)
 
+# Main script
+set -Eo pipefail
+
 validate_input
 
 install_kubectl

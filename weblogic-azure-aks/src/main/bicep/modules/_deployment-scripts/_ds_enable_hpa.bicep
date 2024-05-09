@@ -48,7 +48,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: hpaScaleType
       }
       {
-        name: 'UTILIZATION_PERSENTAGE'
+        name: 'UTILIZATION_PERCENTAGE'
         value: utilizationPercentage
       }
       {

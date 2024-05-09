@@ -36,7 +36,7 @@ param acrResourceGroupName string = 'acr-contoso-rg'
 param aksAgentPoolName string = 'agentpool'
 @maxValue(10000)
 @minValue(1)
-@description('Set the minimum node count for the cluster..')
+@description('Set the minimum node count for the cluster.')
 param aksAgentPoolNodeCount int = 3
 @maxValue(1000)
 @minValue(3)

@@ -24,7 +24,7 @@
         },
         {
             "key": "WME",
-            "description": "Oracle Weblogic Monitoring Exporter",
+            "description": "Oracle Weblogic Monitoring Exporter. IMPORTANT note to maintener: This value is hard coded in enablePrometheusMetrics.sh. Please update it there also.",
             "version": "2.1.9",
             "imageURL": "ghcr.io/oracle/weblogic-monitoring-exporter:2.1.9",
             "testedDate": "2024-02-29"

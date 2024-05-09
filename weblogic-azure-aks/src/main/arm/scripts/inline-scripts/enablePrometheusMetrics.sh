@@ -11,7 +11,7 @@ function connect_aks(){
 
 function enable_promethues_metrics(){
     # See https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-enable?tabs=cli#enable-prometheus-and-grafana
-    az extension add --name k8s-extension
+    az extension add --name k8s-extension && true
 
     ### Use existing Azure Monitor workspace
     az aks update --enable-azure-monitor-metrics \
@@ -22,8 +22,8 @@ function enable_promethues_metrics(){
 
     utility_validate_status "Enable Promethues Metrics."
 
-    az extension add --name aks-preview
-    az extension remove --name k8s-extension
+    az extension add --name aks-preview && true
+    az extension remove --name k8s-extension && true
 
     #Verify that the DaemonSet was deployed properly on the Linux node pools
     #https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-enable?tabs=cli#managed-prometheus
