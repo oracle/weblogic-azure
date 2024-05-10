@@ -98,14 +98,6 @@ function validate_input() {
     fi
 }
 
-# Connect to AKS cluster
-function connect_aks_cluster() {
-    az aks get-credentials \
-        --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
-        --name ${AKS_CLUSTER_NAME} \
-        --overwrite-existing
-}
-
 function query_wls_cluster_info(){
     WLS_CLUSTER_SIZE=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
         | jq '. | .status.clusters[] | select(.clusterName == "'${constClusterName}'") | .maximumReplicas')
@@ -291,7 +283,7 @@ validate_input
 
 install_kubectl
 
-connect_aks_cluster
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RESOURCEGROUP_NAME
 
 query_wls_cluster_info
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
@@ -25,6 +25,16 @@ function utility_validate_status() {
     else
         echo_stdout "$@"
     fi
+}
+
+function connect_aks(){
+    az aks get-credentials \
+        -n $1 \
+        -g $2 \
+        --overwrite-existing \
+        --only-show-errors
+
+    utility_validate_status "Finished connecting to AKS cluster."
 }
 
 # JAVA_HOME=/usr/lib/jvm/java-11-openjdk

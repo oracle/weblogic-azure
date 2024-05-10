@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # Inputs:
 # AKS_CLUSTER_RESOURCEGROUP_NAME
@@ -7,14 +7,6 @@
 echo "Script ${0} starts"
 
 export currentStorageAccount="null"
-
-# Connect to AKS cluster
-function connect_aks_cluster() {
-  az aks get-credentials \
-    --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
-    --name ${AKS_CLUSTER_NAME} \
-    --overwrite-existing
-}
 
 function query_storage_account() {
   echo "install kubectl"
@@ -42,7 +34,7 @@ function output_result() {
   echo $result >$AZ_SCRIPTS_OUTPUT_PATH
 }
 
-connect_aks_cluster
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RESOURCEGROUP_NAME
 
 query_storage_account
 

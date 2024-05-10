@@ -1,13 +1,6 @@
 # Copyright (c) 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-function connect_aks(){
-    az aks get-credentials \
-        --resource-group ${AKS_CLUSTER_RG_NAME} \
-        --name ${AKS_CLUSTER_NAME} \
-        --overwrite-existing
-}
-
 function get_cluster_uid(){
   local clusterUid=$(kubectl get clusters -n ${WLS_NAMESPACE} -o=jsonpath='{.items[].metadata.name}')
   utility_validate_status "Obtain cluster UID."
@@ -62,7 +55,7 @@ set -Eo pipefail
 
 install_kubectl
 
-connect_aks
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RG_NAME
 
 get_cluster_uid
 

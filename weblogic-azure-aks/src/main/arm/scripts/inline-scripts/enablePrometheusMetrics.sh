@@ -1,13 +1,7 @@
 # Copyright (c) 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-function connect_aks(){
-    az aks get-credentials \
-        -n $AKS_CLUSTER_NAME \
-        -g $AKS_CLUSTER_RG_NAME \
-        --overwrite-existing \
-        --only-show-errors
-}
+#!/bin/bash
 
 function enable_promethues_metrics(){
     # See https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-enable?tabs=cli#enable-prometheus-and-grafana
@@ -396,7 +390,7 @@ install_kubectl
 
 install_helm
 
-connect_aks
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RG_NAME
 
 get_wls_monitoring_exporter_image_url
 

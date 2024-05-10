@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 #
@@ -15,10 +15,7 @@ echo "install kubectl"
 az aks install-cli
 
 echo "Connect AKS"
-az aks get-credentials \
-    --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
-    --name ${AKS_CLUSTER_NAME} \
-    --overwrite-existing
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RESOURCEGROUP_NAME
 
 wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 

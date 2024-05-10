@@ -285,11 +285,6 @@ function install_utilities() {
     validate_status ${ret}
 }
 
-# Connect to AKS cluster
-function connect_aks_cluster() {
-    az aks get-credentials --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} --name ${AKS_CLUSTER_NAME} --overwrite-existing
-}
-
 # remove the operator if it is not running.
 function uninstall_operator() {
     echo "remove operator"
@@ -772,7 +767,7 @@ query_acr_credentials
 
 build_docker_image
 
-connect_aks_cluster
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RESOURCEGROUP_NAME
 
 install_wls_operator
 
