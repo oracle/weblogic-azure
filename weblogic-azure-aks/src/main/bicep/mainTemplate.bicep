@@ -370,7 +370,7 @@ module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
 * Deploy ACR
 */
 module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' = {
-  name: 'pre-azure-resources-deployment'
+  name: 'prerequisite-resources-deployment'
   params: {
     acrName: acrName
     acrResourceGroupName: acrResourceGroupName
