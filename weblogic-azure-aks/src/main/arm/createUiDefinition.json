@@ -311,16 +311,30 @@
                                         "uri": "https://aka.ms/wls-aks-well-tested-version"
                                     }
                                 }
-                            },
+                            },                            
                             {
                                 "name": "aksNodeCount",
                                 "type": "Microsoft.Common.Slider",
                                 "min": 1,
-                                "max": 1000,
-                                "label": "Node count",
+                                "max": 100,
+                                "label": "Minimum node count",
                                 "defaultValue": 3,
                                 "showStepMarkers": false,
-                                "toolTip": "The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.",
+                                "toolTip": "Set the minimum node count for the cluster.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "aksNodeMaxCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": "[int(steps('section_aks').clusterInfo.aksNodeCount)]",
+                                "max": 100,
+                                "label": "Maximum node count",
+                                "defaultValue": 5,
+                                "showStepMarkers": false,
+                                "toolTip": "Set the maximum node count for the cluster.",
                                 "constraints": {
                                     "required": true
                                 },
@@ -2107,12 +2121,153 @@
                         "visible": "[bool(steps('section_database').enableDB)]"
                     }
                 ]
+            },
+            {
+                "name": "section_autoScaling",
+                "type": "Microsoft.Common.Section",
+                "label": "Autoscaling",
+                "subLabel": {
+                    "preValidation": "Configure Horizontal Autoscaling",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Horizontal Autoscaling",
+                "elements": [
+                    {
+                        "name": "aboutAutoscaling",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the offer configure metric to scale the WebLogic cluster."
+                        }
+                    },
+                    {
+                        "name": "enableAutoscaling",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Provision resources for horizontal autoscaling?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure horizontal autoscaling.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "autoScalingInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Horizontal autoscaling settings",
+                        "elements": [
+                            {
+                                "name": "metricSource",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Select autoscaling option. ",
+                                "defaultValue": "Kubernetes Metrics Server (simple autoscaling)",
+                                "toolTip": "If you select Kubernetes Metrics Server, this offer configures WebLogic Server to scale based on CPU or memory utilization. If you select WebLogic Monitoring Exporter, this offer configures WebLogic Monitoring Exporter to scrape WebLogic Server metrics and feed them to Azure Monitor Managed Service for Prometheus; integrates KEDA with your AKS cluster to monitor Azure Monitor workspace and feed data to AKS. You can create KEDA scaler based on Java metrics from Azure Monitor workspace",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Kubernetes Metrics Server (simple autoscaling)",
+                                            "value": "kms"
+                                        },
+                                        {
+                                            "label": "WebLogic Monitoring Exporter (advanced autoscaling)",
+                                            "value": "wme"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "infoKms",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms')]",
+                                "options": {
+                                    "icon": "None",
+                                    "text": "This option configures and runs Kubernetes Horizontal Pod Autoscaler (HPA) to scale a WebLogic cluster, based on the CPU or memory utilization. The HPA autoscales WebLogic Server instances from a minimum of 1 cluster members up to maximum of cluster members, and the scale up or down action occur when the average CPU/memory is consistently over the utilization.<br><li>Default maximum of cluster member is 5. You can set it from <b>Basics</b> -> <b>Optional Basic Configuration</b> -> <b>Maximum dynamic cluster size</b>.</li><li>Default CPU request is 200m.</li><li>Default memory request is 1.5Gi.</li>",
+                                    "uri": "https://aka.ms/wlsoperator-autoscaling-hpa"
+                                }
+                            },
+                            {
+                                "name": "infoWme",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'wme')]",
+                                "options": {
+                                    "icon": "None",
+                                    "text": "This option installs all the software necessary to allow you to create Java metric aware KEDA scaling rules.<br>The offer provisions the following deployments. Right-click and select <b>Open Link in New Tab</b> to follow links:<ul><li><a href=https://aka.ms/wls-exporter>Install WebLogic Monitoring Exporter to scrape WebLogic Server metrics.</a><li><a href=https://aka.ms/aks-enable-monitoring>Install AKS Prometheus metrics addon.</a><li><a href=https://aka.ms/aks-prometheus-metrics-scrape-configuration>Feed WebLogic Server metrics to Azure Monitor Managed Service for Prometheus.</a><li><a href=https://aka.ms/aks-integrate-keda>Integrate KEDA with AKS cluster.</a></ul>After the provisioning is completed, you can create KEDA scaling rules. A sample rule is provided in the deployment outputs. The following steps show how to see the sample rule.<ul><li>View the resource group for this deployment in the Azure portal.<li>In the <b>Settings</b> section, select <b>Deployments</b>.<li>Select the oldest deployment. The name of the deployment looks similar to <b>oracle.20210620-wls-on-aks</b>.<li>Select <b>Outputs</b>.<li>The <b>shellCmdtoOutputKedaScalerSample</b> value is the base64 string of a scaler sample. Copy the value and run it in your terminal.<li>For guidance on how to complete the configuration, see <a href=https://aka.ms/wls-aks-keda-scaler>Tutorial: Migrate Oracle WebLogic Server to AKS with KEDA scaler based on Prometheus Metrics</a></ul>",
+                                    "uri": "https://aka.ms/wls-aks-keda-scaler"
+                                }
+                            },
+                            {
+                                "name": "kmsMetrics",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Select metric. ",
+                                "defaultValue": "Average CPU Utilization",
+                                "toolTip": "Select metric.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Average CPU Utilization",
+                                            "value": "cpu"
+                                        },
+                                        {
+                                            "label": "Average Memory Utilization",
+                                            "value": "memory"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms')]"
+                            },
+                            {
+                                "name": "averageCpuUtilization",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 10,
+                                "max": 100,
+                                "label": "Average CPU Utilization",
+                                "subLabel": "Percent",
+                                "defaultValue": 60,
+                                "showStepMarkers": false,
+                                "toolTip": "Pick Average CPU Utilization in Percent",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.kmsMetrics, 'cpu')]"
+                            },
+                            {
+                                "name": "averageMemoryUtilization",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 10,
+                                "max": 100,
+                                "label": "Average Memory Utilization",
+                                "subLabel": "Percent",
+                                "defaultValue": 60,
+                                "showStepMarkers": false,
+                                "toolTip": "Pick Average Memory Utilization in Percent",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": "[equals(steps('section_autoScaling').autoScalingInfo.kmsMetrics, 'memory')]"
+                            }
+                        ],
+                    "visible": "[bool(steps('section_autoScaling').enableAutoscaling)]"
+                    }
+                ]
             }
         ],
         "outputs": {
             "acrName": "[last(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'))]",
             "acrResourceGroupName": "[last(take(split(steps('section_aks').imageInfo.oracleAcrSelector.id, '/'),5))]",
             "aksAgentPoolNodeCount": "[steps('section_aks').clusterInfo.aksNodeCount]",
+            "aksAgentPoolNodeMaxCount": "[steps('section_aks').clusterInfo.aksNodeMaxCount]",
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
@@ -2124,6 +2279,8 @@
             "appgwUsePrivateIP": "[steps('section_appGateway').appgwIngress.appgwUsePrivateIP]",
             "appPackageUrls": "[steps('section_aks').jeeAppInfo.appPackageUrl]",
             "appReplicas": "[int(steps('section_aks').jeeAppInfo.appReplicas)]",
+            "averageCpuUtilization": "[steps('section_autoScaling').autoScalingInfo.averageCpuUtilization]",
+            "averageMemoryUtilization": "[steps('section_autoScaling').autoScalingInfo.averageMemoryUtilization]",
             "createACR": "[bool(steps('section_aks').imageInfo.oracleCreateACR)]",
             "createAKSCluster": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]",
             "createDNSZone": "[not(bool(steps('section_dnsConfiguration').bringDNSZone))]",
@@ -2143,6 +2300,7 @@
             "dnszoneRGName": "[steps('section_dnsConfiguration').dnsZoneResourceGroup]",
             "dsConnectionURL": "[coalesce(steps('section_database').databaseConnectionInfo.dsConnectionURL, steps('section_database').databaseConnectionInfo.dsConnectionURL2, 'null')]",
             "enableAppGWIngress": "[equals(steps('section_appGateway').loadBalancingOptions, 'agic')]",
+            "enableAutoscaling": "[bool(steps('section_autoScaling').enableAutoscaling)]",
             "enableAzureMonitoring": "[bool(steps('section_aks').aksAdvancedInfo.enableAzureMonitoring)]",
             "enableAzureFileShare": "[bool(steps('section_aks').aksAdvancedInfo.enableAzureFileShare)]",
             "enableCookieBasedAffinity": "[not(bool(steps('section_appGateway').appgwIngress.enableCookieBasedAffinity))]",
@@ -2161,6 +2319,7 @@
             "keyVaultSSLBackendRootCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertDataSecretName]",
             "keyVaultSSLCertDataSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertDataSecretName]",
             "keyVaultSSLCertPasswordSecretName": "[steps('section_appGateway').appgwIngress.keyVaultSSLCertPasswordSecretName]",
+            "hpaScaleType": "[steps('section_autoScaling').autoScalingInfo.kmsMetrics]",
             "managedServerPrefix": "[basics('basicsOptional').managedServerPrefix]",
             "newOrExistingVnetForApplicationGateway": "[steps('section_appGateway').appgwIngress.vnetForApplicationGateway.newOrExisting]",
             "ocrSSOPSW": "[steps('section_aks').imageInfo.ocrSSOPassword]",
@@ -2184,6 +2343,7 @@
             "sslUploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
             "sslUploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
             "sslUploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
+            "useHpa": "[if(equals(steps('section_autoScaling').autoScalingInfo.metricSource, 'kms'), true, false)]",
             "useInternalLB": "[bool(steps('section_appGateway').lbSVCInfo.enableInternalLB)]",
             "useOracleImage": "[if(bool(steps('section_aks').aksAdvancedInfo.useAcrImage), false, true)]",
             "userProvidedAcr": "[last(split(steps('section_aks').aksAdvancedInfo.userProvidedAcrSelector.id, '/'))]",

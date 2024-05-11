@@ -15,6 +15,8 @@ export checkAcrInterval=30
 export checkAcrMaxAttempt=10
 export checkAgicInterval=30
 export checkAgicMaxAttempt=50
+export checkKedaInteval=30
+export checkKedaMaxAttempt=20
 
 export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'
@@ -41,6 +43,7 @@ export ocrGaImagePath="middleware/weblogic"
 export ocrCpuImagePath="middleware/weblogic_cpu"
 export gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_cpu_images.json"
 export gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
+export gitUrl4AksToolingWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_tooling_well_tested_versions.json"
 export gitUrl4WLSToolingFamilyJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_tooling_family.json"
 export gitUrl4AzureIdentityExtensionsPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
 export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"

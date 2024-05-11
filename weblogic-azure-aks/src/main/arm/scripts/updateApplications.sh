@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script ${0} starts"
@@ -96,14 +96,6 @@ function validate_input() {
         echo_stderr "USER_PROVIDED_IMAGE_PATH is required. "
         usage 1
     fi
-}
-
-# Connect to AKS cluster
-function connect_aks_cluster() {
-    az aks get-credentials \
-        --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
-        --name ${AKS_CLUSTER_NAME} \
-        --overwrite-existing
 }
 
 function query_wls_cluster_info(){
@@ -227,8 +219,9 @@ function apply_new_image() {
 
 function wait_for_pod_completed() {
     # Make sure all of the pods are running.
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
-        | jq '. | .spec.clusters[] | .replicas')
+    local clusterName=$(kubectl get cluster -n ${wlsDomainNS} -o json | jq -r '.items[0].metadata.name')
+    local replicas=$(kubectl -n ${wlsDomainNS} get cluster ${clusterName} -o json \
+        | jq '. | .spec.replicas')
 
     utility_wait_for_pod_completed \
         ${replicas} \
@@ -240,8 +233,9 @@ function wait_for_pod_completed() {
 function wait_for_image_update_completed() {
     # Make sure all of the pods are updated with new image.
     # Assumption: we have only one cluster currently.
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json \
-        | jq '. | .spec.clusters[] | .replicas')
+    local clusterName=$(kubectl get cluster -n ${wlsDomainNS} -o json | jq -r '.items[0].metadata.name')
+    local replicas=$(kubectl -n ${wlsDomainNS} get cluster ${clusterName} -o json \
+        | jq '. | .spec.replicas')
     
     utility_wait_for_image_update_completed \
         "${acrImagePath}" \
@@ -282,11 +276,14 @@ export ENABLE_CUSTOM_SSL=${constFalse}
 export WLS_CLUSTER_SIZE=5
 export URL_3RD_DATASOURCE=$(echo "[]" | base64)
 
+# Main script
+set -Eo pipefail
+
 validate_input
 
 install_kubectl
 
-connect_aks_cluster
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RESOURCEGROUP_NAME
 
 query_wls_cluster_info
 

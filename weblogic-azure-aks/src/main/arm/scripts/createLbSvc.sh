@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 # Description: to create Load Balancer Service for the following targets.
@@ -359,8 +359,9 @@ ${currentDomainConfig}
 EOF
     echo ${currentDomainConfig} | kubectl -n ${wlsDomainNS} apply -f -
 
-    replicas=$(kubectl -n ${wlsDomainNS} get domain ${WLS_DOMAIN_UID} -o json |
-      jq '. | .spec.clusters[] | .replicas')
+    local clusterName=$(kubectl get cluster -n ${wlsDomainNS} -o json | jq -r '.items[0].metadata.name')
+    local replicas=$(kubectl -n ${wlsDomainNS} get cluster ${clusterName} -o json \
+        | jq '. | .spec.replicas')
 
     # wait for the restart completed.
     utility_wait_for_pod_restarted \
