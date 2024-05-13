@@ -40,8 +40,10 @@ runs:
             --admin-user ${{ inputs.dbAdminUser }} \
             --admin-password ${{ inputs.dbPassword }} \
             --version 16 \
+            --public-access 0.0.0.0 \
             --tier Burstable \
             --sku-name Standard_B1ms \
+            --private-dns-zone "zone-${{ inputs.dbName }}" \
             --yes
 
           az postgres flexible-server db create \
