@@ -41,7 +41,8 @@ runs:
             --admin-password ${{ inputs.dbPassword }} \
             --version 16 \
             --tier Burstable \
-            --sku-name Standard_B1ms
+            --sku-name Standard_B1ms \
+            --yes
 
           az postgres flexible-server db create \
             --resource-group ${{ inputs.resourceGroupName }} \
