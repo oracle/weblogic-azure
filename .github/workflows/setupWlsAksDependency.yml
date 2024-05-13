@@ -42,7 +42,6 @@ jobs:
             - name: Set up PostgreSQL Flexible Server that allows access from Azure services
               uses: ./.github/actions/createPostgresqlFlexibleServer
               with:
-                azCliVersion: ${{ env.azCliVersion }}
                 dbAdminUser: ${{ env.dbAdminUser }}
                 dbName: ${{ env.dbName }}
                 dbPassword: ${{ env.dbPassword }}

@@ -1,9 +1,6 @@
 name: Create PostgreSQL Flexible Server
 description: Create  PostgreSQL Flexible Server that allows access from Azure services.
 inputs:
-  azCliVersion:
-    description: "Azure CLI Version"
-    required: true
   dbAdminUser:
     description: "Database Admin User"
     required: true
@@ -26,6 +23,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@v2.3.4
+    - name: Set azCliVersion
+      uses: ./.github/actions/setvars
+      with:
+        varFilePath: ./.github/variables/vm-dependencies.env
     - name: Set Up Azure Postgresql that allows access from Azure services
       id: setup-postgresql
       uses: azure/CLI@v1
@@ -43,7 +45,7 @@ runs:
             --public-access 0.0.0.0 \
             --tier Burstable \
             --sku-name Standard_B1ms \
-            --private-dns-zone "zone-${{ inputs.dbName }}" \
+            --private-dns-zone zone$(date +%s) \
             --yes
 
           az postgres flexible-server db create \
