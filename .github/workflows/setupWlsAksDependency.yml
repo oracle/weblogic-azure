@@ -23,6 +23,7 @@ jobs:
     deploy-db:
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v2.3.4
             - name: Set AZ CLI Version
               id: set-az-cli-version
               uses: ./.github/actions/setvars
@@ -53,6 +54,7 @@ jobs:
     deploy-storage-account:
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v2.3.4
             - name: Set AZ CLI Version
               id: set-az-cli-version
               uses: ./.github/actions/setvars
