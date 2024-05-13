@@ -2,11 +2,6 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 function wait_for_azure_ingress_ready() {
-    az aks get-credentials \
-        --resource-group ${AKS_CLUSTER_RG_NAME} \
-        --name ${AKS_CLUSTER_NAME} \
-        --overwrite-existing
-
     local ready=false
     local attempt=0
 
@@ -35,5 +30,7 @@ function wait_for_azure_ingress_ready() {
 set -Eo pipefail
 
 install_kubectl
+
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RG_NAME
 
 wait_for_azure_ingress_ready

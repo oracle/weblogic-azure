@@ -21,6 +21,13 @@
             "version": "1.12.1",
             "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.12.1/imagetool.zip",
             "testedDate": "2024-03-13"
+        },
+        {
+            "key": "WME",
+            "description": "Oracle Weblogic Monitoring Exporter. IMPORTANT note to maintener: This value is hard coded in enablePrometheusMetrics.sh. Please update it there also.",
+            "version": "2.1.9",
+            "imageURL": "ghcr.io/oracle/weblogic-monitoring-exporter:2.1.9",
+            "testedDate": "2024-02-29"
         }
     ]
 }

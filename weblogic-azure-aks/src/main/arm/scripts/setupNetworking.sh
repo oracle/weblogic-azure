@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script  ${0} starts"
@@ -114,11 +114,6 @@ function validate_input() {
   fi
 }
 
-# Connect to AKS cluster
-function connect_aks_cluster() {
-  az aks get-credentials --resource-group ${AKS_CLUSTER_RG_NAME} --name ${AKS_CLUSTER_NAME} --overwrite-existing
-}
-
 function create_svc_lb() {
   # No lb svc inputs
   if [[ "${LB_SVC_VALUES}" != "[]" ]]; then
@@ -147,7 +142,7 @@ validate_input
 
 install_utilities
 
-connect_aks_cluster
+connect_aks $AKS_CLUSTER_NAME $AKS_CLUSTER_RG_NAME
 
 create_svc_lb
 

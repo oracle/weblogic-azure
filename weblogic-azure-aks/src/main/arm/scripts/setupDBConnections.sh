@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+# Copyright (c) 2021, 2024 Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 echo "Script ${0} starts"
@@ -78,14 +78,6 @@ function validate_input() {
             DB_USER=""
         fi
     fi
-}
-
-# Connect to AKS cluster
-function connect_aks_cluster() {
-    az aks get-credentials \
-        --resource-group ${AKS_RESOURCE_GROUP_NAME} \
-        --name ${AKS_NAME} \
-        --overwrite-existing
 }
 
 function create_datasource_model_configmap_and_secret() {
@@ -289,7 +281,7 @@ export wlsDomainNS="${WLS_DOMAIN_UID}-ns"
 
 validate_input
 
-connect_aks_cluster
+connect_aks $AKS_NAME $AKS_RESOURCE_GROUP_NAME
 
 install_kubectl
 

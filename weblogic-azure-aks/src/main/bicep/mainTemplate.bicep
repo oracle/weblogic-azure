@@ -1,5 +1,5 @@
 /* 
-* Copyright (c) 2021, Oracle Corporation and/or its affiliates.
+* Copyright (c) 2021, 2024, Oracle Corporation and/or its affiliates.
 * Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 *
 * Terms:
@@ -36,8 +36,12 @@ param acrResourceGroupName string = 'acr-contoso-rg'
 param aksAgentPoolName string = 'agentpool'
 @maxValue(10000)
 @minValue(1)
-@description('The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.')
+@description('Set the minimum node count for the cluster.')
 param aksAgentPoolNodeCount int = 3
+@maxValue(1000)
+@minValue(3)
+@description('Set the maximum node count for the cluster.')
+param aksAgentPoolNodeMaxCount int = 5
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
 param vmSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
@@ -74,6 +78,10 @@ param appgwUsePrivateIP bool = false
 param appPackageUrls array = []
 @description('The number of managed server to start.')
 param appReplicas int = 2
+@description('Scale up once average cpu utilization is larger then the input number ')
+param averageCpuUtilization int = 60
+@description('Scale up once average memory utilization is larger then the input number ')
+param averageMemoryUtilization int = 60
 @description('true to create a new Azure Container Registry.')
 param createACR bool = false
 @description('true to create a new AKS cluster.')
@@ -126,6 +134,8 @@ param dnszoneRGName string = 'dns-contoso-rg'
 param dsConnectionURL string = 'jdbc:postgresql://contoso.postgres.database.azure.com:5432/postgres'
 @description('true to set up Application Gateway ingress.')
 param enableAppGWIngress bool = false
+@description('true to enable Horizontal Autoscaling.')
+param enableAutoscaling bool = false
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 @description('true to create persistent volume using file share.')
@@ -141,6 +151,11 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 @description('Enable passwordless datasource connection.')
 param enablePswlessConnection bool = false
+@allowed([
+  'cpu'
+  'memory'
+])
+param hpaScaleType string = 'cpu'
 @description('Is the specified SSO account associated with an active Oracle support contract?')
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
@@ -239,6 +254,8 @@ param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
 @description('True to use latest supported Kubernetes version.')
 param useLatestSupportedAksVersion bool = true
+@description('True to enable HPA for auto scaling.')
+param useHpa bool = true
 @description('True to set up internal load balancer service.')
 param useInternalLB bool = false
 @description('ture to upload Java EE applications and deploy the applications to WebLogic domain.')
@@ -298,7 +315,7 @@ var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_azcliVersion = '2.41.0'
+var const_azcliVersion = '2.53.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_hasTags = contains(resourceGroup(), 'tags')
 // If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
@@ -370,7 +387,7 @@ module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
 * Deploy ACR
 */
 module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' = {
-  name: 'pre-azure-resources-deployment'
+  name: 'prerequisite-resources-deployment'
   params: {
     acrName: acrName
     acrResourceGroupName: acrResourceGroupName
@@ -551,6 +568,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
+    aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
     vmSize: vmSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
@@ -621,6 +639,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
+    aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
     vmSize: vmSize
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
@@ -821,6 +840,33 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   ]
 }
 
+module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAutoscaling) {
+  name: 'enable-horizontal-autoscaling'
+  params: {
+    _pidCPUUtilization: pids.outputs.cpuUtilization
+    _pidEnd: pids.outputs.autoScalingEnd
+    _pidMemoryUtilization: pids.outputs.memoryUtilization
+    _pidStart: pids.outputs.autoScalingStart
+    _pidWme: pids.outputs.enableWlsMonitoringExporter
+    aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
+    aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
+    azCliVersion: const_azcliVersion
+    hpaScaleType: hpaScaleType
+    identity: obj_uamiForDeploymentScript
+    location: location
+    useHpa: useHpa
+    utilizationPercentage: hpaScaleType == 'cpu' ? averageCpuUtilization : averageMemoryUtilization
+    wlsClusterSize: wlsClusterSize
+    wlsDomainUID: wlsDomainUID
+    wlsPassword: wlsPassword
+    wlsUserName: wlsUserName
+
+  }
+  dependsOn: [
+    validateApplciations
+  ]
+}
+ 
 /*
 * Query and output WebLogic domain configuration, including: 
 *   - domain deployment description
@@ -839,7 +885,7 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
     wlsDomainUID: wlsDomainUID
   }
   dependsOn: [
-    validateApplciations
+    horizontalAutoscaling
   ]
 }
 
@@ -857,7 +903,9 @@ output clusterExternalUrl string = const_enableNetworking ? networkingDeployment
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredEndpoint : ''
 output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalEndpoint
 output clusterT3ExternalEndpoint string = enableClusterT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.clusterT3ChannelEndpoint : ''
+output kedaScalerServerAddress string = enableAutoscaling ? horizontalAutoscaling.outputs.kedaScalerServerAddress : ''
 output shellCmdtoConnectAks string = format('az account set --subscription {0}; az aks get-credentials --resource-group {1} --name {2}', split(subscription().id, '/')[2], ref_wlsDomainDeployment.outputs.aksClusterRGName, ref_wlsDomainDeployment.outputs.aksClusterName)
+output shellCmdtoOutputKedaScalerSample string = enableAutoscaling ? horizontalAutoscaling.outputs.base64ofKedaScalerSample : ''
 output shellCmdtoOutputWlsDomainYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsDomainYaml
 output shellCmdtoOutputWlsImageModelYaml string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageModelYaml
 output shellCmdtoOutputWlsImageProperties string = queryWLSDomainConfig.outputs.shellCmdtoOutputWlsImageProperties

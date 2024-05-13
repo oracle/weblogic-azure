@@ -147,7 +147,7 @@ jobs:
                     --public-network-access Enabled \
                     --admin-password ${{ env.dbPassword }} \
                     --sku-name B_Gen5_1
-                    sleep 1m
+                    sleep 2m
                     echo "Allow Access To Azure Services"
                     az postgres server firewall-rule create \
                     -g ${{ env.resourceGroupForDB }} \
@@ -326,13 +326,14 @@ jobs:
                 az aks get-credentials --resource-group ${{ env.resourceGroupForWlsAks }} --name $aksClusterName
             - name: Generate&Apply configmap
               run: |
+                wlsDomainNS=sample-domain1-ns
                 wlsConfigmapName=sample-domain1-wdt-config-map
                 wlsConfigmapJson=cargo-tracker-db.json
                 modelFilePath=models
                 mkdir ${modelFilePath}
                 echo "create configmap"
                 echo "export exisiting configmap"
-                kubectl -n sample-domain1-ns get configmap ${wlsConfigmapName} -o json >${wlsConfigmapJson}
+                kubectl -n ${wlsDomainNS} get configmap ${wlsConfigmapName} -o json >${wlsConfigmapJson}
 
                 echo "query model keys"
                 keyList=$(cat ${wlsConfigmapJson} | jq '.data | keys[]' | tr -d "\"")
@@ -343,24 +344,25 @@ jobs:
                 done
 
                 # remove current configmap and create a new one
-                kubectl -n sample-domain1-ns delete configmap ${wlsConfigmapName}
+                kubectl -n ${wlsDomainNS} delete configmap ${wlsConfigmapName}
 
                 cp cargotracker/src/test/aks/cargo-tracker-jms.yaml ${modelFilePath}/cargo-tracker-jms.yaml
 
-                kubectl -n sample-domain1-ns create configmap ${wlsConfigmapName} \
+                kubectl -n ${wlsDomainNS} create configmap ${wlsConfigmapName} \
                 --from-file=${modelFilePath}
 
-                kubectl -n sample-domain1-ns label configmap ${wlsConfigmapName} \
+                kubectl -n ${wlsDomainNS} label configmap ${wlsConfigmapName} \
                 weblogic.domainUID=sample-domain1
-                restartVersion=$(kubectl -n sample-domain1-ns get domain sample-domain1 '-o=jsonpath={.spec.restartVersion}')
+                restartVersion=$(kubectl -n ${wlsDomainNS} get domain sample-domain1 '-o=jsonpath={.spec.restartVersion}')
                 # increase restart version
                 restartVersion=$((restartVersion + 1))
                 # record timestamp before apply changes
                 timestampBeforePatchingDomain=$(date +%s)
-                # get the replica number
-                replicas=$(kubectl -n sample-domain1-ns get domain sample-domain1 -o json | jq '. | .spec.clusters[] | .replicas')
+                # get the replica number                
+                clusterName=$(kubectl get cluster -n ${wlsDomainNS} -o json | jq -r '.items[0].metadata.name')
+                replicas=$(kubectl -n ${wlsDomainNS} get cluster ${clusterName} -o json | jq '. | .spec.replicas')
                 echo "append configmap and update restart version"
-                kubectl -n sample-domain1-ns patch domain sample-domain1 \
+                kubectl -n ${wlsDomainNS} patch domain sample-domain1 \
                     --type=json \
                     '-p=[{"op": "replace", "path": "/spec/restartVersion", "value": "'${restartVersion}'" }, {"op": "add", "path": "/spec/configuration/model/configMap", "value": "'${wlsConfigmapName}'" }]'
                 echo "timestampBeforePatchingDomain=${timestampBeforePatchingDomain}" >> $GITHUB_ENV
