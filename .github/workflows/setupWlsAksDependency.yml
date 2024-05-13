@@ -23,9 +23,11 @@ jobs:
     deploy-db:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2.3.4
-            - name: Get Azure CLI Version and save with environment variable `azCliVersion`
-              uses: ./.github/actions/getAzureCLIVersion
+            - name: Set AZ CLI Version
+              id: set-az-cli-version
+              uses: ./.github/actions/setvars
+              with:
+                varFilePath: ./.github/variables/vm-dependencies.env
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -51,9 +53,11 @@ jobs:
     deploy-storage-account:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2.3.4
-            - name: Get Azure CLI Version and save with environment variable `azCliVersion`
-              uses: ./.github/actions/getAzureCLIVersion
+            - name: Set AZ CLI Version
+              id: set-az-cli-version
+              uses: ./.github/actions/setvars
+              with:
+                varFilePath: ./.github/variables/vm-dependencies.env
             - uses: azure/login@v1
               id: azure-login
               with:
