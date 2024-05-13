@@ -27,7 +27,7 @@ env:
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
-    dbServerName: contoso
+    dbServerName: weblogicdb
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
     wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
