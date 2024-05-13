@@ -10,4 +10,5 @@ runs:
   steps:
     - run: |
         sed "" ${{ inputs.varFilePath }} >> $GITHUB_ENV
+        sed "" ${{ inputs.varFilePath }} >> $GITHUB_OUTPUT
       shell: bash

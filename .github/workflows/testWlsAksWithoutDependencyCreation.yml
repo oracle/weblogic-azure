@@ -58,17 +58,21 @@ jobs:
           isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
           gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
           testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
-          azCliVersion: ${{steps.get-external-dependencies-version.outputs.azCliVersion}}
+          azCliVersion: ${{steps.set-az-cli-version.outputs.azCliVersion}}
         steps:
             - name: Get versions of external dependencies
               id: get-external-dependencies-version
               run: |
                 curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
                 source external-deps-versions.properties
-                echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
                 echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
                 echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
-                echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_OUTPUT
+            - uses: actions/checkout@v2.3.4
+            - name: Set AZ CLI Version
+              id: set-az-cli-version
+              uses: ./.github/actions/setvars
+              with:
+                varFilePath: ./.github/variables/vm-dependencies.env
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
