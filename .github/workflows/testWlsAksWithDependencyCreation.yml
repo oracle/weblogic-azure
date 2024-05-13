@@ -27,6 +27,7 @@ env:
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
+    dbServerName: contoso
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
     wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
@@ -131,30 +132,19 @@ jobs:
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForDB }}
                     az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{ env.location }}
-            - name: Set Up Azure Postgresql to Test dbTemplate
-              id: setup-postgresql
-              uses: azure/CLI@v1
+
+            - uses: actions/checkout@v2.3.4
+            - name: Set up PostgreSQL Flexible Server that allows access from Azure services
+              uses: ./.github/actions/createPostgresqlFlexibleServer
               with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    echo "Deploy DB with name " ${{ env.dbName }}
-                    az postgres server create \
-                    --resource-group ${{ env.resourceGroupForDB }} \
-                    --name ${{ env.dbName }}  \
-                    --location ${{ env.location }} \
-                    --admin-user ${{ env.dbAdminUser }} \
-                    --ssl-enforcement Enabled \
-                    --public-network-access Enabled \
-                    --admin-password ${{ env.dbPassword }} \
-                    --sku-name B_Gen5_1
-                    sleep 2m
-                    echo "Allow Access To Azure Services"
-                    az postgres server firewall-rule create \
-                    -g ${{ env.resourceGroupForDB }} \
-                    -s ${{ env.dbName }} \
-                    -n "AllowAllWindowsAzureIps" \
-                    --start-ip-address "0.0.0.0" \
-                    --end-ip-address "0.0.0.0"
+                azCliVersion: ${{ env.azCliVersion }}
+                dbAdminUser: ${{ env.dbAdminUser }}
+                dbName: ${{ env.dbName }}
+                dbPassword: ${{ env.dbPassword }}
+                dbServerName: ${{ env.dbServerName }}
+                location: ${{ env.location }}
+                resourceGroupName: ${{ env.resourceGroupForDB }}     
+            
     deploy-storage-account:
         needs: preflight
         runs-on: ubuntu-latest
@@ -269,8 +259,8 @@ jobs:
                   ${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }} \
                   "${cargoTrackerBlobUrl}" \
                   ${dbPassword} \
-                  ${dbAdminUser}@${dbName} \
-                  jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/postgres \
+                  ${dbAdminUser} \
+                  jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/${{ env.dbServerName }} \
                   ${location} \
                   ${ocrSSOPSW} \
                   ${ocrSSOUser} \

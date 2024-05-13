@@ -1,0 +1,59 @@
+name: Create PostgreSQL Flexible Server
+description: Create  PostgreSQL Flexible Server that allows access from Azure services.
+inputs:
+  azCliVersion:
+    description: "Azure CLI Version"
+    required: true
+  dbAdminUser:
+    description: "Database Admin User"
+    required: true
+  dbName:
+    description: "Database Name"
+    required: true
+  dbPassword:
+    description: "Database Password"
+    required: true
+  dbServerName:
+    description: "Database Server Name"
+    required: true
+  location:
+    description: "Location"
+    required: true
+  resourceGroupName:
+    description: "Resource Group Name"
+    required: true
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Set Up Azure Postgresql that allows access from Azure services
+      id: setup-postgresql
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ inputs.azCliVersion }}
+        inlineScript: |
+          echo "Deploy DB with name " ${{ inputs.dbName }}
+          az postgres flexible-server create \
+            --resource-group ${{ inputs.resourceGroupName }} \
+            --name ${{ inputs.dbName }} \
+            --location ${{ inputs.location }} \
+            --admin-user ${{ inputs.dbAdminUser }} \
+            --admin-password ${{ inputs.dbPassword }} \
+            --version 16 \
+            --public-access 0.0.0.0 \
+            --tier Burstable \
+            --sku-name Standard_B1ms
+
+          az postgres flexible-server db create \
+            --resource-group ${{ inputs.resourceGroupName }} \
+            --server-name ${{ inputs.dbName }} \
+            --database-name ${{ inputs.dbServerName }}
+
+          sleep 1m
+          echo "Allow Access To Azure Services"
+          az postgres flexible-server firewall-rule create \
+            -g ${{ inputs.resourceGroupName }} \
+            -n ${{ inputs.dbName }} \
+            -r "AllowAllWindowsAzureIps" \
+            --start-ip-address "0.0.0.0" \
+            --end-ip-address "0.0.0.0"
