@@ -48,6 +48,15 @@ jobs:
           azCliVersion: ${{steps.set-az-cli-version.outputs.azCliVersion}}
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v2.3.4
+            - name: Set AZ CLI Version and save in variable azCliVersion              
+              uses: ./.github/actions/setvars
+              with:
+                varFilePath: ./.github/variables/vm-dependencies.env
+            - name: Output Az CLi version
+              id: set-az-cli-version
+              run: |
+                echo "azCliVersion=${azCliVersion}" >> $GITHUB_OUTPUT
             - name: Get versions of external dependencies
               id: get-external-dependencies-version
               run: |
@@ -55,12 +64,6 @@ jobs:
                 source external-deps-versions.properties
                 echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
                 echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
-            - uses: actions/checkout@v2.3.4
-            - name: Set AZ CLI Version
-              id: set-az-cli-version
-              uses: ./.github/actions/setvars
-              with:
-                varFilePath: ./.github/variables/vm-dependencies.env
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
