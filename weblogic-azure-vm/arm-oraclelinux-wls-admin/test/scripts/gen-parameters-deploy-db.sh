@@ -5,7 +5,7 @@
 #Generate parameters with value for deploying db template independently
 
 #read arguments from stdin
-read parametersPath adminVMName dbPassword dbName location wlsusername wlspassword repoPath testbranchName
+read parametersPath adminVMName dbPassword dbAdminUser dbName location wlsusername wlspassword repoPath testbranchName
 
 cat <<EOF > ${parametersPath}/parameters-deploy-db.json
 {
@@ -19,7 +19,7 @@ cat <<EOF > ${parametersPath}/parameters-deploy-db.json
         "value": "${dbPassword}"
       },
       "dbUser": {
-        "value": "weblogic@${dbName}"
+        "value": "${dbAdminUser}"
       },
       "dsConnectionURL": {
         "value": "jdbc:postgresql://${dbName}.postgres.database.azure.com:5432/postgres?sslmode=require"

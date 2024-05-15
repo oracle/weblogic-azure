@@ -414,6 +414,7 @@ jobs:
             <<< "${{ env.adminOfferPath }}/test/scripts/ \
             ${{ env.adminVMName }} \
             ${{ env.wlsPassword}} \
+            ${{ env.dbAdminUser }} \
             ${{ env.dbName }} \
             ${{ env.location }} \
             ${{ env.wlsUserName }} \
