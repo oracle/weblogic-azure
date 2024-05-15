@@ -32,7 +32,7 @@ runs:
       id: setup-postgresql
       uses: azure/CLI@v1
       with:
-        azcliversion: ${{ inputs.azCliVersion }}
+        azcliversion: ${{ env.azCliVersion }}
         inlineScript: |
           echo "Deploy DB with name " ${{ inputs.dbName }}
           az postgres flexible-server create \
@@ -45,7 +45,6 @@ runs:
             --public-access 0.0.0.0 \
             --tier Burstable \
             --sku-name Standard_B1ms \
-            --private-dns-zone zone$(date +%s) \
             --yes
 
           az postgres flexible-server db create \
