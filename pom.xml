@@ -43,9 +43,9 @@
         <version.wls-on-aks-azure-marketplace>1.0.76</version.wls-on-aks-azure-marketplace>
         <!--  weblogic azure vm versions  -->
         <version.arm-oraclelinux-wls>1.0.27</version.arm-oraclelinux-wls>
-        <version.arm-oraclelinux-wls-admin>1.0.50</version.arm-oraclelinux-wls-admin>
-        <version.arm-oraclelinux-wls-cluster>1.0.660000</version.arm-oraclelinux-wls-cluster>
-        <version.arm-oraclelinux-wls-dynamic-cluster>1.0.49</version.arm-oraclelinux-wls-dynamic-cluster>
+        <version.arm-oraclelinux-wls-admin>1.0.51</version.arm-oraclelinux-wls-admin>
+        <version.arm-oraclelinux-wls-cluster>1.0.670000</version.arm-oraclelinux-wls-cluster>
+        <version.arm-oraclelinux-wls-dynamic-cluster>1.0.50</version.arm-oraclelinux-wls-dynamic-cluster>
         <!--  node versions  -->
         <version.arm-oraclelinux-wls-dynamic-cluster-addnode>1.0.7</version.arm-oraclelinux-wls-dynamic-cluster-addnode>
         <version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>1.0.3</version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence>

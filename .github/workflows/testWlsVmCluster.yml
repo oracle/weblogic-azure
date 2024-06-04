@@ -25,7 +25,9 @@ env:
   adminConsolePort: 7001
   adminPassword: ${{ secrets.WLS_PSW }}
   adminVMName: adminServerVM
+  dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
+  dbServerName: weblogicdb
   elkURI: ${{ secrets.ELK_URI }}
   elkUser: ${{ secrets.ELK_USER_NAME }}
   elkPassword: ${{ secrets.ELK_PSW }}
@@ -214,30 +216,16 @@ jobs:
         run: |
           echo "create resource group" ${{ env.resourceGroupForDependency }}
           az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
-
-      - name: Set Up Azure Postgresql to Test dbTemplate
-        id: setup-postgresql
-        run: |
-          echo "Deploy DB with name " ${{ env.dbName }}
-          az postgres server create \
-          --resource-group ${{ env.resourceGroupForDependency }} \
-          --name ${{ env.dbName }}  \
-          --location ${location} \
-          --admin-user weblogic \
-          --ssl-enforcement Enabled \
-          --public-network-access Enabled \
-          --admin-password ${{ env.wlsPassword }} \
-          --sku-name B_Gen5_1
-
-          sleep 2m
-          
-          echo "Allow Access To Azure Services"
-          az postgres server firewall-rule create \
-          -g ${{ env.resourceGroupForDependency }} \
-          -s ${{ env.dbName }} \
-          -n "AllowAllWindowsAzureIps" \
-          --start-ip-address "0.0.0.0" \
-          --end-ip-address "0.0.0.0"
+      - uses: actions/checkout@v2.3.4
+      - name: Set up PostgreSQL Flexible Server that allows access from Azure services
+        uses: ./.github/actions/createPostgresqlFlexibleServer
+        with:
+          dbAdminUser: ${{ env.dbAdminUser }}
+          dbName: ${{ env.dbName }}
+          dbPassword: ${{ env.wlsPassword }}
+          dbServerName: ${{ env.dbServerName }}
+          location: ${{ env.location }}
+          resourceGroupName: ${{ env.resourceGroupForDependency }}
 
   deploy-weblogic-cluster:
     needs: [deploy-dependencies, preflight]
@@ -490,6 +478,7 @@ jobs:
             <<< "${{ env.offerPath }}/test/scripts/ \
             ${{ env.adminVMName }} \
             ${{ env.wlsPassword}} \
+            ${{ env.dbAdminUser }} \
             ${{ env.dbName }} \
             ${{ env.location }} \
             ${{ env.wlsUserName }} \
