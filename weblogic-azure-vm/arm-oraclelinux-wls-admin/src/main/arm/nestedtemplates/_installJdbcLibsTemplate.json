@@ -77,7 +77,7 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2023-07-01",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('adminVMName'), '/newuserscript')]",
             "location": "[parameters('location')]",

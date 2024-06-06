@@ -107,7 +107,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "uamiDeployment",
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2022-09-01",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -126,7 +126,7 @@
         },
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "apiVersion": "2023-08-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'uamiDeployment')]"
             ],
@@ -141,7 +141,7 @@
             "kind": "AzureCLI",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
-                "AzCliVersion": "${azure.cli.version}",
+                "AzCliVersion": "2.53.0",
                 "timeout": "PT30M",
                 "environmentVariables": [
                     {

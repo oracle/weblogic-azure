@@ -108,7 +108,7 @@
     },
     "variables": {
         "const_connectionString": "[if(and(equals(parameters('databaseType'),'sqlserver'), equals(last(parameters('dsConnectionURL')),';')), take(parameters('dsConnectionURL'), add(length(parameters('dsConnectionURL')),-1)),parameters('dsConnectionURL'))]",
-        "const_identityAPIVersion": "${azure.apiVersionForIdentity}",
+        "const_identityAPIVersion": "2023-01-31",
         "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
         "const_msiDefaultUser": "msiUser",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
@@ -137,8 +137,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "name": "${cluster.pswless.database.start}",
+            "apiVersion": "2022-09-01",
+            "name": "340f5265-6de7-5b6f-aad3-9f179736cde0",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -150,7 +150,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2022-09-01",
             "name": "[concat('assignDbIdentityTo',variables('const_managedVMPrefix'), copyIndex(1))]",
             "copy": {
                 "name": "virtualMachineIdentityLoop",
@@ -170,7 +170,7 @@
                         "value": "[variables('obj_dbIdentity')]"
                     },
                     "existingIdentities": {
-                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',concat(variables('const_managedVMPrefix'), copyIndex(1))), '${azure.apiVersionForDeployment}', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',concat(variables('const_managedVMPrefix'), copyIndex(1))), '${azure.apiVersionForDeployment}', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
+                        "value": "[if(equals(reference(resourceId('Microsoft.Compute/virtualMachines',concat(variables('const_managedVMPrefix'), copyIndex(1))), '2022-09-01', 'Full').identity.type,'UserAssigned'),reference(resourceId('Microsoft.Compute/virtualMachines',concat(variables('const_managedVMPrefix'), copyIndex(1))), '2022-09-01', 'Full').identity.userAssignedIdentities, variables('obj_empty'))]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -180,7 +180,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2022-09-01",
             "name": "installJdbcLibsTemplate",
             "condition": "[or(equals(parameters('databaseType'),'mysql'), equals(parameters('databaseType'),'postgresql'))]",
             "dependsOn": [
@@ -231,7 +231,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2022-09-01",
             "name": "passwordlessDatasourceDeployment",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
@@ -284,8 +284,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "name": "${cluster.pswless.database.end}",
+            "apiVersion": "2022-09-01",
+            "name": "b4d91140-fb26-50de-9358-147b9dd25f7a",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'passwordlessDatasourceDeployment')]"
             ],
