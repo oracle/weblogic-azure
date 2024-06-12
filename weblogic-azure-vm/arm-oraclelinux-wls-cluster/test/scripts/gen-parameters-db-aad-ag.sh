@@ -3,7 +3,7 @@
 # Copyright (c) 2021, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 # Description
-# This script is to generate test parameters for database datasource, AAD and Appgateway testing.
+# This script is to generate test parameters for database datasource, Entra ID and Appgateway testing.
 
 #read arguments from stdin
 read  parametersPath repoPath testbranchName keyVaultName keyVaultResourceGroup keyVaultSSLCertDataSecretName keyVaultSSLCertPasswordSecretName

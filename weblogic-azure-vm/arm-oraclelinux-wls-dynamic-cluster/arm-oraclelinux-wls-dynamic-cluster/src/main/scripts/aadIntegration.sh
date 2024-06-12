@@ -308,7 +308,7 @@ function importAADCertificate()
 {
     # import the key to java security 
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    # For AAD failure: exception happens when importing certificate to JDK 11.0.7
+    # For Entra ID failure: exception happens when importing certificate to JDK 11.0.7
     # ISSUE: https://github.com/wls-eng/arm-oraclelinux-wls/issues/109
     # JRE was removed since JDK 11.
     java_version=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*"/\1\2/p;')
@@ -345,14 +345,14 @@ function importAADCertificateIntoWLSCustomTrustKeyStore()
            exit 1
         fi
 
-        # For SSL enabled causes AAD failure #225
+        # For SSL enabled causes Entra ID failure #225
         # ISSUE: https://github.com/wls-eng/arm-oraclelinux-wls/issues/225
 
-        echo "Importing AAD Certificate into WLS Custom Trust Key Store: "
+        echo "Importing Entra ID Certificate into WLS Custom Trust Key Store: "
 
         sudo ${JAVA_HOME}/bin/keytool -noprompt -import -trustcacerts -keystore ${DOMAIN_PATH}/${wlsDomainName}/keystores/trust.keystore -storepass ${customTrustKeyStorePassPhrase} -alias aadtrust -file ${addsCertificate} -storetype ${customTrustKeyStoreType}
     else
-        echo "customSSL not enabled. Not required to configure AAD for WebLogic Custom SSL"
+        echo "customSSL not enabled. Not required to configure Entra ID for WebLogic Custom SSL"
     fi
 }
 
