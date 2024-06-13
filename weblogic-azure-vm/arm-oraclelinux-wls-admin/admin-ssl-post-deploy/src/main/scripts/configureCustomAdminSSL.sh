@@ -215,14 +215,14 @@ function importAADCertificateIntoWLSCustomTrustKeyStore()
             exit 1
         fi
 
-        # For SSL enabled causes AAD failure #225
+        # For SSL enabled causes Entra ID failure #225
         # ISSUE: https://github.com/wls-eng/arm-oraclelinux-wls/issues/225
 
-        echo "Importing AAD Certificate into WLS Custom Trust Key Store: "
+        echo "Importing Entra ID Certificate into WLS Custom Trust Key Store: "
 
         sudo ${JAVA_HOME}/bin/keytool -noprompt -import -trustcacerts -keystore $customSSLTrustKeyStoreFile -storepass $customTrustKeyStorePassPhrase -alias aadtrust -file ${addsCertificate} -storetype $customTrustKeyStoreType
     else
-        echo "customSSL not enabled. Not required to configure AAD for WebLogic Custom SSL"
+        echo "customSSL not enabled. Not required to configure Entra ID for WebLogic Custom SSL"
     fi
 }
 
