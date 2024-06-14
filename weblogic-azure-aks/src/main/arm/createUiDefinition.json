@@ -332,7 +332,11 @@
                                     "numAvailabilityZonesRequired": 3,
                                     "zone": "3",
                                     "excludedSizes": [
+                                        "Standard_A0",
+                                        "Standard_A1",
                                         "Standard_A1_v2",
+                                        "Standard_F1",
+                                        "Standard_F1s",
                                         "Standard_B12ms",
                                         "Standard_B16als_v2",
                                         "Standard_B16as_v2",
