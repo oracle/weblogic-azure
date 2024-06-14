@@ -19,6 +19,14 @@
                 "label": "Credentials for WebLogic",
                 "elements": [
                     {
+                        "name": "listVMSizes",
+                        "type": "Microsoft.Solutions.ArmApiControl",
+                        "request": {
+                            "method": "GET",
+                            "path": "[concat(subscription().id, '/providers/Microsoft.Compute/locations/',location(),'/vmSizes?api-version=2024-03-01')]"
+                        }
+                    },
+                    {
                         "name": "wlsUserName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Username for WebLogic Administrator",
@@ -375,57 +383,33 @@
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
-                                "name": "listVMSizes",
-                                "type": "Microsoft.Solutions.ArmApiControl",
-                                "request": {
-                                    "method": "GET",
-                                    "path": "[concat(subscription().id, '/providers/Microsoft.Compute/locations/',location(),'/vmSizes?api-version=2024-03-01')]"
-                                }
+                                "name": "aksNodeCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": "[add(1, div(add(12288, mul(if(empty(basics('basicsOptional').wlsClusterSize),5,basics('basicsOptional').wlsClusterSize), 1536)), first(filter(basics('basicsRequired').listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
+                                "defaultValue": 3,
+                                "max": 1000,
+                                "label": "Minimum node count",
+                                "showStepMarkers": false,
+                                "toolTip": "Set the minimum node count for the cluster.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
-                                "name": "aksNodeCount",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Minimum node count (The recommended value is calculated dynamically based on selected VM size)",
-                                "toolTip": "Set the minimum node count for the cluster.",
-                                "placeholder": "[add(1,div(16384, first(filter(steps('section_aks').clusterInfo.listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
-                                "multiLine": false,
-                                "constraints": {
-                                  "required": true,
-                                  "validations": [
-                                    {
-                                      "regex": "^([1-9][0-9]{0,2})$",
-                                      "message": "Only integer are allowed, and the value must be less than 1000."
-                                    },
-                                    {
-                                      "isValid": "[greaterOrEquals(steps('section_aks').clusterInfo.aksNodeCount, add(1,div(16384, first(filter(steps('section_aks').clusterInfo.listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB)))]",
-                                      "message": "Must meet the minimum requirement, please clean your input to see the recommended value."
-                                    }
-                                  ]
-                                },
-                                "visible": true
-                              },
-                              {
                                 "name": "aksNodeMaxCount",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Maximum node count (The recommended value is calculated dynamically based on selected VM size)",
+                                "type": "Microsoft.Common.Slider",
+                                "min": "[add(5,div(add(12288, mul(if(empty(basics('basicsOptional').wlsClusterSize),5,basics('basicsOptional').wlsClusterSize), 1536)), first(filter(basics('basicsRequired').listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
+                                "defaultValue": 50,
+                                "max": 1000,
+                                "label": "Maximum node count",
+                                "showStepMarkers": false,
                                 "toolTip": "Set the maximum node count for the cluster.",
-                                "placeholder": "[add(5,div(16384, first(filter(steps('section_aks').clusterInfo.listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
-                                "multiLine": false,
                                 "constraints": {
-                                  "required": true,
-                                  "validations": [
-                                    {
-                                      "regex": "^([1-9][0-9]{0,2})$",
-                                      "message": "Only integer are allowed, and the value must be less than 1000."
-                                    },
-                                    {
-                                      "isValid": "[greaterOrEquals(steps('section_aks').clusterInfo.aksNodeMaxCount, steps('section_aks').clusterInfo.aksNodeCount)]",
-                                      "message": "The number should not be less then the minimum node count."
-                                    }
-                                  ]
+                                    "required": true
                                 },
-                                "visible": true
-                              }
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            }
                         ]
                     },
                     {
