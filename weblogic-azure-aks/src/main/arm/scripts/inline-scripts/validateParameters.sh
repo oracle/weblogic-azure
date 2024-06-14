@@ -131,15 +131,15 @@ function validate_compute_resources() {
 # Minimum memory requirement: 12 + (APP_REPLICAS + 1)*1.5 GB
 function validate_memory_resources() {
   if [[ "${createAKSCluster,,}" == "true" ]]; then
-    local requiredMemoryinGB=$((12 + (APP_REPLICAS + 1)*1.5))
+    local requiredMemoryinGB=$(echo "12+($APP_REPLICAS+1)*1.5" | bc)
 
     local vmDetails=$(az vm list-skus --size ${aksAgentPoolVMSize} -l ${location} --query [0])
     validate_status "Query VM details of ${aksAgentPoolVMSize} in ${location}."
 
-    local memoryGB=$(echo ${vmDetails} | jq '.capabilities[] | select(.name=="memoryGB") | .value' | tr -d "\"")
-    local requestedMemory=$((aksAgentPoolNodeCount * memoryGB))
+    local memoryGB=$(echo ${vmDetails} | jq '.capabilities[] | select(.name=="MemoryGB") | .value' | tr -d "\"")
+    local requestedMemory=$(echo "$aksAgentPoolNodeCount*$memoryGB" | bc)
     echo_stdout "Current requested memory is ${requestedMemory}GB."
-    if [[ ${requestedMemory} -le ${requiredMemoryinGB} ]]; then
+    if [[ $(echo "${requestedMemory}<${requiredMemoryinGB}" | bc) -eq 1 ]]; then
       echo_stderr "It requires ${requiredMemoryinGB} GiB memory to create the AKS cluster, you have to select a larger VM size or increase node count."
       exit 1
     fi
@@ -621,8 +621,6 @@ checkDNSZone=${12}
 
 outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
-
-exit 1
 
 validate_compute_resources
 
