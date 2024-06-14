@@ -409,6 +409,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     appGatewayCertificateOption: appGatewayCertificateOption
     appGatewaySSLCertData: appGatewaySSLCertData
     appGatewaySSLCertPassword: appGatewaySSLCertPassword
+    appReplicas: appReplicas
     azCliVersion: const_azcliVersion
     createAKSCluster: createAKSCluster
     createDNSZone: createDNSZone
