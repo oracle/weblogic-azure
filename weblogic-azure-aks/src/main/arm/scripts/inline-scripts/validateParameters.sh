@@ -126,8 +126,8 @@ function validate_compute_resources() {
   echo_stdout "Check compute resources: passed!"
 }
 
-# The offer deploys a WLS cluster with 1 + ${APP_REPLICAS} pods, each pod request 1.5GB and 0.25CPU.
 # Ensure the cluster has enough memory resources.
+# The offer deploys a WLS cluster with 1 + ${APP_REPLICAS} pods, each pod requestes 1.5GB and 0.25CPU.
 # Minimum memory requirement: 12 + (APP_REPLICAS + 1)*1.5 GB
 function validate_memory_resources() {
   if [[ "${createAKSCluster,,}" == "true" ]]; then
