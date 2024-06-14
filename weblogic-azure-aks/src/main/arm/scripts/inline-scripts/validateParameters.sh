@@ -622,6 +622,8 @@ checkDNSZone=${12}
 outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 
+exit 1
+
 validate_compute_resources
 
 validate_memory_resources
