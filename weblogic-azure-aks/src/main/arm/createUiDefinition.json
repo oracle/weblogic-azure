@@ -378,10 +378,7 @@
                                         "Standard_B8pls_v2",
                                         "Standard_B8ps_v2",
                                         "Standard_B8s_v2",
-                                        "Standard_A2_v2",
-                                        "Standard_A4_v2",
-                                        "Standard_A2m_v2",
-                                        "Standard_A4m_v2"
+                                        "Standard_A2_v2"
                                     ]
                                 },
                                 "options": {
@@ -390,6 +387,15 @@
                                 "osPlatform": "Linux",
                                 "count": "[steps('section_aks').clusterInfo.aksNodeCount]",
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "vmSizeInfoBox",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[contains(parse('[\"Standard_A4_v2\", \"Standard_A2m_v2\", \"Standard_A4m_v2\"]'),steps('section_aks').clusterInfo.nodeVMSizeSelector)]",
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "Node sizes 'Standard_A4_v2', 'Standard_A2m_v2' and 'Standard_A4m_v2' are not recommended due to inconsistent availability."
+                                }
                             },
                             {
                                 "name": "aksNodeCount",
