@@ -82,6 +82,16 @@ spec:
 
   # Settings for all server pods in the domain including the introspector job pod
   serverPod:
+    # Tune for small VM sizes
+    # https://oracle.github.io/weblogic-kubernetes-operator/managing-domains/domain-lifecycle/liveness-readiness-probe-customization/
+    livenessProbe:
+      periodSeconds: ${constLivenessProbePeriodSeconds}
+      timeoutSeconds: ${constLivenessProbeTimeoutSeconds}
+      failureThreshold: ${constLivenessProbeFailureThreshold}
+    readinessProbe:
+      periodSeconds: ${constReadinessProbeProbePeriodSeconds}
+      timeoutSeconds: ${constReadinessProbeTimeoutSeconds}
+      failureThreshold: ${constReadinessProbeFailureThreshold}
     # Optional new or overridden environment variables for the domain's pods
     # - This sample uses CUSTOM_DOMAIN_NAME in its image model file 
     #   to set the Weblogic domain name
