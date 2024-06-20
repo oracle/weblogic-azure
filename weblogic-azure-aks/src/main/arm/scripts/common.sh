@@ -41,7 +41,7 @@ export constLivenessProbeTimeoutSeconds=5
 export constLivenessProbeFailureThreshold=20
 export constReadinessProbeProbePeriodSeconds=10
 export constReadinessProbeTimeoutSeconds=5
-export constReadinessProbeFailureThreshold=30
+export constReadinessProbeFailureThreshold=3
 
 export curlMaxTime=120 # seconds
 export ocrLoginServer="container-registry.oracle.com"
