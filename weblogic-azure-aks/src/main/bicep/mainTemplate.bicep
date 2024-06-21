@@ -324,6 +324,7 @@ var const_hasTags = contains(resourceGroup(), 'tags')
 // * generate selfsigned certificate for gateway frontend TLS/SSL.
 var const_bCreateNewKeyVault = (!const_hasTags || !contains(resourceGroup().tags, name_tagNameForKeyVault) || empty(resourceGroup().tags.wlsKeyVault)) && ((enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) || (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)))
 var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
+var const_bValidateApplications= validateApplications && (length(appPackageUrls) > 0)
 var const_createNewAcr = useOracleImage && createACR
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
@@ -821,7 +822,7 @@ module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.
 * To check if all the applciations in WLS cluster become ACTIVE state after all configurations are completed.
 * This should be the last step.
 */
-module validateApplciations 'modules/_deployment-scripts/_ds-validate-applications.bicep' = if (validateApplications) {
+module validateApplciations 'modules/_deployment-scripts/_ds-validate-applications.bicep' = if (const_bValidateApplications) {
   name: 'validate-wls-application-status'
   params: {
     _artifactsLocation: _artifactsLocation
