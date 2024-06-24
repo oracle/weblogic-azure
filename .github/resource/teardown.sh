@@ -11,6 +11,3 @@ yq eval -o=json '.[]' "$param_file" | jq -c '.' | while read -r line; do
 done
 
 echo "teardown-credentials.sh - Finish"
-
-
-
