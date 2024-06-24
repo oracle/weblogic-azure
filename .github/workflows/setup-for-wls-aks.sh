@@ -27,7 +27,7 @@ set -Eeuo pipefail
 
 source ../resource/pre-check.sh
 ## Set environment variables
-export param_file="../resource/credentials-params.yaml"
+export param_file="../resource/credentials-params-wls-aks.yaml"
 
 source ../resource/setup.sh
 
