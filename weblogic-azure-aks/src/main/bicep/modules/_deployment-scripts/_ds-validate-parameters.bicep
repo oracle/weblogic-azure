@@ -12,6 +12,7 @@ param appGatewayCertificateOption string
 param appGatewaySSLCertData string
 @secure()
 param appGatewaySSLCertPassword string
+param appReplicas int
 param azCliVersion string = ''
 param createAKSCluster bool
 param createDNSZone bool
@@ -120,6 +121,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'AKS_VERSION'
         value: aksVersion
+      }
+      {
+        name: 'APP_REPLICAS'
+        value: appReplicas
       }
       {
         name: 'WLS_SSL_KEYVAULT_NAME'

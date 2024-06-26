@@ -126,6 +126,29 @@ function validate_compute_resources() {
   echo_stdout "Check compute resources: passed!"
 }
 
+# Ensure the cluster has enough memory resources.
+# The offer deploys a WLS cluster with 1 + ${APP_REPLICAS} pods, each pod requestes 1.5GB and 0.25CPU.
+# Minimum memory requirement: 12 + (APP_REPLICAS + 1)*1.5 GB
+function validate_memory_resources() {
+  if [[ "${createAKSCluster,,}" == "true" ]]; then
+    local requiredMemoryinGB=$(echo "12+($APP_REPLICAS+1)*1.5" | bc)
+
+    local vmDetails=$(az vm list-skus --size ${aksAgentPoolVMSize} -l ${location} --query [0])
+    validate_status "Query VM details of ${aksAgentPoolVMSize} in ${location}."
+
+    local memoryGB=$(echo ${vmDetails} | jq '.capabilities[] | select(.name=="MemoryGB") | .value' | tr -d "\"")
+    local requestedMemory=$(echo "$aksAgentPoolNodeCount*$memoryGB" | bc)
+    echo_stdout "Current requested memory is ${requestedMemory}GB."
+    if [[ $(echo "${requestedMemory}<${requiredMemoryinGB}" | bc) -eq 1 ]]; then
+      echo_stderr "It requires ${requiredMemoryinGB} GiB memory to create the AKS cluster, you have to select a larger VM size or increase node count."
+      exit 1
+    fi
+
+  fi
+
+  echo_stdout "Check memory resources: passed!"
+}
+
 function validate_ocr_account() {
   # install docker cli
   install_docker
@@ -600,6 +623,8 @@ outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 
 validate_compute_resources
+
+validate_memory_resources
 
 validate_base_image_path
 

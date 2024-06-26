@@ -3,7 +3,7 @@
 # This script runs on Azure Container Instance with Alpine Linux that Azure Deployment script creates.
 
 export checkPodStatusInterval=20 # interval of checking pod status.
-export checkPodStatusMaxAttemps=100 # max attempt to check pod status.
+export checkPodStatusMaxAttemps=200 # max attempt to check pod status.
 export checkPVStateInterval=5 # interval of checking pvc status.
 export checkPVStateMaxAttempt=10 # max attempt to check pvc status.
 export checkSVCStateMaxAttempt=50
@@ -36,6 +36,12 @@ export constMSSQLDriverName="mssql-jdbc-10.2.1.jre8.jar"
 export constAzureCoreVersion="1.34.0"
 export constDbPodIdentitySelector="db-pod-identity" # do not change the value
 export constPreclassDirectoryName="preclassLibraries"
+export constLivenessProbePeriodSeconds=30
+export constLivenessProbeTimeoutSeconds=5
+export constLivenessProbeFailureThreshold=20
+export constReadinessProbeProbePeriodSeconds=10
+export constReadinessProbeTimeoutSeconds=5
+export constReadinessProbeFailureThreshold=3
 
 export curlMaxTime=120 # seconds
 export ocrLoginServer="container-registry.oracle.com"

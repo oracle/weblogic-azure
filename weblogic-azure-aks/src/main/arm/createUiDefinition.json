@@ -19,6 +19,14 @@
                 "label": "Credentials for WebLogic",
                 "elements": [
                     {
+                        "name": "listVMSizes",
+                        "type": "Microsoft.Solutions.ArmApiControl",
+                        "request": {
+                            "method": "GET",
+                            "path": "[concat(subscription().id, '/providers/Microsoft.Compute/locations/',location(),'/vmSizes?api-version=2024-03-01')]"
+                        }
+                    },
+                    {
                         "name": "wlsUserName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Username for WebLogic Administrator",
@@ -311,34 +319,6 @@
                                         "uri": "https://aka.ms/wls-aks-well-tested-version"
                                     }
                                 }
-                            },                            
-                            {
-                                "name": "aksNodeCount",
-                                "type": "Microsoft.Common.Slider",
-                                "min": 1,
-                                "max": 100,
-                                "label": "Minimum node count",
-                                "defaultValue": 3,
-                                "showStepMarkers": false,
-                                "toolTip": "Set the minimum node count for the cluster.",
-                                "constraints": {
-                                    "required": true
-                                },
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
-                            },
-                            {
-                                "name": "aksNodeMaxCount",
-                                "type": "Microsoft.Common.Slider",
-                                "min": "[int(steps('section_aks').clusterInfo.aksNodeCount)]",
-                                "max": 100,
-                                "label": "Maximum node count",
-                                "defaultValue": 5,
-                                "showStepMarkers": false,
-                                "toolTip": "Set the maximum node count for the cluster.",
-                                "constraints": {
-                                    "required": true
-                                },
-                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
                                 "name": "nodeVMSizeSelector",
@@ -350,13 +330,89 @@
                                 ],
                                 "constraints": {
                                     "numAvailabilityZonesRequired": 3,
-                                    "zone": "3"
+                                    "zone": "3",
+                                    "excludedSizes": [
+                                        "Standard_A0",
+                                        "Standard_A1",
+                                        "Standard_A1_v2",
+                                        "Standard_F1",
+                                        "Standard_F1s",
+                                        "Standard_B12ms",
+                                        "Standard_B16als_v2",
+                                        "Standard_B16as_v2",
+                                        "Standard_B16ls_v2",
+                                        "Standard_B16ms",
+                                        "Standard_B16pls_v2",
+                                        "Standard_B16ps_v2",
+                                        "Standard_B16s_v2",
+                                        "Standard_B1ls",
+                                        "Standard_B1ms",
+                                        "Standard_B1s",
+                                        "Standard_B20ms",
+                                        "Standard_B2als_v2",
+                                        "Standard_B2as_v2",
+                                        "Standard_B2ats_v2",
+                                        "Standard_B2ls_v2",
+                                        "Standard_B2ms",
+                                        "Standard_B2pls_v2",
+                                        "Standard_B2ps_v2",
+                                        "Standard_B2pts_v2",
+                                        "Standard_B2s",
+                                        "Standard_B2s_v2",
+                                        "Standard_B2ts_v2",
+                                        "Standard_B32als_v2",
+                                        "Standard_B32as_v2",
+                                        "Standard_B32ls_v2",
+                                        "Standard_B32s_v2",
+                                        "Standard_B4als_v2",
+                                        "Standard_B4as_v2",
+                                        "Standard_B4ls_v2",
+                                        "Standard_B4ms",
+                                        "Standard_B4pls_v2",
+                                        "Standard_B4ps_v2",
+                                        "Standard_B4s_v2",
+                                        "Standard_B8als_v2",
+                                        "Standard_B8as_v2",
+                                        "Standard_B8ls_v2",
+                                        "Standard_B8ms",
+                                        "Standard_B8pls_v2",
+                                        "Standard_B8ps_v2",
+                                        "Standard_B8s_v2"
+                                    ]
                                 },
                                 "options": {
                                     "hideDiskTypeFilter": false
                                 },
                                 "osPlatform": "Linux",
                                 "count": "[steps('section_aks').clusterInfo.aksNodeCount]",
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "aksNodeCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": "[add(1, div(add(12288, mul(if(empty(basics('basicsOptional').wlsClusterSize),5,basics('basicsOptional').wlsClusterSize), 1536)), first(filter(basics('basicsRequired').listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
+                                "defaultValue": 3,
+                                "max": 998,
+                                "label": "Minimum node count",
+                                "showStepMarkers": false,
+                                "toolTip": "Set the minimum node count for the cluster.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
+                            },
+                            {
+                                "name": "aksNodeMaxCount",
+                                "type": "Microsoft.Common.Slider",
+                                "min": "[add(steps('section_aks').clusterInfo.aksNodeCount,2)]",
+                                "defaultValue": 3,
+                                "max": 1000,
+                                "label": "Maximum node count",
+                                "showStepMarkers": false,
+                                "toolTip": "Set the maximum node count for the cluster.",
+                                "constraints": {
+                                    "required": true
+                                },
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             }
                         ]
@@ -2024,7 +2080,8 @@
                                         }
                                     ]
                                 },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(and(steps('section_database').databaseConnectionInfo.enablePswlessConnection0, equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))))]"                            },
+                                "visible": "[and(bool(steps('section_database').enableDB), not(and(steps('section_database').databaseConnectionInfo.enablePswlessConnection0, equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))))]"
+                            },
                             {
                                 "name": "enablePswlessConnection",
                                 "type": "Microsoft.Common.CheckBox",
@@ -2258,7 +2315,7 @@
                                 "visible": "[equals(steps('section_autoScaling').autoScalingInfo.kmsMetrics, 'memory')]"
                             }
                         ],
-                    "visible": "[bool(steps('section_autoScaling').enableAutoscaling)]"
+                        "visible": "[bool(steps('section_autoScaling').enableAutoscaling)]"
                     }
                 ]
             }
