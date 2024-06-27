@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Copyright (c) IBM Corporation.
-# Copyright (c) Microsoft Corporation.
 
 set -Eeuo pipefail
 
