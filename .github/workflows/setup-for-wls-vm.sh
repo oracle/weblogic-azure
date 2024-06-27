@@ -28,6 +28,5 @@ set -Eeuo pipefail
 source ../resource/pre-check.sh
 ## Set environment variables
 export param_file="../resource/credentials-params-wls-vm.yaml"
+source ../resource/credentials-params-setup.sh
 source ../resource/azure-credential-setup-wls-vm.sh
-source ../resource/setup.sh
-

@@ -25,5 +25,5 @@ set -Eeuo pipefail
 source ../resource/pre-check.sh
 ## Set environment variables
 export param_file="../resource/credentials-params-wls-aks.yaml"
+source ../resource/credentials-params-teardown.sh
 source ../resource/azure-credential-teardown-wls-aks.sh
-source ../resource/teardown.sh
