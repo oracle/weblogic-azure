@@ -21,7 +21,7 @@ spec:
     namespace: @NAMESPACE@
   azureFile:
     secretName: azure-secret
-    shareName: weblogic
+    shareName: @FILE_SHARE_NAME@
     readOnly: false
   mountOptions:
   - dir_mode=0777

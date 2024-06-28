@@ -323,6 +323,7 @@ var const_createNewAcr = useOracleImage && createACR
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
 var const_enablePV = enableCustomSSL || enableAzureFileShare
+var const_fileShareName = 'weblogic-${uniqueString(utcValue)}'
 var const_hasStorageAccount = !createAKSCluster && queryStorageAccount.outputs.storageAccount != 'null'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
 var const_showAdminConsoleExUrl = (length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForAdminServer)
@@ -580,6 +581,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePswlessConnection: enablePswlessConnection
     enablePV: const_enablePV
+    fileShareName: const_fileShareName
     identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
     location: location
@@ -651,6 +653,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePswlessConnection: enablePswlessConnection
     enablePV: const_enablePV
+    fileShareName: const_fileShareName
     identity: obj_uamiForDeploymentScript
     isSSOSupportEntitled: isSSOSupportEntitled
     location: location

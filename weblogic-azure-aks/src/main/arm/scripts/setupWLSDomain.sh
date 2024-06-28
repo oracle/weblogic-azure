@@ -548,6 +548,7 @@ function create_pv() {
     sed -i -e "s:@PV_NAME@:${pvName}:g" ${customPVYaml}
     sed -i -e "s:@PVC_NAME@:${pvcName}:g" ${customPVYaml}
     sed -i -e "s:@STORAGE_ACCOUNT@:${STORAGE_ACCOUNT_NAME}:g" ${customPVYaml}
+    sed -i -e "s:@FILE_SHARE_NAME@:${FILE_SHARE_NAME}:g" ${customPVYaml}
 
     # generate pv configurations
     customPVCYaml=${scriptDir}/pvc.yaml
