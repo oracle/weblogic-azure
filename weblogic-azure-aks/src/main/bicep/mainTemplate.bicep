@@ -345,8 +345,6 @@ var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCert
 var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
 var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
 var name_storageAccountName = const_hasStorageAccount ? queryStorageAccount.outputs.storageAccount : 'wls${uniqueString(utcValue)}'
-var name_tagNameForKeyVault = 'wlsKeyVault'
-var name_tagNameForStorageAccount = 'wlsStorageAccount'
 var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData'
 var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw'
 var ref_wlsDomainDeployment = _enableCustomSSL ? wlsDomainWithCustomSSLDeployment : wlsDomainDeployment
@@ -688,22 +686,6 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   dependsOn: [
     wlsSSLCertSecretsDeployment
     queryStorageAccount
-  ]
-}
-
-/*
- * Update tags to save key vault name and storage account name that are used for current configuration
-*/
-resource applyTags 'Microsoft.Resources/tags@${azure.apiVersionForTags}' = {
-  name: 'default'
-  properties: {
-    tags: {
-      '${name_tagNameForKeyVault}': name_keyVaultName
-      '${name_tagNameForStorageAccount}': (const_bCreateStorageAccount || const_hasStorageAccount) ? name_storageAccountName : ''
-    }
-  }
-  dependsOn: [
-    appgwSecretDeployment
   ]
 }
 
