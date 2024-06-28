@@ -317,12 +317,6 @@ var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
 var const_azcliVersion = '2.53.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
-var const_hasTags = contains(resourceGroup(), 'tags')
-// If there is not tag 'wlsKeyVault' and key vault is created for the following usage:
-// * upload custom TLS/SSL certificates for WLS trust and identity.
-// * upload custom certificate for gateway frontend TLS/SSL.
-// * generate selfsigned certificate for gateway frontend TLS/SSL.
-var const_bCreateNewKeyVault = (!const_hasTags || !contains(resourceGroup().tags, name_tagNameForKeyVault) || empty(resourceGroup().tags.wlsKeyVault)) && ((enableCustomSSL && sslConfigurationAccessOption != const_wlsSSLCertOptionKeyVault) || (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)))
 var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
 var const_bValidateApplications= validateApplications && (length(appPackageUrls) > 0)
 var const_createNewAcr = useOracleImage && createACR
@@ -331,7 +325,6 @@ var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
 var const_enablePV = enableCustomSSL || enableAzureFileShare
 var const_hasStorageAccount = !createAKSCluster && queryStorageAccount.outputs.storageAccount != 'null'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
-var const_keyvaultNameFromTag = const_hasTags && contains(resourceGroup().tags, name_tagNameForKeyVault) ? resourceGroup().tags.wlsKeyVault : ''
 var const_showAdminConsoleExUrl = (length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForAdminServer)
 var const_showRemoteAdminConsoleExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && !enableCustomSSL
 var const_showRemoteAdminConsoleSecuredExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && enableCustomSSL
@@ -346,7 +339,7 @@ var name_dnsNameforApplicationGateway = '${dnsNameforApplicationGateway}${take(u
 var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGateway}-${toLower(name_rgNameWithoutSpecialCharacter)}-${toLower(wlsDomainName)}', 63)
 var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData'
 var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw'
-var name_keyVaultName = empty(const_keyvaultNameFromTag) ? '${take('wls-kv${uniqueString(utcValue)}', 24)}' : resourceGroup().tags.wlsKeyVault
+var name_keyVaultName = '${take('wls-kv${uniqueString(utcValue)}', 24)}'
 var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias'
 var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
 var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
@@ -705,7 +698,7 @@ resource applyTags 'Microsoft.Resources/tags@${azure.apiVersionForTags}' = {
   name: 'default'
   properties: {
     tags: {
-      '${name_tagNameForKeyVault}': const_bCreateNewKeyVault ? name_keyVaultName : const_keyvaultNameFromTag
+      '${name_tagNameForKeyVault}': name_keyVaultName
       '${name_tagNameForStorageAccount}': (const_bCreateStorageAccount || const_hasStorageAccount) ? name_storageAccountName : ''
     }
   }
