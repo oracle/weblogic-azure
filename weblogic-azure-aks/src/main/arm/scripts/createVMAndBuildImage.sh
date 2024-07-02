@@ -32,15 +32,6 @@ function cleanup_vm() {
 | where nics == 1 or nic.properties.primary =~ 'true' or isempty(nic) \
 | project nicId = tostring(nic.id)" --query "data[0].nicId" -o tsv)
 
-    # query ip id
-    ipId=$(az graph query -q "Resources \
-| where type =~ 'microsoft.network/networkinterfaces' \
-| where id=~ '${nicId}' \
-| extend ipConfigsCount=array_length(properties.ipConfigurations) \
-| mv-expand ipconfig=properties.ipConfigurations \
-| where ipConfigsCount == 1 or ipconfig.properties.primary =~ 'true' \
-| project  publicIpId = tostring(ipconfig.properties.publicIPAddress.id)" --query "data[0].publicIpId" -o tsv)
-
     # query os disk id
     osDiskId=$(az graph query -q "Resources \
 | where type =~ 'microsoft.compute/virtualmachines' \
@@ -67,8 +58,6 @@ function cleanup_vm() {
     az vm delete --ids $vmId --yes
     echo "deleting nic ${nicId}"
     az network nic delete --ids ${nicId}
-    echo "deleting public-ip ${ipId}"
-    az network public-ip delete --ids ${ipId}
     echo "deleting disk ${osDiskId}"
     az disk delete --yes --ids ${osDiskId}
     echo "deleting vnet ${vnetId}"
@@ -120,6 +109,7 @@ function build_docker_image() {
     --enable-agent true \
     --vnet-name ${vmName}VNET \
     --enable-auto-update false \
+    --public-ip-address "" \
     --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
     if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]]; then

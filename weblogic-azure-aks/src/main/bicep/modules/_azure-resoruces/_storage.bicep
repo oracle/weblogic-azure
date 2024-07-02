@@ -1,13 +1,13 @@
 // Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param fileShareName string
 param location string
 param storageAccountName string = 'stg-contoso'
 param utcValue string = utcNow()
 
 var const_shareQuota = 5120
 var const_sku = 'Standard_LRS'
-var name_fileShare = 'weblogic'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionForStorage}' = {
   name: storageAccountName
@@ -40,7 +40,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionFor
 }
 
 resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@${azure.apiVersionForStorageFileService}' = {
-  name: '${storageAccount.name}/default/${name_fileShare}'
+  name: '${storageAccount.name}/default/${fileShareName}'
   properties: {
     accessTier: 'TransactionOptimized'
     shareQuota: const_shareQuota

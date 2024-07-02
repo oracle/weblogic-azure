@@ -19,6 +19,7 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 param enablePswlessConnection bool = false
 param enablePV bool = false
+param fileShareName string
 param identity object = {}
 param isSSOSupportEntitled bool
 param location string
@@ -128,6 +129,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'ENABLE_PV'
         value: string(enablePV)
+      }
+      {
+        name: 'FILE_SHARE_NAME'
+        value: fileShareName
       }
       {
         name: 'ORACLE_ACCOUNT_NAME'

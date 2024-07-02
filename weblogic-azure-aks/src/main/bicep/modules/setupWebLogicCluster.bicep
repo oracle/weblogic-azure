@@ -69,6 +69,7 @@ param enableAdminT3Tunneling bool = false
 param enableClusterT3Tunneling bool = false
 param enablePswlessConnection bool = false
 param enablePV bool = false
+param fileShareName string = ''
 @description('An user assigned managed identity. Make sure the identity has permission to create/update/delete/list Azure resources.')
 param identity object = {}
 param isSSOSupportEntitled bool
@@ -178,6 +179,7 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
 module storageDeployment './_azure-resoruces/_storage.bicep' = if (createStorageAccount) {
   name: 'storage-deployment'
   params: {
+    fileShareName: fileShareName
     location: location
     storageAccountName: storageAccountName
   }
@@ -208,6 +210,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     enableClusterT3Tunneling: enableClusterT3Tunneling
     enablePswlessConnection: enablePswlessConnection
     enablePV: enablePV
+    fileShareName: fileShareName
     identity: identity
     isSSOSupportEntitled: isSSOSupportEntitled
     location: location
