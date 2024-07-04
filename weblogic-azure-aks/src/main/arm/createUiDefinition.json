@@ -428,12 +428,12 @@
                                 "visible": "[bool(steps('section_aks').clusterInfo.createAKSCluster)]"
                             },
                             {
-                            "name": "invalidVMSizeInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[contains(steps('section_aks').clusterInfo.nodeVMSizeSelector,'p')]",
-                                "options": {
-                                    "icon": "Error",
-                                    "text": "ARM CPUs are not supported. Please select a different VM size. For guidance on excluding ARM CPUs, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
+                                "name": "invalidVMSizeInfo",
+                                    "type": "Microsoft.Common.InfoBox",
+                                    "visible": "[contains(steps('section_aks').clusterInfo.nodeVMSizeSelector,'p')]",
+                                    "options": {
+                                        "icon": "Error",
+                                        "text": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM CPUs are not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
                                 }
                             },
                             {
