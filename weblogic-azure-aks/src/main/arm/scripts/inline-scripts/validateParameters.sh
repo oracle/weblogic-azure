@@ -51,6 +51,14 @@ function validate_status() {
   fi
 }
 
+function validate_cpu_architecture() {
+  # check if the current CPU architecture is ARM
+  if [[ "${aksAgentPoolVMSize}" != "*p*" ]]; then
+    echo_stderr "ERROR: The current CPU architecture is ${aksAgentPoolVMSize}, ARM CPus is not supported. Please select a different VM size. For guidance on excluding ARM CPUs, refer to https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions."
+    exit 1
+  fi
+}
+
 # Validate compute resources
 # Check points:
 #   - there is enough resource for AKS cluster
@@ -622,6 +630,8 @@ checkDNSZone=${12}
 outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 
+validate_cpu_architecture
+
 validate_compute_resources
 
 validate_memory_resources
@@ -651,4 +661,3 @@ fi
 validate_appgateway_vnet
 
 output_result
-
