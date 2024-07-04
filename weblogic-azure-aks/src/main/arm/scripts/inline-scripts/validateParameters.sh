@@ -53,7 +53,7 @@ function validate_status() {
 
 function validate_cpu_architecture() {
   # check if the current CPU architecture is ARM
-  if [[ "${aksAgentPoolVMSize}" != "*p*" ]]; then
+  if [[ "$aksAgentPoolVMSize" == *"p"* ]]; then
     echo_stderr "ERROR: The current CPU architecture is ${aksAgentPoolVMSize}, ARM CPus is not supported. Please select a different VM size. For guidance on excluding ARM CPUs, refer to https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions."
     exit 1
   fi
