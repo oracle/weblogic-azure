@@ -598,7 +598,7 @@ function validate_appgateway_vnet() {
 
 function query_available_zones() {
   if [[ "${createAKSCluster,,}" == "true" ]]; then
-    outputAvailableZones=$(az vm list-skus -l ${location} --size ${aksAgentPoolVMSize} --zone true | jq '.[] | .locationInfo[] | .zones')
+    outputAvailableZones=$(az vm list-skus -l ${location} --size ${aksAgentPoolVMSize} --zone true | jq -c '.[] | .locationInfo[] | .zones')
   fi
 
   if [ -z "${outputAvailableZones}" ]; then  
