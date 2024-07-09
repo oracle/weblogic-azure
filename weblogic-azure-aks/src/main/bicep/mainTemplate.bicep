@@ -567,6 +567,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
+    aksAgentAvailabilityZones:validateInputs.outputs.aksAgentAvailabilityZones
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
@@ -639,6 +640,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
+    aksAgentAvailabilityZones:validateInputs.outputs.aksAgentAvailabilityZones
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
