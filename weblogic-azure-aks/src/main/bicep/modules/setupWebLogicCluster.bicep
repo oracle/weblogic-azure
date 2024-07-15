@@ -29,7 +29,6 @@ param aciRetentionInDays int = 120
 param aciWorkspaceSku string = 'pergb2018'
 param acrName string = ''
 param acrResourceGroupName string = ''
-param aksAgentAvailabilityZones array = []
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
@@ -57,6 +56,7 @@ param appPackageUrls array = []
 @description('The number of managed server to start.')
 param appReplicas int = 2
 param azCliVersion string = ''
+param cpuPlatform string = 'linux/amd64'
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
@@ -162,7 +162,6 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
     aciResourcePermissions: aciResourcePermissions
     aciRetentionInDays: aciRetentionInDays
     aciWorkspaceSku: aciWorkspaceSku
-    agentAvailabilityZones: aksAgentAvailabilityZones
     aksAgentPoolName: aksAgentPoolName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
@@ -205,6 +204,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: azCliVersion
+    cpuPlatform: cpuPlatform
     databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableCustomSSL: enableCustomSSL

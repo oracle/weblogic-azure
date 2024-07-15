@@ -7,7 +7,6 @@ param aciResourcePermissions bool = true
 param aciRetentionInDays int = 120
 @description('Pricing tier: PerGB2018 or legacy tiers (Free, Standalone, PerNode, Standard or Premium) which are not available to all customers.')
 param aciWorkspaceSku string = 'pergb2018'
-param agentAvailabilityZones array = []
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
@@ -28,6 +27,11 @@ param location string
 param utcValue string = utcNow()
 
 var const_aksAgentPoolOSDiskSizeGB = 128
+var const_aksAvailabilityZones = [
+  '1'
+  '2'
+  '3'
+]
 var name_aciWorkspace = 'Workspace-${guid(utcValue)}-${location}'
 // Generate a unique AKS name scoped to subscription. 
 var name_aksClusterNameForSV = '${aksClusterNamePrefix}${uniqueString(utcValue)}'
@@ -75,7 +79,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersi
         osDiskType: 'Managed'
         kubeletDiskType: 'OS'
         type: 'VirtualMachineScaleSets'
-        availabilityZones: agentAvailabilityZones
+        availabilityZones: const_aksAvailabilityZones
         mode: 'System'
         osType: 'Linux'
       }

@@ -329,6 +329,8 @@
                                     "Standard_DS2_v2"
                                 ],
                                 "constraints": {
+                                    "numAvailabilityZonesRequired": 3,
+                                    "zone": "3",
                                     "excludedSizes": [
                                         "Standard_A0",
                                         "Standard_A1",
@@ -600,6 +602,15 @@
                                             "message": "Must be a valid Docker tag for WebLogic on Oracle Container Registry"
                                         }
                                     ]
+                                }
+                            },
+                            {
+                                "name": "unsupportedPlatformInfo1",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[and(contains(steps('section_aks').clusterInfo.nodeVMSizeSelector,'p'), not(contains(parse('[\"14.1.1.0-11\", \"14.1.1.0-8\", \"14.1.1.0-slim-11\", \"14.1.1.0-slim-8\", \"12.2.1.4\", \"12.2.1.4-slim\"]'),if(equals(steps('section_aks').imageInfo.oracleImageSelector, 'others'), steps('section_aks').imageInfo.fromOracleImage, steps('section_aks').imageInfo.oracleImageSelector))))]",
+                                "options": {
+                                    "icon": "Error",
+                                    "text": "The selected image is not compatible with the ARM64 platform. Please choose a different image or select a different size from <b>AKS</b> -> <b>Azure Kubernetes Service</b> -> <b>Node size</b>. For more information, see https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions."
                                 }
                             }
                         ],

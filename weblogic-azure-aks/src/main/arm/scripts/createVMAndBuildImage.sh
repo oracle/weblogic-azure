@@ -96,13 +96,32 @@ function build_docker_image() {
     # Create vm to build docker image
     vmName="VM-UBUNTU-WLS-AKS-$(date +%s)"
 
+    # az vm image list --publisher Canonical --offer UbuntuServer --all -o table
+    ubuntuImage="Canonical:UbuntuServer:18.04-LTS:latest"
+
+    if [[ "${CPU_PLATFORM}" == "${constARM64Platform}" ]]; then
+        ubuntuImage="Canonical:UbuntuServer:18_04-lts-arm64:latest"
+    fi
+
+    # query AKS vm size
+    # use the same VM size to create the Ubuntu machine, make sure the architecture is matched.
+    local vmSize=$(az aks show --name ${AKS_CLUSTER_NAME} --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
+        | jq '.agentPoolProfiles[] | select(.name=="agentpool") | .vmSize' \
+        | tr -d "\"")
+    
+    # if vmSize is empty or null, exit
+    if [[ "${vmSize}" == "" || "${vmSize}" == "null" ]]; then
+        echo_stderr "Failed to obtain VM size of AKS ${AKS_CLUSTER_NAME} in ${AKS_CLUSTER_RESOURCEGROUP_NAME}."
+        exit 1
+    fi
+
     # MICROSOFT_INTERNAL
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
     # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which causes vm-redeployed issue
     az vm create \
     --resource-group ${CURRENT_RESOURCEGROUP_NAME} \
     --name ${vmName} \
-    --image "Canonical:UbuntuServer:18.04-LTS:latest" \
+    --image "${ubuntuImage}" \
     --admin-username azureuser \
     --generate-ssh-keys \
     --nsg-rule NONE \
@@ -110,6 +129,7 @@ function build_docker_image() {
     --vnet-name ${vmName}VNET \
     --enable-auto-update false \
     --public-ip-address "" \
+    --size ${vmSize} \
     --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
     if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]]; then
@@ -128,7 +148,7 @@ function build_docker_image() {
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
         --settings "{ \"fileUris\": [\"${SCRIPT_LOCATION}model.properties\",\"${SCRIPT_LOCATION}genImageModel.sh\",\"${SCRIPT_LOCATION}buildWLSDockerImage.sh\",\"${SCRIPT_LOCATION}common.sh\"]}" \
-        --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_PASSWORDLESS_DB_CONNECTION} ${DB_TYPE} \"}"
+        --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_PASSWORDLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
     
     cleanup_vm
 }

@@ -247,4 +247,3 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
 }
 
 output aksVersion string = deploymentScript.properties.outputs.aksVersion
-output aksAgentAvailabilityZones array = json(deploymentScript.properties.outputs.agentAvailabilityZones)

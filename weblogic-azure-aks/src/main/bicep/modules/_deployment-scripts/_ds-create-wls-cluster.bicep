@@ -12,6 +12,7 @@ param acrResourceGroupName string = ''
 param appPackageUrls array = []
 param appReplicas int = 2
 param azCliVersion string = ''
+param cpuPlatform string = ''
 param databaseType string = 'oracle'
 param dbDriverLibrariesUrls array = []
 param enableCustomSSL bool = false
@@ -101,6 +102,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
         value: aksClusterRGName
+      }
+      {
+        name: 'CPU_PLATFORM'
+        value: cpuPlatform
       }
       {
         name: 'CURRENT_RESOURCEGROUP_NAME'
