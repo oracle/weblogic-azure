@@ -150,9 +150,6 @@ function validate_memory_resources() {
 }
 
 function validate_ocr_account() {
-  # install docker cli
-  install_docker
-
   # ORACLE_ACCOUNT_NAME
   # ORACLE_ACCOUNT_PASSWORD
   docker logout
@@ -685,6 +682,9 @@ checkDNSZone=${12}
 
 outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
+
+# install docker cli
+install_docker
 
 validate_compute_resources
 
