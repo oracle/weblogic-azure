@@ -18,9 +18,9 @@
         {
             "key": "WIT",
             "description": "Oracle WebLogic Image Tool",
-            "version": "1.12.1",
-            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.12.1/imagetool.zip",
-            "testedDate": "2024-03-13"
+            "version": "1.13.2",
+            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.13.2/imagetool.zip",
+            "testedDate": "2024-07-15"
         },
         {
             "key": "WME",
