@@ -657,11 +657,24 @@ function validate_appgateway_vnet() {
   fi
 }
 
+function query_available_zones() {
+  if [[ "${createAKSCluster,,}" == "true" ]]; then
+    outputAvailableZones=$(az vm list-skus -l ${location} --size ${aksAgentPoolVMSize} --zone true | jq -c '.[] | .locationInfo[] | .zones')
+  fi
+
+  if [ -z "${outputAvailableZones}" ]; then  
+    outputAvailableZones="[]"
+  fi  
+
+  export outputAvailableZones="${outputAvailableZones}"
+}
+
 function output_result() {
   echo "AKS version: ${outputAksVersion}"
   result=$(jq -n -c \
     --arg aksVersion "$outputAksVersion" \
-    '{aksVersion: $aksVersion}')
+    --arg agentAvailabilityZones "${outputAvailableZones}" \
+    '{aksVersion: $aksVersion, agentAvailabilityZones: $agentAvailabilityZones}')
   echo "result is: $result"
   echo $result >$AZ_SCRIPTS_OUTPUT_PATH
 }
@@ -715,5 +728,7 @@ if [[ "${createAKSCluster,,}" != "true" ]]; then
 fi
 
 validate_appgateway_vnet
+
+query_available_zones
 
 output_result
