@@ -112,8 +112,16 @@
                         "toolTip": "Use only letters and numbers",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                            "validations": [
+                                {
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "message": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                {
+                                    "isValid": "[not(contains(basics('vmSizeSelect'),'p'))]",
+                                    "message": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM CPUs are not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
+                                }
+                            ]
                         },
                         "visible": true
                     },
