@@ -10,6 +10,7 @@ env:
     repoName: "weblogic-azure"
     userEmail: ${{ secrets.USER_EMAIL }}
     userName: ${{ secrets.USER_NAME }}    
+    GH_TOKEN: ${{ secrets.GIT_TOKEN }}
 
 jobs:
   check-vm-sizes:
@@ -85,30 +86,32 @@ jobs:
         fi
 
         echo "Current sizes : $new_sizes"
-        echo "{latest_sizes}=\"{new_sizes}\"" >> "$GITHUB_OUTPUT"
+        echo "latest_sizes=\"{new_sizes}\"" >> "$GITHUB_OUTPUT"
 
     - name: Create PR if changes detected
       if: steps.check_vm_sizes.outputs.vm_sizes_changed == 'true'
       run: |
         # Logic to create a pull request to update the ARM VM sizes configuration file
         # Example: Use GitHub CLI or git commands to create a branch and push changes
+        cd ${{ env.repoName }}
+        branchName="update-vm-sizes-$(date +%s)"
         git config --global user.email "${userEmail}"
         git config --global user.name "${userName}"
 
-        git checkout -b update-vm-sizes
+        git checkout -b ${branchName}
         # Use sed to delete the line starting with azure.armBased.vmSize.list=
-        property_file="${{ env.repoName }}/resources/azure-common.properties"
+        property_file="resources/azure-common.properties"
         sed -i '/^azure\.armBased\.vmSize\.list=/d' "$property_file"
         latest_sizes=${{ steps.check_vm_sizes.outputs.latest_sizes }}
-        echo "azure.armBased.vmSize.list=\"$latest_sizes\"" > "$property_file"
+        echo "azure.armBased.vmSize.list=\"$latest_sizes\"" >> "$property_file"
 
         git add $property_file
         git commit -m "Update ARM VM sizes"
-        git push origin update-vm-sizes
+        git push origin ${branchName}
 
         # Create a pull request
         gh pr create --title "Update ARM VM sizes" \
             --body "Automatic update of ARM VM sizes based on latest changes" \
-            --repo oracle/${env.repoName} \
+            --repo oracle/weblogic-azure \
             --base main \
-            --head update-vm-sizes
+            --head ${branchName}
