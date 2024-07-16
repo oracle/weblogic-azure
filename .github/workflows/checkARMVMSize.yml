@@ -1,0 +1,98 @@
+name: Check ARM VM Size Changes
+
+on:
+  schedule:
+    - cron: '0 0 */14 * *'  # Runs at midnight (00:00) UTC every 14 days (2 weeks)
+
+env:
+    azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
+    repoName: "weblogic-azure"
+    userEmail: ${{ secrets.USER_EMAIL }}
+    userName: ${{ secrets.USER_NAME }}    
+
+jobs:
+  check-vm-sizes:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout oracle/weblogic-azure:main
+      uses: actions/checkout@v2
+      with:
+        repository: oracle/${{ env.repoName }}
+        ref: main
+
+    - uses: azure/login@v1
+      id: azure-login
+      with:
+        creds: ${{ env.azureCredentials }}
+
+    - name: Check for VM size changes
+      id: check_vm_sizes
+      run: |
+        # Path to the properties file
+        property_file="resources/azure-common.properties"
+
+        # Check if the properties file exists
+        if [ ! -f "$property_file" ]; then
+            echo "Properties file '$property_file' not found."
+            exit 1
+        fi
+
+        # Using grep to find the line containing azure.armBased.vmSize.list
+        # Then using sed to extract the value between the double quotes
+        vm_size_variable=$(grep '^azure\.armBased\.vmSize\.list=' "$property_file")
+        vm_size_list=${vm_size_variable#*=}
+        vm_size_list=${vm_size_list#*=}
+
+        # Print the extracted value
+        echo "$vm_size_list"
+
+        current_sizes="[${vm_size_list}]"
+
+        latest_locations=$(az account list-locations --query '[].name' -o tsv)
+
+        new_sizes=""
+        echo "{vm_sizes_changed}={false}" >> "$GITHUB_OUTPUT"
+
+        for location in $latest_locations; do
+          latest_sizes=$(az vm list-sizes --location $location -o tsv | jq '.[] | select(.name | contains("p")) | .name' | sort | tr '\n' ')
+          for size in $latest_sizes; do
+            // if new_sizes does not contain size
+            if [[ $(echo "[$new_sizes]" | jq '. | index(${size})') != null ]]; then
+                new_sizes="$new_sizes,\"$size\""
+            fi
+
+            if [[ $(echo "[$current_sizes]" | jq '. | index(${size})') != null ]]; then
+                echo "Changes detected in ARM VM sizes."
+                echo "{vm_sizes_changed}={true}" >> "$GITHUB_OUTPUT"
+            fi            
+          done
+        done
+
+        echo "Current sizes : $new_sizes"
+        echo "{latest_sizes}=\"{new_sizes}\"" >> "$GITHUB_OUTPUT"
+
+    - name: Create PR if changes detected
+      if: steps.check_vm_sizes.outputs.vm_sizes_changed == 'true'
+      run: |
+        # Logic to create a pull request to update the ARM VM sizes configuration file
+        # Example: Use GitHub CLI or git commands to create a branch and push changes
+        git config --global user.email "${userEmail}"
+        git config --global user.name "${userName}"
+
+        git checkout -b update-vm-sizes
+        # Use sed to delete the line starting with azure.armBased.vmSize.list=
+        property_file="resources/azure-common.properties"
+        sed -i '/^azure\.armBased\.vmSize\.list=/d' "$property_file"
+        latest_sizes=${{ steps.check_vm_sizes.outputs.latest_sizes }}
+        echo "azure.armBased.vmSize.list=\"$latest_sizes\"" > "$property_file"
+
+        git add $property_file
+        git commit -m "Update ARM VM sizes"
+        git push origin update-vm-sizes
+
+        # Create a pull request
+        gh pr create --title "Update ARM VM sizes" \
+            --body "Automatic update of ARM VM sizes based on latest changes" \
+            --repo oracle/${env.repoName} \
+            --base main \
+            --head update-vm-sizes
