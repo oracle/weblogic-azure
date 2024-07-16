@@ -13,6 +13,7 @@ env:
 
 jobs:
   check-vm-sizes:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.repository_owner == 'azure-javaee')
     runs-on: ubuntu-latest
     steps:
     - name: Checkout oracle/weblogic-azure:main
@@ -30,7 +31,7 @@ jobs:
     - name: Check for VM size changes
       id: check_vm_sizes
       run: |
-        ls -l
+        ls -l ${{ env.repoName }}
         # Path to the properties file
         property_file="${{ env.repoName }}/resources/azure-common.properties"
 
