@@ -96,7 +96,7 @@
                     "visible": "[contains(basics('vmSizeSelect'),'p')]",
                     "options": {
                         "icon": "Error",
-                        "text": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM CPUs are not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
+                        "text": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM platform is not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
                 }
             },
             {
@@ -119,7 +119,7 @@
                                 },
                                 {
                                     "isValid": "[not(contains(basics('vmSizeSelect'),'p'))]",
-                                    "message": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM CPUs are not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
+                                    "message": "ARM platform is not supported. Please select a different VM size."
                                 }
                             ]
                         },
