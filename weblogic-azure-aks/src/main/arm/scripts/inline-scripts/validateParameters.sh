@@ -211,7 +211,7 @@ function obtain_image_architecture() {
       elif [[ $ret == *"${constARM64Platform}"* ]]; then
           imageArch="${constARM64Platform}"
       else
-          echo_stderr "The architecture of image is not supported."
+          echo_stderr "The architecture of image is not supported. Currently only ARM64 and AMD64 are supported."
           exit 1
       fi       
   fi
