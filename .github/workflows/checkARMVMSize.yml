@@ -34,6 +34,7 @@ jobs:
         ls -l ${{ env.repoName }}
         # Path to the properties file
         property_file="${{ env.repoName }}/resources/azure-common.properties"
+        echo test1
 
         # Check if the properties file exists
         if [ ! -f "$property_file" ]; then
@@ -41,11 +42,15 @@ jobs:
             exit 1
         fi
 
+        echo test2
+
         # Using grep to find the line containing azure.armBased.vmSize.list
         # Then using sed to extract the value between the double quotes
         vm_size_variable=$(grep '^azure\.armBased\.vmSize\.list=' "$property_file")
+        echo test3
         vm_size_list=${vm_size_variable#*=}
         vm_size_list=${vm_size_list#*=}
+        echo test4
 
         # Print the extracted value
         echo "$vm_size_list"
