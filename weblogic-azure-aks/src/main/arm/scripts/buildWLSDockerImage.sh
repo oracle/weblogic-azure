@@ -187,16 +187,20 @@ function download_mysql_driver() {
     fi
 }
 
-# Install docker, zip, unzip and java
-# Download WebLogic Tools
-function install_utilities() {
-    # Install docker
+function install_docker_multi_arch(){
+    # Install docker https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+    # Add Docker's official GPG key:
     sudo apt-get -q update
-    sudo apt-get -y -q install apt-transport-https
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    sudo apt-get -y -q install ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    # Add the repository to Apt sources:
     echo \
-        "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     sudo apt-get -q update
     sudo apt-get -y -q install docker-ce docker-ce-cli containerd.io
 
@@ -204,21 +208,56 @@ function install_utilities() {
     sudo docker --version
     validate_status "Check status of docker."
     sudo systemctl start docker
+}
 
+function install_openjdk11_x64(){
     # Install Microsoft OpenJDK
-    wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    # Valid values are only '18.04', '20.04', and '22.04'
+    ubuntu_release=`lsb_release -rs`
+    wget https://packages.microsoft.com/config/ubuntu/${ubuntu_release}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
     sudo dpkg -i packages-microsoft-prod.deb
-    sudo apt -q update
-    sudo apt -y -q install msopenjdk-11
+
+    sudo apt-get -y -q install apt-transport-https
+    sudo apt-get -q update
+    sudo apt-get -y -q install msopenjdk-11
 
     echo "java version"
     java -version
-    validate_status "Check status of Zulu JDK 8."
+    validate_status "Check status of OpenJDK 11."
+
+
+    export JAVA_HOME=/usr/lib/jvm/msopenjdk-11-$(dpkg --print-architecture)
+    if [ ! -d "${JAVA_HOME}" ]; then
+        echo "Java home ${JAVA_HOME} does not exist."
+        exit 1
+    fi
+}
+
+function install_openjdk11_arm64(){
+    local zipFileName="microsoft-jdk-11.tar.gz"
+    sudo curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fsSL ${jdkArm64Url} -o ${zipFileName} 
+    sudo mkdir -p /usr/lib/jvm
+    local dirName=$(sudo tar -xzvf ${zipFileName} | head -1 | cut -f1 -d"/")
+    sudo tar -xzvf ${zipFileName}
+    sudo mv ${dirName} msopenjdk-11-amd64
+    sudo mv -f msopenjdk-11-amd64 /usr/lib/jvm/
 
     export JAVA_HOME=/usr/lib/jvm/msopenjdk-11-amd64
     if [ ! -d "${JAVA_HOME}" ]; then
         echo "Java home ${JAVA_HOME} does not exist"
         exit 1
+    fi
+}
+
+# Install docker, zip, unzip and java
+# Download WebLogic Tools
+function install_utilities() {
+    install_docker_multi_arch    
+
+    if [[ "$(dpkg --print-architecture)" == "arm64" ]]; then
+        install_openjdk11_arm64
+    else
+        install_openjdk11_x64
     fi
 
     sudo apt -y -q install zip
@@ -378,6 +417,7 @@ function build_wls_image() {
         --wdtArchive ${scriptDir}/model-images/archive.zip \
         --wdtModelOnly \
         --wdtDomainType WLS \
+        --platform ${cpuPlatform} \
         --chown ${user}:${group}
 
     validate_status "Check status of building WLS domain image."
@@ -413,6 +453,7 @@ export useOracleImage=${11}
 export dbDriversUrls=${12}
 export enablePswlessConnection=${13}
 export dbType=${14}
+export cpuPlatform=${15}
 
 export acrImagePath="$azureACRServer/aks-wls-images:${imageTag}"
 

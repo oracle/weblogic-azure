@@ -150,9 +150,6 @@ function validate_memory_resources() {
 }
 
 function validate_ocr_account() {
-  # install docker cli
-  install_docker
-
   # ORACLE_ACCOUNT_NAME
   # ORACLE_ACCOUNT_PASSWORD
   docker logout
@@ -186,6 +183,43 @@ function check_acr() {
   echo_stdout "Check if ACR ${ACR_NAME} is ready to import image."
 }
 
+function obtain_image_architecture() {
+  local acrName=$1
+  local repoName=$2
+  local tag=$3
+  local imageUri="${acrName}.azurecr.io/${repoName}:${tag}"
+
+  local imageArch=$(az acr manifest list-metadata -r ${acrName} -n ${repoName} \
+    | jq '.[] | select(.tags != null) | select(.tags[] | length >0 ) | select(.tags[0]=="'${tag}'") | .architecture' \
+    | tr -d "\"")
+  
+  if [[ "${imageArch}" == "null" ]]; then
+      # if the image is multi-architecture, the value is empty.
+      # Use the docker manifest inspect command to get the architecture.
+      # https://learn.microsoft.com/en-us/azure/container-registry/push-multi-architecture-images
+      local acrUserName=$(az acr credential show -n ${acrName} --query "username" | tr -d "\"")
+      local acrPassword=$(az acr credential show -n ${acrName} --query "passwords[0].value" | tr -d "\"")
+      local acrServer="${acrName}.azurecr.io"
+
+      docker login ${acrServer} -u ${acrUserName} -p ${acrPassword}
+      local ret=$(docker manifest inspect ${imageUri} | jq '.manifests[] | .platform.architecture')
+
+      if [[ $ret == *"${constX86Platform}"* && $ret == *"${constARM64Platform}"* ]]; then
+          imageArch="${constMultiArchPlatform}"
+      elif [[ $ret == *"${constX86Platform}"* ]]; then
+          imageArch="${constX86Platform}"
+      elif [[ $ret == *"${constARM64Platform}"* ]]; then
+          imageArch="${constARM64Platform}"
+      else
+          echo_stderr "The architecture of image is not supported. Currently only ARM64 and AMD64 are supported."
+          exit 1
+      fi       
+  fi
+  echo_stdout "Architecture of image is ${imageArch}."
+
+  export IMAGE_ARCHITECTURE=${imageArch}
+}
+
 function validate_ocr_image() {
   local ocrImageFullPath="${ocrLoginServer}/${ocrGaImagePath}:${wlsImageTag}"
 
@@ -213,7 +247,8 @@ function validate_ocr_image() {
 
   # validate the image by importing it to ACR.
   # if failure happens, the image should be unavailable
-  local tmpImagePath="tmp$(date +%s):${wlsImageTag}"
+  local tmpRepo="tmp$(date +%s)"
+  local tmpImagePath="${tmpRepo}:${wlsImageTag}"
   az acr import --name ${ACR_NAME} \
     --resource-group ${ACR_RESOURCE_GROUP} \
     --source ${ocrImageFullPath} \
@@ -226,6 +261,7 @@ function validate_ocr_image() {
   # check if the image is imported successfully.
   local ret=$(az acr repository show --name $ACR_NAME --image ${tmpImagePath})
   if [ -n "${ret}" ]; then
+    obtain_image_architecture ${ACR_NAME} ${tmpRepo} ${wlsImageTag}
     # delete the image from ACR.
     az acr repository delete --name ${ACR_NAME} --image ${tmpImagePath} --yes
   else
@@ -269,6 +305,8 @@ function validate_acr_image() {
     exit 1
   fi
 
+  obtain_image_architecture ${ACR_NAME_FOR_USER_PROVIDED_IMAGE} ${repository} ${tag}
+
   echo_stdout "Check ACR image: passed!"
 }
 
@@ -287,6 +325,29 @@ function validate_acr_admin_enabled()
     check_acr_admin_enabled "${ACR_NAME}" "${ACR_RESOURCE_GROUP}"
   else
     check_acr_admin_enabled "${ACR_NAME_FOR_USER_PROVIDED_IMAGE}" "${ACR_RG_NAME_FOR_USER_PROVIDED_IMAGE}"
+  fi
+}
+
+# Validate whether image architecture is matched with the architecture of the VM.
+# Azure supports both AMD based processor and ARM based CPU, see https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions.
+  # For ARM cpu, the VM size name includes letter 'p'.
+  # For AMD cpu, the VM size name does not include letter 'p'.
+# Validate cases:
+  # 1. If the VM size is AMD based, the image should be amd64 or multi-platform.
+  # 2. If the VM size is ARM based, the image should be arm64 or multi-platform.
+# IMAGE_ARCHITECTURE value may be "amd64", "arm64" or "Multi-architecture (amd64 and arm64)".
+function validate_image_compatibility
+{
+  if [[ $aksAgentPoolVMSize == *"p"* ]]; then
+    if [[ "${IMAGE_ARCHITECTURE}" != "${constARM64Platform}" && "${IMAGE_ARCHITECTURE}" != "${constMultiArchPlatform}" ]]; then
+      echo_stderr "The image architecture ${IMAGE_ARCHITECTURE} is not compatible with the ARM based VM size ${aksAgentPoolVMSize}."
+      exit 1
+    fi
+  else
+    if [[ "${IMAGE_ARCHITECTURE}" != "${constX86Platform}" && "${IMAGE_ARCHITECTURE}" != "${constMultiArchPlatform}" ]]; then
+      echo_stderr "The image architecture ${IMAGE_ARCHITECTURE} is not compatible with the AMD based VM size ${aksAgentPoolVMSize}."
+      exit 1
+    fi
   fi
 }
 
@@ -635,6 +696,9 @@ checkDNSZone=${12}
 outputAksVersion=${constDefaultAKSVersion}
 sslCertificateKeyVaultOption="keyVaultStoredConfig"
 
+# install docker cli
+install_docker
+
 validate_compute_resources
 
 validate_memory_resources
@@ -642,6 +706,8 @@ validate_memory_resources
 validate_base_image_path
 
 validate_acr_admin_enabled
+
+validate_image_compatibility
 
 if [[ "${enableCustomSSL,,}" == "true" ]]; then
   validate_wls_ssl_certificates
@@ -666,4 +732,3 @@ validate_appgateway_vnet
 query_available_zones
 
 output_result
-

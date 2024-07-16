@@ -22,6 +22,9 @@ export constAdminT3AddressEnvName="T3_TUNNELING_ADMIN_ADDRESS"
 export constAdminServerName='admin-server'
 export constClusterName='cluster-1'
 export constClusterT3AddressEnvName="T3_TUNNELING_CLUSTER_ADDRESS"
+export constARM64Platform="arm64"
+export constX86Platform="amd64"
+export constMultiArchPlatform="Multi-architecture"
 export constDBTypeMySQL="mysql"
 export constDBTypeSqlServer="sqlserver"
 export constDefaultJavaOptions="-Dlog4j2.formatMsgNoLookups=true -Dweblogic.StdoutDebugEnabled=false" # the java options will be applied to the cluster
@@ -63,3 +66,4 @@ export retryInterval=10
 export wlsContainerName="weblogic-server"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.5.1.jar"
 export wlsMSSQLDriverUrl="https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/10.2.1.jre8/mssql-jdbc-10.2.1.jre8.jar"
+export jdkArm64Url="https://aka.ms/download-jdk/microsoft-jdk-11.0.23-linux-aarch64.tar.gz"

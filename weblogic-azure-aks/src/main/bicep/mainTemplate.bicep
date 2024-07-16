@@ -319,6 +319,7 @@ var const_azcliVersion = '2.53.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
 var const_bValidateApplications= validateApplications && (length(appPackageUrls) > 0)
+var const_cpuPlatform = (contains(vmSize, 'p') ? 'arm64' : 'amd64')
 var const_createNewAcr = useOracleImage && createACR
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
@@ -567,11 +568,11 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
-    aksAgentAvailabilityZones:validateInputs.outputs.aksAgentAvailabilityZones
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: const_azcliVersion
+    cpuPlatform: const_cpuPlatform
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
     databaseType: databaseType
@@ -640,11 +641,11 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
-    aksAgentAvailabilityZones:validateInputs.outputs.aksAgentAvailabilityZones
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: const_azcliVersion
+    cpuPlatform: const_cpuPlatform
     createAKSCluster: createAKSCluster
     createStorageAccount: const_bCreateStorageAccount
     databaseType: databaseType

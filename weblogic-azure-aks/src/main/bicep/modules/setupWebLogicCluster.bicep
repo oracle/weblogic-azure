@@ -57,6 +57,7 @@ param appPackageUrls array = []
 @description('The number of managed server to start.')
 param appReplicas int = 2
 param azCliVersion string = ''
+param cpuPlatform string = 'linux/amd64'
 @description('true to create a new AKS cluster.')
 param createAKSCluster bool = true
 param createStorageAccount bool = false
@@ -205,6 +206,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: azCliVersion
+    cpuPlatform: cpuPlatform
     databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableCustomSSL: enableCustomSSL

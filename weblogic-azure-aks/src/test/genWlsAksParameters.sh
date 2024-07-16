@@ -14,7 +14,9 @@ ocrSSOUser=$9
 wdtRuntimePassword=${10}
 wlsPassword=${11}
 wlsUserName=${12}
-parametersPath=${13}
+vmSize=${13}
+parametersPath=${14}
+
 
 cat <<EOF > ${parametersPath}
 {
@@ -29,7 +31,7 @@ cat <<EOF > ${parametersPath}
             "value": 3
         },
         "vmSize": {
-            "value": "Standard_DS2_v2"
+            "value": "${vmSize}"
         },
         "appGatewayCertificateOption": {
             "value": "generateCert"
