@@ -30,6 +30,7 @@ jobs:
     - name: Check for VM size changes
       id: check_vm_sizes
       run: |
+        ls -l
         # Path to the properties file
         property_file="${{ env.repoName }}/resources/azure-common.properties"
 
