@@ -1,6 +1,7 @@
 name: Check ARM VM Size Changes
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 */14 * *'  # Runs at midnight (00:00) UTC every 14 days (2 weeks)
 
