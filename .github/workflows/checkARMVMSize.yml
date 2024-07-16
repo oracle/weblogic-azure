@@ -20,6 +20,7 @@ jobs:
       with:
         repository: oracle/${{ env.repoName }}
         ref: main
+        path: ${{ env.repoName }}
 
     - uses: azure/login@v1
       id: azure-login
@@ -30,7 +31,7 @@ jobs:
       id: check_vm_sizes
       run: |
         # Path to the properties file
-        property_file="resources/azure-common.properties"
+        property_file="${{ env.repoName }}/resources/azure-common.properties"
 
         # Check if the properties file exists
         if [ ! -f "$property_file" ]; then
@@ -82,7 +83,7 @@ jobs:
 
         git checkout -b update-vm-sizes
         # Use sed to delete the line starting with azure.armBased.vmSize.list=
-        property_file="resources/azure-common.properties"
+        property_file="${{ env.repoName }}/resources/azure-common.properties"
         sed -i '/^azure\.armBased\.vmSize\.list=/d' "$property_file"
         latest_sizes=${{ steps.check_vm_sizes.outputs.latest_sizes }}
         echo "azure.armBased.vmSize.list=\"$latest_sizes\"" > "$property_file"
