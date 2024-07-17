@@ -3,6 +3,8 @@
 ### Overview
 This GitHub Action runs on a schedule to check for changes in Azure ARM VM sizes and creates a pull request to update configurations if changes are detected.
 
+The action will compare the latest ARM VM sizes queried using AZ CLI with those listed in the variable azure.armBased.vmSize.list within oracle/weblogic-azure/resources/azure-common.properties. If changes are detected, it will initiate a pull request to the main branch of the current repository that runs the action.
+
 ### Schedule
 - **Frequency:** Every 14 days (2 weeks)
 - **Schedule Expression:** `0 0 */14 * *` (Runs at midnight (00:00) UTC)

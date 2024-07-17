@@ -17,16 +17,11 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.repository_owner == 'azure-javaee')
     runs-on: ubuntu-latest
     steps:
-    # - name: Checkout oracle/weblogic-azure:main
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: oracle/${{ env.repoName }}
-    #     ref: main
-    #     path: ${{ env.repoName }}
-
-    - name: checkout
+    - name: Checkout oracle/weblogic-azure:main
       uses: actions/checkout@v2
       with:
+        repository: oracle/${{ env.repoName }}
+        ref: main
         path: ${{ env.repoName }}
 
     - uses: azure/login@v1
@@ -102,8 +97,8 @@ jobs:
         # Use sed to delete the line starting with azure.armBased.vmSize.list=
         property_file="resources/azure-common.properties"
         sed -i '/^azure\.armBased\.vmSize\.list=/d' "$property_file"
-        latest_sizes=${{ steps.check_vm_sizes.outputs.latest_sizes }}
-        echo "azure.armBased.vmSize.list=$latest_sizes" >> "$property_file"
+        latest_sizes=$(echo ${{ steps.check_vm_sizes.outputs.latest_sizes }} | sed 's/,/","/g')
+        echo "azure.armBased.vmSize.list=\"$latest_sizes\"" >> "$property_file"
 
         git add $property_file
         git commit -m "Update ARM VM sizes"
@@ -112,6 +107,6 @@ jobs:
         # Create a pull request
         gh pr create --title "Update ARM VM sizes" \
             --body "Automatic update of ARM VM sizes based on latest changes" \
-            --repo oracle/weblogic-azure \
+            --reviewer edburns,galiacheng \
             --base main \
             --head ${branchName}
