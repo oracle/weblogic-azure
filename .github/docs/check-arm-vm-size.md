@@ -14,8 +14,8 @@ If you want to run the action in your repository, you have to trigger it from We
 ### Environment Variables
 - **azureCredentials:** Secret for Azure credentials
 - **repoName:** Repository name set to "weblogic-azure"
-- **userEmail:** Secret for user email
-- **userName:** Secret for user name
+- **userEmail:** Secret for user Email of GitHub acount to access GitHub repository
+- **userName:** Secret for user name of GitHub account
 
 ### Jobs
 #### check-vm-sizes
