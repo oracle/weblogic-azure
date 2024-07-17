@@ -49,7 +49,7 @@ You can use `.github/resource/azure-credential-setup-wls-vm.sh` to create GitHub
 | WLS_PSW | Password for WebLogic Server. | 
 | USER_EMAIL | User Email of GitHub acount to access GitHub repository. |
 | USER_NAME | User name of GitHub account. |
-| GIT_TOKEN | GitHub token to access GitHub repository. |
+| GIT_TOKEN | GitHub token to access GitHub repository. <br /> Make sure the token have permissions: <br /> - Read and write of Pull requests. <br /> - Read and write of Contents. |
 
 2. Set up secret
 
