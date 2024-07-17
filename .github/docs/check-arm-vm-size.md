@@ -42,14 +42,14 @@ You can use `.github/resource/azure-credential-setup-wls-vm.sh` to create GitHub
 
 1. Fill in `.github/resource/credentials-params-wls-vm.yaml` with your values.
 
-| Variable Name | Value |
-|----------------|----------------------|
-| OTN_USERID | Oracle single sign-on userid. If you don't have one, sign up from [Create Your Oracle Account](https://profile.oracle.com/myprofile/account/create-account.jspx?nexturl=https%3A%2F%2Fsupport.oracle.com&pid=mos) |
-| OTN_PASSWORD | Password for Oracle single sign-on userid. |
-| WLS_PSW | Password for WebLogic Server. | 
-| USER_EMAIL | User Email of GitHub acount to access GitHub repository. |
-| USER_NAME | User name of GitHub account. |
-| GIT_TOKEN | GitHub token to access GitHub repository. <br /> Make sure the token have permissions: <br /> - Read and write of Pull requests. <br /> - Read and write of Contents. |
+   | Variable Name | Value |
+   |----------------|----------------------|
+   | OTN_USERID | Oracle single sign-on userid. If you don't have one, sign up from [Create Your Oracle Account](https://profile.oracle.com/myprofile/account/create-account.jspx?nexturl=https%3A%2F%2Fsupport.oracle.com&pid=mos) |
+   | OTN_PASSWORD | Password for Oracle single sign-on userid. |
+   | WLS_PSW | Password for WebLogic Server. | 
+   | USER_EMAIL | User Email of GitHub acount to access GitHub repository. |
+   | USER_NAME | User name of GitHub account. |
+   | GIT_TOKEN | GitHub token to access GitHub repository. <br /> Make sure the token have permissions: <br /> - Read and write of Pull requests. <br /> - Read and write of Contents. |
 
 2. Set up secret
 
