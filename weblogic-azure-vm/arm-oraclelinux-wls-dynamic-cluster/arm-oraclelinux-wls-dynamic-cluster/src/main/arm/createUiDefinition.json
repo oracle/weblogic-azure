@@ -82,13 +82,23 @@
                         "Standard_B1ls",
                         "Standard_A0",
                         "Basic_A0",
-                        "Standard_B1s"
+                        "Standard_B1s",
+                        ${azure.armBased.vmSize.list}
                     ]
                 },
                 "osPlatform": "Linux",
                 "count": "1",
                 "visible": true
             },
+            {
+                "name": "invalidVMSizeInfo",
+                    "type": "Microsoft.Common.InfoBox",
+                    "visible": "[contains(basics('vmSizeSelect'),'p')]",
+                    "options": {
+                        "icon": "Error",
+                        "text": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM platform is not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
+                }
+            },            
             {
                 "name": "basicsRequired",
                 "type": "Microsoft.Common.Section",
@@ -102,8 +112,16 @@
                         "toolTip": "Use only letters and numbers",
                         "constraints": {
                             "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                            "validations": [
+                                {
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "message": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                {
+                                    "isValid": "[not(contains(basics('vmSizeSelect'),'p'))]",
+                                    "message": "ARM platform is not supported. Please select a different VM size."
+                                }
+                            ]
                         },
                         "visible": true
                     },
