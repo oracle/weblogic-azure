@@ -1,0 +1,112 @@
+name: Check ARM VM Size Changes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 */14 * *'  # Runs at midnight (00:00) UTC every 14 days (2 weeks)
+
+env:
+    azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
+    repoName: "weblogic-azure"
+    userEmail: ${{ secrets.USER_EMAIL }}
+    userName: ${{ secrets.USER_NAME }}    
+    GH_TOKEN: ${{ secrets.GIT_TOKEN }}
+
+jobs:
+  check-vm-sizes:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.repository_owner == 'azure-javaee')
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout oracle/weblogic-azure:main
+      uses: actions/checkout@v2
+      with:
+        repository: oracle/${{ env.repoName }}
+        ref: main
+        path: ${{ env.repoName }}
+
+    - uses: azure/login@v1
+      id: azure-login
+      with:
+        creds: ${{ env.azureCredentials }}
+
+    - name: Check for VM size changes
+      id: check_vm_sizes
+      run: |
+        ls -l ${{ env.repoName }}
+        # Path to the properties file
+        property_file="${{ env.repoName }}/resources/azure-common.properties"        
+
+        # Check if the properties file exists
+        if [ ! -f "$property_file" ]; then
+            echo "Properties file '$property_file' not found."
+            exit 1
+        fi
+
+        if ! grep -q '^azure\.armBased\.vmSize\.list=' "$property_file"; then
+            echo "Line 'azure.armBased.vmSize.list' not found in $property_file."
+            echo "vm_sizes_changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+        fi
+
+        # Using grep to find the line containing azure.armBased.vmSize.list
+        vm_size_variable=$(grep '^azure\.armBased\.vmSize\.list=' "$property_file")
+        vm_size_list=${vm_size_variable#*=}
+
+        # Print the extracted value
+        echo "$vm_size_list"
+
+        latest_locations=$(az account list-locations --query '[].name' -o tsv)
+
+        new_sizes=""
+        for location in $latest_locations; do
+          latest_sizes=$(az vm list-sizes --location $location | jq '.[] | select(.name | contains("p")) | .name' | tr -d "\"")
+          for size in $latest_sizes; do
+            # if new_sizes does not contain size
+            if [[ $(echo "[$new_sizes]" | jq '. | index("'${size}'")') == null ]]; then
+                echo "Add size: ${size}"
+                if [ -z "$new_sizes" ]; then
+                    new_sizes="\"$size\""
+                else
+                    new_sizes="$new_sizes,\"$size\""
+                fi
+            fi       
+          done
+        done
+
+        if [ ${#new_sizes} -ne ${#vm_size_list} ]; then
+            echo "VM sizes changed"
+            echo "vm_sizes_changed=true" >> "$GITHUB_OUTPUT"
+        else
+            echo "vm_sizes_changed=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        echo "Current sizes : $new_sizes"
+        echo "latest_sizes=\"${new_sizes}\"" >> "$GITHUB_OUTPUT"
+
+    - name: Create PR if changes detected
+      if: steps.check_vm_sizes.outputs.vm_sizes_changed == 'true'
+      run: |
+        # Logic to create a pull request to update the ARM VM sizes configuration file
+        # Example: Use GitHub CLI or git commands to create a branch and push changes
+        cd ${{ env.repoName }}
+        branchName="update-vm-sizes-$(date +%s)"
+        git config --global user.email "${userEmail}"
+        git config --global user.name "${userName}"
+
+        git checkout -b ${branchName}
+        # Use sed to delete the line starting with azure.armBased.vmSize.list=
+        property_file="resources/azure-common.properties"
+        sed -i '/^azure\.armBased\.vmSize\.list=/d' "$property_file"
+        latest_sizes=$(echo ${{ steps.check_vm_sizes.outputs.latest_sizes }} | sed 's/,/","/g')
+        echo "azure.armBased.vmSize.list=\"$latest_sizes\"" >> "$property_file"
+
+        git add $property_file
+        git commit -m "Update ARM VM sizes"
+        git push origin ${branchName}
+
+        # Create a pull request
+        gh pr create --title "Update ARM VM sizes" \
+            --body "Automatic update of ARM VM sizes based on latest changes" \
+            --reviewer edburns,galiacheng \
+            --base main \
+            --head ${branchName}
