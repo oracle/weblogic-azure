@@ -20,7 +20,7 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls</artifactId>
-    <version>1.0.27</version>
+    <version>${version.arm-oraclelinux-wls}</version>
 
     <packaging>jar</packaging>
     <name>arm-oraclelinux-wls</name>

@@ -286,7 +286,28 @@
                 "visible": true
             }            
         ],
-		"steps":[],
+		"steps":[
+            {
+                "name": "tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "tagsByResource",
+                        "type": "Microsoft.Common.TagsByResource",
+                        "resources": [
+                            "${identifier.virtualMachines}",
+                            "${identifier.virtualNetworks}",
+                            "${identifier.networkInterfaces}",
+                            "${identifier.networkSecurityGroups}",
+                            "${identifier.publicIPAddresses}",
+                            "${identifier.storageAccounts}",
+                            "${identifier.resourcesDeployment}"
+                        ],
+                        "toolTip": "Tags help you organize your resources and categorize them for billing or management purposes. You can apply tags to resources deployed by the offer."
+                    }
+                ]
+            }
+        ],
         "outputs": {
             "adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
@@ -294,6 +315,7 @@
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
+            "tagsByResource": "[steps('tags').tagsByResource]",
             "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
             "vmSize": "[basics('vmSizeSelect')]",
             "Location": "[location()]"
