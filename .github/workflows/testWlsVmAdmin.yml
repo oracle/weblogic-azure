@@ -223,7 +223,7 @@ jobs:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ needs.preflight.outputs.artifactName }}
 

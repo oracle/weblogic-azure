@@ -256,7 +256,7 @@ jobs:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ needs.preflight.outputs.artifactName }}
       - uses: azure/login@v1
@@ -713,7 +713,7 @@ jobs:
             --template-file ${artifactName}/nestedtemplates/coherenceTemplate.json
 
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ needs.preflight.outputs.addnodeArtifactName }}
 
@@ -761,7 +761,7 @@ jobs:
           fi
 
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
 
@@ -809,7 +809,7 @@ jobs:
           fi
 
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ needs.preflight.outputs.deletenodeArtifactName }}
       - name: Delete nodes from existing cluster
