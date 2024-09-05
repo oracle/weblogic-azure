@@ -612,9 +612,6 @@
                   "type": "object",
                   "value": "[if(contains(parameters('tagsByResource'), parameters('resourceIdentifier')), parameters('tagsByResource')[parameters('resourceIdentifier')], json('{}'))]"
                }
-            },
-            "organizeTagsByResources":{
-
             }
          }
       }
