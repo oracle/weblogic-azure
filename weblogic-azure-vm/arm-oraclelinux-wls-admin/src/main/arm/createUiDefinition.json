@@ -1223,8 +1223,6 @@
                     {
                         "name": "tagsByResource",
                         "type": "Microsoft.Common.TagsByResource",
-                        // If adding a new resource, add the resource identifier to the array below
-                        // Also modify mainTemplate.json to include the resource in the resources array
                         "resources": [
                             "${identifier.dnszones}",
                             "${identifier.networkInterfaces}",
