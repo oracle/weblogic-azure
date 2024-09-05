@@ -70,6 +70,13 @@
                 "description": "Location for all resources."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "wlsDomainName": {
             "type": "string",
             "defaultValue": "adminDomain",
@@ -121,6 +128,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${admin.pswless.database.start}",
             "properties": {
                 "mode": "Incremental",
@@ -134,6 +142,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "assignDbIdentityToAdminVM",
             "properties": {
                 "mode": "Incremental",
@@ -160,6 +169,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "installJdbcLibsTemplate",
             "condition": "[or(equals(parameters('databaseType'),'mysql'), equals(parameters('databaseType'),'postgresql'))]",
             "dependsOn": [
@@ -190,6 +200,9 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -205,6 +218,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "passwordlessDatasourceDeployment",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'installJdbcLibsTemplate')]"
@@ -258,6 +272,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${admin.pswless.database.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'passwordlessDatasourceDeployment')]"

@@ -1215,6 +1215,34 @@
                         "visible": "[bool(steps('section_database').enableDB)]"
                     }
                 ]
+            },
+            {
+                "name": "section_tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "tagsByResource",
+                        "type": "Microsoft.Common.TagsByResource",
+                        // If adding a new resource, add the resource identifier to the array below
+                        // Also modify mainTemplate.json to include the resource in the resources array
+                        "resources": [
+                            "${identifier.dnszones}",
+                            "${identifier.networkInterfaces}",
+                            "${identifier.networkSecurityGroups}",
+                            "${identifier.publicIPAddresses}",
+                            "${identifier.privateEndpoints}",
+                            "${identifier.storageAccounts}",
+                            "${identifier.vaults}",
+                            "${identifier.virtualNetworks}",
+                            "${identifier.virtualMachines}",
+                            "${identifier.virtualMachinesExtensions}",
+                            "${identifier.deploymentScripts}",
+                            "${identifier.userAssignedIdentities}",
+                            "${identifier.resourcesDeployment}"
+                        ],
+                        "toolTip": "Tags help you organize your resources and categorize them for billing or management purposes. You can apply tags to resources deployed by the offer."
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -1261,6 +1289,7 @@
             "keyVaultCustomTrustKeyStoreType": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStoreType]",
             "keyVaultPrivateKeyAliasSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultPrivateKeyAliasSecretName]",
             "keyVaultPrivateKeyPassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultPrivateKeyPassPhraseSecretName]",
+            "tagsByResource": "[steps('section_tags').tagsByResource]",
             "uploadedCustomIdentityKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreData]",
             "uploadedCustomIdentityKeyStorePassphrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStorePassphrase]",
             "uploadedCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreType]",

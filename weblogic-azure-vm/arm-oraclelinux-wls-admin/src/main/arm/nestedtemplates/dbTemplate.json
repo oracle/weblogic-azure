@@ -84,6 +84,13 @@
                 "description": "Location for all resources."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "wlsDomainName": {
             "type": "string",
             "defaultValue": "adminDomain",
@@ -113,6 +120,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "pswlessDbTemplate",
             "condition": "[parameters('enablePswlessConnection')]",
             "properties": {
@@ -152,6 +160,9 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -167,6 +178,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "upgradeMySQLJdbcDriverTemplate",
             "condition": "[and(not(parameters('enablePswlessConnection')), equals(parameters('databaseType'),'mysql'))]",
             "properties": {
@@ -194,6 +206,9 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -210,6 +225,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "passwordDatasourceDeployment",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "condition": "[not(parameters('enablePswlessConnection'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'upgradeMySQLJdbcDriverTemplate')]"
@@ -253,6 +269,9 @@
                     },
                     "location": {
                         "value": "[parameters('location')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
                     },
                     "wlsPassword": {
                         "value": "[parameters('wlsPassword')]"

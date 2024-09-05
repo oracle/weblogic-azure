@@ -18,7 +18,7 @@
 	},
 	"resources": [
 		{
-                        "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
+			"apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
 			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
 			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogicAdminPortsAllowed')]",
 			"condition": "[not(parameters('denyPublicTrafficForAdminServer'))]",
@@ -37,7 +37,7 @@
 			}
 		},
 		{
-                        "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
+			"apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
 			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
 			"name": "[concat(parameters('networkSecurityGroupName'),'/','WebLogicAdminPortsDenied')]",
 			"condition": "[parameters('denyPublicTrafficForAdminServer')]",
