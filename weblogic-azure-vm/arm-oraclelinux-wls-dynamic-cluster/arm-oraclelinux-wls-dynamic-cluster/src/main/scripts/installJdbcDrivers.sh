@@ -77,7 +77,7 @@ function install_maven() {
     fi
 
     tar xzvf ${mvnInstaller} -C /u01/app
-    export MAVEN_HOME=/u01/app/apache-maven
+    export MAVEN_HOME=$(find /u01/app -maxdepth 1 -type d -name "apache-maven*")
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh # set JAVA_HOME
     export PATH=${MAVEN_HOME}/bin:$PATH
 
