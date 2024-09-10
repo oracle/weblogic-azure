@@ -125,7 +125,7 @@ jobs:
                 echo "##[set-output name=artifactName;]${artifactName}"
                 echo "##[set-output name=artifactPath;]weblogic-azure/weblogic-azure-aks/target/$artifactName"
             - name: Archive weblogic-azure/weblogic-azure-aks template
-              uses: actions/upload-artifact@v1
+              uses: actions/upload-artifact@v4
               if: success()
               with:
                 name: ${{steps.artifact_file.outputs.artifactName}}
