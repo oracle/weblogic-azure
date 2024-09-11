@@ -245,6 +245,13 @@ export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/o
 export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 export retryMaxAttempt=5 # retry attempt for curl command
 export mvnInstaller="apache-maven-bin.tar.gz"
+
+# 2024-09-11 https://github.com/oracle/weblogic-azure/pull/325
+# Increase maintainability by putting URL behind redirector. As of today
+# target is https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
+# A better solution would be if Oracle had an employee accessible URL redirector
+# service similar to Microsoft's aka.ms. 
+
 export url4MavenInstaller="https://aka.ms/wls-offer-maven-download-url"
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
