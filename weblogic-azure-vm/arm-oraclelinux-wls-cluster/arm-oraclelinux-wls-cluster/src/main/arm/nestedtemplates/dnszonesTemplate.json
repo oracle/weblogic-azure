@@ -77,6 +77,13 @@
                 "description": "References to Azure resources from where the DNS resource value is taken. Each item is corresponding to values of dnszonesARecordSetNames."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "ttl": {
             "type": "int",
             "defaultValue": 3600,
@@ -101,6 +108,7 @@
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.dns.start}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
@@ -115,6 +123,7 @@
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "createDNSZone",
             "condition": "[not(parameters('hasDNSZones'))]",
             "properties": {
@@ -142,6 +151,9 @@
                     "targetResources": {
                         "value": "[parameters('targetResources')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "ttl": {
                         "value": "[parameters('ttl')]"
                     }
@@ -151,6 +163,7 @@
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "updateDNSZone",
             "condition": "[parameters('hasDNSZones')]",
             "properties": {
@@ -187,6 +200,9 @@
                     "targetResources": {
                         "value": "[parameters('targetResources')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "ttl": {
                         "value": "[parameters('ttl')]"
                     },
@@ -200,6 +216,7 @@
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.dns.end}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "properties": {
                 "mode": "Incremental",
                 "template": {

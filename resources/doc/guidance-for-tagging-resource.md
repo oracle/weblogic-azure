@@ -45,6 +45,7 @@ For example, in the UI definition, customers can specify tags for `Microsoft.Key
 - Microsoft.Resources/deploymentScripts
 - Microsoft.ManagedIdentity/userAssignedIdentities
 - Microsoft.Resources/deployments
+- Microsoft.Network/applicationGateways
 
 ### Resources that Do Not Support Tags:
 
@@ -53,7 +54,16 @@ For example, in the UI definition, customers can specify tags for `Microsoft.Key
 - Microsoft.Network/networkSecurityGroups/securityRules
 - Microsoft.Network/dnsZones/A
 - Microsoft.Network/dnszones/CNAME
+- Microsoft.Network/virtualNetworks/subnets
 - Microsoft.Authorization/roleAssignments
+- Microsoft.Network/loadBalancers/backendAddressPools
+- Microsoft.Network/applicationGateways/backendHttpSettingsCollection
+- Microsoft.Network/applicationGateways/frontendIPConfigurations
+- Microsoft.Network/applicationGateways/frontendPorts
+- Microsoft.Network/applicationGateways/gatewayIPConfigurations
+- Microsoft.Network/applicationGateways/httpListeners
+- Microsoft.Network/applicationGateways/probes
+- Microsoft.Network/applicationGateways/requestRoutingRules
 
 ## Step 2: Tag UI Control
 

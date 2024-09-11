@@ -77,6 +77,13 @@
             "metadata": {
                 "description": "Current deployment time. Used as a tag in deployment script."
             }
+        },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
         }
     },
     "variables": {
@@ -90,6 +97,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${cluster.appgateway.keyvault.start}",
             "properties": {
                 "mode": "Incremental",
@@ -104,6 +112,7 @@
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "keyVaultwithSelfSignedAppGatewaySSLCert",
             "condition": "[not(parameters('useExistingAppGatewaySSLCertificate'))]",
             "properties": {
@@ -127,6 +136,9 @@
                     },
                     "sku": {
                         "value": "[parameters('sku')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
                     }
                 }
             }
@@ -134,6 +146,7 @@
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "keyVaultwithExistingAppGatewaySSLCert",
             "condition": "[parameters('useExistingAppGatewaySSLCertificate')]",
             "properties": {
@@ -166,6 +179,9 @@
                     },
                     "sku": {
                         "value": "[parameters('sku')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
                     }
                 }
             }
@@ -173,6 +189,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${cluster.appgateway.keyvault.end}",
             "properties": {
                 "mode": "Incremental",

@@ -96,6 +96,13 @@
 				"description": "If true, will override the host name with dnszoneSubDomain."
 			}
 		},
+		"tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "virtualNetworkNewOrExisting": {
             "type": "string",
             "defaultValue": "new",
@@ -213,6 +220,7 @@
 		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersionForDeployment}",
+			"tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
 			"name": "${cluster.appgateway.start}",
 			"properties": {
 				"mode": "Incremental",
@@ -225,8 +233,9 @@
 			}
 		},
 		{
-                        "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
-                        "type": "Microsoft.Network/publicIPAddresses",
+			"apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+			"type": "Microsoft.Network/publicIPAddresses",
+			"tags": "[parameters('tagsByResource')['${identifier.publicIPAddresses}']]",
 			"name": "[parameters('gatewayPublicIPAddressName')]",
 			"sku": {
 				"name": "Standard"
@@ -242,6 +251,7 @@
 		{
 			"type": "Microsoft.Network/applicationGateways",
 			"apiVersion": "${azure.apiVersionForApplicationGateways}",
+			"tags": "[parameters('tagsByResource')['${identifier.applicationGateways}']]",
 			"name": "[variables('name_appGateway')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -428,8 +438,9 @@
 			}
 		},
 		{
-                        "apiVersion": "${azure.apiVersionForVirtualMachines}",
-                        "type": "Microsoft.Compute/virtualMachines/extensions",
+			"apiVersion": "${azure.apiVersionForVirtualMachines}",
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
 			"name": "[concat(parameters('adminVMName'),'/newuserscript')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -453,6 +464,7 @@
 		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersionForDeployment}",
+			"tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
 			"name": "${cluster.appgateway.end}",
 			"dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"

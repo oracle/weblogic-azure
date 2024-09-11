@@ -69,6 +69,13 @@
                 "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "wlsDomainName": {
             "defaultValue": "wlsd",
             "type": "string",
@@ -166,6 +173,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${cluster.aad.start}",
             "properties": {
                 "mode": "Incremental",
@@ -180,6 +188,7 @@
         {
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
+            "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
             "name": "[concat(variables('const_managedVMPrefix'), add(copyIndex(), 1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -204,6 +213,7 @@
         {
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
+            "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -227,6 +237,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${cluster.aad.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"

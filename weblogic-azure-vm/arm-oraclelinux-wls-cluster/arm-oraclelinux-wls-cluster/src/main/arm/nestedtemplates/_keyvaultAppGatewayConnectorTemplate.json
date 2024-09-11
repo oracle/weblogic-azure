@@ -140,6 +140,13 @@
                 "description": "If true, will override the host name with dnszoneSubDomain."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "virtualNetworkNewOrExisting": {
             "type": "string",
             "defaultValue": "new",
@@ -204,6 +211,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "${cluster.appgateway.custom.certificate}",
             "condition": "[not(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionGenerateCert')))]",
             "properties": {
@@ -219,6 +227,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "appGatewaywithExistingKeyVaultTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault'))]",
             "properties": {
@@ -277,6 +286,9 @@
                     "overrideHostName": {
                         "value": "[parameters('overrideHostName')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "virtualNetworkNewOrExisting": {
                         "value": "[parameters('virtualNetworkNewOrExisting')]"
                     },
@@ -304,6 +316,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "appGatewaywithExistingSSLCertTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveCert'))]",
             "properties": {
@@ -362,6 +375,9 @@
                     "overrideHostName": {
                         "value": "[parameters('overrideHostName')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "virtualNetworkNewOrExisting": {
                         "value": "[parameters('virtualNetworkNewOrExisting')]"
                     },
@@ -389,6 +405,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "appGatewaywithSelfSignedSSLCertTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionGenerateCert'))]",
             "properties": {
@@ -441,6 +458,9 @@
                     },
                     "overrideHostName": {
                         "value": "[parameters('overrideHostName')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
                     },
                     "virtualNetworkNewOrExisting": {
                         "value": "[parameters('virtualNetworkNewOrExisting')]"

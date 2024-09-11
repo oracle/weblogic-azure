@@ -63,6 +63,7 @@
         {
             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
             "apiVersion": "${azure.apiVersionForIdentity}",
+            "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]",
             "name": "[variables('name_deploymentScriptUserDefinedManagedIdentity')]",
             "location": "[parameters('location')]"
         },
@@ -83,6 +84,7 @@
         {
             "type": "Microsoft.KeyVault/vaults",
             "apiVersion": "${azure.apiVersionForKeyVault}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[parameters('keyvaultName')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Authorization/roleAssignments', variables('name_roleAssignmentName'))]"
@@ -110,6 +112,7 @@
         {
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
             "name": "script-createAddCertificate",
             "location": "[parameters('location')]",
             "dependsOn": [

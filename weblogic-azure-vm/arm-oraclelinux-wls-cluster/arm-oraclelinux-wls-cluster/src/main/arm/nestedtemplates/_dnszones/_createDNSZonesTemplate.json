@@ -38,6 +38,13 @@
                 "description": "References to Azure resources from where the DNS resource value is taken. Each item is corresponding to values of dnszonesARecordSetNames."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "ttl": {
             "type": "int",
             "defaultValue": 3600,
@@ -61,6 +68,7 @@
         {
             "type": "Microsoft.Network/dnszones",
             "apiVersion": "${azure.apiVersionForDNSZone}",
+            "tags": "[parameters('tagsByResource')['${identifier.dnszones}']]",
             "name": "[parameters('dnszoneName')]",
             "location": "[parameters('location')]",
             "properties": {

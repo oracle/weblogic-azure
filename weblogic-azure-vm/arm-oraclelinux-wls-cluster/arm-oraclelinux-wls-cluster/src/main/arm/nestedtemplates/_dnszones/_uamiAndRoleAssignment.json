@@ -1,89 +1,98 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      "location": {
-        "type": "string"
-      },
-      "uamiName": {
-        "type": "string"
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "uamiName": {
+      "type": "string"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Tags for the resources."
       }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+    "name_deploymentScriptContributorRoleAssignmentName": "[guid(format('{0}{1}Deployment Script', resourceGroup().id, parameters('uamiName')))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "${azure.apiVersionForIdentity}",
+      "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]",
+      "name": "[parameters('uamiName')]",
+      "location": "[parameters('location')]"
     },
-    "functions": [],
-    "variables": {
-      "const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "name_deploymentScriptContributorRoleAssignmentName": "[guid(format('{0}{1}Deployment Script', resourceGroup().id, parameters('uamiName')))]"
-    },
-    "resources": [
-      {
-        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-        "apiVersion": "${azure.apiVersionForIdentity}",
-        "name": "[parameters('uamiName')]",
-        "location": "[parameters('location')]"
-      },
-      {
-        "type": "Microsoft.Resources/deployments",
-        "apiVersion": "${azure.apiVersionForDeployment}",
-        "name": "[variables('name_deploymentScriptContributorRoleAssignmentName')]",
-        "subscriptionId": "[subscription().subscriptionId]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "expressionEvaluationOptions": {
-            "scope": "inner"
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "${azure.apiVersionForDeployment}",
+      "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+      "name": "[variables('name_deploymentScriptContributorRoleAssignmentName')]",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "roleDefinition": {
+            "value": "[variables('const_roleDefinitionIdOfContributor')]"
           },
-          "mode": "Incremental",
+          "principalId": {
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('uamiName'))).principalId]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
           "parameters": {
             "roleDefinition": {
-              "value": "[variables('const_roleDefinitionIdOfContributor')]"
+              "type": "string",
+              "defaultValue": ""
             },
             "principalId": {
-              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('uamiName'))).principalId]"
+              "type": "string",
+              "defaultValue": ""
             }
           },
-          "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "parameters": {
-              "roleDefinition": {
-                "type": "string",
-                "defaultValue": ""
-              },
-              "principalId": {
-                "type": "string",
-                "defaultValue": ""
+          "functions": [],
+          "variables": {
+            "name_roleAssignmentName": "[guid(format('{0}{1}Role assignment in subscription scope', subscription().id, parameters('principalId')))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "${azure.apiVersionForRoleAssignment}",
+              "name": "[variables('name_roleAssignmentName')]",
+              "properties": {
+                "description": "Assign subscription scope role to User Assigned Managed Identity ",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "ServicePrincipal",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleDefinition'))]"
               }
-            },
-            "functions": [],
-            "variables": {
-              "name_roleAssignmentName": "[guid(format('{0}{1}Role assignment in subscription scope', subscription().id, parameters('principalId')))]"
-            },
-            "resources": [
-              {
-                "type": "Microsoft.Authorization/roleAssignments",
-                "apiVersion": "${azure.apiVersionForRoleAssignment}",
-                "name": "[variables('name_roleAssignmentName')]",
-                "properties": {
-                  "description": "Assign subscription scope role to User Assigned Managed Identity ",
-                  "principalId": "[parameters('principalId')]",
-                  "principalType": "ServicePrincipal",
-                  "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleDefinition'))]"
-                }
-              }
-            ],
-            "outputs": {
-              "roleId": {
-                "type": "string",
-                "value": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleDefinition'))]"
-              }
+            }
+          ],
+          "outputs": {
+            "roleId": {
+              "type": "string",
+              "value": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleDefinition'))]"
             }
           }
         }
       }
-    ],
-    "outputs": {
-      "uamiIdForDeploymentScript": {
-        "type": "string",
-        "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('uamiName'))]"
-      }
+    }
+  ],
+  "outputs": {
+    "uamiIdForDeploymentScript": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('uamiName'))]"
     }
   }
+}

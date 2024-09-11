@@ -64,6 +64,13 @@
             "metadata": {
                 "description": "Current deployment time. Used as a tag in deployment script."
             }
+        },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
         }
     },
     "variables": {
@@ -80,6 +87,7 @@
             "name": "[parameters('keyVaultName')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.KeyVault/vaults",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "properties": {
                 "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
                 "sku": {
@@ -93,6 +101,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customIdentityKeyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -105,6 +114,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customIdentityKeyStorePassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -117,6 +127,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customTrustKeyStoreDataSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -129,6 +140,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_customTrustKeyStorePassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -141,6 +153,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_privateKeyAliasSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -153,6 +166,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('keyVaultName'), '/', variables('name_privateKeyPassPhraseSecretName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [

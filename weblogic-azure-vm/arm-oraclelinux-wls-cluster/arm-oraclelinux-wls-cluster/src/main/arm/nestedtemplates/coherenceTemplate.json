@@ -173,6 +173,13 @@
                "description": "Name of the existing or new Subnet"
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "usePreviewImage": {
             "type": "bool",
             "defaultValue": false,
@@ -361,6 +368,7 @@
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.coherence.start}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -374,6 +382,7 @@
         {
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
+            "tags": "[parameters('tagsByResource')['${identifier.publicIPAddresses}']]",
             "name": "[concat(variables('name_vmMachine'),copyIndex(1),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -396,6 +405,7 @@
         {
             "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
+            "tags": "[parameters('tagsByResource')['${identifier.networkInterfaces}']]",
             "name": "[concat(variables('name_vmMachine'), copyIndex(1), variables('name_nic'))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -428,6 +438,7 @@
         {
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
+            "tags": "[parameters('tagsByResource')['${identifier.virtualMachines}']]",
             "name": "[concat(variables('name_vmMachine'), copyIndex(1))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -483,6 +494,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
+            "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('name_vmMachine'), copyIndex(),'/newuserscript'))]",
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "location": "[parameters('location')]",
@@ -517,6 +529,7 @@
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.coherence.end}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "virtualMachineExtensionLoop"
             ],

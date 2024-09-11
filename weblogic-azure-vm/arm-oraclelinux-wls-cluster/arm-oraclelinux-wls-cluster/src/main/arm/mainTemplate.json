@@ -409,6 +409,13 @@
             ],
             "defaultValue": "keyVaultStoredConfig"
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "usePreviewImage": {
             "type": "bool",
             "defaultValue": false,
@@ -716,6 +723,29 @@
             "defaultValue": true
         }
     },
+    "functions": [
+      {
+         "namespace":"funcTags",
+         "members": {
+            "tagsFilter": {
+               "parameters": [
+                  {
+                     "name": "tagsByResource",
+                     "type": "object"
+                  },
+                  {
+                     "name": "resourceIdentifier",
+                     "type": "string"
+                  }
+               ],
+               "output": {
+                  "type": "object",
+                  "value": "[if(contains(parameters('tagsByResource'), parameters('resourceIdentifier')), parameters('tagsByResource')[parameters('resourceIdentifier')], json('{}'))]"
+               }
+            }
+         }
+      }
+   ],
     "variables": {
         "const_currentSubscription": "[subscription().subscriptionId]",
         "const_appGatewaySSLCertOptionHaveCert": "haveCert",
@@ -742,13 +772,33 @@
         "name_clusterTemplate": "clusterLinkedTemplate",
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
         "name_sslKeyVaultLinkedTemplateName": "_keyvaultSSLConfigTemplate.json",
-        "name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcNow'))), 24)]"
+        "name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcNow'))), 24)]",
+        // If adding a new resource, add the resource identifier to the array below
+        // Also modify createUIDefinition.json to include the new resource
+        "obj_tagsByResources":{
+            "${identifier.applicationGateways}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.applicationGateways}')]",
+            "${identifier.availabilitySets}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.availabilitySets}')]",
+            "${identifier.dnszones}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.dnszones}')]",
+            "${identifier.networkInterfaces}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.networkInterfaces}')]",
+            "${identifier.networkSecurityGroups}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.networkSecurityGroups}')]",
+            "${identifier.publicIPAddresses}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.publicIPAddresses}')]",
+            "${identifier.privateEndpoints}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.privateEndpoints}')]",
+            "${identifier.storageAccounts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.storageAccounts}')]",
+            "${identifier.vaults}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.vaults}')]",
+            "${identifier.virtualNetworks}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualNetworks}')]",
+            "${identifier.virtualMachines}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachines}')]",
+            "${identifier.virtualMachinesExtensions}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachinesExtensions}')]",
+            "${identifier.deploymentScripts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.deploymentScripts}')]",
+            "${identifier.userAssignedIdentities}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.userAssignedIdentities}')]",
+            "${identifier.resourcesDeployment}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.resourcesDeployment}')]"
+        }
     },
     "resources": [
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.start}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -763,6 +813,7 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "[variables('name_clusterTemplate')]",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "condition": "[not(parameters('enableCustomSSL'))]",
             "properties": {
                 "mode": "Incremental",
@@ -822,6 +873,9 @@
                     "subnetPrefixForAppGateway": {
                         "value": "[parameters('subnetPrefixForAppGateway')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
+                    },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
                     },
@@ -867,6 +921,7 @@
         {
             "name": "sslKeyVaultNestedTemplate",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "apiVersion": "${azure.apiVersionForDeployment}",
             "condition": "[and(parameters('enableCustomSSL'), equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionUploadConfig')))]",
             "properties": {
@@ -905,6 +960,9 @@
                     },
                     "keyVaultName": {
                         "value": "[variables('name_keyVaultName')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     }
                 }
             }
@@ -912,6 +970,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "name": "[variables('name_clusterCustomSSLTemplate')]",
             "condition": "[parameters('enableCustomSSL')]",
             "properties": {
@@ -971,6 +1030,9 @@
                     },
                     "subnetPrefixForAppGateway": {
                         "value": "[parameters('subnetPrefixForAppGateway')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
@@ -1077,6 +1139,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "name": "keyVaultLinkedTemplate",
             "condition": "[and(parameters('enableAppGateway'), not(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveKeyVault'))))]",
             "dependsOn": [
@@ -1116,6 +1179,9 @@
                     },
                     "keyVaultName": {
                         "value": "[variables('name_keyVaultName')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     }
                 }
             }
@@ -1123,6 +1189,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
             "name": "networkSecurityLinkedTemplate",
             "properties": {
@@ -1143,6 +1210,9 @@
                     },
                     "enableAppGateway": {
                         "value": "[parameters('enableAppGateway')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     }
                 }
             },
@@ -1153,6 +1223,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "name": "keyVaultLinkedAppGatewayTemplate",
             "condition": "[parameters('enableAppGateway')]",
             "properties": {
@@ -1219,6 +1290,9 @@
                     "overrideHostName": {
                         "value": "[parameters('enableDNSConfiguration')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
+                    },
                     "virtualNetworkNewOrExisting": {
                         "value": "[parameters('virtualNetworkNewOrExisting')]"
                     },
@@ -1249,6 +1323,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "name": "dnszonesLinkedTemplate",
             "condition": "[parameters('enableDNSConfiguration')]",
             "dependsOn": [
@@ -1294,6 +1369,9 @@
                         "value": [
                             "[reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value]"
                         ]
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     }
                 }
 
@@ -1302,6 +1380,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "name": "dbLinkedTemplate",
             "condition": "[parameters('enableDB')]",
             "dependsOn": [
@@ -1371,6 +1450,7 @@
         {
             "name": "aadLinkedTemplate",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
             ],
@@ -1410,6 +1490,9 @@
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -1443,6 +1526,7 @@
         {
             "name": "aadLinkedTemplateWithCustomSSL",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'sslKeyVaultNestedTemplate')]"
@@ -1482,6 +1566,9 @@
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
@@ -1530,6 +1617,7 @@
         {
             "name": "elkLinkedTemplate",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplateWithCustomSSL')]"
@@ -1573,6 +1661,9 @@
                     "numberOfManagedApplicationInstances": {
                         "value": "[add(parameters('numberOfInstances'),-1)]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
@@ -1588,6 +1679,7 @@
         {
             "name": "coherenceTemplate",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
             ],
@@ -1660,6 +1752,9 @@
                     "subnetName": {
                         "value": "[parameters('subnetName')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
+                    },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
                     },
@@ -1696,6 +1791,7 @@
         {
             "name": "coherenceTemplateWithCustomSSL",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
             ],
@@ -1764,6 +1860,9 @@
                     },
                     "storageAccountName": {
                         "value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
                     },
                     "usePreviewImage": {
                         "value": "[parameters('usePreviewImage')]"
@@ -1850,6 +1949,7 @@
             "apiVersion": "${azure.apiVersionForDeployment}",
             "name": "${cluster.end}",
             "type": "Microsoft.Resources/deployments",
+            "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
                 "[resourceId('Microsoft.Resources/deployments', 'keyVaultLinkedTemplate')]",
