@@ -128,7 +128,7 @@ jobs:
           echo "##[set-output name=artifactName;]${artifactName}"
           echo "##[set-output name=artifactPath;]${offerPath}/${{ env.offerName }}/target/$artifactName"
       - name: Archive ${{env.offerName}} template
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}
@@ -143,7 +143,7 @@ jobs:
           echo "##[set-output name=addnode_artifactName;]${addnode_artifactName}"
           echo "##[set-output name=addnode_artifactPath;]${offerPath}/addnode/target/$addnode_artifactName"
       - name: Archive ${{env.offerName}} addnode template
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ${{steps.addnode_artifact_file.outputs.addnode_artifactName}}
@@ -159,7 +159,7 @@ jobs:
           echo "##[set-output name=deletenode_artifactPath;]${offerPath}/deletenode/target/$deletenode_artifactName"
 
       - name: Archive ${{env.offerName}} deletenode template
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactName}}
@@ -175,7 +175,7 @@ jobs:
           echo "##[set-output name=addnode_coherence_artifactPath;]${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName"
 
       - name: Archive ${{env.offerName}} addnode-coherence template
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactName}}
