@@ -260,6 +260,9 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
+                    },
                     "wlsPassword": {
                         "value": "[parameters('wlsPassword')]"
                     },

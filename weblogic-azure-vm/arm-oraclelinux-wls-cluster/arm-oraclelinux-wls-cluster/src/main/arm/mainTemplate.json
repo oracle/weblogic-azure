@@ -1435,6 +1435,9 @@
                     "numberOfManagedApplicationInstances": {
                         "value": "[add(parameters('numberOfInstances'),-1)]"
                     },
+                    "tagsByResource": {
+                        "value": "[parameters('obj_tagsByResources')]"
+                    },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
                     },
