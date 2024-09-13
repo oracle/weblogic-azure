@@ -336,8 +336,22 @@
         },
         "logsToIntegrate": {
             "type": "array",
-            "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
-            "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
+            "defaultValue": [
+                "HTTPAccessLog",
+                "ServerLog",
+                "DomainLog",
+                "DataSourceLog",
+                "StandardErrorAndOutput",
+                "NodeManagerLog"
+            ],
+            "allowedValues": [
+                "HTTPAccessLog",
+                "ServerLog",
+                "DomainLog",
+                "DataSourceLog",
+                "StandardErrorAndOutput",
+                "NodeManagerLog"
+            ],
             "metadata": {
                 "description": "Specify the expeted logs to integrate, you must input at least one log."
             }
@@ -389,7 +403,7 @@
                 "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
                 "owls-141100-jdk11-rhel87;Oracle:weblogic-141100-jdk11-rhel87:owls-141100-jdk11-rhel87;latest",
                 "owls-141100-jdk8-rhel87;Oracle:weblogic-141100-jdk8-rhel87:owls-141100-jdk8-rhel87;latest",
-                "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest",                
+                "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest",
                 "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
                 "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
                 "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
@@ -723,29 +737,6 @@
             "defaultValue": true
         }
     },
-    "functions": [
-      {
-         "namespace":"funcTags",
-         "members": {
-            "tagsFilter": {
-               "parameters": [
-                  {
-                     "name": "tagsByResource",
-                     "type": "object"
-                  },
-                  {
-                     "name": "resourceIdentifier",
-                     "type": "string"
-                  }
-               ],
-               "output": {
-                  "type": "object",
-                  "value": "[if(contains(parameters('tagsByResource'), parameters('resourceIdentifier')), parameters('tagsByResource')[parameters('resourceIdentifier')], json('{}'))]"
-               }
-            }
-         }
-      }
-   ],
     "variables": {
         "const_currentSubscription": "[subscription().subscriptionId]",
         "const_appGatewaySSLCertOptionHaveCert": "haveCert",
@@ -775,7 +766,7 @@
         "name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcNow'))), 24)]",
         // If adding a new resource, add the resource identifier to the array below
         // Also modify createUIDefinition.json to include the new resource
-        "obj_tagsByResources":{
+        "obj_tagsByResources": {
             "${identifier.applicationGateways}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.applicationGateways}')]",
             "${identifier.availabilitySets}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.availabilitySets}')]",
             "${identifier.dnszones}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.dnszones}')]",
@@ -793,6 +784,29 @@
             "${identifier.resourcesDeployment}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.resourcesDeployment}')]"
         }
     },
+    "functions": [
+        {
+            "namespace": "funcTags",
+            "members": {
+                "tagsFilter": {
+                    "parameters": [
+                        {
+                            "name": "tagsByResource",
+                            "type": "object"
+                        },
+                        {
+                            "name": "resourceIdentifier",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "object",
+                        "value": "[if(contains(parameters('tagsByResource'), parameters('resourceIdentifier')), parameters('tagsByResource')[parameters('resourceIdentifier')], json('{}'))]"
+                    }
+                }
+            }
+        }
+    ],
     "resources": [
         {
             "apiVersion": "${azure.apiVersionForDeployment}",
@@ -804,8 +818,7 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                    "resources": []
                 }
             }
         },
@@ -1374,7 +1387,6 @@
                         "value": "[parameters('obj_tagsByResources')]"
                     }
                 }
-
             }
         },
         {
@@ -1971,8 +1983,7 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                    "resources": []
                 }
             }
         }
