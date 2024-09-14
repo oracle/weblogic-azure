@@ -49,6 +49,13 @@
                 "description": "Subject name to create a new certificate, example: 'CN=contoso.com'."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "Tags for the resources."
+            }
+        },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
