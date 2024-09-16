@@ -75,7 +75,7 @@ Incorporate the [Microsoft.Common.TagsByResource UI element](https://learn.micro
 
 ## Step 3: Update the Template
 
-Refer to the WLS PR to apply tags to the resource deployments appropriately.
+Refer to this [pull request](https://github.com/oracle/weblogic-azure/pull/327/) as a guide for how to apply tags to the resource deployments.
 
 ## Step 4: Testing
 
