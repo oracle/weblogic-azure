@@ -1,6 +1,10 @@
 
 # Guidance on Applying Tags in Solution Templates
 
+## What are Tags in this context and why are they useful?
+
+Tags are arbitrary name=value pairs that can be associated with most Azure resources. Azure features such as Azure Policy can use Tags to enforce cloud governance policies. For more about tags, see [Use tags to organize your Azure resources and management hierarchy](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources).
+
 ## Step 1: Audit Resources Created in the Offer
 
 To determine the resources that will be created in your offer, use the following commands based on the template type:
