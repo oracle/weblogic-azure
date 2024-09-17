@@ -81,7 +81,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "Tags for the resources."
+                "description": "${label.tagsLabel}"
             }
         },
         "ttl": {
