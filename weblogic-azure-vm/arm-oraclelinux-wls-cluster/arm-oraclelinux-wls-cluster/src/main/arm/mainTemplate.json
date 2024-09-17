@@ -786,6 +786,8 @@
     },
     "functions": [
         {
+            // This same function is defined in the mainTemplate.json for every other offer.
+            // Please ensure any changes are applied in all the other places.
             "namespace": "funcTags",
             "members": {
                 "tagsFilter": {
