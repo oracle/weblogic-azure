@@ -65,6 +65,13 @@
                 "description": "Number of VMs that have been deployed to host managed application server."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "${label.tagsLabel}"
+            }
+        },
         "wlsDomainName": {
             "type": "string",
             "defaultValue": "wlsd",
@@ -96,6 +103,7 @@
         {
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
+            "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {

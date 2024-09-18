@@ -64,6 +64,13 @@
                 "description": "References to Azure resources from where the DNS resource value is taken. Each item is corresponding to values of dnszonesARecordSetNames."
             }
         },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "${label.tagsLabel}"
+            }
+        },
         "ttl": {
             "type": "int",
             "defaultValue": 3600,
@@ -108,6 +115,7 @@
             "type": "Microsoft.Resources/deployments",
             "name": "uamiDeployment",
             "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -120,6 +128,9 @@
                     },
                     "uamiName": {
                         "value": "[variables('name_deploymentScriptUserDefinedManagedIdentity')]"
+                    },
+                    "tagsByResource": {
+                        "value": "[parameters('tagsByResource')]"
                     }
                 }
             }
@@ -127,6 +138,7 @@
         {
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "${azure.apiVersionForDeploymentScript}",
+            "tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'uamiDeployment')]"
             ],

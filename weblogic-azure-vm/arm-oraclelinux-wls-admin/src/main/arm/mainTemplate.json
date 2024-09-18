@@ -492,6 +492,13 @@
             "description": "Address prefix of the subnet"
          }
       },
+      "tagsByResource": {
+         "type": "object",
+         "defaultValue": {},
+         "metadata": {
+            "description": "${label.tagsLabel}"
+         }
+      },
       "wlsDomainName": {
          "defaultValue": "adminDomain",
          "type": "string",
@@ -567,12 +574,55 @@
       "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
       "name_elkLinkedTemplateName": "elkNestedTemplate.json",
       "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
-      "name_keyVaultNestedTemplate": "_keyVaultNestedTemplate.json"
+      "name_keyVaultNestedTemplate": "_keyVaultNestedTemplate.json",
+      // If adding a new resource, add the resource identifier to the array below
+      // Also modify createUIDefinition.json to include the new resource
+      "obj_tagsByResources":{
+         "${identifier.dnszones}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.dnszones}')]",
+         "${identifier.networkInterfaces}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.networkInterfaces}')]",
+         "${identifier.networkSecurityGroups}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.networkSecurityGroups}')]",
+         "${identifier.publicIPAddresses}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.publicIPAddresses}')]",
+         "${identifier.privateEndpoints}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.privateEndpoints}')]",
+         "${identifier.storageAccounts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.storageAccounts}')]",
+         "${identifier.vaults}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.vaults}')]",
+         "${identifier.virtualNetworks}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualNetworks}')]",
+         "${identifier.virtualMachines}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachines}')]",
+         "${identifier.virtualMachinesExtensions}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachinesExtensions}')]",
+         "${identifier.deploymentScripts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.deploymentScripts}')]",
+         "${identifier.userAssignedIdentities}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.userAssignedIdentities}')]",
+         "${identifier.resourcesDeployment}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.resourcesDeployment}')]"
+      }
    },
+   "functions": [
+      {
+         // This same function is defined in the mainTemplate.json for every other offer.
+         // Please ensure any changes are applied in all the other places.
+         "namespace": "funcTags",
+         "members": {
+            "tagsFilter": {
+               "parameters": [
+                  {
+                     "name": "tagsByResource",
+                     "type": "object"
+                  },
+                  {
+                     "name": "resourceIdentifier",
+                     "type": "string"
+                  }
+               ],
+               "output": {
+                  "type": "object",
+                  "value": "[if(contains(parameters('tagsByResource'), parameters('resourceIdentifier')), parameters('tagsByResource')[parameters('resourceIdentifier')], json('{}'))]"
+               }
+            }
+         }
+      }
+   ],
    "resources": [
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "name": "${admin.start}",
          "properties": {
             "mode": "Incremental",
@@ -587,6 +637,7 @@
       {
          "name": "adminLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[not(parameters('enableCustomSSL'))]",
          "properties": {
@@ -644,6 +695,9 @@
                "subnetPrefix": {
                   "value": "[parameters('subnetPrefix')]"
                },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
+               },
                "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
@@ -678,6 +732,7 @@
          "name": "keyVaultNestedTemplate",
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[and(parameters('enableCustomSSL'), equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionUploadConfig')))]",
          "properties": {
             "mode": "Incremental",
@@ -712,6 +767,9 @@
                },
                "sku": {
                   "value": "[parameters('keyVaultSku')]"
+               },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
                }
             }
          }
@@ -720,6 +778,7 @@
          "name": "adminCustomSSLLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[parameters('enableCustomSSL')]",
          "properties": {
             "mode": "Incremental",
@@ -833,6 +892,9 @@
                "subnetPrefix": {
                   "value": "[parameters('subnetPrefix')]"
                },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
+               },
                "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
@@ -869,6 +931,7 @@
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "networkSecurityLinkedTemplate",
          "properties": {
@@ -895,6 +958,7 @@
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "dnszonesLinkedTemplate",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[and(parameters('enableCustomDNS'), equals(parameters('virtualNetworkNewOrExisting'), 'new'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
@@ -933,6 +997,9 @@
                   "value": [
                      "[reference(variables('name_adminLinkedTemplateDeployment'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value]"
                   ]
+               },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
                }
             }
          }
@@ -943,6 +1010,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[parameters('enableDB')]",
          "properties": {
@@ -988,6 +1056,9 @@
                "location": {
                   "value": "[parameters('location')]"
                },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
+               },
                "wlsDomainName": {
                   "value": "[parameters('wlsDomainName')]"
                },
@@ -1007,6 +1078,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[and(parameters('enableAAD'),not(parameters('enableCustomSSL')))]",
          "properties": {
@@ -1036,6 +1108,9 @@
                },
                "location": {
                   "value": "[parameters('location')]"
+               },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
                },
                "wlsDomainName": {
                   "value": "[parameters('wlsDomainName')]"
@@ -1074,6 +1149,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[and(parameters('enableAAD'),parameters('enableCustomSSL'))]",
          "properties": {
@@ -1103,6 +1179,9 @@
                },
                "location": {
                   "value": "[parameters('location')]"
+               },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
                },
                "wlsDomainName": {
                   "value": "[parameters('wlsDomainName')]"
@@ -1154,6 +1233,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[parameters('enableELK')]",
          "properties": {
@@ -1187,6 +1267,9 @@
                "logsToIntegrate": {
                   "value": "[parameters('logsToIntegrate')]"
                },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
+               },
                "wlsDomainName": {
                   "value": "[parameters('wlsDomainName')]"
                },
@@ -1202,6 +1285,7 @@
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "name": "${admin.end}",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",

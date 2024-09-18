@@ -189,7 +189,7 @@ jobs:
               with:
                 path: weblogic-azure
             - name: Download artifact for deployment
-              uses: actions/download-artifact@v1
+              uses: actions/download-artifact@v4
               with:
                 name: ${{needs.preflight.outputs.artifactName}}
             - uses: azure/login@v1

@@ -1649,6 +1649,34 @@
                         "visible": "[bool(steps('section_coherence').enableCoherence)]"
                     }
                 ]
+            },
+            {
+                "name": "section_tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "tagsByResource",
+                        "type": "Microsoft.Common.TagsByResource",
+                        "resources": [
+                            "${identifier.applicationGateways}",
+                            "${identifier.virtualMachines}",
+                            "${identifier.virtualMachinesExtensions}",
+                            "${identifier.publicIPAddresses}",
+                            "${identifier.availabilitySets}",
+                            "${identifier.vaults}",
+                            "${identifier.userAssignedIdentities}",
+                            "${identifier.dnszones}",
+                            "${identifier.networkInterfaces}",
+                            "${identifier.networkSecurityGroups}",
+                            "${identifier.privateEndpoints}",
+                            "${identifier.virtualNetworks}",
+                            "${identifier.deploymentScripts}",
+                            "${identifier.storageAccounts}",
+                            "${identifier.resourcesDeployment}"
+                        ],
+                        "toolTip": "Tags help you organize your resources and categorize them for billing or management purposes. You can apply tags to resources deployed by the offer."
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -1724,7 +1752,8 @@
             "uploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
             "virtualNetworkName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.name, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.name)]",
             "virtualNetworkResourceGroupName": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.resourceGroup, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.resourceGroup)]",
-            "virtualNetworkNewOrExisting": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.newOrExisting, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.newOrExisting)]"
+            "virtualNetworkNewOrExisting": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.newOrExisting, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.newOrExisting)]",
+            "tagsByResource": "[steps('section_tags').tagsByResource]"
         }
     }
 }

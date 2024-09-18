@@ -50,6 +50,13 @@
             "metadata": {
                 "description": "Price tier for Key Vault."
             }
+        },
+        "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "${label.tagsLabel}"
+            }
         }
     },
     "variables": {
@@ -61,6 +68,7 @@
             "name": "[parameters('name')]",
             "location": "[parameters('location')]",
             "type": "Microsoft.KeyVault/vaults",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "properties": {
                 "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
                 "sku": {
@@ -74,6 +82,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('name'), '/', parameters('certificateDataName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -86,6 +95,7 @@
         {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "${azure.apiVersionForKeyVaultSecrets}",
+            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
             "name": "[concat(parameters('name'), '/', parameters('certificatePasswordName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [

@@ -7,7 +7,14 @@
       },
       "uamiName": {
         "type": "string"
-      }
+      },
+      "tagsByResource": {
+            "type": "object",
+            "defaultValue": {},
+            "metadata": {
+                "description": "${label.tagsLabel}"
+            }
+        }
     },
     "functions": [],
     "variables": {
@@ -19,12 +26,14 @@
         "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
         "apiVersion": "${azure.apiVersionForIdentity}",
         "name": "[parameters('uamiName')]",
-        "location": "[parameters('location')]"
+        "location": "[parameters('location')]",
+        "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]"
       },
       {
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "${azure.apiVersionForDeployment}",
         "name": "[variables('name_deploymentScriptContributorRoleAssignmentName')]",
+        "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
         "subscriptionId": "[subscription().subscriptionId]",
         "location": "[parameters('location')]",
         "properties": {
