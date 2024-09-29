@@ -156,3 +156,13 @@ Refer to this [pull request](https://github.com/oracle/weblogic-azure/pull/327/)
         }
     ]
     ```
+
+## Step 4: Known issues
+
+The tag is not applied to resources that are not deployed through our template, so we cannot apply tags to them from the template.
+
+Known resources:
+
+- Microsoft.Compute/virtualMachines/extensions
+  - OmsAgentForLinux
+  - MDE.Linux

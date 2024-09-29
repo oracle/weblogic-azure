@@ -40,6 +40,8 @@ param identity object = {}
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -80,6 +82,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
     location: location
+    tagsByResource: tagsByResource
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName

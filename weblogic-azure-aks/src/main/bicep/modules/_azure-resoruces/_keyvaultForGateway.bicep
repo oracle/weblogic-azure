@@ -41,6 +41,9 @@ param useExistingAppGatewaySSLCertificate bool = false
 @description('Current deployment time. Used as a tag in deployment script.')
 param keyVaultName string = 'GEN_UNIQUE'
 
+@description('${label.tagsLabel}')
+param tagsByResource object
+
 var name_sslBackendCertSercretName= 'myAppGatewaySSLBackendRootCert'
 var name_sslCertSecretName = 'myAppGatewaySSLCert'
 var name_sslCertPasswordSecretName = 'myAppGatewaySSLCertPassword'
@@ -54,6 +57,7 @@ module keyVaultwithSelfSignedAppGatewaySSLCert '_keyvault/_keyvaultWithNewCert.b
     permission: permission
     subjectName: subjectName
     sku: sku
+    tagsByResource: tagsByResource
   }
 }
 
@@ -68,6 +72,7 @@ module keyVaultwithExistingAppGatewaySSLCert '_keyvault/_keyvaultWithExistingCer
     keyVaultName: keyVaultName
     location: location
     sku: sku
+    tagsByResource: tagsByResource
   }
 }
 
@@ -80,6 +85,7 @@ module keyvaultBackendRootCert '_keyvault/_keyvaultForGatewayBackendCert.bicep' 
     keyVaultName: keyVaultName
     location: location
     sku: sku
+    tagsByResource: tagsByResource
   }
   dependsOn:[
     keyVaultwithSelfSignedAppGatewaySSLCert

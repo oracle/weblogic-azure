@@ -86,6 +86,8 @@ param ocrSSOUser string
 param storageAccountName string = 'stg-contoso'
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
+@description('${label.tagsLabel}')
+param tagsByResource object
 param userProvidedAcr string = 'null'
 param userProvidedAcrRgName string = 'null'
 param userProvidedImagePath string = 'null'
@@ -172,6 +174,7 @@ module aksClusterDeployment './_azure-resoruces/_aks.bicep' = if (createAKSClust
     aksVersion: aksVersion
     enableAzureMonitoring: enableAzureMonitoring
     location: location
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     pidStart
@@ -185,6 +188,7 @@ module storageDeployment './_azure-resoruces/_storage.bicep' = if (createStorage
     fileShareName: fileShareName
     location: location
     storageAccountName: storageAccountName
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     pidStart
@@ -224,6 +228,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     storageAccountName: storageAccountName
     t3ChannelAdminPort: t3ChannelAdminPort
     t3ChannelClusterPort: t3ChannelClusterPort
+    tagsByResource: tagsByResource
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
     wdtRuntimePassword: wdtRuntimePassword

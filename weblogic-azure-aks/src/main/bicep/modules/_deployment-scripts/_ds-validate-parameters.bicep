@@ -56,6 +56,7 @@ param sslUploadedCustomTrustKeyStoreType string
 param sslUploadedPrivateKeyAlias string
 @secure()
 param sslUploadedPrivateKeyPassPhrase string
+param tagsByResource object
 param useAksWellTestedVersion bool = true
 param userProvidedAcr string
 param userProvidedAcrRgName string
@@ -78,6 +79,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   location: location
   kind: 'AzureCLI'
   identity: identity
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     arguments: const_arguments

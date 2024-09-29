@@ -18,6 +18,8 @@ param vnetForApplicationGateway object = {
     }
   }
 }
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 
 var const_subnetAddressPrefixes = vnetForApplicationGateway.subnets.gatewaySubnet.addressPrefix
@@ -43,6 +45,7 @@ resource existingSubnet 'Microsoft.Network/virtualNetworks/subnets@${azure.apiVe
 resource nsg 'Microsoft.Network/networkSecurityGroups@${azure.apiVersionForNetworkSecurityGroups}' = if (const_newVnet) {
   name: name_nsg
   location: location
+  tags: tagsByResource['${identifier.networkSecurityGroups}']
   properties: {
     securityRules: [
       {
@@ -82,6 +85,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@${azure.apiVersionForNetwo
 resource newVnet 'Microsoft.Network/virtualNetworks@${azure.apiVersionForVirtualNetworks}' = if (const_newVnet) {
   name: name_vnet
   location: location
+  tags: tagsByResource['${identifier.virtualNetworks}']
   properties: {
     addressSpace: {
       addressPrefixes: const_vnetAddressPrefixes

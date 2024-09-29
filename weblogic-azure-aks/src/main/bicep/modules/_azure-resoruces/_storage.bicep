@@ -4,15 +4,21 @@
 param fileShareName string
 param location string
 param storageAccountName string = 'stg-contoso'
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 
 var const_shareQuota = 5120
 var const_sku = 'Standard_LRS'
+var objExtraTag = {
+  'created-by-azure-weblogic': utcValue
+}
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionForStorage}' = {
   name: storageAccountName
   location: location
   kind: 'StorageV2'
+  tags: union(tagsByResource['${identifier.storageAccounts}'], objExtraTag)
   sku: {
     name: const_sku
     tier: 'Standard'
@@ -33,10 +39,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionFor
       keySource: 'Microsoft.Storage'
     }
     accessTier: 'Hot'
-  }
-  tags:{
-    'managed-by-azure-weblogic': utcValue
-  }
+  }  
 }
 
 resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@${azure.apiVersionForStorageFileService}' = {

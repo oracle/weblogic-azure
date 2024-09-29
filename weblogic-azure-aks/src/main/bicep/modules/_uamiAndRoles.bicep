@@ -4,6 +4,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 */
 
 param location string
+param tagsByResource object
 param name_deploymentScriptContributorRoleAssignmentName string = newGuid()
 
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
@@ -15,6 +16,7 @@ var name_deploymentScriptUserDefinedManagedIdentity = 'wls-aks-deployment-script
 resource uamiForDeploymentScript 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' = {
   name: name_deploymentScriptUserDefinedManagedIdentity
   location: location
+  tags: tagsByResource['${identifier.userAssignedIdentities}']
 }
 
 // Assign Contributor role in subscription scope, we need the permission to get/update resource cross resource group.

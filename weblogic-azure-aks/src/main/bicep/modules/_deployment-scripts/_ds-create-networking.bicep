@@ -34,6 +34,8 @@ param useInternalLB bool = false
 param utcValue string = utcNow()
 param wlsDomainName string = 'domain1'
 param wlsDomainUID string = 'sample-domain1'
+@description('${label.tagsLabel}')
+param tagsByResource object
 
 var const_commonScript = 'common.sh'
 var const_createDnsRecordScript = 'createDnsRecord.sh'
@@ -48,6 +50,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   location: location
   kind: 'AzureCLI'
   identity: identity
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [
