@@ -290,6 +290,10 @@ jobs:
               with:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
+                   
+                    ls -l
+                    ls ${artifactName} -l
+
                     artifactName=${{ needs.preflight.outputs.artifactName }}
                     
                     az deployment group create \
