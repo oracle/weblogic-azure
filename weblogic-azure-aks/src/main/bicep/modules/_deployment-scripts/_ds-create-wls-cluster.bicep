@@ -163,6 +163,14 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: storageAccountName
       }
       {
+        name: 'TAG_VM'
+        value: string(tagsByResource['${identifier.virtualMachines}'])
+      }
+      {
+        name: 'TAG_VM_EXTENSION'
+        value: string(tagsByResource['${identifier.virtualMachinesExtensions}'])
+      }
+      {
         name: 'URL_3RD_DATASOURCE'
         value:  string(dbDriverLibrariesUrls)
       }

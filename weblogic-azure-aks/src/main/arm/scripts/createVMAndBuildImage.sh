@@ -115,6 +115,10 @@ function build_docker_image() {
         exit 1
     fi
 
+    echo_stdout "TAG_VM: ${TAG_VM}"
+    TAG_VM=$(echo "${TAG_VM}" \
+        | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
+
     # MICROSOFT_INTERNAL
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
     # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which causes vm-redeployed issue
@@ -130,7 +134,7 @@ function build_docker_image() {
     --enable-auto-update false \
     --public-ip-address "" \
     --size ${vmSize} \
-    --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
+    --tags ${TAG_VM} SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
     if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]]; then
         get_ocr_image_full_path
@@ -138,15 +142,19 @@ function build_docker_image() {
         wlsImagePath="${USER_PROVIDED_IMAGE_PATH}"
     fi
 
-    echo "wlsImagePath: ${wlsImagePath}"
+    echo_stdout "wlsImagePath: ${wlsImagePath}"
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | tr -d "\"") # remove " from the string
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | base64 -w0)
+    echo_stdout "TAG_VM_EXTENSION: ${TAG_VM_EXTENSION}"
+    TAG_VM_EXTENSION=$(echo "${TAG_VM_EXTENSION}" \
+        | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
     az vm extension set --name CustomScript \
         --extension-instance-name wls-image-script \
         --resource-group ${CURRENT_RESOURCEGROUP_NAME} \
         --vm-name ${vmName} \
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
+        --tags ${TAG_VM_EXTENSION} \
         --settings "{ \"fileUris\": [\"${SCRIPT_LOCATION}model.properties\",\"${SCRIPT_LOCATION}genImageModel.sh\",\"${SCRIPT_LOCATION}buildWLSDockerImage.sh\",\"${SCRIPT_LOCATION}common.sh\"]}" \
         --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_PASSWORDLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
     
