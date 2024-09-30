@@ -327,6 +327,7 @@ var _objTagsByResource = {
   '${identifier.vaults}': tagsFilter(tagsByResource, '${identifier.vaults}')
   '${identifier.userAssignedIdentities}': tagsFilter(tagsByResource, '${identifier.userAssignedIdentities}')
   '${identifier.dnszones}': tagsFilter(tagsByResource, '${identifier.dnszones}')
+  '${identifier.workspaces}': tagsFilter(tagsByResource, '${identifier.workspaces}')
   '${identifier.deploymentScripts}': tagsFilter(tagsByResource, '${identifier.deploymentScripts}')
 }
 var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false

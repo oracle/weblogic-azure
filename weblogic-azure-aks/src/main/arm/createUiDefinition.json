@@ -2348,6 +2348,7 @@
                             "${identifier.vaults}",
                             "${identifier.userAssignedIdentities}",
                             "${identifier.dnszones}",
+                            "${identifier.workspaces}",
                             "${identifier.deploymentScripts}"
                         ],
                         "toolTip": "Tags help you organize your resources and categorize them for billing or management purposes. You can apply tags to resources deployed by the offer."

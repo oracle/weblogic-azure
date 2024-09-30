@@ -85,7 +85,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
     name: 'Standard'
   }
   location: location
-  tags: tagsByResource['identifier.publicIPAddresses']
+  tags: tagsByResource['${identifier.publicIPAddresses}']
   properties: {
     publicIPAllocationMethod: 'Static'
     dnsSettings: {
@@ -97,7 +97,7 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
 resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersionForApplicationGateways}' = {
   name: name_appGateway
   location: location
-  tags: union(tagsByResource['identifier.applicationGateways'], tagIngress)
+  tags: union(tagsByResource['${identifier.applicationGateways}'], tagIngress)
   properties: {
     sku: {
       name: 'WAF_v2'
