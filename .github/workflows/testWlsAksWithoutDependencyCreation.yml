@@ -27,6 +27,10 @@ on:
       dbName:
         description: 'Name of the database. Get from another pipeline run'
         required: true
+      vmSize:
+        description: 'The VM size for the AKS pool'
+        required: true
+        default: Standard_D2s_v3
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
   # sample <request_data>
@@ -40,6 +44,7 @@ env:
     location: eastus
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
+    dbServerName: weblogicdb
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
     wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
@@ -192,6 +197,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                 name: ${{needs.preflight.outputs.artifactName}}
+                path: ${{needs.preflight.outputs.artifactName}}
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -238,7 +244,7 @@ jobs:
                   "${cargoTrackerBlobUrl}" \
                   ${dbPassword} \
                   ${dbAdminUser} \
-                  jdbc:postgresql:\/\/${{ needs.preflight.outputs.dbName }}.postgres.database.azure.com:5432\/postgres \
+                  jdbc:postgresql:\/\/${{ needs.preflight.outputs.dbName }}.postgres.database.azure.com:5432\/${{ env.dbServerName }} \
                   ${location} \
                   ${ocrSSOPSW} \
                   ${ocrSSOUser} \
