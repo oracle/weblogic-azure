@@ -21,7 +21,7 @@ jobs:
                 curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
                 source external-deps-versions.properties
                 echo "azCliVersion=${AZ_CLI_VERSION}" >> $GITHUB_ENV
-                echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
+                echo "bicepVersion=v0.26.54" >> $GITHUB_ENV
             - name: Set up bicep
               run: |
                 curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64

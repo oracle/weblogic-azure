@@ -314,21 +314,21 @@ param wlsUserName string = 'weblogic'
 var _enableCustomSSL = enableCustomSSL
 var _enableAppGWIngress = enableAppGWIngress
 var _objTagsByResource = {
-  '${identifier.managedClusters}': tagsFilter(tagsByResource, '${identifier.managedClusters}')
-  '${identifier.applicationGateways}': tagsFilter(tagsByResource, '${identifier.applicationGateways}')
-  '${identifier.registries}': tagsFilter(tagsByResource, '${identifier.registries}')
-  '${identifier.virtualMachines}': tagsFilter(tagsByResource, '${identifier.virtualMachines}')
-  '${identifier.virtualMachinesExtensions}': tagsFilter(tagsByResource, '${identifier.virtualMachinesExtensions}')
-  '${identifier.virtualNetworks}': tagsFilter(tagsByResource, '${identifier.virtualNetworks}')
-  '${identifier.networkInterfaces}': tagsFilter(tagsByResource, '${identifier.networkInterfaces}')
-  '${identifier.networkSecurityGroups}': tagsFilter(tagsByResource, '${identifier.networkSecurityGroups}')
-  '${identifier.publicIPAddresses}': tagsFilter(tagsByResource, '${identifier.publicIPAddresses}')
-  '${identifier.storageAccounts}': tagsFilter(tagsByResource, '${identifier.storageAccounts}')
-  '${identifier.vaults}': tagsFilter(tagsByResource, '${identifier.vaults}')
-  '${identifier.userAssignedIdentities}': tagsFilter(tagsByResource, '${identifier.userAssignedIdentities}')
-  '${identifier.dnszones}': tagsFilter(tagsByResource, '${identifier.dnszones}')
-  '${identifier.workspaces}': tagsFilter(tagsByResource, '${identifier.workspaces}')
-  '${identifier.deploymentScripts}': tagsFilter(tagsByResource, '${identifier.deploymentScripts}')
+  '${identifier.managedClusters}': contains(tagsByResource, '${identifier.managedClusters}') ? tagsByResource['${identifier.managedClusters}'] : json('{}')
+  '${identifier.applicationGateways}': contains(tagsByResource, '${identifier.applicationGateways}') ? tagsByResource['${identifier.applicationGateways}'] : json('{}')
+  '${identifier.registries}': contains(tagsByResource, '${identifier.registries}') ? tagsByResource['${identifier.registries}'] : json('{}')
+  '${identifier.virtualMachines}': contains(tagsByResource, '${identifier.virtualMachines}') ? tagsByResource['${identifier.virtualMachines}'] : json('{}')
+  '${identifier.virtualMachinesExtensions}': contains(tagsByResource, '${identifier.virtualMachinesExtensions}') ? tagsByResource['${identifier.virtualMachinesExtensions}'] : json('{}')
+  '${identifier.virtualNetworks}': contains(tagsByResource, '${identifier.virtualNetworks}') ? tagsByResource['${identifier.virtualNetworks}'] : json('{}')
+  '${identifier.networkInterfaces}': contains(tagsByResource, '${identifier.networkInterfaces}') ? tagsByResource['${identifier.networkInterfaces}'] : json('{}')
+  '${identifier.networkSecurityGroups}': contains(tagsByResource, '${identifier.networkSecurityGroups}') ? tagsByResource['${identifier.networkSecurityGroups}'] : json('{}')
+  '${identifier.publicIPAddresses}': contains(tagsByResource, '${identifier.publicIPAddresses}') ? tagsByResource['${identifier.publicIPAddresses}'] : json('{}')
+  '${identifier.storageAccounts}': contains(tagsByResource, '${identifier.storageAccounts}') ? tagsByResource['${identifier.storageAccounts}'] : json('{}')
+  '${identifier.vaults}': contains(tagsByResource, '${identifier.vaults}') ? tagsByResource['${identifier.vaults}'] : json('{}')
+  '${identifier.userAssignedIdentities}': contains(tagsByResource, '${identifier.userAssignedIdentities}') ? tagsByResource['${identifier.userAssignedIdentities}'] : json('{}')
+  '${identifier.dnszones}': contains(tagsByResource, '${identifier.dnszones}') ? tagsByResource['${identifier.dnszones}'] : json('{}')
+  '${identifier.workspaces}': contains(tagsByResource, '${identifier.workspaces}') ? tagsByResource['${identifier.workspaces}'] : json('{}')
+  '${identifier.deploymentScripts}': contains(tagsByResource, '${identifier.deploymentScripts}') ? tagsByResource['${identifier.deploymentScripts}'] : json('{}')
 }
 var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
 
@@ -375,8 +375,6 @@ var obj_uamiForDeploymentScript = {
     '${uamiDeployment.outputs.uamiIdForDeploymentScript}': {}
   }
 }
-
-func tagsFilter(tagsByResource object, resourceIdentifier string) object => contains(tagsByResource, resourceIdentifier) ? tagsByResource[resourceIdentifier] : json('{}')
 
 /*
 * Beginning of the offer deployment
