@@ -116,7 +116,7 @@ function build_docker_image() {
     fi
 
     echo_stdout "TAG_VM: ${TAG_VM}"
-    TAG_VM=$(echo "${TAG_VM}" \
+    export TAG_VM=$(echo "${TAG_VM}" \
         | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
 
     # MICROSOFT_INTERNAL
@@ -145,16 +145,13 @@ function build_docker_image() {
     echo_stdout "wlsImagePath: ${wlsImagePath}"
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | tr -d "\"") # remove " from the string
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | base64 -w0)
-    echo_stdout "TAG_VM_EXTENSION: ${TAG_VM_EXTENSION}"
-    TAG_VM_EXTENSION=$(echo "${TAG_VM_EXTENSION}" \
-        | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
+    # Tag for VM extension is not supported yet, see https://github.com/Azure/azure-cli/issues/14341
     az vm extension set --name CustomScript \
         --extension-instance-name wls-image-script \
         --resource-group ${CURRENT_RESOURCEGROUP_NAME} \
         --vm-name ${vmName} \
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
-        --tags ${TAG_VM_EXTENSION} \
         --settings "{ \"fileUris\": [\"${SCRIPT_LOCATION}model.properties\",\"${SCRIPT_LOCATION}genImageModel.sh\",\"${SCRIPT_LOCATION}buildWLSDockerImage.sh\",\"${SCRIPT_LOCATION}common.sh\"]}" \
         --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_PASSWORDLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
     
@@ -169,6 +166,7 @@ export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
 source ${scriptDir}/common.sh
+source ${scriptDir}/utility.sh
 
 export newImageTag=$1
 export acrLoginServer=$2
