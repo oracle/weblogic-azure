@@ -82,6 +82,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersi
         availabilityZones: agentAvailabilityZones
         mode: 'System'
         osType: 'Linux'
+        tags: tagsByResource['${identifier.managedClusters}']
       }
     ]
     addonProfiles: {
