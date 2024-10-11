@@ -314,6 +314,7 @@ param wlsUserName string = 'weblogic'
 var _enableCustomSSL = enableCustomSSL
 var _enableAppGWIngress = enableAppGWIngress
 var _objTagsByResource = {
+  '${identifier.accounts}': contains(tagsByResource, '${identifier.accounts}') ? tagsByResource['${identifier.accounts}'] : json('{}')
   '${identifier.managedClusters}': contains(tagsByResource, '${identifier.managedClusters}') ? tagsByResource['${identifier.managedClusters}'] : json('{}')
   '${identifier.applicationGateways}': contains(tagsByResource, '${identifier.applicationGateways}') ? tagsByResource['${identifier.applicationGateways}'] : json('{}')
   '${identifier.registries}': contains(tagsByResource, '${identifier.registries}') ? tagsByResource['${identifier.registries}'] : json('{}')
