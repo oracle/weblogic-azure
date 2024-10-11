@@ -77,6 +77,36 @@ Incorporate the [Microsoft.Common.TagsByResource UI element](https://learn.micro
 
 Refer to this [pull request](https://github.com/oracle/weblogic-azure/pull/327/) as a guide for how to apply tags to the resource deployments.
 
+Notes:
+
+For AKS, make sure the tag is applied to agent pool and node pool. The whole structure looks like:
+
+```bicep
+resource symbolicname 'Microsoft.ContainerService/managedClusters@2024-06-02-preview' = {
+  name: 'string'
+  location: 'string'
+  tags: {
+    tagName1: 'tagValue1'
+    tagName2: 'tagValue2'
+  }
+
+  ...
+
+  agentPoolProfiles: {
+
+    ...
+
+    tags: {
+        tagName1: 'tagValue1'
+        tagName2: 'tagValue2'
+    }
+  }
+}
+
+```
+
+See [Microsoft.ContainerService managedClusters - Bicep](https://learn.microsoft.com/en-us/azure/templates/microsoft.containerservice/managedclusters?pivots=deployment-language-bicep) for more information.
+
 ## Step 4: Testing
 
 1. **Create a Test Offer:** Set up a test offer to validate the tagging process.
