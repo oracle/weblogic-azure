@@ -7,6 +7,7 @@ param azCliVersion string = ''
 
 param identity object = {}
 param location string
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 

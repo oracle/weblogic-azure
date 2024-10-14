@@ -290,14 +290,8 @@ jobs:
               uses: azure/CLI@v1
               with:
                 azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                   
-                    ls -l
-                    
-                    artifactName=${{ needs.preflight.outputs.artifactName }}
-
-                    ls ${artifactName} -l
-                    
+                inlineScript: |                    
+                    artifactName=${{ needs.preflight.outputs.artifactName }}                    
                     az deployment group create \
                     --verbose \
                     --resource-group ${{ env.resourceGroupForWlsAks }} \

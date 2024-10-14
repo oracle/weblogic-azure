@@ -4,6 +4,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 */
 
 param location string
+@description('${label.tagsLabel}')
 param tagsByResource object
 param name_deploymentScriptContributorRoleAssignmentName string = newGuid()
 

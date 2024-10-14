@@ -3,6 +3,7 @@
 
 param acrNamePrefix string = 'wlsaksacr'
 param location string
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 

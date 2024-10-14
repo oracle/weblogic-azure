@@ -196,3 +196,6 @@ Known resources:
 - Microsoft.Compute/virtualMachines/extensions
   - OmsAgentForLinux
   - MDE.Linux
+- Microsoft.AlertsManagement/prometheusRuleGroups
+- Microsoft.Insights/dataCollectionEndpoints
+- Microsoft.Insights/dataCollectionRules

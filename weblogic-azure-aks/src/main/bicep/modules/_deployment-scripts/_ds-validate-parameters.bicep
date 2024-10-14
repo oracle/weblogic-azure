@@ -56,6 +56,7 @@ param sslUploadedCustomTrustKeyStoreType string
 param sslUploadedPrivateKeyAlias string
 @secure()
 param sslUploadedPrivateKeyPassPhrase string
+@description('${label.tagsLabel}')
 param tagsByResource object
 param useAksWellTestedVersion bool = true
 param userProvidedAcr string

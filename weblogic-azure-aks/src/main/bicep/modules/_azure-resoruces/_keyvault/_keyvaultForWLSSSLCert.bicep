@@ -8,6 +8,7 @@ param keyVaultName string
 param location string
 @description('Price tier for Key Vault.')
 param sku string = 'Standard'
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 @secure()

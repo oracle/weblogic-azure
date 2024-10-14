@@ -10,7 +10,7 @@ param utcValue string = utcNow()
 
 var const_shareQuota = 5120
 var const_sku = 'Standard_LRS'
-var objExtraTag = {
+var obj_extraTag = {
   'created-by-azure-weblogic': utcValue
 }
 
@@ -18,7 +18,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionFor
   name: storageAccountName
   location: location
   kind: 'StorageV2'
-  tags: union(tagsByResource['${identifier.storageAccounts}'], objExtraTag)
+  tags: union(tagsByResource['${identifier.storageAccounts}'], obj_extraTag)
   sku: {
     name: const_sku
     tier: 'Standard'
