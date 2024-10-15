@@ -313,6 +313,8 @@ param wlsUserName string = 'weblogic'
 // To mitigate arm-ttk error: Type Mismatch: Parameter in nested template is defined as string, but the parent template defines it as bool.
 var _enableCustomSSL = enableCustomSSL
 var _enableAppGWIngress = enableAppGWIngress
+// We can streamline the following code with a user-defined function, but it is not supported in Partner Center.
+// For status, see https://dev.azure.com/edburns-msft/Open%20Standard%20Enterprise%20Java%20(Java%20EE)%20on%20Azure/_workitems/edit/6219
 var _objTagsByResource = {
   '${identifier.accounts}': contains(tagsByResource, '${identifier.accounts}') ? tagsByResource['${identifier.accounts}'] : json('{}')
   '${identifier.managedClusters}': contains(tagsByResource, '${identifier.managedClusters}') ? tagsByResource['${identifier.managedClusters}'] : json('{}')
