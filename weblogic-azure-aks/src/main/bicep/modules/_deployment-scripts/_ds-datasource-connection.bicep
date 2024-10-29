@@ -21,6 +21,8 @@ param enablePswlessConnection bool = false
 param identity object = {}
 param jdbcDataSourceName string
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -40,6 +42,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   location: location
   kind: 'AzureCLI'
   identity: identity
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [

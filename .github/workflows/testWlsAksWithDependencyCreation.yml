@@ -229,6 +229,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                 name: ${{needs.preflight.outputs.artifactName}}
+                path: ${{needs.preflight.outputs.artifactName}}
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -289,9 +290,8 @@ jobs:
               uses: azure/CLI@v1
               with:
                 azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    artifactName=${{ needs.preflight.outputs.artifactName }}
-                    
+                inlineScript: |                    
+                    artifactName=${{ needs.preflight.outputs.artifactName }}                    
                     az deployment group create \
                     --verbose \
                     --resource-group ${{ env.resourceGroupForWlsAks }} \

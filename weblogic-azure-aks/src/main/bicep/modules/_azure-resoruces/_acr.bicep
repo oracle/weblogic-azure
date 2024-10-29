@@ -3,9 +3,11 @@
 
 param acrNamePrefix string = 'wlsaksacr'
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 
-var name_acr= '${acrNamePrefix}${uniqueString(utcValue)}'
+var name_acr = '${acrNamePrefix}${uniqueString(utcValue)}'
 
 resource registries 'Microsoft.ContainerRegistry/registries@${azure.apiVersionForContainerRegistries}' = {
   name: name_acr
@@ -38,6 +40,7 @@ resource registries 'Microsoft.ContainerRegistry/registries@${azure.apiVersionFo
     zoneRedundancy: 'Disabled'
     anonymousPullEnabled: false
   }
+  tags: tagsByResource['${identifier.registries}']
 }
 
 output acrName string = name_acr

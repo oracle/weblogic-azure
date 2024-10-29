@@ -248,6 +248,8 @@ param sslUploadedPrivateKeyAlias string = newGuid()
 @secure()
 @description('Password of the private key')
 param sslUploadedPrivateKeyPassPhrase string = newGuid()
+@description('${label.tagsLabel}')
+param tagsByResource object = {}
 @description('Public port of the custom T3 channel in admin server')
 param t3ChannelAdminPort int = 7005
 @description('Public port of the custom T3 channel in WebLoigc cluster')
@@ -311,6 +313,26 @@ param wlsUserName string = 'weblogic'
 // To mitigate arm-ttk error: Type Mismatch: Parameter in nested template is defined as string, but the parent template defines it as bool.
 var _enableCustomSSL = enableCustomSSL
 var _enableAppGWIngress = enableAppGWIngress
+// We can streamline the following code with a user-defined function, but it is not supported in Partner Center.
+// For status, see https://dev.azure.com/edburns-msft/Open%20Standard%20Enterprise%20Java%20(Java%20EE)%20on%20Azure/_workitems/edit/6219
+var _objTagsByResource = {
+  '${identifier.accounts}': contains(tagsByResource, '${identifier.accounts}') ? tagsByResource['${identifier.accounts}'] : json('{}')
+  '${identifier.managedClusters}': contains(tagsByResource, '${identifier.managedClusters}') ? tagsByResource['${identifier.managedClusters}'] : json('{}')
+  '${identifier.applicationGateways}': contains(tagsByResource, '${identifier.applicationGateways}') ? tagsByResource['${identifier.applicationGateways}'] : json('{}')
+  '${identifier.registries}': contains(tagsByResource, '${identifier.registries}') ? tagsByResource['${identifier.registries}'] : json('{}')
+  '${identifier.virtualMachines}': contains(tagsByResource, '${identifier.virtualMachines}') ? tagsByResource['${identifier.virtualMachines}'] : json('{}')
+  '${identifier.virtualMachinesExtensions}': contains(tagsByResource, '${identifier.virtualMachinesExtensions}') ? tagsByResource['${identifier.virtualMachinesExtensions}'] : json('{}')
+  '${identifier.virtualNetworks}': contains(tagsByResource, '${identifier.virtualNetworks}') ? tagsByResource['${identifier.virtualNetworks}'] : json('{}')
+  '${identifier.networkInterfaces}': contains(tagsByResource, '${identifier.networkInterfaces}') ? tagsByResource['${identifier.networkInterfaces}'] : json('{}')
+  '${identifier.networkSecurityGroups}': contains(tagsByResource, '${identifier.networkSecurityGroups}') ? tagsByResource['${identifier.networkSecurityGroups}'] : json('{}')
+  '${identifier.publicIPAddresses}': contains(tagsByResource, '${identifier.publicIPAddresses}') ? tagsByResource['${identifier.publicIPAddresses}'] : json('{}')
+  '${identifier.storageAccounts}': contains(tagsByResource, '${identifier.storageAccounts}') ? tagsByResource['${identifier.storageAccounts}'] : json('{}')
+  '${identifier.vaults}': contains(tagsByResource, '${identifier.vaults}') ? tagsByResource['${identifier.vaults}'] : json('{}')
+  '${identifier.userAssignedIdentities}': contains(tagsByResource, '${identifier.userAssignedIdentities}') ? tagsByResource['${identifier.userAssignedIdentities}'] : json('{}')
+  '${identifier.dnszones}': contains(tagsByResource, '${identifier.dnszones}') ? tagsByResource['${identifier.dnszones}'] : json('{}')
+  '${identifier.workspaces}': contains(tagsByResource, '${identifier.workspaces}') ? tagsByResource['${identifier.workspaces}'] : json('{}')
+  '${identifier.deploymentScripts}': contains(tagsByResource, '${identifier.deploymentScripts}') ? tagsByResource['${identifier.deploymentScripts}'] : json('{}')
+}
 var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
@@ -374,6 +396,7 @@ module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
   name: 'uami-deployment'
   params: {
     location: location
+    tagsByResource: _objTagsByResource
   }
 }
 
@@ -387,6 +410,7 @@ module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' =
     acrResourceGroupName: acrResourceGroupName
     createNewAcr: const_createNewAcr
     location: location
+    tagsByResource: _objTagsByResource
   }
 }
 
@@ -440,6 +464,7 @@ module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep
     sslUploadedCustomTrustKeyStoreType: sslUploadedCustomTrustKeyStoreType
     sslUploadedPrivateKeyAlias: sslUploadedPrivateKeyAlias
     sslUploadedPrivateKeyPassPhrase: sslUploadedPrivateKeyPassPhrase
+    tagsByResource: _objTagsByResource
     useAksWellTestedVersion: useLatestSupportedAksVersion
     userProvidedAcr: userProvidedAcr // used in user provided images
     userProvidedAcrRgName: userProvidedAcrRgName
@@ -461,6 +486,7 @@ module wlsSSLCertSecretsDeployment 'modules/_azure-resoruces/_keyvault/_keyvault
     keyVaultName: name_keyVaultName
     location: location
     sku: keyVaultSku
+    tagsByResource: _objTagsByResource
     wlsIdentityKeyStoreData: sslUploadedCustomIdentityKeyStoreData
     wlsIdentityKeyStoreDataSecretName: name_identityKeyStoreDataSecret
     wlsIdentityKeyStorePassphrase: sslUploadedCustomIdentityKeyStorePassphrase
@@ -495,6 +521,7 @@ module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-accoun
     azCliVersion: const_azcliVersion
     identity: obj_uamiForDeploymentScript
     location: location
+    tagsByResource: _objTagsByResource
   }
 }
 
@@ -511,6 +538,7 @@ module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep
     subjectName: format('CN={0}', enableDNSConfiguration ? format('{0}.{1}', dnsNameforApplicationGateway, dnszoneName) : const_azureSubjectName)
     useExistingAppGatewaySSLCertificate: _useExistingAppGatewaySSLCertificate
     keyVaultName: name_keyVaultName
+    tagsByResource: _objTagsByResource
   }
   dependsOn: [
     wlsSSLCertSecretsDeployment
@@ -541,6 +569,7 @@ module appgatewayDeployment 'modules/_appGateway.bicep' = if (enableAppGWIngress
     newOrExistingVnetForApplicationGateway: newOrExistingVnetForApplicationGateway
     vnetForApplicationGateway: vnetForApplicationGateway
     vnetRGNameForApplicationGateway: vnetRGNameForApplicationGateway
+    tagsByResource: _objTagsByResource
   }
   dependsOn: [
     appgwSecretDeployment
@@ -593,6 +622,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     storageAccountName: name_storageAccountName
     t3ChannelAdminPort: t3ChannelAdminPort
     t3ChannelClusterPort: t3ChannelClusterPort
+    tagsByResource: _objTagsByResource
     wdtRuntimePassword: wdtRuntimePassword
     userProvidedAcr: userProvidedAcr
     userProvidedAcrRgName: userProvidedAcrRgName
@@ -670,6 +700,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     userProvidedAcrRgName: userProvidedAcrRgName
     userProvidedImagePath: userProvidedImagePath
     useOracleImage: useOracleImage
+    tagsByResource: _objTagsByResource
     wdtRuntimePassword: wdtRuntimePassword
     wlsClusterSize: wlsClusterSize
     wlsCPU: wlsCPU
@@ -729,9 +760,10 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     identity: obj_uamiForDeploymentScript
     location: location
     lbSvcValues: lbSvcValues
+    tagsByResource: _objTagsByResource
     useInternalLB: useInternalLB
     wlsDomainName: wlsDomainName
-    wlsDomainUID: wlsDomainUID
+    wlsDomainUID: wlsDomainUID    
   }
   dependsOn: [
     appgatewayDeployment
@@ -761,6 +793,7 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB &&
     identity: obj_uamiForDeploymentScript
     jdbcDataSourceName: jdbcDataSourceName
     location: location
+    tagsByResource: _objTagsByResource
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
@@ -790,6 +823,7 @@ module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.
     identity: obj_uamiForDeploymentScript
     jdbcDataSourceName: jdbcDataSourceName
     location: location
+    tagsByResource: _objTagsByResource
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
@@ -813,6 +847,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
     azCliVersion: const_azcliVersion
     identity: obj_uamiForDeploymentScript
     location: location
+    tagsByResource: _objTagsByResource
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
@@ -837,6 +872,7 @@ module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAuto
     hpaScaleType: hpaScaleType
     identity: obj_uamiForDeploymentScript
     location: location
+    tagsByResource: _objTagsByResource
     useHpa: useHpa
     utilizationPercentage: hpaScaleType == 'cpu' ? averageCpuUtilization : averageMemoryUtilization
     wlsClusterSize: wlsClusterSize
@@ -864,6 +900,7 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
     azCliVersion: const_azcliVersion
     identity: obj_uamiForDeploymentScript
     location: location
+    tagsByResource: _objTagsByResource
     wlsClusterName: const_wlsClusterName
     wlsDomainUID: wlsDomainUID
   }

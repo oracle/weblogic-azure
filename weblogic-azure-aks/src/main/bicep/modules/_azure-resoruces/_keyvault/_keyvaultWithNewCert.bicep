@@ -27,13 +27,19 @@ param sku string = 'Standard'
 
 @description('Subject name to create a new certificate, example: \'CN=contoso.com\'.')
 param subjectName string = 'contoso.xyz'
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 
+var obj_extraTag= {
+  'created-by-azure-weblogic': utcValue
+}
 var const_identityId = '${substring(string(identity.userAssignedIdentities), indexOf(string(identity.userAssignedIdentities), '"') + 1, lastIndexOf(string(identity.userAssignedIdentities), '"') - (indexOf(string(identity.userAssignedIdentities), '"') + 1))}'
 
 resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   name: keyVaultName
   location: location
+  tags: union(tagsByResource['${identifier.vaults}'], obj_extraTag)
   properties: {
     sku: {
       family: 'A'
@@ -53,9 +59,6 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
     enabledForTemplateDeployment: true
     enableSoftDelete: true
   }
-  tags:{
-    'managed-by-azure-weblogic': utcValue
-  }
 }
 
 resource createAddCertificate 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
@@ -63,6 +66,7 @@ resource createAddCertificate 'Microsoft.Resources/deploymentScripts@${azure.api
   location: location
   identity: identity
   kind: 'AzurePowerShell'
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     forceUpdateTag: utcValue
     azPowerShellVersion: '${azure.powershell.version}'

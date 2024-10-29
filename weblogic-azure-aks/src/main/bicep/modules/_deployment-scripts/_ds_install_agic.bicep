@@ -7,6 +7,8 @@ param appgwName string = 'appgw-contoso'
 param azCliVersion string = ''
 param identity object = {}
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 
 // To mitigate arm-ttk error: Unreferenced variable: $fxv#0
@@ -20,6 +22,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   location: location
   kind: 'AzureCLI'
   identity: identity
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableAgic))

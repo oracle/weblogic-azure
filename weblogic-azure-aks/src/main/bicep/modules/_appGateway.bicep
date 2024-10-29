@@ -21,6 +21,8 @@ param location string
 param newOrExistingVnetForApplicationGateway string
 param vnetForApplicationGateway object
 param vnetRGNameForApplicationGateway string
+@description('${label.tagsLabel}')
+param tagsByResource object
 
 // To mitigate arm-ttk error: Type Mismatch: Parameter in nested template is defined as string, but the parent template defines it as bool.
 var _appgwUsePrivateIP = appgwUsePrivateIP
@@ -56,6 +58,7 @@ module networkDeployment '_azure-resoruces/_vnetAppGateway.bicep' = {
   params: {
     location: location
     vnetForApplicationGateway: vnetForApplicationGateway
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     pidAppgwStart
@@ -70,6 +73,7 @@ module queryPrivateIPFromSubnet '_deployment-scripts/_ds_query_available_private
     location: location
     subnetId: networkDeployment.outputs.subIdForApplicationGateway
     knownIP: networkDeployment.outputs.knownIPAddress
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     networkDeployment
@@ -92,6 +96,7 @@ module appgwDeployment1 '_azure-resoruces/_appgateway.bicep' = if (_selfSignedFr
     staticPrivateFrontentIP: _appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
     trustedRootCertData: const_null
     usePrivateIP: appgwUsePrivateIP
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     queryPrivateIPFromSubnet
@@ -114,6 +119,7 @@ module appgwDeployment2 '_azure-resoruces/_appgateway.bicep' = if (_selfSignedFr
     staticPrivateFrontentIP: _appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
     trustedRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
     usePrivateIP: appgwUsePrivateIP
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     queryPrivateIPFromSubnet
@@ -135,6 +141,7 @@ module appgwDeployment3 '_azure-resoruces/_appgateway.bicep' = if (_signedFronte
     staticPrivateFrontentIP: _appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
     trustedRootCertData: const_null
     usePrivateIP: appgwUsePrivateIP
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     queryPrivateIPFromSubnet
@@ -156,6 +163,7 @@ module appgwDeployment4 '_azure-resoruces/_appgateway.bicep' = if (_signedFronte
     staticPrivateFrontentIP: _appgwUsePrivateIP ? queryPrivateIPFromSubnet.outputs.privateIP : ''
     trustedRootCertData: existingKeyvault.getSecret(keyvaultBackendCertDataSecretName)
     usePrivateIP: appgwUsePrivateIP
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     queryPrivateIPFromSubnet

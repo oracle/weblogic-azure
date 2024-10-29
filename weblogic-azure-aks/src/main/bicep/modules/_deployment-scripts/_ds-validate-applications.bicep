@@ -10,6 +10,8 @@ param aksClusterName string = ''
 param azCliVersion string = ''
 param identity object = {}
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -28,6 +30,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   location: location
   kind: 'AzureCLI'
   identity: identity
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [

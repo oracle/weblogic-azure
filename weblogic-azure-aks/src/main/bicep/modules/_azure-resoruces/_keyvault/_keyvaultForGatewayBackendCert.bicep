@@ -18,7 +18,14 @@ param location string
 @description('Price tier for Key Vault.')
 param sku string = 'Standard'
 
+@description('${label.tagsLabel}')
+param tagsByResource object
+
 param utcValue string = utcNow()
+
+var obj_extraTag= {
+  'created-by-azure-weblogic': utcValue
+}
 
 resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   name: keyVaultName
@@ -32,9 +39,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
     }
     tenantId: subscription().tenantId
   }
-  tags:{
-    'managed-by-azure-weblogic': utcValue
-  }
+  tags: union(tagsByResource['${identifier.vaults}'], obj_extraTag)
 }
 
 resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
@@ -42,6 +47,7 @@ resource secretForCertificate 'Microsoft.KeyVault/vaults/secrets@${azure.apiVers
   properties: {
     value: certificateDataValue
   }
+  tags: union(tagsByResource['${identifier.vaults}'], obj_extraTag)
   dependsOn: [
     keyvault
   ]

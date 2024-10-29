@@ -46,6 +46,8 @@ param identity object = {}
 param location string
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
+@description('${label.tagsLabel}')
+param tagsByResource object
 @description('True to set up internal load balancer service.')
 param useInternalLB bool = false
 @description('Name of WebLogic domain to create.')
@@ -85,6 +87,7 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
   name: 'dnszone-deployment'
   params: {
     dnszoneName: dnszoneName
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     pidNetworkingStart
@@ -101,6 +104,7 @@ module installAgic '_deployment-scripts/_ds_install_agic.bicep' = if (enableAppG
     appgwName: appGatewayName
     aksClusterName: aksClusterName
     azCliVersion: azCliVersion
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     pidNetworkingStart
@@ -126,6 +130,7 @@ module validateAgic '_deployment-scripts/_ds_validate_agic.bicep' = if (enableAp
     aksClusterRGName: aksClusterRGName
     aksClusterName: aksClusterName
     azCliVersion: azCliVersion
+    tagsByResource: tagsByResource
   }
   dependsOn: [
     agicRoleAssignment
@@ -161,9 +166,10 @@ module networkingDeploymentYesAppGW '_deployment-scripts/_ds-create-networking.b
     identity: identity
     lbSvcValues: lbSvcValues
     location: location
+    tagsByResource: tagsByResource
     useInternalLB: useInternalLB
     wlsDomainName: wlsDomainName
-    wlsDomainUID: wlsDomainUID
+    wlsDomainUID: wlsDomainUID    
   }
   dependsOn: [
     dnsZoneDeployment
@@ -200,6 +206,7 @@ module networkingDeploymentNoAppGW '_deployment-scripts/_ds-create-networking.bi
     identity: identity
     lbSvcValues: lbSvcValues
     location: location
+    tagsByResource: tagsByResource
     useInternalLB: useInternalLB
     wlsDomainName: wlsDomainName
     wlsDomainUID: wlsDomainUID

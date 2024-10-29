@@ -7,6 +7,8 @@ param aksClusterRGName string
 param azCliVersion string
 param identity object = {}
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 param wlsClusterSize int
 param wlsDomainUID string
@@ -25,12 +27,14 @@ resource monitorAccount 'Microsoft.Monitor/accounts@${azure.apiVersionForMonitor
   name: name_azureMonitorAccountName
   location: location
   properties: {}
+  tags: tagsByResource['${identifier.accounts}']
 }
 
 // UAMI for KEDA
 resource uamiForKeda 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' = {
   name: name_kedaUserDefinedManagedIdentity
   location: location
+  tags: tagsByResource['${identifier.userAssignedIdentities}']
 }
 
 // Get role resource id
@@ -64,6 +68,7 @@ module azureMonitorIntegrationDeployment '_deployment-scripts/_ds_enable_prometh
     identity: identity
     kedaUamiName: name_kedaUserDefinedManagedIdentity
     location: location
+    tagsByResource: tagsByResource
     wlsClusterSize: wlsClusterSize
     wlsDomainUID: wlsDomainUID
     wlsNamespace: const_namespace

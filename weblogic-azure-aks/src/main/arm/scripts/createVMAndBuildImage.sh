@@ -115,6 +115,10 @@ function build_docker_image() {
         exit 1
     fi
 
+    echo_stdout "TAG_VM: ${TAG_VM}"
+    export TAG_VM=$(echo "${TAG_VM}" \
+        | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
+
     # MICROSOFT_INTERNAL
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
     # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which causes vm-redeployed issue
@@ -130,7 +134,7 @@ function build_docker_image() {
     --enable-auto-update false \
     --public-ip-address "" \
     --size ${vmSize} \
-    --tags SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
+    --tags ${TAG_VM} SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
     if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]]; then
         get_ocr_image_full_path
@@ -138,9 +142,10 @@ function build_docker_image() {
         wlsImagePath="${USER_PROVIDED_IMAGE_PATH}"
     fi
 
-    echo "wlsImagePath: ${wlsImagePath}"
+    echo_stdout "wlsImagePath: ${wlsImagePath}"
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | tr -d "\"") # remove " from the string
     URL_3RD_DATASOURCE=$(echo $URL_3RD_DATASOURCE | base64 -w0)
+    # Tag for VM extension is not supported yet, see https://github.com/Azure/azure-cli/issues/14341
     az vm extension set --name CustomScript \
         --extension-instance-name wls-image-script \
         --resource-group ${CURRENT_RESOURCEGROUP_NAME} \
@@ -161,6 +166,7 @@ export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
 source ${scriptDir}/common.sh
+source ${scriptDir}/utility.sh
 
 export newImageTag=$1
 export acrLoginServer=$2

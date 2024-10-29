@@ -29,6 +29,8 @@ param managedServerPrefix string = 'managed-server'
 param ocrSSOPSW string
 param ocrSSOUser string
 param storageAccountName string = 'null'
+@description('${label.tagsLabel}')
+param tagsByResource object
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
 param utcValue string = utcNow()
@@ -84,6 +86,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
   location: location
   kind: 'AzureCLI'
   identity: identity
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [
@@ -158,6 +161,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'STORAGE_ACCOUNT_NAME'
         value: storageAccountName
+      }
+      {
+        name: 'TAG_VM'
+        value: string(tagsByResource['${identifier.virtualMachines}'])
       }
       {
         name: 'URL_3RD_DATASOURCE'

@@ -8,6 +8,8 @@ param keyVaultName string
 param location string
 @description('Price tier for Key Vault.')
 param sku string = 'Standard'
+@description('${label.tagsLabel}')
+param tagsByResource object
 param utcValue string = utcNow()
 @secure()
 param wlsIdentityKeyStoreData string = newGuid()
@@ -28,9 +30,13 @@ param wlsTrustKeyStoreDataSecretName string = 'myTrustKeyStoreData'
 param wlsTrustKeyStorePassPhrase string = newGuid()
 param wlsTrustKeyStorePassPhraseSecretName string = 'myTrustKeyStorePsw'
 
+var obj_extraTag= {
+  'created-by-azure-weblogic': utcValue
+}
+
 resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   name: keyVaultName
-  location: location
+  location: location  
   properties: {
     accessPolicies: []
     enabledForTemplateDeployment: enabledForTemplateDeployment
@@ -40,13 +46,12 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
     }
     tenantId: subscription().tenantId
   }
-  tags: {
-    'managed-by-azure-weblogic': utcValue
-  }
+  tags: union(tagsByResource['${identifier.vaults}'],obj_extraTag)
 }
 
 resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsIdentityKeyStoreDataSecretName}'
+  tags: tagsByResource['${identifier.vaults}']
   properties: {
     value: wlsIdentityKeyStoreData
   }
@@ -57,6 +62,7 @@ resource identityKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@${azure.a
 
 resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsIdentityKeyStorePassphraseSecretName}'
+  tags: tagsByResource['${identifier.vaults}']
   properties: {
     value: wlsIdentityKeyStorePassphrase
   }
@@ -67,6 +73,7 @@ resource identityKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.ap
 
 resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsPrivateKeyAliasSecretName}'
+  tags: tagsByResource['${identifier.vaults}']
   properties: {
     value: wlsPrivateKeyAlias
   }
@@ -77,6 +84,7 @@ resource privateKeyAliasSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVer
 
 resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsPrivateKeyPassPhraseSecretName}'
+  tags: tagsByResource['${identifier.vaults}']
   properties: {
     value: wlsPrivateKeyPassPhrase
   }
@@ -87,6 +95,7 @@ resource privateKeyPswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersi
 
 resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsTrustKeyStoreDataSecretName}'
+  tags: tagsByResource['${identifier.vaults}']
   properties: {
     value: wlsTrustKeyStoreData
   }
@@ -97,6 +106,7 @@ resource trustKeyStoreDataSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiV
 
 resource trustKeyStorePswSecret 'Microsoft.KeyVault/vaults/secrets@${azure.apiVersionForKeyVaultSecrets}' = {
   name: '${keyVaultName}/${wlsTrustKeyStorePassPhraseSecretName}'
+  tags: tagsByResource['${identifier.vaults}']
   properties: {
     value: wlsTrustKeyStorePassPhrase
   }

@@ -736,7 +736,7 @@ source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
 export adminServerName="admin-server"
-export azFileShareName="weblogic"
+export azFileShareName=${FILE_SHARE_NAME}
 export exitCode=0
 export kubectlSecretForACR="regsecret"
 export kubectlWDTEncryptionSecret="${WLS_DOMAIN_UID}-runtime-encryption-secret"
@@ -746,7 +746,6 @@ export newImageTag=$(date +%s)
 export operatorName="weblogic-operator"
 # seconds
 export sasTokenValidTime=3600
-export storageFileShareName="weblogic"
 export storageResourceGroup=${CURRENT_RESOURCEGROUP_NAME}
 export sharedPath="/shared"
 export wlsDomainNS="${WLS_DOMAIN_UID}-ns"

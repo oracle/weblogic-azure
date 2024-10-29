@@ -20,6 +20,8 @@ param azCliVersion string
 param hpaScaleType string = 'cpu'
 param identity object = {}
 param location string
+@description('${label.tagsLabel}')
+param tagsByResource object
 param useHpa bool 
 param utilizationPercentage int
 param wlsClusterSize int
@@ -76,6 +78,7 @@ module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
     hpaScaleType: hpaScaleType
     identity: identity
     location: location
+    tagsByResource: tagsByResource
     utilizationPercentage: utilizationPercentage
     wlsClusterSize: wlsClusterSize
     wlsNamespace: const_namespace
@@ -93,6 +96,7 @@ module promethuesKedaDeployment '_enablePromethuesKeda.bicep' = if (!useHpa) {
     azCliVersion: azCliVersion
     identity: identity
     location: location
+    tagsByResource: tagsByResource
     wlsClusterSize: wlsClusterSize
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
