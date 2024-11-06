@@ -389,7 +389,7 @@
                             {
                                 "name": "aksNodeCount",
                                 "type": "Microsoft.Common.Slider",
-                                "min": "[add(1, div(add(12288, mul(if(empty(basics('basicsOptional').wlsClusterSize),5,basics('basicsOptional').wlsClusterSize), 1536)), first(filter(basics('basicsRequired').listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
+                                "min": "[add(1, div(add(12288, mul(if(bool(basics('basicsOptional').basicsOptionalAcceptDefaults), basics('basicsOptional').wlsClusterSize, 5), 1536)), first(filter(basics('basicsRequired').listVMSizes.value, (item) => equals(item.name, steps('section_aks').clusterInfo.nodeVMSizeSelector))).memoryInMB))]",
                                 "defaultValue": 3,
                                 "max": 998,
                                 "label": "Minimum node count",
