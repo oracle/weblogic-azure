@@ -40,7 +40,7 @@
     <properties>    
         <!--  versions  start -->
         <!--  weblogic azure aks versions  -->
-        <version.wls-on-aks-azure-marketplace>1.0.82</version.wls-on-aks-azure-marketplace>
+        <version.wls-on-aks-azure-marketplace>1.0.83</version.wls-on-aks-azure-marketplace>
         <!--  weblogic azure vm versions  -->
         <version.arm-oraclelinux-wls>1.0.29</version.arm-oraclelinux-wls>
         <version.arm-oraclelinux-wls-admin>1.0.54</version.arm-oraclelinux-wls-admin>
