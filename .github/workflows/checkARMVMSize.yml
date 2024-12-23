@@ -17,12 +17,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.repository_owner == 'azure-javaee')
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout oracle/weblogic-azure:main
+    - name: Checkout weblogic-azure
       uses: actions/checkout@v2
       with:
-        repository: oracle/${{ env.repoName }}
-        ref: main
-        path: ${{ env.repoName }}
+        path: weblogic-azure
 
     - uses: azure/login@v1
       id: azure-login
@@ -55,7 +53,7 @@ jobs:
         # Print the extracted value
         echo "$vm_size_list"
 
-        latest_locations=$(az account list-locations --query '[].name' -o tsv)
+        latest_locations=$(az account list-locations --query '[?not_null(metadata.latitude)] .name' -o tsv)
 
         new_sizes=""
         for location in $latest_locations; do
