@@ -5,7 +5,7 @@
 param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
 param enableCustomSSL bool = false
 @description('Public IP Name for the Application Gateway')
-param gatewayPublicIPAddressName string = 'gwip'
+param gatewayPublicIPAddressName string
 param gatewaySubnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
 param gatewaySslCertName string = 'appGatewaySslCert'
 param gatewayTrustedRootCertName string = 'appGatewayTrustedRootCert'

@@ -337,6 +337,7 @@ var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const
 
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
+var const_appGatewayPublicIPAddressName = format('{0}-{1}', appGatewayPublicIPAddressName, uniqueString(utcValue))
 var const_azcliVersion = '2.53.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
 var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
@@ -359,7 +360,7 @@ var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
 var name_appgwBackendRootCertName = 'appGatewayTrustedRootCert'
 var name_defaultPidDeployment = 'pid'
-var name_dnsNameforApplicationGateway = '${dnsNameforApplicationGateway}${take(utcValue, 6)}'
+var name_dnsNameforApplicationGateway = '${dnsNameforApplicationGateway}${uniqueString(utcValue)}'
 var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGateway}-${toLower(name_rgNameWithoutSpecialCharacter)}-${toLower(wlsDomainName)}', 63)
 var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData'
 var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw'
@@ -552,7 +553,7 @@ module appgatewayDeployment 'modules/_appGateway.bicep' = if (enableAppGWIngress
     _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
     _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
     _pidAppgwWithCustomCert: pids.outputs.customCertForAppgw == '' ? name_defaultPidDeployment : pids.outputs.customCertForAppgw
-    appgwPublicIPAddressName: appGatewayPublicIPAddressName
+    appgwPublicIPAddressName: const_appGatewayPublicIPAddressName
     appgwUsePrivateIP: appgwUsePrivateIP
     appgwSslCertName: name_appgwFrontendSSLCertName
     appgwTrustedRootCertName: name_appgwBackendRootCertName

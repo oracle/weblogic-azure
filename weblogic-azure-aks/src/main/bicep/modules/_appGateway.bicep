@@ -4,7 +4,7 @@
 param _pidAppgwEnd string = 'pid-networking-appgateway-end'
 param _pidAppgwStart string = 'pid-networking-appgateway-start'
 param _pidAppgwWithCustomCert string = 'pid-networking-appgateway-with-custom-certificate'
-param appgwPublicIPAddressName string = 'gwip'
+param appgwPublicIPAddressName string
 param appgwUsePrivateIP bool
 param appgwSslCertName string = 'appGatewaySslCert'
 param appgwTrustedRootCertName string = 'appGatewayTrustedRootCert'
