@@ -335,21 +335,23 @@ var _objTagsByResource = {
 }
 var _useExistingAppGatewaySSLCertificate = (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveCert) ? true : false
 
+var const_aksName = createAKSCluster ? 'wlsonaks${const_globalResourceNameSufix}' : aksClusterName
 var const_appGatewaySSLCertOptionHaveCert = 'haveCert'
 var const_appGatewaySSLCertOptionHaveKeyVault = 'haveKeyVault'
-var const_appGatewayPublicIPAddressName = format('{0}-{1}', appGatewayPublicIPAddressName, uniqueString(utcValue))
+var const_appGatewayPublicIPAddressName = format('{0}-{1}', appGatewayPublicIPAddressName, const_globalResourceNameSufix)
+var const_acrName = (createACR) ? format('{acrwlsaks{0}',const_globalResourceNameSufix) : acrName
 var const_azcliVersion = '2.53.0'
 var const_azureSubjectName = format('{0}.{1}.{2}', name_domainLabelforApplicationGateway, location, 'cloudapp.azure.com')
-var const_bCreateStorageAccount = (createAKSCluster || !const_hasStorageAccount) && const_enablePV
 var const_bValidateApplications= validateApplications && (length(appPackageUrls) > 0)
 var const_cpuPlatform = (contains(vmSize, 'p') ? 'arm64' : 'amd64')
 var const_createNewAcr = useOracleImage && createACR
 var const_defaultKeystoreType = 'PKCS12'
 var const_enableNetworking = (length(lbSvcValues) > 0) || enableAppGWIngress
 var const_enablePV = enableCustomSSL || enableAzureFileShare
-var const_fileShareName = 'weblogic-${uniqueString(utcValue)}'
-var const_hasStorageAccount = !createAKSCluster && queryStorageAccount.outputs.storageAccount != 'null'
+var const_fileShareName = 'weblogic-${const_globalResourceNameSufix}'
+var const_globalResourceNameSufix = '${uniqueString(utcValue)}'
 var const_identityKeyStoreType = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreType : sslUploadedCustomIdentityKeyStoreType
+var const_nsgName = 'wls-aks-nsg-${const_globalResourceNameSufix}'
 var const_showAdminConsoleExUrl = (length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForAdminServer)
 var const_showRemoteAdminConsoleExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && !enableCustomSSL
 var const_showRemoteAdminConsoleSecuredExUrl = ((length(lbSvcValues) > 0) || (enableAppGWIngress && appgwForRemoteConsole)) && enableCustomSSL
@@ -360,16 +362,16 @@ var const_wlsSSLCertOptionKeyVault = 'keyVaultStoredConfig'
 var name_appgwFrontendSSLCertName = 'appGatewaySslCert'
 var name_appgwBackendRootCertName = 'appGatewayTrustedRootCert'
 var name_defaultPidDeployment = 'pid'
-var name_dnsNameforApplicationGateway = '${dnsNameforApplicationGateway}${uniqueString(utcValue)}'
+var name_dnsNameforApplicationGateway = '${dnsNameforApplicationGateway}${const_globalResourceNameSufix}'
 var name_domainLabelforApplicationGateway = take('${name_dnsNameforApplicationGateway}-${toLower(name_rgNameWithoutSpecialCharacter)}-${toLower(wlsDomainName)}', 63)
 var name_identityKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStoreDataSecretName : 'myIdentityKeyStoreData'
 var name_identityKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName : 'myIdentityKeyStorePsw'
-var name_keyVaultName = '${take('wls-kv${uniqueString(utcValue)}', 24)}'
+var name_keyVaultName = '${take('wls-kv${const_globalResourceNameSufix}', 24)}'
 var name_privateKeyAliasSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyAliasSecretName : 'privateKeyAlias'
 var name_privateKeyPswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultPrivateKeyPassPhraseSecretName : 'privateKeyPsw'
 var name_rgNameWithoutSpecialCharacter = replace(replace(replace(replace(resourceGroup().name, '.', ''), '(', ''), ')', ''), '_', '') // remove . () _ from resource group name
 var name_rgKeyvaultForWLSSSL = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultResourceGroup : resourceGroup().name
-var name_storageAccountName = const_hasStorageAccount ? queryStorageAccount.outputs.storageAccount : 'wls${uniqueString(utcValue)}'
+var name_storageAccountName = 'wls${const_globalResourceNameSufix}'
 var name_trustKeyStoreDataSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStoreDataSecretName : 'myTrustKeyStoreData'
 var name_trustKeyStorePswSecret = (sslConfigurationAccessOption == const_wlsSSLCertOptionKeyVault) ? sslKeyVaultCustomTrustKeyStorePassPhraseSecretName : 'myTrustKeyStorePsw'
 var ref_wlsDomainDeployment = _enableCustomSSL ? wlsDomainWithCustomSSLDeployment : wlsDomainDeployment
@@ -407,7 +409,7 @@ module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
 module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' = {
   name: 'prerequisite-resources-deployment'
   params: {
-    acrName: acrName
+    acrName: const_acrName
     acrResourceGroupName: acrResourceGroupName
     createNewAcr: const_createNewAcr
     location: location
@@ -418,6 +420,7 @@ module preAzureResourceDeployment './modules/_preDeployedAzureResources.bicep' =
 module validateInputs 'modules/_deployment-scripts/_ds-validate-parameters.bicep' = {
   name: 'validate-parameters-and-fail-fast'
   params: {
+    _globalResourceNameSufix: const_globalResourceNameSufix
     acrName: preAzureResourceDeployment.outputs.acrName
     acrResourceGroupName: preAzureResourceDeployment.outputs.acrResourceGroupName
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
@@ -512,20 +515,6 @@ resource sslKeyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' 
   scope: resourceGroup(name_rgKeyvaultForWLSSSL)
 }
 
-// If updating an existing aks cluster, query the storage account that is being used.
-// Return "null" is no storage account is applied.
-module queryStorageAccount 'modules/_deployment-scripts/_ds-query-storage-account.bicep' = if (!createAKSCluster) {
-  name: 'query-existing-storage-account'
-  params: {
-    aksClusterName: aksClusterName
-    aksClusterRGName: aksClusterRGName
-    azCliVersion: const_azcliVersion
-    identity: obj_uamiForDeploymentScript
-    location: location
-    tagsByResource: _objTagsByResource
-  }
-}
-
 module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
   name: 'appgateway-certificates-secrets-deployment'
   params: {
@@ -553,6 +542,7 @@ module appgatewayDeployment 'modules/_appGateway.bicep' = if (enableAppGWIngress
     _pidAppgwEnd: pids.outputs.appgwEnd == '' ? name_defaultPidDeployment : pids.outputs.appgwEnd
     _pidAppgwStart: pids.outputs.appgwStart == '' ? name_defaultPidDeployment : pids.outputs.appgwStart
     _pidAppgwWithCustomCert: pids.outputs.customCertForAppgw == '' ? name_defaultPidDeployment : pids.outputs.customCertForAppgw
+    appgwName: 'appgw${const_globalResourceNameSufix}'
     appgwPublicIPAddressName: const_appGatewayPublicIPAddressName
     appgwUsePrivateIP: appgwUsePrivateIP
     appgwSslCertName: name_appgwFrontendSSLCertName
@@ -566,6 +556,7 @@ module appgatewayDeployment 'modules/_appGateway.bicep' = if (enableAppGWIngress
     keyvaultBackendCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLBackendRootCertDataSecretName : appgwSecretDeployment.outputs.sslBackendCertDataSecretName
     keyvaultFrontendCertDataSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertDataSecretName : appgwSecretDeployment.outputs.sslCertDataSecretName
     keyvaultFrontendCertPswSecretName: (!enableAppGWIngress || (appGatewayCertificateOption == const_appGatewaySSLCertOptionHaveKeyVault)) ? keyVaultSSLCertPasswordSecretName : appgwSecretDeployment.outputs.sslCertPwdSecretName
+    nsgName: const_nsgName
     location: location
     newOrExistingVnetForApplicationGateway: newOrExistingVnetForApplicationGateway
     vnetForApplicationGateway: vnetForApplicationGateway
@@ -582,6 +573,7 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: const_globalResourceNameSufix
     _pidEnd: pids.outputs.wlsAKSEnd == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSEnd
     _pidSSLEnd: pids.outputs.sslEnd == '' ? name_defaultPidDeployment : pids.outputs.sslEnd
     _pidSSLStart: pids.outputs.sslStart == '' ? name_defaultPidDeployment : pids.outputs.sslStart
@@ -595,16 +587,14 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
     vmSize: vmSize
-    aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
-    aksClusterName: aksClusterName
+    aksClusterName: const_aksName
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: const_azcliVersion
     cpuPlatform: const_cpuPlatform
     createAKSCluster: createAKSCluster
-    createStorageAccount: const_bCreateStorageAccount
     databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
@@ -649,7 +639,6 @@ module wlsDomainDeployment 'modules/setupWebLogicCluster.bicep' = if (!enableCus
   }
   dependsOn: [
     validateInputs
-    queryStorageAccount
   ]
 }
 
@@ -658,6 +647,7 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: const_globalResourceNameSufix
     _pidEnd: pids.outputs.wlsAKSEnd == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSEnd
     _pidStart: pids.outputs.wlsAKSStart == '' ? name_defaultPidDeployment : pids.outputs.wlsAKSStart
     aciResourcePermissions: aciResourcePermissions
@@ -669,16 +659,14 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
     aksAgentPoolNodeCount: aksAgentPoolNodeCount
     aksAgentPoolNodeMaxCount: aksAgentPoolNodeMaxCount
     vmSize: vmSize
-    aksClusterNamePrefix: aksClusterNamePrefix
     aksClusterRGName: aksClusterRGName
-    aksClusterName: aksClusterName
+    aksClusterName: const_aksName
     aksVersion: validateInputs.outputs.aksVersion
     appPackageUrls: appPackageUrls
     appReplicas: appReplicas
     azCliVersion: const_azcliVersion
     cpuPlatform: const_cpuPlatform
     createAKSCluster: createAKSCluster
-    createStorageAccount: const_bCreateStorageAccount
     databaseType: databaseType
     dbDriverLibrariesUrls: dbDriverLibrariesUrls
     enableAzureMonitoring: enableAzureMonitoring
@@ -723,7 +711,6 @@ module wlsDomainWithCustomSSLDeployment 'modules/setupWebLogicCluster.bicep' = i
   }
   dependsOn: [
     wlsSSLCertSecretsDeployment
-    queryStorageAccount
   ]
 }
 
@@ -732,6 +719,7 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: const_globalResourceNameSufix
     _pidNetworkingEnd: pids.outputs.networkingEnd == '' ? name_defaultPidDeployment : pids.outputs.networkingEnd
     _pidNetworkingStart: pids.outputs.networkingStart == '' ? name_defaultPidDeployment : pids.outputs.networkingStart
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
@@ -778,8 +766,9 @@ module datasourceDeployment 'modules/_setupDBConnection.bicep' = if (enableDB &&
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: const_globalResourceNameSufix
     _pidEnd: pids.outputs.dbEnd
-    _pidStart: pids.outputs.dbStart
+    _pidStart: pids.outputs.dbStart    
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     azCliVersion: const_azcliVersion
@@ -809,6 +798,7 @@ module passwordlessDatasourceDeployment 'modules/_setupPasswordlessDBConnection.
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: const_globalResourceNameSufix
     _pidEnd: pids.outputs.pswlessDbEnd
     _pidStart: pids.outputs.pswlessDbStart
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
@@ -843,6 +833,7 @@ module validateApplciations 'modules/_deployment-scripts/_ds-validate-applicatio
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: const_globalResourceNameSufix
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     azCliVersion: const_azcliVersion
@@ -864,6 +855,7 @@ module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAuto
   params: {
     _pidCPUUtilization: pids.outputs.cpuUtilization
     _pidEnd: pids.outputs.autoScalingEnd
+    _globalResourceNameSufix: const_globalResourceNameSufix
     _pidMemoryUtilization: pids.outputs.memoryUtilization
     _pidStart: pids.outputs.autoScalingStart
     _pidWme: pids.outputs.enableWlsMonitoringExporter
@@ -896,6 +888,7 @@ module horizontalAutoscaling 'modules/_enableAutoScaling.bicep' = if (enableAuto
 module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-configurations.bicep' = {
   name: 'query-wls-domain-configurations'
   params: {
+    _globalResourceNameSufix: const_globalResourceNameSufix
     aksClusterRGName: ref_wlsDomainDeployment.outputs.aksClusterRGName
     aksClusterName: ref_wlsDomainDeployment.outputs.aksClusterName
     azCliVersion: const_azcliVersion

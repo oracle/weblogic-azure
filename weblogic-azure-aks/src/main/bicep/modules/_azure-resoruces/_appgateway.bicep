@@ -4,6 +4,7 @@
 @description('DNS for ApplicationGateway')
 param dnsNameforApplicationGateway string = take('wlsgw${uniqueString(utcValue)}', 63)
 param enableCustomSSL bool = false
+param gatewayName string
 @description('Public IP Name for the Application Gateway')
 param gatewayPublicIPAddressName string
 param gatewaySubnetId string = '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/resourcegroupname/providers/Microsoft.Network/virtualNetworks/vnetname/subnets/subnetname'
@@ -24,7 +25,7 @@ param tagsByResource object
 param utcValue string = utcNow()
 
 var const_sslCertPsw = (noSslCertPsw) ? '' : sslCertPswData
-var name_appGateway = 'appgw${uniqueString(utcValue)}'
+var name_appGateway = gatewayName
 var name_backendAddressPool = 'myGatewayBackendPool'
 var name_frontEndIPConfig = 'appGwPublicFrontendIp'
 var name_frontEndPrivateIPConfig = 'appGwPrivateFrontendIp'

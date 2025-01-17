@@ -22,7 +22,7 @@ param wlsNamespace string
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_enableHpa = loadFileAsBase64('../../../arm/scripts/inline-scripts/enableHpa.sh')
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
-var const_deploymentName='ds-enable-hpa'
+var const_deploymentName='ds-enable-hpa-${uniqueString(utcValue)}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName

@@ -8,7 +8,7 @@ param aksClusterRGName string
 param utcValue string = utcNow()
 
 var const_APIVersion = '2020-12-01'
-var name_appGwContributorRoleAssignmentName = guid('${resourceGroup().id}${utcValue}ForApplicationGateway')
+var name_appGwContributorRoleAssignmentName = guid('${resourceGroup().id}${uniqueString(utcValue)}ForApplicationGateway')
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfContributor = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 

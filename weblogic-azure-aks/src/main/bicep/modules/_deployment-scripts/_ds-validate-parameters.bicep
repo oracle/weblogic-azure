@@ -1,6 +1,7 @@
 // Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSufix string
 param acrName string
 param acrResourceGroupName string
 param aksAgentPoolNodeCount int
@@ -73,7 +74,7 @@ var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var base64_validateParameters = loadFileAsBase64('../../../arm/scripts/inline-scripts/validateParameters.sh')
 var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone}'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
-var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
+var const_deploymentName = 'ds-validate-parameters-and-fail-fast-${_globalResourceNameSufix}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName

@@ -2,6 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 param location string
+param nsgName string
 param vnetForApplicationGateway object = {
   name: 'wlsaks-app-gateway-vnet'
   resourceGroup: resourceGroup().name
@@ -25,7 +26,6 @@ param utcValue string = utcNow()
 var const_subnetAddressPrefixes = vnetForApplicationGateway.subnets.gatewaySubnet.addressPrefix
 var const_vnetAddressPrefixes = vnetForApplicationGateway.addressPrefixes
 var const_newVnet = (vnetForApplicationGateway.newOrExisting == 'new') ? true : false
-var name_nsg = 'wlsaks-nsg-${uniqueString(utcValue)}'
 var name_subnet = vnetForApplicationGateway.subnets.gatewaySubnet.name
 var name_vnet = vnetForApplicationGateway.name
 
@@ -43,7 +43,7 @@ resource existingSubnet 'Microsoft.Network/virtualNetworks/subnets@${azure.apiVe
 
 // Create new network security group.
 resource nsg 'Microsoft.Network/networkSecurityGroups@${azure.apiVersionForNetworkSecurityGroups}' = if (const_newVnet) {
-  name: name_nsg
+  name: nsgName
   location: location
   tags: tagsByResource['${identifier.networkSecurityGroups}']
   properties: {

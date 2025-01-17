@@ -20,7 +20,7 @@ param aksAgentPoolNodeMaxCount int = 5
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
 param aksAgentPoolVMSize string = 'Standard_DS2_v2'
 @description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
-param aksClusterNamePrefix string = 'wlsonaks'
+param aksClusterName string
 param aksVersion string = 'default'
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
@@ -32,7 +32,6 @@ param utcValue string = utcNow()
 var const_aksAgentPoolOSDiskSizeGB = 128
 var name_aciWorkspace = 'Workspace-${guid(utcValue)}-${location}'
 // Generate a unique AKS name scoped to subscription. 
-var name_aksClusterNameForSV = '${aksClusterNamePrefix}${uniqueString(utcValue)}'
 var obj_aciDisableOmsAgent = {
   enabled: false
 }
@@ -61,12 +60,12 @@ resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@${az
 }
 
 resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersionForManagedClusters}' = {
-  name: name_aksClusterNameForSV
+  name: aksClusterName
   location: location
   tags: tagsByResource['${identifier.managedClusters}']
   properties: {
     kubernetesVersion: aksVersion
-    dnsPrefix: '${name_aksClusterNameForSV}-dns'
+    dnsPrefix: '${aksClusterName}-dns'
     agentPoolProfiles: [
       {
         name: aksAgentPoolName
@@ -109,5 +108,4 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersi
   }
 }
 
-output aksClusterName string = name_aksClusterNameForSV
 output aksNodeRgName string = aksCluster.properties.nodeResourceGroup

@@ -4,6 +4,7 @@
 param _pidAppgwEnd string = 'pid-networking-appgateway-end'
 param _pidAppgwStart string = 'pid-networking-appgateway-start'
 param _pidAppgwWithCustomCert string = 'pid-networking-appgateway-with-custom-certificate'
+param appgwName string
 param appgwPublicIPAddressName string
 param appgwUsePrivateIP bool
 param appgwSslCertName string = 'appGatewaySslCert'
@@ -17,6 +18,7 @@ param keyVaultResourceGroup string = 'kv-contoso-rg'
 param keyvaultBackendCertDataSecretName string = 'kv-ssl-backend-data'
 param keyvaultFrontendCertDataSecretName string = 'kv-ssl-frontend-data'
 param keyvaultFrontendCertPswSecretName string = 'kv-ssl-frontend-psw'
+param nsgName string
 param location string
 param newOrExistingVnetForApplicationGateway string
 param vnetForApplicationGateway object
@@ -57,6 +59,7 @@ module networkDeployment '_azure-resoruces/_vnetAppGateway.bicep' = {
   name: 'vnet-application-gateway'
   params: {
     location: location
+    nsgName: nsgName
     vnetForApplicationGateway: vnetForApplicationGateway
     tagsByResource: tagsByResource
   }
@@ -85,6 +88,7 @@ module appgwDeployment1 '_azure-resoruces/_appgateway.bicep' = if (_selfSignedFr
   params: {
     dnsNameforApplicationGateway: dnsNameforApplicationGateway
     enableCustomSSL: enableCustomSSL
+    gatewayName: appgwName
     gatewayPublicIPAddressName: appgwPublicIPAddressName
     gatewaySubnetId: networkDeployment.outputs.subIdForApplicationGateway
     gatewaySslCertName: appgwSslCertName
@@ -108,6 +112,7 @@ module appgwDeployment2 '_azure-resoruces/_appgateway.bicep' = if (_selfSignedFr
   params: {
     dnsNameforApplicationGateway: dnsNameforApplicationGateway
     enableCustomSSL: enableCustomSSL
+    gatewayName: appgwName
     gatewayPublicIPAddressName: appgwPublicIPAddressName
     gatewaySubnetId: networkDeployment.outputs.subIdForApplicationGateway
     gatewaySslCertName: appgwSslCertName
@@ -131,6 +136,7 @@ module appgwDeployment3 '_azure-resoruces/_appgateway.bicep' = if (_signedFronte
   params: {
     dnsNameforApplicationGateway: dnsNameforApplicationGateway
     enableCustomSSL: enableCustomSSL
+    gatewayName: appgwName
     gatewayPublicIPAddressName: appgwPublicIPAddressName
     gatewaySubnetId: networkDeployment.outputs.subIdForApplicationGateway
     gatewaySslCertName: appgwSslCertName
@@ -153,6 +159,7 @@ module appgwDeployment4 '_azure-resoruces/_appgateway.bicep' = if (_signedFronte
   params: {
     dnsNameforApplicationGateway: dnsNameforApplicationGateway
     enableCustomSSL: enableCustomSSL
+    gatewayName: appgwName
     gatewayPublicIPAddressName: appgwPublicIPAddressName
     gatewaySubnetId: networkDeployment.outputs.subIdForApplicationGateway
     gatewaySslCertName: appgwSslCertName
