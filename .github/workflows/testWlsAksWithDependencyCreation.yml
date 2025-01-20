@@ -19,6 +19,10 @@ on:
         description: 'The VM size for the AKS pool'
         required: true
         default: Standard_D2s_v3
+      location:
+        description: 'The location for the resources'
+        required: true
+        default: eastus
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
   repository_dispatch:
@@ -26,7 +30,6 @@ on:
 
 env:
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
-    location: eastus
     resourceGroupForWlsAks: wlsd-aks-${{ github.run_id }}-${{ github.run_number }}
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
@@ -51,6 +54,7 @@ jobs:
           testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
           azCliVersion: ${{steps.set-az-cli-version.outputs.azCliVersion}}
           vmSize: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.vmSize }}
+          location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2.3.4
@@ -72,27 +76,32 @@ jobs:
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
+                location=eastus # default value
                 if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
                   isForDemo=${{ github.event.inputs.isForDemo }}
                   gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
                   testBranchNameForArtifactsLocation=${{ github.event.inputs.testBranchNameForArtifactsLocation }}
                   vmSize=${{ github.event.inputs.vmSize }}
+                  location=${{ github.event.inputs.location }}
                 else
                   isForDemo=${{ github.event.client_payload.isForDemo }}
                   gitUserNameForArtifactsLocation=${{ github.event.client_payload.gitUserNameForArtifactsLocation }}
                   testBranchNameForArtifactsLocation=${{ github.event.client_payload.testBranchNameForArtifactsLocation }}
                   vmSize=${{ github.event.client_payload.vmSize }}
+                  location=${{ github.event.client_payload.location }}
                 fi
 
                 echo "##[set-output name=isForDemo;]${isForDemo}"
                 echo "##[set-output name=gitUserNameForArtifactsLocation;]${gitUserNameForArtifactsLocation}"
                 echo "##[set-output name=testBranchNameForArtifactsLocation;]${testBranchNameForArtifactsLocation}"
                 echo "##[set-output name=vmSize;]${vmSize}"
+                echo "##[set-output name=location;]${location}"
 
                 echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
                 echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
                 echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
                 echo "vmSize=${vmSize}" >> $GITHUB_ENV
+                echo "location=${location}" >> $GITHUB_ENV
             - uses: actions/checkout@v2.3.4
             - name: Set up Maven with GitHub token
               uses: ./.github/actions/setupmaven
@@ -137,6 +146,7 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -147,7 +157,7 @@ jobs:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForDB }}
-                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{ env.location }}
+                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
 
             - uses: actions/checkout@v2.3.4
             - name: Set up PostgreSQL Flexible Server that allows access from Azure services
@@ -157,7 +167,7 @@ jobs:
                 dbName: ${{ env.dbName }}
                 dbPassword: ${{ env.dbPassword }}
                 dbServerName: ${{ env.dbServerName }}
-                location: ${{ env.location }}
+                location: $location
                 resourceGroupName: ${{ env.resourceGroupForDB }}     
             
     deploy-storage-account:
@@ -167,6 +177,7 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
             - name: Checkout Azure-Samples/cargotracker-wls-aks
               uses: actions/checkout@v2
               with:
@@ -191,7 +202,7 @@ jobs:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForStorageAccount }}
-                    az group create --verbose --name ${{ env.resourceGroupForStorageAccount }} --location ${{ env.location }}
+                    az group create --verbose --name ${{ env.resourceGroupForStorageAccount }} --location $location
             - name: Create Storage Account
               uses: azure/CLI@v1
               with:
@@ -199,7 +210,7 @@ jobs:
                 inlineScript: |
                     az storage account create --name ${{ env.storageAccountName }} \
                         --resource-group ${{ env.resourceGroupForStorageAccount }} \
-                        --location ${{ env.location }} \
+                        --location $location \
                         --sku Standard_LRS \
                         --kind StorageV2
             - name: Create Storage Container
@@ -221,6 +232,7 @@ jobs:
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
             - name: Checkout weblogic-azure
               uses: actions/checkout@v2
               with:
@@ -261,7 +273,7 @@ jobs:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForWlsAks }}
-                    az group create --verbose --name ${{ env.resourceGroupForWlsAks }} --location ${{ env.location }}
+                    az group create --verbose --name ${{ env.resourceGroupForWlsAks }} --location $location
             - name: Checkout Azure-Samples/cargotracker-wls-aks
               uses: actions/checkout@v2
               with:
