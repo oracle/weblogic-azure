@@ -398,6 +398,7 @@ module partnerCenterPid './modules/_pids/_empty.bicep' = {
 module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
   name: 'uami-deployment'
   params: {
+    _globalResourceNameSufix: const_globalResourceNameSufix
     location: location
     tagsByResource: _objTagsByResource
   }
