@@ -2,6 +2,7 @@
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 // Deploy Application Gateway certificate secrets.
 
+param _globalResourceNameSufix string
 @description('Backend certificate data to store in the secret')
 param backendCertificateDataValue string = newGuid()
 
@@ -51,6 +52,7 @@ var name_sslCertPasswordSecretName = 'myAppGatewaySSLCertPassword'
 module keyVaultwithSelfSignedAppGatewaySSLCert '_keyvault/_keyvaultWithNewCert.bicep' = if (!useExistingAppGatewaySSLCertificate) {
   name: 'kv-appgw-selfsigned-certificate-deployment'
   params: {
+    _globalResourceNameSufix: _globalResourceNameSufix
     identity: identity
     keyVaultName: keyVaultName
     location: location

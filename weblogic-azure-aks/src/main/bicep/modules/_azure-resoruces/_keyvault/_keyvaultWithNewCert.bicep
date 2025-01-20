@@ -1,6 +1,7 @@
 // Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSufix string
 @description('Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported.')
 param identity object = {}
 
@@ -62,7 +63,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
 }
 
 resource createAddCertificate 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
-  name: 'ds-create-add-appgw-certificate'
+  name: 'ds-create-add-appgw-certificate-${_globalResourceNameSufix}'
   location: location
   identity: identity
   kind: 'AzurePowerShell'

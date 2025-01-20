@@ -519,6 +519,7 @@ resource sslKeyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' 
 module appgwSecretDeployment 'modules/_azure-resoruces/_keyvaultForGateway.bicep' = if (enableAppGWIngress && (appGatewayCertificateOption != const_appGatewaySSLCertOptionHaveKeyVault)) {
   name: 'appgateway-certificates-secrets-deployment'
   params: {
+    _globalResourceNameSufix: const_globalResourceNameSufix
     backendCertificateDataValue: appGatewaySSLBackendRootCertData
     certificateDataValue: appGatewaySSLCertData
     certificatePasswordValue: appGatewaySSLCertPassword
