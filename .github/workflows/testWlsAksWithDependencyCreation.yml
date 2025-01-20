@@ -183,9 +183,11 @@ jobs:
               with:
                 repository: Azure-Samples/cargotracker-wls-aks
                 path: cargotracker
-            - name: Maven build web app
-              run: |
-                mvn clean install -PweblogicOnAks --file cargotracker/pom.xml
+            - uses: actions/setup-java@v4
+              with:
+                distribution: 'microsoft'
+                java-version: '11'
+            - run: mvn clean install -PweblogicOnAks --file cargotracker/pom.xml
             - name: Query version string for deployment verification
               run: |
                 PROPERTY_FILE="cargotracker/target/cargo-tracker/WEB-INF/classes/org/eclipse/cargotracker/messages.properties"
