@@ -72,7 +72,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       }
       {
         name: 'WLS_CLUSTER_SIZE'
-        value: wlsClusterSize
+        value: string(wlsClusterSize)
       }
       {
         name: 'WLS_ADMIN_PASSWORD'

@@ -53,11 +53,11 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       }
       {
         name: 'UTILIZATION_PERCENTAGE'
-        value: utilizationPercentage
+        value: string(utilizationPercentage)
       }
       {
         name: 'WLS_CLUSTER_SIZE'
-        value: wlsClusterSize
+        value: string(wlsClusterSize)
       }
       {
         name: 'WLS_NAMESPACE'

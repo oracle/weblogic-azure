@@ -81,6 +81,7 @@ module dbIdentityVMContributorRoleAssignment '_rolesAssignment/_roleAssignmentin
   name: 'assign-db-identity-vm-contributor-role'
   scope: resourceGroup(aksNodeRGName)
   params: {
+    _globalResourceNameSufix: _globalResourceNameSufix
     identity: dbIdentity
     roleDefinitionId: const_roleDefinitionIdOfVMContributor
   }
