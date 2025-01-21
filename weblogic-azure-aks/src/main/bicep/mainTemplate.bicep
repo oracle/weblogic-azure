@@ -44,8 +44,6 @@ param aksAgentPoolNodeCount int = 3
 param aksAgentPoolNodeMaxCount int = 5
 @description('The size of the virtual machines that will form the nodes in the cluster. This cannot be changed after creating the cluster')
 param vmSize string = 'Standard_DS2_v2'
-@description('Prefix for cluster name. Only The name can contain only letters, numbers, underscores and hyphens. The name must start with letter or number.')
-param aksClusterNamePrefix string = 'wlsonaks'
 @description('Resource group name of an existing AKS cluster.')
 param aksClusterRGName string = 'aks-contoso-rg'
 @description('Name of an existing AKS cluster.')
@@ -160,9 +158,9 @@ param hpaScaleType string = 'cpu'
 param isSSOSupportEntitled bool = false
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
-@description('Existing Key Vault Name')
+@description('Existing Key Vault Name that stores certificate of Application Gateway backend TLS/SSL.')
 param keyVaultName string = 'kv-contoso'
-@description('Resource group name in current subscription containing the KeyVault')
+@description('Resource group name in current subscription containing the KeyVault that stores certificate of Application Gateway backend TLS/SSL.')
 param keyVaultResourceGroup string = 'kv-contoso-rg'
 @description('Price tier for Key Vault.')
 param keyVaultSku string = 'Standard'
@@ -395,10 +393,18 @@ module partnerCenterPid './modules/_pids/_empty.bicep' = {
   name: 'pid-a1775ed4-512c-4cfa-9e68-f0b09b36de90-partnercenter'
 }
 
-module uamiDeployment 'modules/_uamiAndRoles.bicep' = {
+module uamiDeployment 'modules/_globalUamiAndRoles.bicep' = {
   name: 'uami-deployment'
   params: {
     _globalResourceNameSufix: const_globalResourceNameSufix
+    enableCustomSSL: enableCustomSSL
+    sslConfigurationAccessOption: sslConfigurationAccessOption
+    sslKeyVaultName: sslKeyVaultName
+    sslKeyVaultResourceGroup: sslKeyVaultResourceGroup
+    enableAppGWIngress: enableAppGWIngress
+    appGatewayCertificateOption: appGatewayCertificateOption
+    keyVaultName: keyVaultName
+    keyVaultResourceGroup: keyVaultResourceGroup
     location: location
     tagsByResource: _objTagsByResource
   }
