@@ -29,12 +29,6 @@ param name_deploymentScriptContributorRoleAssignmentName string = newGuid()
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfContributor = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 var name_deploymentScriptUserDefinedManagedIdentity = 'wls-aks-deployment-script-user-defined-managed-itentity-${_globalResourceNameSufix}'
-var obj_permission = {
-  secrets: [
-    'get'
-    'list'
-  ]
-}
 
 // UAMI for deployment script
 resource uamiForDeploymentScript 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' = {
@@ -63,7 +57,7 @@ module updateKeyvaultStoringWLSSSLCerts '_azure-resoruces/_keyvault/_keyvaultGet
 }
 
 module updateKeyvaultStoringAppgwCerts '_azure-resoruces/_keyvault/_keyvaultGetListAccessPolicy.bicep' = if (enableAppGWIngress && appGatewayCertificateOption == 'haveKeyVault') {
-  name: 'update-keyvault-storing-wls-ssl-certs-with-getlist-permission'
+  name: 'update-keyvault-storing-appgw-certs-with-getlist-permission'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
     sslKeyVaultName: keyVaultName

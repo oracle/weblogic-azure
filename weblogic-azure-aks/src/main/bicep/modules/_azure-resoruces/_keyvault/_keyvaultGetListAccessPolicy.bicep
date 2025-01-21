@@ -18,7 +18,6 @@ var obj_permission = {
 
 resource updateKeyvaultStoringWLSSSLCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   name: sslKeyVaultName
-  resourceGroup: sslKeyVaultResourceGroup
   properties: {
     accessPolicies: [
       {
@@ -28,5 +27,6 @@ resource updateKeyvaultStoringWLSSSLCerts 'Microsoft.KeyVault/vaults@${azure.api
       }
     ]
     enabledForTemplateDeployment: true
+    enableRbacAuthorization: false
   }
 }
