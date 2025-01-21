@@ -359,6 +359,13 @@ function download_wls_ssl_certificates_from_keyvault() {
     exit 1
   fi
 
+  # check key vault permission model, current support model is Vault access policy.
+  local enableRbacAuthorization=$(az keyvault show --name ${WLS_SSL_KEYVAULT_NAME} --query "properties.enableRbacAuthorization")
+  if [[ "${enableRbacAuthorization,,}" != "false" ]]; then
+    echo_stderr "Make sure Key Vault ${WLS_SSL_KEYVAULT_NAME} is using Vault access policy, not using RBAC authorization. "
+    exit 1
+  fi
+
   # allow the identity to access the keyvault
   local principalId=$(az identity show --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY} --query "principalId" -o tsv)
   az keyvault set-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId} --secret-permissions get list
@@ -492,6 +499,13 @@ function download_application_gateway_certificate_from_keyvault() {
   local enabledForTemplateDeployment=$(az keyvault show --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} --query "properties.enabledForTemplateDeployment")
   if [[ "${enabledForTemplateDeployment,,}" != "true" ]]; then
     echo_stderr "Make sure Key Vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} is enabled for template deployment. "
+    exit 1
+  fi
+
+  # check key vault permission model, current support model is Vault access policy.
+  local enableRbacAuthorization=$(az keyvault show --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} --query "properties.enableRbacAuthorization")
+  if [[ "${enableRbacAuthorization,,}" != "false" ]]; then
+    echo_stderr "Make sure Key Vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} is using Vault access policy, not using RBAC authorization. "
     exit 1
   fi
 
