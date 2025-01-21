@@ -53,33 +53,21 @@ module deploymentScriptUAMICotibutorRoleAssignment '_rolesAssignment/_roleAssign
   }
 }
 
-resource updateKeyvaultStoringWLSSSLCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = if (enableCustomSSL && sslConfigurationAccessOption == 'keyVaultStoredConfig') {
-  name: sslKeyVaultName
-  resourceGroup: sslKeyVaultResourceGroup
-  properties: {
-    accessPolicies: [
-      {
-        objectId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
-        tenantId: subscription().tenantId
-        permissions: obj_permission
-      }
-    ]
-    enabledForTemplateDeployment: true
+module updateKeyvaultStoringWLSSSLCerts '_azure-resoruces/_keyvault/_keyvaultGetListAccessPolicy.bicep' = if (enableCustomSSL && sslConfigurationAccessOption == 'keyVaultStoredConfig') {
+  name: 'update-keyvault-storing-wls-ssl-certs-with-getlist-permission'
+  scope: resourceGroup(sslKeyVaultResourceGroup)
+  params: {
+    sslKeyVaultName: sslKeyVaultName
+    principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
   }
 }
 
-resource updateKeyvaultStoringAppGwCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = if (enableAppGWIngress && appGatewayCertificateOption == 'haveKeyVault') {
-  name: keyVaultName
-  resourceGroup: keyVaultResourceGroup
-  properties: {
-    accessPolicies: [
-      {
-        objectId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
-        tenantId: subscription().tenantId
-        permissions: obj_permission
-      }
-    ]
-    enabledForTemplateDeployment: true
+module updateKeyvaultStoringAppgwCerts '_azure-resoruces/_keyvault/_keyvaultGetListAccessPolicy.bicep' = if (enableAppGWIngress && appGatewayCertificateOption == 'haveKeyVault') {
+  name: 'update-keyvault-storing-wls-ssl-certs-with-getlist-permission'
+  scope: resourceGroup(keyVaultResourceGroup)
+  params: {
+    sslKeyVaultName: keyVaultName
+    principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
   }
 }
 
