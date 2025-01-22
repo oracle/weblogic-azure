@@ -16,7 +16,7 @@ var obj_permission = {
   ]
 }
 
-resource updateKeyvaultStoringWLSSSLCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
+resource updateExistingKeyVault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   name: keyVault.name
   location: keyVault.location
   sku: keyVault.sku
