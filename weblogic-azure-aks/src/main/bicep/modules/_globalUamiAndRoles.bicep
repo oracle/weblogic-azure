@@ -47,11 +47,22 @@ module deploymentScriptUAMICotibutorRoleAssignment '_rolesAssignment/_roleAssign
   }
 }
 
+resource keyvaultStoringWLSSSLCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' existing = {
+  name: sslKeyVaultName
+  scope: resourceGroup(sslKeyVaultResourceGroup)
+}
+
+resource keyvaultStoringAppgwCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' existing = {
+  name: keyVaultName
+  scope: resourceGroup(keyVaultResourceGroup)
+}
+
 module updateKeyvaultStoringWLSSSLCerts '_azure-resoruces/_keyvault/_keyvaultGetListAccessPolicy.bicep' = if (enableCustomSSL && sslConfigurationAccessOption == 'keyVaultStoredConfig') {
   name: 'update-keyvault-storing-wls-ssl-certs-with-getlist-permission'
   scope: resourceGroup(sslKeyVaultResourceGroup)
   params: {
-    sslKeyVaultName: sslKeyVaultName
+    location: keyvaultStoringWLSSSLCerts.location
+    keyVaultName: sslKeyVaultName
     principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
   }
 }
@@ -60,7 +71,8 @@ module updateKeyvaultStoringAppgwCerts '_azure-resoruces/_keyvault/_keyvaultGetL
   name: 'update-keyvault-storing-appgw-certs-with-getlist-permission'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
-    sslKeyVaultName: keyVaultName
+    location: keyvaultStoringAppgwCerts.location
+    keyVaultName: keyVaultName
     principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
   }
 }
