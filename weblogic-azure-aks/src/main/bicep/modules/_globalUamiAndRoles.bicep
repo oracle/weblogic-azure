@@ -61,8 +61,7 @@ module updateKeyvaultStoringWLSSSLCerts '_azure-resoruces/_keyvault/_keyvaultGet
   name: 'update-keyvault-storing-wls-ssl-certs-with-getlist-permission'
   scope: resourceGroup(sslKeyVaultResourceGroup)
   params: {
-    location: keyvaultStoringWLSSSLCerts.location
-    keyVaultName: sslKeyVaultName
+    keyVault: keyvaultStoringWLSSSLCerts
     principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
   }
 }
@@ -71,8 +70,7 @@ module updateKeyvaultStoringAppgwCerts '_azure-resoruces/_keyvault/_keyvaultGetL
   name: 'update-keyvault-storing-appgw-certs-with-getlist-permission'
   scope: resourceGroup(keyVaultResourceGroup)
   params: {
-    location: keyvaultStoringAppgwCerts.location
-    keyVaultName: keyVaultName
+    keyVault: keyvaultStoringAppgwCerts
     principalId: reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', name_deploymentScriptUserDefinedManagedIdentity)).principalId
   }
 }

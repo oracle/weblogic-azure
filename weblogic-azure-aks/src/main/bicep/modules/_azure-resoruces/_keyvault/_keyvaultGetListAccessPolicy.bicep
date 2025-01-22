@@ -6,8 +6,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 // This script is to update existing keyvault with access policy for global uami.
 // And enable template deployment for the keyvault.
 
-param keyVaultName string
-param location string
+param keyVault object
 param principalId string
 
 var obj_permission = {
@@ -18,8 +17,9 @@ var obj_permission = {
 }
 
 resource updateKeyvaultStoringWLSSSLCerts 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
-  name: keyVaultName
-  location: location
+  name: keyVault.name
+  location: keyVault.location
+  sku: keyVault.sku
   properties: {
     accessPolicies: [
       {
