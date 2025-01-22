@@ -6,7 +6,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _globalResourceNameSufix string
+param _globalResourceNameSufix string = uniqueString(utcNow())
 param _pidEnd string = ''
 param _pidStart string = ''
 param _pidOtherDb string = ''
