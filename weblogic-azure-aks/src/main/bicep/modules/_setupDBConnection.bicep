@@ -42,7 +42,7 @@ param identity object = {}
 param jdbcDataSourceName string = 'jdbc/contoso'
 param location string
 @description('${label.tagsLabel}')
-param tagsByResource object
+param tagsByResource object = {}
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 @secure()
