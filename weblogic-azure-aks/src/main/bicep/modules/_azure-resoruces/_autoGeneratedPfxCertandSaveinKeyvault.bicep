@@ -6,7 +6,7 @@ param _globalResourceNameSufix string
 param identity object = {}
 
 @description('Used to name the new Azure Key Vault resoure.')
-param keyVaultName string = 'wls-kv-${uniqueString(utcValue)}'
+param keyVaultName string = 'wlskv${uniqueString(utcValue)}'
 
 param location string
 

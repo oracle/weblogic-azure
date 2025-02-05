@@ -9,16 +9,6 @@
 # AKS_CLUSTER_NAME
 # AKS_CLUSTER_RESOURCEGROUP_NAME
 # BASE64_FOR_SERVICE_PRINCIPAL
-# WLS_SSL_KEYVAULT_NAME
-# WLS_SSL_KEYVAULT_RESOURCEGROUP_NAME
-# WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME
-# WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME
-# WLS_SSL_KEYVAULT_IDENTITY_TYPE
-# WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME
-# WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME
-# WLS_SSL_KEYVAULT_TRUST_TYPE
-# WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS
-# WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD
 # WLS_SSL_IDENTITY_DATA
 # WLS_SSL_IDENTITY_PASSWORD
 # WLS_SSL_IDENTITY_TYPE
@@ -27,10 +17,6 @@
 # WLS_SSL_TRUST_TYPE
 # WLS_SSL_PRIVATE_KEY_ALIAS
 # WLS_SSL_PRIVATE_KEY_PASSWORD
-# APPLICATION_GATEWAY_SSL_KEYVAULT_NAME
-# APPLICATION_GATEWAY_SSL_KEYVAULT_RESOURCEGROUP
-# APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_DATA_SECRET_NAME
-# APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_PASSWORD_SECRET_NAME
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_DATA
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD
 # DNS_ZONE_NAME
@@ -351,113 +337,7 @@ function validate_image_compatibility
   fi
 }
 
-function download_wls_ssl_certificates_from_keyvault() {
-  # check key vault accessibility for template deployment
-  local enabledForTemplateDeployment=$(az keyvault show --name ${WLS_SSL_KEYVAULT_NAME} --query "properties.enabledForTemplateDeployment")
-  if [[ "${enabledForTemplateDeployment,,}" != "true" ]]; then
-    echo_stderr "Make sure Key Vault ${WLS_SSL_KEYVAULT_NAME} is enabled for template deployment. "
-    exit 1
-  fi
-
-  # check key vault permission model, current support model is Vault access policy.
-  local enableRbacAuthorization=$(az keyvault show --name ${WLS_SSL_KEYVAULT_NAME} --query "properties.enableRbacAuthorization")
-  if [[ "${enableRbacAuthorization,,}" != "false" ]]; then
-    echo_stderr "Make sure Key Vault ${WLS_SSL_KEYVAULT_NAME} is using Vault access policy, not using RBAC authorization. "
-    exit 1
-  fi
-
-  # allow the identity to access the keyvault
-  local principalId=$(az identity show --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY} --query "principalId" -o tsv)
-  az keyvault set-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId} --secret-permissions get list
-  validate_status "grant identity permission to get/list secrets in key vault ${WLS_SSL_KEYVAULT_NAME}"
-
-  local identityDataFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/identityData.txt
-  local identityPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/identityPsw.txt
-  local trustDataFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/trustData.txt
-  local trustPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/trustPsw.txt
-  local privateKeyAliasFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/privateKeyData.txt
-  local privateKeyPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/privateKeyPsw.txt
-
-  rm -f ${identityDataFileName}
-  rm -f ${identityPswFileName}
-  rm -f ${trustDataFileName}
-  rm -f ${trustPswFileName}
-  rm -f ${privateKeyAliasFileName}
-  rm -f ${privateKeyPswFileName}
-
-  # download identity data
-  az keyvault secret download --file ${identityDataFileName} \
-    --name ${WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set identity data with values in download file
-  WLS_SSL_IDENTITY_DATA="$(cat ${identityDataFileName} | base64)"
-  # remove the data file
-  rm -f ${identityDataFileName}
-
-  # download identity password
-  az keyvault secret download --file ${identityPswFileName} \
-    --name ${WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set identity psw with values in download file
-  WLS_SSL_IDENTITY_PASSWORD="$(cat ${identityPswFileName})"
-  # remove the data file
-  rm -f ${identityPswFileName}
-
-  # download trust data
-  az keyvault secret download --file ${trustDataFileName} \
-    --name ${WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set trust data with values in download file
-  WLS_SSL_TRUST_DATA="$(cat ${trustDataFileName} | base64)"
-  # remove the data file
-  rm -f ${trustDataFileName}
-
-  # download trust psw
-  az keyvault secret download --file ${trustPswFileName} \
-    --name ${WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set trust psw with values in download file
-  WLS_SSL_TRUST_PASSWORD="$(cat ${trustPswFileName})"
-  # remove the data file
-  rm -f ${trustPswFileName}
-
-  # download alias
-  az keyvault secret download --file ${privateKeyAliasFileName} \
-    --name ${WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set alias with values in download file
-  WLS_SSL_PRIVATE_KEY_ALIAS="$(cat ${privateKeyAliasFileName})"
-  # remove the data file
-  rm -f ${privateKeyAliasFileName}
-
-  # download private key psw
-  az keyvault secret download --file ${privateKeyPswFileName} \
-    --name ${WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD} \
-    --vault-name ${WLS_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD} from key vault ${WLS_SSL_KEYVAULT_NAME}"
-  # set private key psw with values in download file
-  WLS_SSL_PRIVATE_KEY_PASSWORD="$(cat ${privateKeyPswFileName})"
-  # remove the data file
-  rm -f ${privateKeyPswFileName}
-
-  WLS_SSL_IDENTITY_TYPE="${WLS_SSL_KEYVAULT_IDENTITY_TYPE}"
-  WLS_SSL_TRUST_TYPE="${WLS_SSL_KEYVAULT_TRUST_TYPE}"
-
-  # reset key vault policy
-  az keyvault delete-policy --name ${WLS_SSL_KEYVAULT_NAME}  --object-id ${principalId}
-  validate_status "delete identity permission to get/list secrets in key vault ${WLS_SSL_KEYVAULT_NAME}"
-}
-
 function validate_wls_ssl_certificates() {
-  if [[ "${sslConfigurationAccessOption}" == "${sslCertificateKeyVaultOption}" ]]; then
-    download_wls_ssl_certificates_from_keyvault
-  fi
-
   local wlsIdentityKeyStoreFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/identity.keystore
   local wlsTrustKeyStoreFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/trust.keystore
   echo "$WLS_SSL_IDENTITY_DATA" | base64 -d >$wlsIdentityKeyStoreFileName
@@ -494,64 +374,9 @@ function validate_wls_ssl_certificates() {
   echo_stdout "validate SSL key stores: passed!"
 }
 
-function download_application_gateway_certificate_from_keyvault() {
-  # check key vault accessibility for template deployment
-  local enabledForTemplateDeployment=$(az keyvault show --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} --query "properties.enabledForTemplateDeployment")
-  if [[ "${enabledForTemplateDeployment,,}" != "true" ]]; then
-    echo_stderr "Make sure Key Vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} is enabled for template deployment. "
-    exit 1
-  fi
-
-  # check key vault permission model, current support model is Vault access policy.
-  local enableRbacAuthorization=$(az keyvault show --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} --query "properties.enableRbacAuthorization")
-  if [[ "${enableRbacAuthorization,,}" != "false" ]]; then
-    echo_stderr "Make sure Key Vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} is using Vault access policy, not using RBAC authorization. "
-    exit 1
-  fi
-
-  # allow the identity to access the keyvault
-  local principalId=$(az identity show --ids ${AZ_SCRIPTS_USER_ASSIGNED_IDENTITY} --query "principalId" -o tsv)
-  az keyvault set-policy --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}  --object-id ${principalId} --secret-permissions get list
-  validate_status "grant identity permission to get/list secrets in key vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}"
-
-  local gatewayCertDataFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/gatewayCertData.txt
-  local gatewayCertPswFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/gatewayCertPsw.txt
-
-  rm -f ${gatewayCertDataFileName}
-  rm -f ${gatewayCertPswFileName}
-
-  # download cert data
-  az keyvault secret download --file ${gatewayCertDataFileName} \
-    --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_DATA_SECRET_NAME} \
-    --vault-name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}
-  validate_status "download secret ${APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_DATA_SECRET_NAME} from key vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}"
-  # set cert data with values in download file
-  APPLICATION_GATEWAY_SSL_FRONTEND_CERT_DATA=$(cat ${gatewayCertDataFileName})
-  # remove the data file
-  rm -f ${gatewayCertDataFileName}
-
-  # download cert data
-  az keyvault secret download --file ${gatewayCertPswFileName} \
-    --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_PASSWORD_SECRET_NAME} \
-    --vault-name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME} 
-  validate_status "download secret ${APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_PASSWORD_SECRET_NAME} from key vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}"
-  # set cert data with values in download file
-  APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD=$(cat ${gatewayCertPswFileName})
-  # remove the data file
-  rm -f ${gatewayCertPswFileName}
-
-  # reset key vault policy
-  az keyvault delete-policy --name ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}  --object-id ${principalId}
-  validate_status "delete identity permission to get/list secrets in key vault ${APPLICATION_GATEWAY_SSL_KEYVAULT_NAME}"
-}
-
 function validate_gateway_frontend_certificates() {
   if [[ "${appGatewayCertificateOption}" == "generateCert" ]]; then
     return
-  fi
-
-  if [[ "${appGatewayCertificateOption}" == "haveKeyVault" ]]; then
-    download_application_gateway_certificate_from_keyvault
   fi
 
   local appgwFrontCertFileName=${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/gatewaycert.pfx
@@ -702,13 +527,11 @@ useOracleImage=$5
 wlsImageTag=$6
 userProvidedImagePath=$7
 enableCustomSSL=$8
-sslConfigurationAccessOption=$9
-appGatewayCertificateOption=${10}
-enableAppGWIngress=${11}
-checkDNSZone=${12}
+appGatewayCertificateOption=${9}
+enableAppGWIngress=${10}
+checkDNSZone=${11}
 
 outputAksVersion=${constDefaultAKSVersion}
-sslCertificateKeyVaultOption="keyVaultStoredConfig"
 
 # install docker cli
 install_docker
