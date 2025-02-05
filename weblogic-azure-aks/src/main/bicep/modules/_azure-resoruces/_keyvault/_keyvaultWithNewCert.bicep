@@ -59,6 +59,7 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
     enabledForDiskEncryption: false
     enabledForTemplateDeployment: true
     enableSoftDelete: true
+    enableRbacAuthorization: false
   }
 }
 

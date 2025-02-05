@@ -1212,6 +1212,22 @@
                                 "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
                             },
                             {
+                                "name": "keyVaultBackendSSLCertData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Trusted root certificate(.cer, .cert)",
+                                "toolTip": "Trusted root certificate (CA certificate) used to set up end to end TLS/SSL",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".cer, .cert"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": "[steps('section_sslConfiguration').enableCustomSSL]"
+                            },
+                            {
                                 "name": "enableCookieBasedAffinity",
                                 "type": "Microsoft.Common.CheckBox",
                                 "label": "Disable cookie based affinity",
@@ -2054,6 +2070,7 @@
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
+            "appGatewaySSLBackendRootCertData": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertData]",
             "appGatewaySSLCertData": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
             "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
