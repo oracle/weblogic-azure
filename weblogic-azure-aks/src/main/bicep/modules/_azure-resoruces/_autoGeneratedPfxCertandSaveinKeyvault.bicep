@@ -12,10 +12,11 @@ param location string
 
 @description('Access permission of the key vault, will applied to all access policies.')
 param permission object = {
-  secrets: [
+  certificates: [
     'get'
     'list'
-    'set'
+    'update'
+    'create'
   ]
 }
 
