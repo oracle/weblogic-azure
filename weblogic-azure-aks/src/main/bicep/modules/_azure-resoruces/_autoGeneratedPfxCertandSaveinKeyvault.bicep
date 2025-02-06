@@ -15,8 +15,7 @@ param permission object = {
   secrets: [
     'get'
     'list'
-    'update'
-    'create'
+    'set'
   ]
 }
 
