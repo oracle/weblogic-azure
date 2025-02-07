@@ -65,6 +65,7 @@ param identity object = {}
 
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
+param utcValue string = utcNow()
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
 @secure()
@@ -74,6 +75,24 @@ param wlsUserName string = 'weblogic'
 
 // This template is used for post deployment, hard code the CLI version with a variable.
 var const_azCliVersion = '2.33.1'
+var _objTagsByResource = {
+  'Microsoft.Monitor/accounts': contains(tagsByResource, 'Microsoft.Monitor/accounts') ? tagsByResource['Microsoft.Monitor/accounts'] : json('{}')
+  'Microsoft.ContainerService/managedClusters': contains(tagsByResource, 'Microsoft.ContainerService/managedClusters') ? tagsByResource['Microsoft.ContainerService/managedClusters'] : json('{}')
+  'Microsoft.Network/applicationGateways': contains(tagsByResource, 'Microsoft.Network/applicationGateways') ? tagsByResource['Microsoft.Network/applicationGateways'] : json('{}')
+  'Microsoft.ContainerRegistry/registries': contains(tagsByResource, 'Microsoft.ContainerRegistry/registries') ? tagsByResource['Microsoft.ContainerRegistry/registries'] : json('{}')
+  'Microsoft.Compute/virtualMachines': contains(tagsByResource, 'Microsoft.Compute/virtualMachines') ? tagsByResource['Microsoft.Compute/virtualMachines'] : json('{}')
+  'Virtual machine extension': contains(tagsByResource, 'Virtual machine extension') ? tagsByResource['Virtual machine extension'] : json('{}')
+  'Microsoft.Network/virtualNetworks': contains(tagsByResource, 'Microsoft.Network/virtualNetworks') ? tagsByResource['Microsoft.Network/virtualNetworks'] : json('{}')
+  'Microsoft.Network/networkInterfaces': contains(tagsByResource, 'Microsoft.Network/networkInterfaces') ? tagsByResource['Microsoft.Network/networkInterfaces'] : json('{}')
+  'Microsoft.Network/networkSecurityGroups': contains(tagsByResource, 'Microsoft.Network/networkSecurityGroups') ? tagsByResource['Microsoft.Network/networkSecurityGroups'] : json('{}')
+  'Microsoft.Network/publicIPAddresses': contains(tagsByResource, 'Microsoft.Network/publicIPAddresses') ? tagsByResource['Microsoft.Network/publicIPAddresses'] : json('{}')
+  'Microsoft.Storage/storageAccounts': contains(tagsByResource, 'Microsoft.Storage/storageAccounts') ? tagsByResource['Microsoft.Storage/storageAccounts'] : json('{}')
+  'Microsoft.KeyVault/vaults': contains(tagsByResource, 'Microsoft.KeyVault/vaults') ? tagsByResource['Microsoft.KeyVault/vaults'] : json('{}')
+  'Microsoft.ManagedIdentity/userAssignedIdentities': contains(tagsByResource, 'Microsoft.ManagedIdentity/userAssignedIdentities') ? tagsByResource['Microsoft.ManagedIdentity/userAssignedIdentities'] : json('{}')
+  'Microsoft.Network/dnszones': contains(tagsByResource, 'Microsoft.Network/dnszones') ? tagsByResource['Microsoft.Network/dnszones'] : json('{}')
+  'Microsoft.OperationalInsights/workspaces': contains(tagsByResource, 'Microsoft.OperationalInsights/workspaces') ? tagsByResource['Microsoft.OperationalInsights/workspaces'] : json('{}')
+  'Microsoft.Resources/deploymentScripts': contains(tagsByResource, 'Microsoft.Resources/deploymentScripts') ? tagsByResource['Microsoft.Resources/deploymentScripts'] : json('{}')
+}
 
 module pids './_pids/_pid.bicep' = {
   name: 'initialization'
@@ -87,6 +106,7 @@ module configDataSource './_setupDBConnection.bicep' = {
     _pidStart: pids.outputs.dbStart
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
+    _globalResourceNameSufix: uniqueString(utcValue)
     aksClusterName: aksClusterName
     aksClusterRGName: resourceGroup().name
     azCliVersion: const_azCliVersion
@@ -99,6 +119,7 @@ module configDataSource './_setupDBConnection.bicep' = {
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
     location: resourceGroup().location
+    tagsByResource: _objTagsByResource
     wlsDomainUID: wlsDomainUID
     wlsPassword: wlsPassword
     wlsUserName: wlsUserName
