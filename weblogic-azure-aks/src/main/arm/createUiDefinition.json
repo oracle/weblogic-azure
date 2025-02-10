@@ -301,6 +301,14 @@
                                 }
                             },
                             {
+                                "name": "infoBoxAks",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[not(bool(steps('section_aks').clusterInfo.createAKSCluster))]",
+                                "options": {
+                                    "text": "Ensure that the AKS cluster is configured with the following networking settings:<br><li>Container networking: Azure CNI Node Subnet</li><li>Network policy: Azure</li>"
+                                }
+                            },
+                            {
                                 "name": "aksClusterSelector",
                                 "type": "Microsoft.Solutions.ResourceSelector",
                                 "label": "Select AKS cluster",

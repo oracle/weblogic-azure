@@ -441,6 +441,21 @@ function validate_aks_version() {
   fi
 }
 
+function validate_aks_networking() {
+  local networkPluginMode=$(az aks show -g ${AKS_CLUSTER_RESOURCEGROUP_NAME} -n ${AKS_CLUSTER_NAME} | jq '.networkProfile.networkPluginMode' | tr -d "\"")
+  local networkPlugin=$(az aks show -g ${AKS_CLUSTER_RESOURCEGROUP_NAME} -n ${AKS_CLUSTER_NAME} | jq '.networkProfile.networkPlugin' | tr -d "\"")
+
+  if [[ "${networkPluginMode}" != "null" ]]; then
+    echo_stderr "ERROR: invalid network plugin mode ${networkPluginMode} for ${AKS_CLUSTER_NAME}."
+    exit 1
+  fi
+
+  if [[ "${networkPlugin}" != "azure" ]]; then
+    echo_stderr "ERROR: invalid network plugin ${networkPlugin} for ${AKS_CLUSTER_NAME}."
+    exit 1
+  fi
+}
+
 function enable_aks_managed_identity() {
   local identityLength=$(az aks show -g ${AKS_CLUSTER_RESOURCEGROUP_NAME} -n ${AKS_CLUSTER_NAME} | jq '.identity | length')
   echo "identityLength ${identityLength}"
@@ -560,7 +575,9 @@ if [[ "${createAKSCluster,,}" == "true" ]]; then
   validate_aks_version
 fi
 
+# validate existing aks cluster
 if [[ "${createAKSCluster,,}" != "true" ]]; then
+  validate_aks_networking
   enable_aks_managed_identity
 fi
 
