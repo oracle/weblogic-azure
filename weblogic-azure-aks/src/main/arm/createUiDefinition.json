@@ -1137,7 +1137,7 @@
                                 "visible": false
                             },
                             {
-                                "name": "keyVaultText00",
+                                "name": "sslCertText00",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
@@ -1145,7 +1145,7 @@
                                 }
                             },
                             {
-                                "name": "keyVaultText01",
+                                "name": "sslCertText01",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
@@ -1153,7 +1153,7 @@
                                 }
                             },
                             {
-                                "name": "keyVaultText02",
+                                "name": "sslCertText02",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": true,
                                 "options": {
@@ -1220,7 +1220,7 @@
                                 "visible": "[equals(steps('section_appGateway').appgwIngress.certificateOption, 'haveCert')]"
                             },
                             {
-                                "name": "keyVaultBackendSSLCertData",
+                                "name": "uploadedSSLCertData",
                                 "type": "Microsoft.Common.FileUpload",
                                 "label": "Trusted root certificate(.cer, .cert)",
                                 "toolTip": "Trusted root certificate (CA certificate) used to set up end to end TLS/SSL",
@@ -2078,7 +2078,7 @@
             "aksClusterName": "[last(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'))]",
             "aksClusterRGName": "[last(take(split(steps('section_aks').clusterInfo.aksClusterSelector.id, '/'), 5))]",
             "appGatewayCertificateOption": "[steps('section_appGateway').appgwIngress.certificateOption]",
-            "appGatewaySSLBackendRootCertData": "[steps('section_appGateway').appgwIngress.keyVaultBackendSSLCertData]",
+            "appGatewaySSLBackendRootCertData": "[steps('section_appGateway').appgwIngress.uploadedSSLCertData]",
             "appGatewaySSLCertData": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appgwIngress.appGatewaySSLCertPassword]",
             "appgwForAdminServer": "[steps('section_appGateway').appgwIngress.appgwForAdminServer]",
