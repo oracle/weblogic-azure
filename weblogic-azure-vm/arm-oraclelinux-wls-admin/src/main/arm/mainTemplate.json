@@ -966,7 +966,7 @@
       {
          "name": "aadLinkedTemplateWithCustomSSL",
          "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
          "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
