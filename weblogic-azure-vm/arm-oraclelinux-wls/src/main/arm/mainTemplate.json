@@ -95,13 +95,9 @@
                 "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
             }
         },
-      "utcValue": {
-         "type": "string",
-         "defaultValue": "[utcNow()]"
-      },
       "vmName": {
          "type": "string",
-         "defaultValue": "[concat('WeblogicServerVM',uniqueString(utcValue))]",
+         "defaultValue": "WeblogicServerVM",
          "metadata": {
             "description": "VM name."
          }
@@ -116,7 +112,7 @@
    },
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
-      "const_globalResourceNameSuffix": "[uniqueString(utcValue)]",
+      "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
       "const_hyphen": "-",
       "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
       "const_imagePublisher": "oracle",
@@ -138,12 +134,13 @@
       "const_vmSize": "[parameters('vmSize')]",
       "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
       "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
-      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
+      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg_', variables('const_globalResourceNameSuffix'))]",
       "name_nic": "[concat('olvm_NIC_', variables('const_globalResourceNameSuffix'))]",
       "name_publicIPAddress": "[concat('olvm_PublicIP_', variables('const_globalResourceNameSuffix'))]",
       "name_storageAccount": "[concat('olvmstg', variables('const_globalResourceNameSuffix'))]",
       "name_subnet": "Subnet",
-      "name_virtualNetwork": "[concat('olvm_VNET', variables('const_globalResourceNameSuffix'))]",
+      "name_virtualNetwork": "[concat('olvm_VNET_', variables('const_globalResourceNameSuffix'))]",
+      "name_vmName": "[concat(parameters('vmName'), variables('const_globalResourceNameSuffix'))]",
       "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
       "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
    },
@@ -290,7 +287,7 @@
                }
             ],
             "dnsSettings": {
-               "internalDnsNameLabel": "[parameters('vmName')]"
+               "internalDnsNameLabel": "[variables('name_vmName')]"
             }
          }
       },
@@ -298,7 +295,7 @@
          "apiVersion": "${azure.apiVersionForVirtualMachines}",
          "type": "Microsoft.Compute/virtualMachines",
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachines}')]",
-         "name": "[parameters('vmName')]",
+         "name": "[variables('name_vmName')]",
          "location": "[parameters('location')]",
          "dependsOn": [
             "[resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount'))]",
@@ -310,7 +307,7 @@
                "vmSize": "[variables('const_vmSize')]"
             },
             "osProfile": {
-               "computerName": "[parameters('vmName')]",
+               "computerName": "[variables('name_vmName')]",
                "adminUsername": "[parameters('adminUsername')]",
                "adminPassword": "[parameters('adminPasswordOrKey')]",
                "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
@@ -355,7 +352,7 @@
          "type": "Microsoft.Resources/deployments",
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -373,7 +370,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol91'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -392,7 +389,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol87'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -411,7 +408,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol91'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -430,7 +427,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol87'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -449,7 +446,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122140-jdk8-ol91'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -468,7 +465,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122140-jdk8-ol87'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -487,7 +484,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-jdk8-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -506,7 +503,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -525,7 +522,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -544,7 +541,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122140-jdk8-rhel87'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -563,7 +560,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-rhel87'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -582,7 +579,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-rhel87'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -601,7 +598,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122140-jdk8-rhel76'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -620,7 +617,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-rhel76'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -639,7 +636,7 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'),'${identifier.resourcesDeployment}')]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-rhel76'), bool('true'), bool('false'))]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('name_vmName'))]"
          ],
          "properties": {
             "mode": "Incremental",
