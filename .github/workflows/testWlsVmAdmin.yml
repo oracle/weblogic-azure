@@ -14,6 +14,10 @@ on:
         description: 'Specify Git Ref if needed.'
         required: false
         default: 'refs/heads/main'
+      location:
+        description: 'The location for the resources'
+        required: true
+        default: eastus
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=mriccell/weblogic-azure
@@ -32,7 +36,6 @@ env:
   elkUser: ${{ secrets.ELK_USER_NAME }}
   elkPassword: ${{ secrets.ELK_PSW }}
   gitToken: ${{ secrets.GIT_TOKEN }}
-  location: eastus
   nsg: wls-nsg
   offerName: arm-oraclelinux-wls-admin
   adminOfferPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
@@ -51,18 +54,23 @@ jobs:
   preflight:
     outputs:
       enableELK: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.enableELK }}
-      artifactName: ${{steps.artifact_file.outputs.artifactName}}
+      location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
+      artifactName: ${{steps.artifact_file.outputs.artifactName}}      
     runs-on: ubuntu-latest
     steps:
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
+          location=eastus # default value
+
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
             enableELK=${{ github.event.inputs.enableELK }}
             ref=${{ github.event.inputs.ref }}
+            location=${{ github.event.inputs.location }}
           else
             enableELK=${{ github.event.client_payload.enableELK }}
             ref=${{ github.event.client_payload.ref }}
+            location=${{ github.event.client_payload.location }}
           fi
 
           if [ -z "$enableELK" ]; then
@@ -75,8 +83,10 @@ jobs:
 
           echo "##[set-output name=enableELK;]${enableELK}"
           echo "##[set-output name=ref;]${ref}"
+          echo "##[set-output name=location;]${location}"
           echo "enableELK=${enableELK}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
+          echo "location=${location}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
       - name: Set up Maven with GitHub token
         uses: ./.github/actions/setupmaven
@@ -173,6 +183,9 @@ jobs:
     needs: preflight
     runs-on: ubuntu-latest
     steps:
+      - name: Initialize environment variables
+        run: |
+          echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
       - uses: azure/login@v1
         id: azure-login
         with:
@@ -217,6 +230,9 @@ jobs:
           ]
 
     steps:
+      - name: Initialize environment variables
+        run: |
+          echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
