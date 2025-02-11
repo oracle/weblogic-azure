@@ -95,9 +95,13 @@
                 "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
             }
         },
+      "utcValue": {
+         "type": "string",
+         "defaultValue": "[utcNow()]"
+      },
       "vmName": {
          "type": "string",
-         "defaultValue": "WeblogicServerVM",
+         "defaultValue": "[concat('WeblogicServerVM',uniqueString(utcValue))]",
          "metadata": {
             "description": "VM name."
          }
@@ -112,6 +116,7 @@
    },
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
+      "const_globalResourceNameSuffix": "[uniqueString(utcValue)]",
       "const_hyphen": "-",
       "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
       "const_imagePublisher": "oracle",
@@ -134,11 +139,11 @@
       "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
       "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
       "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
-      "name_nic": "olvm_NIC",
-      "name_publicIPAddress": "olvm_PublicIP",
-      "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
+      "name_nic": "[concat('olvm_NIC_', variables('const_globalResourceNameSuffix'))]",
+      "name_publicIPAddress": "[concat('olvm_PublicIP_', variables('const_globalResourceNameSuffix'))]",
+      "name_storageAccount": "[concat('olvmstg', variables('const_globalResourceNameSuffix'))]",
       "name_subnet": "Subnet",
-      "name_virtualNetwork": "olvm_VNET",
+      "name_virtualNetwork": "[concat('olvm_VNET', variables('const_globalResourceNameSuffix'))]",
       "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
       "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
    },
