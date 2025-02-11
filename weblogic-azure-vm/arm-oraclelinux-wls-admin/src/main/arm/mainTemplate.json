@@ -468,7 +468,6 @@
       }
    },
    "variables": {
-      "const_currentSubscription": "[subscription().subscriptionId]",
       "name_aadLinkedTemplateName": "aadNestedTemplate.json",
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_adminLinkedTemplateDeployment": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
