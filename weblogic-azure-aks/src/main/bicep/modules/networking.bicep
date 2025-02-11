@@ -10,7 +10,7 @@ param _pidLbEnd string = 'pid-networking-lb-end'
 param _pidLbStart string = 'pid-networking-lb-start'
 param _pidNetworkingEnd string = 'pid-networking-end'
 param _pidNetworkingStart string = 'pid-networking-start'
-param _globalResourceNameSufix string
+param _globalResourceNameSuffix string
 @description('Resource group name of an existing AKS cluster.')
 param aksClusterRGName string = 'aks-contoso-rg'
 @description('Name of an existing AKS cluster.')
@@ -99,7 +99,7 @@ module dnsZoneDeployment '_azure-resoruces/_dnsZones.bicep' = if (enableDNSConfi
 module installAgic '_deployment-scripts/_ds_install_agic.bicep' = if (enableAppGWIngress) {
   name: 'install-agic'
   params: {
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     location: location
     identity: identity
     aksClusterRGName: aksClusterRGName
@@ -127,7 +127,7 @@ module agicRoleAssignment '_rolesAssignment/_agicRoleAssignment.bicep' = if (ena
 module validateAgic '_deployment-scripts/_ds_validate_agic.bicep' = if (enableAppGWIngress) {
   name: 'validate-agic'
   params: {
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     location: location
     identity: identity
     aksClusterRGName: aksClusterRGName
@@ -145,7 +145,7 @@ module networkingDeploymentYesAppGW '_deployment-scripts/_ds-create-networking.b
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     appgwName: appGatewayName
     appgwAlias: appGatewayAlias
     appgwForAdminServer: appgwForAdminServer
@@ -186,7 +186,7 @@ module networkingDeploymentNoAppGW '_deployment-scripts/_ds-create-networking.bi
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     appgwName: 'null'
     appgwAlias: 'null'
     appgwForAdminServer: appgwForAdminServer

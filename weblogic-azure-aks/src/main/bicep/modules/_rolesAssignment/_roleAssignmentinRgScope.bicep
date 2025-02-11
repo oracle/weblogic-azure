@@ -16,13 +16,13 @@ Usage:
   }
 */
 
-param _globalResourceNameSufix string
+param _globalResourceNameSuffix string
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 param roleDefinitionId string = ''
 param identity object = {}
 
 var const_identityAPIVersion = '2022-01-31-PREVIEW'
-var name_roleAssignmentName = guid('${subscription().id}${_globalResourceNameSufix}Role assignment in resource group scope')
+var name_roleAssignmentName = guid('${subscription().id}${_globalResourceNameSuffix}Role assignment in resource group scope')
 
 // Get role resource id
 resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = {

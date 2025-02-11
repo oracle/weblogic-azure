@@ -4,7 +4,7 @@
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _globalResourceNameSufix string
+param _globalResourceNameSuffix string
 
 param aksClusterName string 
 param aksClusterRGName string
@@ -39,7 +39,7 @@ var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_utilityScript= 'utility.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
-  name: 'ds-wls-db-connection-${_globalResourceNameSufix}'
+  name: 'ds-wls-db-connection-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity

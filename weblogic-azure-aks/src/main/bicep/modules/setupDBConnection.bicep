@@ -106,7 +106,7 @@ module configDataSource './_setupDBConnection.bicep' = {
     _pidStart: pids.outputs.dbStart
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    _globalResourceNameSufix: uniqueString(utcValue)
+    _globalResourceNameSuffix: uniqueString(utcValue)
     aksClusterName: aksClusterName
     aksClusterRGName: resourceGroup().name
     azCliVersion: const_azCliVersion

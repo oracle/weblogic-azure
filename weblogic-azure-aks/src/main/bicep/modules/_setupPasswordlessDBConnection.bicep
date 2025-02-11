@@ -6,7 +6,7 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _globalResourceNameSufix string
+param _globalResourceNameSuffix string
 param _pidEnd string = ''
 param _pidStart string = ''
 
@@ -81,7 +81,7 @@ module dbIdentityVMContributorRoleAssignment '_rolesAssignment/_roleAssignmentin
   name: 'assign-db-identity-vm-contributor-role'
   scope: resourceGroup(aksNodeRGName)
   params: {
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     identity: dbIdentity
     roleDefinitionId: const_roleDefinitionIdOfVMContributor
   }
@@ -128,7 +128,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     azCliVersion: azCliVersion

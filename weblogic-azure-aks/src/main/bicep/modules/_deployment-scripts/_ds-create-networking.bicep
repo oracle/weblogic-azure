@@ -4,7 +4,7 @@
 param _artifactsLocation string = deployment().properties.templateLink.uri
 @secure()
 param _artifactsLocationSasToken string = ''
-param _globalResourceNameSufix string
+param _globalResourceNameSuffix string
 
 param appgwAlias string = 'appgw-contoso-alias'
 param appgwName string = 'appgw-contoso'
@@ -47,7 +47,7 @@ var const_primaryScript = 'setupNetworking.sh'
 var const_utilityScript = 'utility.sh'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
-  name: 'ds-networking-deployment-${_globalResourceNameSufix}'
+  name: 'ds-networking-deployment-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity

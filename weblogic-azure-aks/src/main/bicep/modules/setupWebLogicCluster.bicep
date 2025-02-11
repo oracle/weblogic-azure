@@ -21,7 +21,7 @@ param _pidEnd string = 'pid-wls-end'
 param _pidStart string = 'pid-wls-start'
 param _pidSSLEnd string = 'pid-ssl-end'
 param _pidSSLStart string = 'pid-ssl-start'
-param _globalResourceNameSufix string
+param _globalResourceNameSuffix string
 @description('true to use resource or workspace permissions. false to require workspace permissions.')
 param aciResourcePermissions bool = true
 @description('Number of days to retain data in Azure Monitor workspace.')
@@ -201,7 +201,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
   params: {
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
-    _globalResourceNameSufix: _globalResourceNameSufix
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
     aksClusterName: aksClusterName
     acrName: useOracleImage ? acrName : userProvidedAcr
