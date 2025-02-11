@@ -1012,7 +1012,6 @@
                             "${identifier.publicIPAddresses}",
                             "${identifier.privateEndpoints}",
                             "${identifier.storageAccounts}",
-                            "${identifier.vaults}",
                             "${identifier.virtualNetworks}",
                             "${identifier.virtualMachines}",
                             "${identifier.virtualMachinesExtensions}",
