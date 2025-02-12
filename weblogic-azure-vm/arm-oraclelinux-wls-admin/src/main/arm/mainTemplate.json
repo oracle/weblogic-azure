@@ -826,6 +826,10 @@
       }
    ],
    "outputs": {
+      "adminVMName": {
+         "type": "string",
+         "value": "[variables('name_adminVM')]"
+      },
       "hostname": {
          "type": "string",
          "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.hostname.value]"
