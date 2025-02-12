@@ -305,7 +305,7 @@
       },
       "virtualNetworkName": {
          "type": "string",
-         "defaultValue": "[concat('wls-vnet', utcNow())]",
+         "defaultValue": "[concat('wls-vnet', uniqueString(utcNow()))]",
          "metadata": {
             "description": "Name of the existing or new VNET"
          }
