@@ -295,7 +295,12 @@ jobs:
         id: verify-nsg
         run: |
             echo "query nsg name, will exit with error if nsg does not exist."
-            az network nsg show -g $resourceGroup -n ${nsg} --query "name"
+            export nsgName=$(az network nsg list -g $resourceGroup --query [0].name -o tsv)
+            if [ -z $nsgName ]; then
+              echo "Network Security Group does not exist."
+              exit 1
+            fi
+            echo "nsgName=${nsgName}" >> $GITHUB_ENV
 
       - name: Get IP of build machine
         id: get-ip-address
@@ -309,7 +314,7 @@ jobs:
             echo "query existing source address prefixes"
               attempt=0
               toCreateRule101=false
-              while [[ -z `az network nsg show -g $resourceGroup -n ${nsg} | grep "NRMS-Rule-101"` && $attempt -le 5 ]]
+              while [[ -z `az network nsg show -g $resourceGroup -n ${nsgName} | grep "NRMS-Rule-101"` && $attempt -le 5 ]]
               do
                 if [ $attempt -eq 5 ]; then
                   toCreateRule101=true
@@ -320,7 +325,7 @@ jobs:
               done
               if [ $toCreateRule101 == true ]; then
                 az network nsg rule create --name NRMS-Rule-101 \
-                             --nsg-name ${nsg} \
+                             --nsg-name ${nsgName} \
                              --priority 101 \
                              --resource-group $resourceGroup \
                              --access Allow \
@@ -332,7 +337,7 @@ jobs:
               else
                 sourceAddressPrefixes=$(az network nsg rule show \
                   --resource-group $resourceGroup \
-                  --nsg-name ${nsg} \
+                  --nsg-name ${nsgName} \
                   --name NRMS-Rule-101 \
                   --query "sourceAddressPrefixes")
                 echo "IP of this machine: " ${myIP}
@@ -341,7 +346,7 @@ jobs:
                 echo ${sourceAddressPrefixes}
                 az network nsg rule update \
                   --resource-group $resourceGroup \
-                  --nsg-name ${nsg} \
+                  --nsg-name ${nsgName} \
                   --name NRMS-Rule-101 \
                   --source-address-prefixes $sourceAddressPrefixes \
                   --destination-port-ranges 443 22
@@ -350,7 +355,7 @@ jobs:
               echo "Allow access to ${adminConsolePort}"
               az network nsg rule update \
                 --resource-group $resourceGroup \
-                --nsg-name ${nsg} \
+                --nsg-name ${nsgName} \
                 --name WebLogicAdminChannelPort \
                 --access Allow \
                 --source-address-prefixes 10.0.0.0/24
