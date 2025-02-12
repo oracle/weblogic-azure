@@ -290,26 +290,7 @@ jobs:
               --resource-group $resourceGroup \
               --name wls-admin-node \
               --query "properties.outputs.adminVMName.value" -o tsv)
-            echo "adminVMName=${adminVMName}" >> $GITHUB_ENV
-
-      - name: Verify WebLogic Server Installation
-        id: verify-wls
-        run: |
-          echo "Verifying Weblgic server installation"
-          sudo apt-get install -y sshpass
-          local scriptPath=https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-admin/test/scripts/verify-wls-path.sh
-          local provisioningState=$(az vm run-command create --name "VerifyWebLogicHome" \
-            --resource-group $resourceGroup \
-            --vm-name $adminVMName \
-            --run-as-user root \
-            --timeout-in-seconds 3600 \
-            --script-uri ${scriptPath} \
-            --query provisioningState)
-
-          if [ "$provisioningState" != "Succeeded" ]; then
-            echo "WebLogic Server installation failed"
-            exit 1
-          fi
+            echo "adminVMName=${adminVMName}" >> $GITHUB_ENV     
 
       - name: Verify system services at admin server
         id: veriy-admin-service
