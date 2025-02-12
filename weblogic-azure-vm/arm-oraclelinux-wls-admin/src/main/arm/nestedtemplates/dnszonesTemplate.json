@@ -184,6 +184,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[parameters('_globalResourceNameSuffix')]"
+                    },
                     "dnszonesARecordSetNames": {
                         "value": "[parameters('dnszonesARecordSetNames')]"
                     },
