@@ -226,6 +226,10 @@
             "description": "JNDI Name for JDBC Datasource"
          }
       },
+      "guidValue": {
+         "type": "string",
+         "defaultValue": "[newGuid()]"
+      },
       "location": {
          "type": "string",
          "defaultValue": "[resourceGroup().location]",
@@ -468,10 +472,12 @@
       }
    },
    "variables": {
+      "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
       "name_aadLinkedTemplateName": "aadNestedTemplate.json",
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_adminLinkedTemplateDeployment": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
       "name_adminLinkedTemplateName": "adminTemplate.json",
+      "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
       "name_dbLinkedTemplate": "dbTemplate.json",
       "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
       "name_elkLinkedTemplateName": "elkNestedTemplate.json",
@@ -553,6 +559,9 @@
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
+               },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
                },
@@ -560,7 +569,7 @@
                   "value": "[parameters('adminUsername')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "authenticationType": {
                   "value": "[parameters('authenticationType')]"
@@ -647,6 +656,9 @@
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
+               },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
                },
@@ -654,7 +666,7 @@
                   "value": "[parameters('adminUsername')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "authenticationType": {
                   "value": "[parameters('authenticationType')]"
@@ -797,6 +809,9 @@
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
+               },
                "dnszonesARecordSetNames": {
                   "value": [
                      "[parameters('dnszoneAdminConsoleLabel')]"
@@ -848,7 +863,7 @@
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "databaseType": {
                   "value": "[parameters('databaseType')]"
@@ -925,7 +940,7 @@
                   "value": "[parameters('aadsServerHost')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "location": {
                   "value": "[parameters('location')]"
@@ -995,7 +1010,7 @@
                   "value": "[parameters('aadsServerHost')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "location": {
                   "value": "[parameters('location')]"
@@ -1065,7 +1080,7 @@
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "elasticsearchEndpoint": {
                   "value": "[parameters('elasticsearchEndpoint')]"

@@ -21,6 +21,12 @@
             "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
          }
       },
+      "_globalResourceNameSuffix": {
+         "type": "string",
+         "metadata": {
+            "description": "A unique suffix that was specified during the deployment of the solution template."
+         }
+      },
       "adminPasswordOrKey": {
          "type": "securestring",
          "metadata": {
@@ -239,15 +245,15 @@
       "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
       "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
       "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
-      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
-      "name_nic": "adminServerVM_NIC",
+      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', parameters('_globalResourceNameSuffix'))]",
+      "name_nic": "[concat('adminServerVM_NIC_', parameters('_globalResourceNameSuffix'))]",
       "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
       "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
-      "name_publicIPAddress": "adminServerVM_PublicIP",
-      "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
+      "name_publicIPAddress": "[concat('adminServerVM_PublicIP_', parameters('_globalResourceNameSuffix'))]",
+      "name_privateSaEndpoint": "[concat('saep', parameters('_globalResourceNameSuffix'))]",
       "name_scriptFile": "setupAdminDomain.sh",
-      "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
-      "name_share": "wlsshare",
+      "name_storageAccount": "[concat('olvmstg', parameters('_globalResourceNameSuffix'))]",
+      "name_share": "[concat('wlsshare', parameters('_globalResourceNameSuffix'))]",
       "name_subnet": "[parameters('subnetName')]",
       "name_virtualNetwork": "[parameters('virtualNetworkName')]",
       "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
