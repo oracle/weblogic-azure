@@ -376,6 +376,7 @@
       "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
       "name_dbLinkedTemplate": "dbTemplate.json",
       "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
+      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', variables('const_globalResourceNameSuffix'))]",
       "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
       // If adding a new resource, add the resource identifier to the array below
       // Also modify createUIDefinition.json to include the new resource
@@ -487,6 +488,9 @@
                "location": {
                   "value": "[parameters('location')]"
                },
+               "nsgName": {
+                  "value": "[variables('name_networkSecurityGroup')]"
+               },
                "portsToExpose": {
                   "value": "[parameters('portsToExpose')]"
                },
@@ -584,6 +588,9 @@
                "enableHTTPAdminListenPort": {
                   "value": "[parameters('enableHTTPAdminListenPort')]"
                },
+               "nsgName": {
+                  "value": "[variables('name_networkSecurityGroup')]"
+               },
                "location": {
                   "value": "[parameters('location')]"
                },
@@ -673,7 +680,7 @@
                   "value": "[parameters('denyPublicTrafficForAdminServer')]"
                },
                "networkSecurityGroupName": {
-                  "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+                  "value": "[variables('name_networkSecurityGroup')]"
                }
             }
          },

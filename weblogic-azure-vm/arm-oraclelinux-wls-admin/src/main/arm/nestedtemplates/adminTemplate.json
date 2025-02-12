@@ -94,6 +94,12 @@
             "description": "Location for all resources."
          }
       },
+      "nsgName": {
+         "type": "string",
+         "metadata": {
+            "description": "Network Security Group name"
+         }
+      },
       "portsToExpose": {
          "type": "string",
          "defaultValue": "80,443,7001-9000",
@@ -245,7 +251,6 @@
       "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
       "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
       "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
-      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', parameters('_globalResourceNameSuffix'))]",
       "name_nic": "[concat('adminServerVM_NIC_', parameters('_globalResourceNameSuffix'))]",
       "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
       "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
@@ -256,7 +261,7 @@
       "name_share": "[concat('wlsshare', parameters('_globalResourceNameSuffix'))]",
       "name_subnet": "[parameters('subnetName')]",
       "name_virtualNetwork": "[parameters('virtualNetworkName')]",
-      "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
+      "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
       "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
       "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
       "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
@@ -287,7 +292,7 @@
          "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
          "tags": "[parameters('tagsByResource')['${identifier.networkSecurityGroups}']]",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-         "name": "[variables('name_networkSecurityGroup')]",
+         "name": "[parameters('nsgName')]",
          "location": "[parameters('location')]",
          "properties": {
             "securityRules": [
@@ -347,7 +352,7 @@
             "supportsHttpsTrafficOnly": false
          },
          "dependsOn": [
-            "[variables('name_networkSecurityGroup')]"
+            "[parameters('nsgName')]"
          ]
       },
       {
