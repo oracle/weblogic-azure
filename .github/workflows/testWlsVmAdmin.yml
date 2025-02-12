@@ -290,6 +290,7 @@ jobs:
               --resource-group $resourceGroup \
               --name wls-admin-node \
               --query "properties.outputs.adminVMName.value" -o tsv)
+            echo "adminVMName=${adminVMName}" >> $GITHUB_ENV
 
       - name: Verify Network Security Group
         id: verify-nsg
