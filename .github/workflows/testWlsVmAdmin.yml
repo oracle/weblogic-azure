@@ -233,6 +233,7 @@ jobs:
       - name: Initialize environment variables
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
+          echo "artifactName=${{ needs.preflight.outputs.artifactName }}" >> $GITHUB_ENV
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
@@ -242,6 +243,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.preflight.outputs.artifactName }}
+          path: ${{needs.preflight.outputs.artifactName}}
 
       - uses: azure/login@v1
         id: azure-login
@@ -293,9 +295,6 @@ jobs:
       - name: Deploy WebLogic Server Admin only Domain offer
         id: deploy-wls-admin
         run: |
-            artifactName=${{ needs.preflight.outputs.artifactName }}
-            echo "artifactName=${{ needs.preflight.outputs.artifactName }}" >> $GITHUB_ENV
-
             az deployment group create \
               --verbose \
               --resource-group $resourceGroup \
