@@ -1,6 +1,7 @@
 // Copyright (c) 2024, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSuffix string
 param aksClusterName string
 param aksClusterRGName string
 param amaName string
@@ -23,7 +24,7 @@ param workspaceId string
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_enableHpa = loadFileAsBase64('../../../arm/scripts/inline-scripts/enablePrometheusMetrics.sh')
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
-var const_deploymentName = 'ds-enable-promethues-metrics'
+var const_deploymentName = 'ds-enable-promethues-metrics-${_globalResourceNameSuffix}'
 var const_kedaNamespace= 'keda'
 var const_kedaSa= 'keda-operator'
 
@@ -71,7 +72,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       }
       {
         name: 'WLS_CLUSTER_SIZE'
-        value: wlsClusterSize
+        value: string(wlsClusterSize)
       }
       {
         name: 'WLS_ADMIN_PASSWORD'

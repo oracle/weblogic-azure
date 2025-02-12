@@ -14,7 +14,7 @@ param utcValue string = utcNow()
 // To mitigate arm-ttk error: Unreferenced variable: $fxv#0
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_queryPrivateIPForAppGateway = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh')
-var const_deploymentName = 'ds-query-private-ip'
+var const_deploymentName = 'ds-query-private-ip-${uniqueString(utcValue)}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName

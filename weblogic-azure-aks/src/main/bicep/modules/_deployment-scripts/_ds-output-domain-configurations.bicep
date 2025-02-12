@@ -1,6 +1,7 @@
 // Copyright (c) 2021, 2024 Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSuffix string
 param aksClusterRGName string = ''
 param aksClusterName string = ''
 param azCliVersion string = ''
@@ -18,7 +19,7 @@ var base64_queryDomainConfigurations = loadFileAsBase64('../../../arm/scripts/in
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
-  name: 'ds-query-wls-configurations'
+  name: 'ds-query-wls-configurations-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity

@@ -2,6 +2,7 @@
  Copyright (c) 2024, Oracle and/or its affiliates.
 Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 */
+param _globalResourceNameSuffix string
 param aksClusterName string 
 param aksClusterRGName string
 param azCliVersion string
@@ -19,9 +20,9 @@ param wlsUserName string
 var const_namespace = '${wlsDomainUID}-ns'
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfMonitorDataReader = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-var name_azureMonitorAccountName = 'ama${uniqueString(utcValue)}'
-var name_kedaUserDefinedManagedIdentity = 'kedauami${uniqueString(utcValue)}'
-var name_kedaMonitorDataReaderRoleAssignmentName = guid('${resourceGroup().id}${name_kedaUserDefinedManagedIdentity}')
+var name_azureMonitorAccountName = 'ama${_globalResourceNameSuffix}'
+var name_kedaUserDefinedManagedIdentity = 'kedauami${_globalResourceNameSuffix}'
+var name_kedaMonitorDataReaderRoleAssignmentName = guid('${resourceGroup().id}${name_kedaUserDefinedManagedIdentity}${_globalResourceNameSuffix}')
 
 resource monitorAccount 'Microsoft.Monitor/accounts@${azure.apiVersionForMonitorAccount}' = {
   name: name_azureMonitorAccountName
@@ -61,6 +62,7 @@ resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure
 module azureMonitorIntegrationDeployment '_deployment-scripts/_ds_enable_prometheus_metrics.bicep' = {
   name: 'azure-monitor-promethues-keda-deployment'
   params: {
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     amaName: name_azureMonitorAccountName

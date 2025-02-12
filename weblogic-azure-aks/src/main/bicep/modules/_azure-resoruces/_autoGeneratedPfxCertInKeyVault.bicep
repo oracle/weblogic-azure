@@ -1,11 +1,12 @@
 // Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSuffix string
 @description('Managed identity to be used for the deployment script. Currently, only user-assigned MSI is supported.')
 param identity object = {}
 
 @description('Used to name the new Azure Key Vault resoure.')
-param keyVaultName string = 'wls-kv-${uniqueString(utcValue)}'
+param keyVaultName string = 'wlskv${uniqueString(utcValue)}'
 
 param location string
 
@@ -58,11 +59,12 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
     enabledForDiskEncryption: false
     enabledForTemplateDeployment: true
     enableSoftDelete: true
+    enableRbacAuthorization: false
   }
 }
 
 resource createAddCertificate 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
-  name: 'ds-create-add-appgw-certificate'
+  name: 'ds-create-add-appgw-certificate-${_globalResourceNameSuffix}'
   location: location
   identity: identity
   kind: 'AzurePowerShell'

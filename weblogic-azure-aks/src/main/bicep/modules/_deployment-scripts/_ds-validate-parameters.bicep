@@ -1,6 +1,7 @@
 // Copyright (c) 2021, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSuffix string
 param acrName string
 param acrResourceGroupName string
 param aksAgentPoolNodeCount int
@@ -21,27 +22,12 @@ param dnszoneRGName string
 param enableAppGWIngress bool
 param enableCustomSSL bool
 param enableDNSConfiguration bool
-param keyVaultName string
-param keyVaultResourceGroup string
-param keyVaultSSLCertDataSecretName string
-param keyVaultSSLCertPasswordSecretName string
 param identity object = {}
 param isSSOSupportEntitled bool
 param location string
 @secure()
 param ocrSSOPSW string
 param ocrSSOUser string
-param sslConfigurationAccessOption string
-param sslKeyVaultCustomIdentityKeyStoreDataSecretName string
-param sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName string
-param sslKeyVaultCustomIdentityKeyStoreType string
-param sslKeyVaultCustomTrustKeyStoreDataSecretName string
-param sslKeyVaultCustomTrustKeyStorePassPhraseSecretName string
-param sslKeyVaultCustomTrustKeyStoreType string
-param sslKeyVaultName string
-param sslKeyVaultPrivateKeyAliasSecretName string
-param sslKeyVaultPrivateKeyPassPhraseSecretName string
-param sslKeyVaultResourceGroup string
 @secure()
 param sslUploadedCustomIdentityKeyStoreData string
 @secure()
@@ -71,9 +57,9 @@ param wlsImageTag string
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var base64_validateParameters = loadFileAsBase64('../../../arm/scripts/inline-scripts/validateParameters.sh')
-var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${sslConfigurationAccessOption} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone}'
+var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${aksAgentPoolNodeCount} ${useOracleImage} ${wlsImageTag} ${userProvidedImagePath} ${enableCustomSSL} ${appGatewayCertificateOption} ${enableAppGWIngress} ${const_checkDNSZone}'
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
-var const_deploymentName = 'ds-validate-parameters-and-fail-fast'
+var const_deploymentName = 'ds-validate-parameters-and-fail-fast-${_globalResourceNameSuffix}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
@@ -130,46 +116,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: appReplicas
       }
       {
-        name: 'WLS_SSL_KEYVAULT_NAME'
-        value: sslKeyVaultName
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_RESOURCEGROUP_NAME'
-        value: sslKeyVaultResourceGroup
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_IDENTITY_DATA_SECRET_NAME'
-        value: sslKeyVaultCustomIdentityKeyStoreDataSecretName
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_IDENTITY_PASSWORD_SECRET_NAME'
-        value: sslKeyVaultCustomIdentityKeyStorePassPhraseSecretName
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_IDENTITY_TYPE'
-        value: sslKeyVaultCustomIdentityKeyStoreType
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_TRUST_DATA_SECRET_NAME'
-        value: sslKeyVaultCustomTrustKeyStoreDataSecretName
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_TRUST_PASSWORD_SECRET_NAME'
-        value: sslKeyVaultCustomTrustKeyStorePassPhraseSecretName
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_TRUST_TYPE'
-        value: sslKeyVaultCustomTrustKeyStoreType
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_PRIVATE_KEY_ALIAS'
-        value: sslKeyVaultPrivateKeyAliasSecretName
-      }
-      {
-        name: 'WLS_SSL_KEYVAULT_PRIVATE_KEY_PASSWORD'
-        value: sslKeyVaultPrivateKeyPassPhraseSecretName
-      }
-      {
         name: 'WLS_SSL_IDENTITY_DATA'
         secureValue: sslUploadedCustomIdentityKeyStoreData
       }
@@ -200,22 +146,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'WLS_SSL_PRIVATE_KEY_PASSWORD'
         secureValue: sslUploadedPrivateKeyPassPhrase
-      }
-      {
-        name: 'APPLICATION_GATEWAY_SSL_KEYVAULT_NAME'
-        value: keyVaultName
-      }
-      {
-        name: 'APPLICATION_GATEWAY_SSL_KEYVAULT_RESOURCEGROUP'
-        value: keyVaultResourceGroup
-      }
-      {
-        name: 'APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_DATA_SECRET_NAME'
-        value: keyVaultSSLCertDataSecretName
-      }
-      {
-        name: 'APPLICATION_GATEWAY_SSL_KEYVAULT_FRONTEND_CERT_PASSWORD_SECRET_NAME'
-        value: keyVaultSSLCertPasswordSecretName
       }
       {
         name: 'APPLICATION_GATEWAY_SSL_FRONTEND_CERT_DATA'

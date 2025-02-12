@@ -3,6 +3,7 @@
 Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 */
 
+param _globalResourceNameSuffix string
 param _pidCPUUtilization string = ''
 param _pidEnd string = ''
 param _pidMemoryUtilization string = ''
@@ -72,6 +73,7 @@ module pidWme './_pids/_pid.bicep' = if(!useHpa) {
 module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
   name: 'hpa-deployment'
   params: {
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     azCliVersion: azCliVersion
@@ -91,6 +93,7 @@ module hapDeployment '_deployment-scripts/_ds_enable_hpa.bicep' = if(useHpa) {
 module promethuesKedaDeployment '_enablePromethuesKeda.bicep' = if (!useHpa) {
   name: 'promethues-keda-weblogic-monitoring-exporter-deployment'
   params: {
+    _globalResourceNameSuffix: _globalResourceNameSuffix
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
     azCliVersion: azCliVersion

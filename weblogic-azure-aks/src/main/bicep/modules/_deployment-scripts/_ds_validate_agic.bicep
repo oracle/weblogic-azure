@@ -1,6 +1,7 @@
 // Copyright (c) 2024, Oracle Corporation and/or its affiliates.
 // Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
+param _globalResourceNameSuffix string
 param aksClusterName string 
 param aksClusterRGName string
 param azCliVersion string = ''
@@ -14,7 +15,7 @@ param utcValue string = utcNow()
 var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_enableAgic = loadFileAsBase64('../../../arm/scripts/inline-scripts/validateAgic.sh')
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
-var const_deploymentName='ds-validate-agic'
+var const_deploymentName='ds-validate-agic-${_globalResourceNameSuffix}'
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName

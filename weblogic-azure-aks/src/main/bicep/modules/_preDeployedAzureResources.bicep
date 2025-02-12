@@ -14,6 +14,7 @@ param location string
 module acrDeployment './_azure-resoruces/_acr.bicep' = if (createNewAcr) {
   name: 'acr-deployment'
   params: {
+    acrName: acrName
     location: location
     tagsByResource: tagsByResource
   }
