@@ -2,9 +2,6 @@
 # Copyright (c) 2021, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-# Description
-#  This script configures ELK (Elasticsearch, Logstash and Kibana) Stack on WebLogic Server Domain.
-
 #Function to output message to StdErr
 function echo_stderr ()
 {

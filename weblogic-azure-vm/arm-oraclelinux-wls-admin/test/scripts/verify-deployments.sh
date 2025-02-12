@@ -20,18 +20,6 @@ parametersList+=(${scriptsDir}/parameters.json)
 bash ${scriptsDir}/gen-parameters-db.sh <<< "${scriptsDir}/parameters-db.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-db.json)
 
-# parameters for cluster+aad
-bash ${scriptsDir}/gen-parameters-aad.sh <<< "${scriptsDir}/parameters-aad.json $repoPath $testbranchName"
-parametersList+=(${scriptsDir}/parameters-aad.json)
-
-# parameters for admin+elk
-bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-elk.json $repoPath $testbranchName"
-parametersList+=(${scriptsDir}/parameters-elk.json)
-
-# parameters for cluster+db+aad
-bash ${scriptsDir}/gen-parameters-db-aad.sh <<< "${scriptsDir}/parameters-db-aad.json $repoPath $testbranchName"
-parametersList+=(${scriptsDir}/parameters-db-aad.json)
-
 # run preflight tests
 success=true
 for parameters in "${parametersList[@]}";

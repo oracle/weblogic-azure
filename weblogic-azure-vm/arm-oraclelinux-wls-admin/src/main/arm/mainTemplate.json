@@ -16,24 +16,6 @@
          },
          "defaultValue": ""
       },
-      "aadsPortNumber": {
-         "type": "string",
-         "defaultValue": "636",
-         "metadata": {
-            "description": "Accessible port of the LDAP server."
-         }
-      },
-      "aadsPublicIP": {
-         "type": "string",
-         "defaultValue": "The LDAP server public IP address"
-      },
-      "aadsServerHost": {
-         "type": "string",
-         "defaultValue": "ldaps.example.com",
-         "metadata": {
-            "description": "The LDAP server host."
-         }
-      },
       "adminPasswordOrKey": {
          "type": "securestring",
          "metadata": {
@@ -142,34 +124,6 @@
             "description": "JDBC Connection String"
          }
       },
-      "elasticsearchEndpoint": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "Endpoint of the Elasticsearch instance."
-         }
-      },
-      "elasticsearchPassword": {
-         "type": "securestring",
-         "defaultValue": "[newGuid()]",
-         "metadata": {
-            "description": "The credentials to distibute message with REST API to Elasticsearch instance."
-         }
-      },
-      "elasticsearchUserName": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "The credentials to distibute message with REST API to Elasticsearch instance."
-         }
-      },
-      "enableAAD": {
-         "type": "bool",
-         "defaultValue": false,
-         "metadata": {
-            "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
-         }
-      },
       "enableDB": {
          "defaultValue": false,
          "type": "bool",
@@ -196,13 +150,6 @@
          "type": "bool",
          "metadata": {
             "description": "True to enable passwordless JDBC connection."
-         }
-      },
-      "enableELK": {
-         "defaultValue": false,
-         "type": "bool",
-         "metadata": {
-            "description": "If true, use the supplied parameters to distribute WebLogic Server logs to the Elasticsearch instance."
          }
       },
       "enableHTTPAdminListenPort": {
@@ -292,14 +239,6 @@
             "description": "Password of the private key"
          },
          "defaultValue": ""
-      },
-      "logsToIntegrate": {
-         "type": "array",
-         "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
-         "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
-         "metadata": {
-            "description": "Specify the expeted logs to integrate, you must input at least one log."
-         }
       },
       "portsToExpose": {
          "type": "string",
@@ -415,48 +354,6 @@
             "description": "Provide Weblogic domain name"
          }
       },
-      "wlsLDAPGroupBaseDN": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
-         }
-      },
-      "wlsLDAPPrincipal": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
-         }
-      },
-      "wlsLDAPPrincipalPassword": {
-         "type": "securestring",
-         "defaultValue": "[newGuid()]",
-         "metadata": {
-            "description": "The credential (usually a password) used to connect to the LDAP server."
-         }
-      },
-      "wlsLDAPProviderName": {
-         "type": "string",
-         "defaultValue": "AzureActiveDirectoryProvider",
-         "metadata": {
-            "description": "The value used for creating authentication provider name of WebLogic Server."
-         }
-      },
-      "wlsLDAPSSLCertificate": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "Client certificate that will be imported to trust store of SSL."
-         }
-      },
-      "wlsLDAPUserBaseDN": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
-         }
-      },
       "wlsPassword": {
          "type": "securestring",
          "metadata": {
@@ -473,14 +370,12 @@
    },
    "variables": {
       "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
-      "name_aadLinkedTemplateName": "aadNestedTemplate.json",
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_adminLinkedTemplateDeployment": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
       "name_adminLinkedTemplateName": "adminTemplate.json",
       "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
       "name_dbLinkedTemplate": "dbTemplate.json",
       "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
-      "name_elkLinkedTemplateName": "elkNestedTemplate.json",
       "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
       // If adding a new resource, add the resource identifier to the array below
       // Also modify createUIDefinition.json to include the new resource
@@ -907,211 +802,7 @@
 
             }
          }
-      },
-      {
-         "name": "aadLinkedTemplate",
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
-         ],
-         "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "condition": "[and(parameters('enableAAD'),not(parameters('enableCustomSSL')))]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
-               "_artifactsLocationSasToken": {
-                  "value": "[parameters('_artifactsLocationSasToken')]"
-               },
-               "aadsPortNumber": {
-                  "value": "[parameters('aadsPortNumber')]"
-               },
-               "aadsPublicIP": {
-                  "value": "[parameters('aadsPublicIP')]"
-               },
-               "aadsServerHost": {
-                  "value": "[parameters('aadsServerHost')]"
-               },
-               "adminVMName": {
-                  "value": "[variables('name_adminVM')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               },
-               "wlsDomainName": {
-                  "value": "[parameters('wlsDomainName')]"
-               },
-               "wlsLDAPGroupBaseDN": {
-                  "value": "[parameters('wlsLDAPGroupBaseDN')]"
-               },
-               "wlsLDAPPrincipal": {
-                  "value": "[parameters('wlsLDAPPrincipal')]"
-               },
-               "wlsLDAPPrincipalPassword": {
-                  "value": "[parameters('wlsLDAPPrincipalPassword')]"
-               },
-               "wlsLDAPProviderName": {
-                  "value": "[parameters('wlsLDAPProviderName')]"
-               },
-               "wlsLDAPSSLCertificate": {
-                  "value": "[parameters('wlsLDAPSSLCertificate')]"
-               },
-               "wlsLDAPUserBaseDN": {
-                  "value": "[parameters('wlsLDAPUserBaseDN')]"
-               },
-               "wlsPassword": {
-                  "value": "[parameters('wlsPassword')]"
-               },
-               "wlsUserName": {
-                  "value": "[parameters('wlsUserName')]"
-               }
-            }
-         }
-      },
-      {
-         "name": "aadLinkedTemplateWithCustomSSL",
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
-         ],
-         "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "condition": "[and(parameters('enableAAD'),parameters('enableCustomSSL'))]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
-               "_artifactsLocationSasToken": {
-                  "value": "[parameters('_artifactsLocationSasToken')]"
-               },
-               "aadsPortNumber": {
-                  "value": "[parameters('aadsPortNumber')]"
-               },
-               "aadsPublicIP": {
-                  "value": "[parameters('aadsPublicIP')]"
-               },
-               "aadsServerHost": {
-                  "value": "[parameters('aadsServerHost')]"
-               },
-               "adminVMName": {
-                  "value": "[variables('name_adminVM')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               },
-               "wlsDomainName": {
-                  "value": "[parameters('wlsDomainName')]"
-               },
-               "wlsLDAPGroupBaseDN": {
-                  "value": "[parameters('wlsLDAPGroupBaseDN')]"
-               },
-               "wlsLDAPPrincipal": {
-                  "value": "[parameters('wlsLDAPPrincipal')]"
-               },
-               "wlsLDAPPrincipalPassword": {
-                  "value": "[parameters('wlsLDAPPrincipalPassword')]"
-               },
-               "wlsLDAPProviderName": {
-                  "value": "[parameters('wlsLDAPProviderName')]"
-               },
-               "wlsLDAPSSLCertificate": {
-                  "value": "[parameters('wlsLDAPSSLCertificate')]"
-               },
-               "wlsLDAPUserBaseDN": {
-                  "value": "[parameters('wlsLDAPUserBaseDN')]"
-               },
-               "wlsPassword": {
-                  "value": "[parameters('wlsPassword')]"
-               },
-               "wlsUserName": {
-                  "value": "[parameters('wlsUserName')]"
-               },
-               "enableCustomSSL": {
-                  "value": "[parameters('enableCustomSSL')]"
-               },
-               "sslCustomTrustKeyStorePassPhrase": {
-                  "value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
-               },
-               "sslCustomTrustKeyStoreType": {
-                  "value": "[parameters('uploadedCustomTrustKeyStoreType')]"
-               }
-            }
-         }
-      },
-      {
-         "name": "elkLinkedTemplate",
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
-         ],
-         "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "condition": "[parameters('enableELK')]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_elkLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
-               "_artifactsLocationSasToken": {
-                  "value": "[parameters('_artifactsLocationSasToken')]"
-               },
-               "adminVMName": {
-                  "value": "[variables('name_adminVM')]"
-               },
-               "elasticsearchEndpoint": {
-                  "value": "[parameters('elasticsearchEndpoint')]"
-               },
-               "elasticsearchPassword": {
-                  "value": "[parameters('elasticsearchPassword')]"
-               },
-               "elasticsearchUserName": {
-                  "value": "[parameters('elasticsearchUserName')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "logsToIntegrate": {
-                  "value": "[parameters('logsToIntegrate')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               },
-               "wlsDomainName": {
-                  "value": "[parameters('wlsDomainName')]"
-               },
-               "wlsPassword": {
-                  "value": "[parameters('wlsPassword')]"
-               },
-               "wlsUserName": {
-                  "value": "[parameters('wlsUserName')]"
-               }
-            }
-         }
-      },
+      },     
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
@@ -1121,9 +812,7 @@
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
             "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -1156,10 +845,6 @@
       "adminConsoleSecureURL": {
          "type": "string",
          "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminConsoleSecureURL.value)]"
-      },
-      "logIndex": {
-         "type": "string",
-         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.logIndex.value, '')]"
       },
       "dnsZoneNameServers": {
          "type": "array",
