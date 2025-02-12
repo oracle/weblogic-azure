@@ -296,19 +296,18 @@ jobs:
         id: veriy-admin-service
         run: |
           echo "Verifying WebLogic services at admin server"
-          local scriptPath=https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-admin/test/scripts/verify-services.sh
-          local provisioningState=$(az vm run-command create --name "VerifyWebLogicServices" \
+          error=$(az vm run-command invoke \
             --resource-group $resourceGroup \
-            --vm-name $adminVMName \
-            --run-as-user root \
-            --timeout-in-seconds 3600 \
-            --script-uri ${scriptPath} \
-            --query provisioningState)
-
-          if [ "$provisioningState" != "Succeeded" ]; then
-            echo "WebLogic Server services verification failed"
+            --name $adminVMName \
+            --command-id RunShellScript \
+            --scripts @${{ env.adminOfferPath }}/test/scripts/verify-services.sh \
+            --query value[*].message \
+            | grep "not in active (running) state")
+          
+          if [ -n "$error" ]; then
+            echo "Error: $error"
             exit 1
-          fi
+          fi          
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
