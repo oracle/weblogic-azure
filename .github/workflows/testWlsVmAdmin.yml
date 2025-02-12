@@ -6,10 +6,6 @@ name: Test Admin Server on VM
 on:
   workflow_dispatch:
     inputs:
-      enableELK:
-        description: "Specify whether to enable ELK depoyment or not."
-        required: true
-        default: "false"
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
@@ -21,7 +17,7 @@ on:
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=mriccell/weblogic-azure
-  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-admin", "client_payload": {"enableELK": "false", "ref": "refs/heads/main"}}'
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-admin", "client_payload": {"ref": "refs/heads/main"}}'
   repository_dispatch:
     types: [test-vm-admin,integration-test-all]
 
@@ -32,11 +28,7 @@ env:
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   dbServerName: weblogicdb
-  elkURI: ${{ secrets.ELK_URI }}
-  elkUser: ${{ secrets.ELK_USER_NAME }}
-  elkPassword: ${{ secrets.ELK_PSW }}
   gitToken: ${{ secrets.GIT_TOKEN }}
-  nsg: wls-nsg
   offerName: arm-oraclelinux-wls-admin
   adminOfferPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
@@ -53,7 +45,6 @@ env:
 jobs:
   preflight:
     outputs:
-      enableELK: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.enableELK }}
       location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
       artifactName: ${{steps.artifact_file.outputs.artifactName}}      
     runs-on: ubuntu-latest
@@ -64,27 +55,19 @@ jobs:
           location=eastus # default value
 
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
-            enableELK=${{ github.event.inputs.enableELK }}
             ref=${{ github.event.inputs.ref }}
             location=${{ github.event.inputs.location }}
           else
-            enableELK=${{ github.event.client_payload.enableELK }}
             ref=${{ github.event.client_payload.ref }}
             location=${{ github.event.client_payload.location }}
-          fi
-
-          if [ -z "$enableELK" ]; then
-            enableELK='false'
           fi
 
           if [ -z "$ref" ]; then
             ref='refs/heads/main'
           fi
 
-          echo "##[set-output name=enableELK;]${enableELK}"
           echo "##[set-output name=ref;]${ref}"
           echo "##[set-output name=location;]${location}"
-          echo "enableELK=${enableELK}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
           echo "location=${location}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
@@ -437,50 +420,19 @@ jobs:
             ${GITHUB_REPOSITORY} \
             ${{ env.testbranchName }}"
             echo "Deploy DB Template..."
-            az group deployment create \
+            az deployment group create \
             --verbose \
             --resource-group ${resourceGroup} \
             --name db \
             --parameters @${{ env.adminOfferPath }}/test/scripts/parameters-deploy-db.json \
-            --template-file ${artifactName}/nestedtemplates/dbTemplate.json
-
-      - name: Set up ELK by deploying sub template
-        id: enable-elk
-        if: ${{ needs.preflight.outputs.enableELK == 'true' }}
-        run: |
-            # Generate parameters for ELK template deployment
-            bash ${{ env.adminOfferPath }}/test/scripts/gen-parameters-deploy-elk.sh \
-            <<< "${{ env.adminOfferPath }}/test/scripts/parameters-deploy-elk.json \
-            ${{ env.adminVMName }} \
-            ${{ env.elkPassword }} \
-            ${{ env.elkURI }} \
-            ${{ env.elkUser }} \
-            ${{ env.location }} \
-            ${{ env.wlsDomainName }} \
-            ${{ env.wlsUserName }} \
-            ${{ env.wlsPassword }} \
-            ${GITHUB_REPOSITORY} \
-            ${{ env.testbranchName }} \
-            ${{ github.run_id }}${{ github.run_number }}"
-            echo "Deploy ELK Template..."
-            az group deployment create \
-            --debug \
-            --resource-group ${resourceGroup} \
-            --name elk \
-            --parameters @${{ env.adminOfferPath }}/test/scripts/parameters-deploy-elk.json \
-            --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
+            --template-file ${artifactName}/nestedtemplates/dbTemplate.json      
       - name: Delete Resource Group
         id: delete-resource-group
         if: always()
         run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
-      - name: Delete ELK index
-        id: delete-elk-index
-        if: ${{ needs.preflight.outputs.enableELK == 'true' }}
-        run: |
-          curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-admin-${{ github.run_id }}${{ github.run_number }}
-
+      
   cleanup-github-resource:
     needs: deploy-weblogic-admin
     if: always()
