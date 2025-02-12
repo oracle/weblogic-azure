@@ -263,9 +263,6 @@ jobs:
           s/#repoPath#/$repoPath/g" \
           ${{ env.adminOfferPath }}/test/data/parameters-test.json
 
-          sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-          ${{ env.adminOfferPath }}/test/scripts/verify-wls-path.sh
-
       - name: Accept Image Terms
         id: accept-terms
         run: |
