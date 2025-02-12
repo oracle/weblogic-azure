@@ -285,6 +285,12 @@ jobs:
               --parameters @${{ env.adminOfferPath }}/test/data/parameters-test.json \
               --template-file ${artifactName}/mainTemplate.json
 
+            # query the admin vm name
+            export adminVMName=$(az deployment group show \
+              --resource-group $resourceGroup \
+              --name wls-admin-node \
+              --query "properties.outputs.adminVMName.value" -o tsv)
+
       - name: Verify Network Security Group
         id: verify-nsg
         run: |
