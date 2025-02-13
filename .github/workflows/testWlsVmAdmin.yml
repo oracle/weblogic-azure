@@ -252,16 +252,21 @@ jobs:
         id: prepare-deployed-parameters-and-test-script
         run: |
           repoPath=${GITHUB_REPOSITORY//\//\\/}
-          sed -i "s/#location#/$location/g; \
-          s/#adminPasswordOrKey#/$wlsPassword/g; \
-          s/#wlsdomainname#/$wlsDomainName/g; \
-          s/#wlsusername#/$wlsUserName/g; \
-          s/#wlspassword#/$wlsPassword/g; \
-          s/#adminvmname#/$adminVMName/g; \
-          s/#skuUrnVersion#/${{ matrix.images }}/g; \
-          s/#testbranchName#/$testbranchName/g; \
-          s/#repoPath#/$repoPath/g" \
-          ${{ env.adminOfferPath }}/test/data/parameters-test.json
+          # Generate parameters for db template deployment
+          bash ${{ env.adminOfferPath }}/test/scripts/gen-parameters-deploy.sh \
+          <<< "${{ env.adminOfferPath }}/test/scripts/ \
+          $wlsPassword \
+          ${{ matrix.images }} \
+          $wlsDomainName \
+          ${{ env.adminVMName }} \
+          ${{ env.wlsPassword}} \
+          ${{ env.dbAdminUser }} \
+          ${{ env.dbName }} \
+          ${{ env.location }} \
+          ${{ env.wlsUserName }} \
+          ${{ env.wlsPassword }} \
+          ${GITHUB_REPOSITORY} \
+          ${{ env.testbranchName }}"
 
       - name: Accept Image Terms
         id: accept-terms
@@ -275,19 +280,19 @@ jobs:
       - name: Deploy WebLogic Server Admin only Domain offer
         id: deploy-wls-admin
         run: |
-            az deployment group create \
-              --verbose \
-              --resource-group $resourceGroup \
-              --name wls-admin-node \
-              --parameters @${{ env.adminOfferPath }}/test/data/parameters-test.json \
-              --template-file ${artifactName}/mainTemplate.json
+          az deployment group create \
+            --verbose \
+            --resource-group $resourceGroup \
+            --name wls-admin-node \
+            --parameters @${{ env.adminOfferPath }}/test/scripts/parameters-deploy.json \
+            --template-file ${artifactName}/mainTemplate.json
 
-            # query the admin vm name
-            export adminVMName=$(az deployment group show \
-              --resource-group $resourceGroup \
-              --name wls-admin-node \
-              --query "properties.outputs.adminVMName.value" -o tsv)
-            echo "adminVMName=${adminVMName}" >> $GITHUB_ENV     
+          # query the admin vm name
+          export adminVMName=$(az deployment group show \
+            --resource-group $resourceGroup \
+            --name wls-admin-node \
+            --query "properties.outputs.adminVMName.value" -o tsv)
+          echo "adminVMName=${adminVMName}" >> $GITHUB_ENV     
 
       - name: Verify system services at admin server
         id: veriy-admin-service
