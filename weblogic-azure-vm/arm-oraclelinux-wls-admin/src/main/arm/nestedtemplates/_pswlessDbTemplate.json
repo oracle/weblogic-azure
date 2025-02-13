@@ -115,8 +115,8 @@
             "sqlserver": "authentication=ActiveDirectoryMSI"
         },
         "array_urlJoiner": {
-            "mysql": "[if(contains(parameters('const_connectionString'), '?'), '&', '?')]",
-            "postgresql": "[if(contains(parameters('const_connectionString'), '?'), '&', '?')]",
+            "mysql": "[if(contains(variables('const_connectionString'), '?'), '&', '?')]",
+            "postgresql": "[if(contains(variables('const_connectionString'), '?'), '&', '?')]",
             "sqlserver": ";"
         },
         "obj_dbIdentity": {
