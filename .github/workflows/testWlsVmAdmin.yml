@@ -303,7 +303,16 @@ jobs:
           if [[ $message == *"not in active (running) state"* ]]; then
             echo "Error: $message"
             exit 1
-          fi     
+          fi
+      - name: Query public IP of AdminServer VM
+        id: query-wls-admin-ip
+        run: |
+            echo "query public ip"
+            publicIP=$(az vm show \
+              --resource-group $resourceGroup \
+              --name $adminVMName -d \
+              --query publicIps -o tsv)
+            echo "wlsPublicIP=${publicIP}" >> $GITHUB_ENV 
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
