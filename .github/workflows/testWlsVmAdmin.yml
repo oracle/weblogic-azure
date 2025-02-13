@@ -304,15 +304,29 @@ jobs:
             echo "Error: $message"
             exit 1
           fi
+      - name: Configure network security group
+        id: configure-nsg
+        run: |
+          nsg=$(az network nsg list \
+            --resource-group $resourceGroup \
+            --query "[0].name" -o tsv)
+
+          echo "Allow access to ${adminConsolePort}"
+          az network nsg rule update \
+            --resource-group $resourceGroup \
+            --nsg-name ${nsg} \
+            --name WebLogicAdminChannelPort \
+            --access Allow \
+            --source-address-prefixes 10.0.0.0/24
       - name: Query public IP of AdminServer VM
         id: query-wls-admin-ip
         run: |
-            echo "query public ip"
-            publicIP=$(az vm show \
-              --resource-group $resourceGroup \
-              --name $adminVMName -d \
-              --query publicIps -o tsv)
-            echo "wlsPublicIP=${publicIP}" >> $GITHUB_ENV 
+          echo "query public ip"
+          publicIP=$(az vm show \
+            --resource-group $resourceGroup \
+            --name $adminVMName -d \
+            --query publicIps -o tsv)
+          echo "wlsPublicIP=${publicIP}" >> $GITHUB_ENV 
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
