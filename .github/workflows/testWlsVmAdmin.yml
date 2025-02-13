@@ -340,28 +340,6 @@ jobs:
           echo ${wlsPublicIP}
           bash ${{ env.adminOfferPath }}/test/scripts/verify-wls-access.sh  <<< "${wlsPublicIP} ${adminConsolePort}"
 
-      - name: Deploy DB Template to Connect to Azure Postgresql Database
-        id: enable-postgresql-db
-        run: |
-            # Generate parameters for db template deployment
-            bash ${{ env.adminOfferPath }}/test/scripts/gen-parameters-deploy-db.sh \
-            <<< "${{ env.adminOfferPath }}/test/scripts/ \
-            ${{ env.adminVMName }} \
-            ${{ env.wlsPassword}} \
-            ${{ env.dbAdminUser }} \
-            ${{ env.dbName }} \
-            ${{ env.location }} \
-            ${{ env.wlsUserName }} \
-            ${{ env.wlsPassword }} \
-            ${GITHUB_REPOSITORY} \
-            ${{ env.testbranchName }}"
-            echo "Deploy DB Template..."
-            az deployment group create \
-            --verbose \
-            --resource-group ${resourceGroup} \
-            --name db \
-            --parameters @${{ env.adminOfferPath }}/test/scripts/parameters-deploy-db.json \
-            --template-file ${artifactName}/nestedtemplates/dbTemplate.json      
       - name: Delete Resource Group
         id: delete-resource-group
         if: always()
