@@ -293,18 +293,17 @@ jobs:
         id: veriy-admin-service
         run: |
           echo "Verifying WebLogic services at admin server"
-          error=$(az vm run-command invoke \
+          message=$(az vm run-command invoke \
             --resource-group $resourceGroup \
             --name $adminVMName \
             --command-id RunShellScript \
             --scripts @${{ env.adminOfferPath }}/test/scripts/verify-services.sh \
-            --query value[*].message \
-            | grep "not in active (running) state")
+            --query value[*].message)
           
-          if [ -n "$error" ]; then
-            echo "Error: $error"
+          if [[ $message == *"not in active (running) state"* ]]; then
+            echo "Error: $message"
             exit 1
-          fi          
+          fi     
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
