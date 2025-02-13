@@ -118,7 +118,7 @@ function install_azure_identity_extension() {
         sudo mv target/dependency/jackson-annotations-*.jar ${domainBase}/azure-libraries/jackson
         sudo mv target/dependency/jackson-core-*.jar ${domainBase}/azure-libraries/jackson
         sudo mv target/dependency/jackson-databind-*.jar ${domainBase}/azure-libraries/jackson
-        sudo mv target/dependency/jackson-dataformat-xml-*.jar ${domainBase}/azure-libraries/jackson
+        sudo mv target/dependency/jackson-datatype-*.jar ${domainBase}/azure-libraries/jackson
         # Those jars will be appended to CLASSPATH
         sudo mv target/dependency/*.jar ${domainBase}/azure-libraries/identity
         sudo chown -R oracle:oracle ${domainBase}/azure-libraries
@@ -241,8 +241,8 @@ EOF
 read oracleHome domainPath wlsServerName wlsAdminHost wlsAdminPort wlsUserName wlsPassword databaseType enablePswlessConnection
 
 export curlMaxTime=120 # seconds
-export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
-export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
+export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/wls-vm-admin-redeploy/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
+export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/galiacheng/weblogic-azure/wls-vm-admin-redeploy/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 export retryMaxAttempt=5 # retry attempt for curl command
 export mvnInstaller="apache-maven-bin.tar.gz"
 
