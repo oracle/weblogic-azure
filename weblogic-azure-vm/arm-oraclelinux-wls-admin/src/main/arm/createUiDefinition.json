@@ -556,7 +556,7 @@
                             "subnets": "Subnets for the virtual network"
                         },
                         "defaultValue": {
-                            "name": "VirtualNetwork",
+                            "name": "[concat('wlsadmin-vnet',take(guid(), 8))]",
                             "addressPrefixSize": "/28"
                         },
                         "constraints": {
