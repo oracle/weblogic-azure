@@ -30,7 +30,7 @@ env:
   gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   gitUserName: ${{ secrets.USER_NAME }}
-  location: eastus
+  location: westus
   managedServerPrefix: managedServer
   managedServerVM: "managedServerVM1"
   managedServers: "managedServer1"
