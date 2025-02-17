@@ -59,28 +59,7 @@
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
             }
-        },
-        "elasticsearchEndpoint": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Endpoint of the Elasticsearch instance."
-            }
-        },
-        "elasticsearchPassword": {
-            "type": "securestring",
-            "defaultValue": "[newGuid()]",
-            "metadata": {
-                "description": "The credentials to distribute message to Elasticsearch instance with REST API."
-            }
-        },
-        "elasticsearchUserName": {
-            "type": "string",
-            "defaultValue": "elastic",
-            "metadata": {
-                "description": "The credentials to distribute message to Elasticsearch instance with REST API."
-            }
-        },
+        },        
         "enableCoherenceWebLocalStorage": {
             "defaultValue": true,
             "type": "bool",
@@ -301,7 +280,6 @@
         },
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_publicIPAddressType": "Dynamic",
-        "const_singleQuote": "'",
         "const_vmSize": "[parameters('vmSizeSelectForCoherence')]",
         "const_wlsDomainPath": "/u01/domains",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",

@@ -189,7 +189,7 @@
 		"obj_backendTrustedRootCerts": {
 			"name": "appGatewayTrustedRootCert",
 			"properties": {
-				"data": "appGatewaySSLBackendCertData"
+				"data": "[parameters('appGatewaySSLBackendCertData')]"
 			}
 		},
 		"obj_HTTPSettingsDefault": {

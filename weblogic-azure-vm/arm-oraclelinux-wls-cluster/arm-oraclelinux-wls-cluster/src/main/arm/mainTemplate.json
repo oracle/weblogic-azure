@@ -508,19 +508,10 @@
                 "description": "Password of the private key"
             },
             "defaultValue": ""
-        },
-        "enabledForTemplateDeployment": {
-            "type": "bool",
-            "metadata": {
-                "description": "Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
-            },
-            "defaultValue": true
         }
     },
     "variables": {
-        "const_currentSubscription": "[subscription().subscriptionId]",
         "const_appGatewaySSLCertOptionGenerateCert": "generateCert",
-        "const_sslConfigurationAccessOptionKeyVaultStoredConfig": "keyVaultStoredConfig",
         "const_azureSubjectName": "[format('{0}.{1}.{2}', variables('name_domainLabelforApplicationGateway'), parameters('location'),'.cloudapp.azure.com')]",
         "const_guidValue": "[parameters('guidValue')]",
         "const_vmSize": "[parameters('vmSize')]",
@@ -538,7 +529,6 @@
         "clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
         "name_clusterTemplate": "clusterLinkedTemplate",
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
-        "name_sslKeyVaultLinkedTemplateName": "_keyvaultSSLConfigTemplate.json",
         "name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcNow'))), 24)]",
         "name_secretName": "mySelfSignedCertificate",
         // If adding a new resource, add the resource identifier to the array below
@@ -980,6 +970,12 @@
                     },
                     "overrideHostName": {
                         "value": "[parameters('enableDNSConfiguration')]"
+                    },
+                    "sslCertData": {
+                        "value": "[parameters('appGatewaySSLCertData')]"
+                    },
+                    "sslCertPswData": {
+                        "value": "[parameters('appGatewaySSLCertPassword')]"
                     },
                     "tagsByResource": {
                         "value": "[variables('obj_tagsByResources')]"

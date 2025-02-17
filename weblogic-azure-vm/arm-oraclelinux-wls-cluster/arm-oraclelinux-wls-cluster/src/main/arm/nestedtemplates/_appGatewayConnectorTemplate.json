@@ -192,7 +192,6 @@
     "variables": {
         "const_appGatewaySSLCertOptionGenerateCert": "generateCert",
         "const_appGatewaySSLCertOptionHaveCert": "haveCert",
-        "const_currentSubscription": "[subscription().subscriptionId]",
         "name_appGatewayLinkedTemplate": "appGatewayNestedTemplate.json"
     },
     "resources": [
