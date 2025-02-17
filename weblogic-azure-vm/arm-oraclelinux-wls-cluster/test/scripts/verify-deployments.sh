@@ -35,21 +35,9 @@ parametersList+=(${scriptsDir}/parameters.json)
 bash ${scriptsDir}/gen-parameters-db.sh <<< "${scriptsDir}/parameters-db.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-db.json)
 
-# parameters for cluster+aad
-bash ${scriptsDir}/gen-parameters-aad.sh <<< "${scriptsDir}/parameters-aad.json $repoPath $testbranchName"
-parametersList+=(${scriptsDir}/parameters-aad.json)
-
 # parameters for cluster+coherence
-bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-coherence.json $repoPath $testbranchName"
+bash ${scriptsDir}/gen-parameters-coherence.sh <<< "${scriptsDir}/parameters-coherence.json $repoPath $testbranchName"
 parametersList+=(${scriptsDir}/parameters-coherence.json)
-
-# parameters for cluster+elk
-bash ${scriptsDir}/gen-parameters-elk.sh <<< "${scriptsDir}/parameters-elk.json $repoPath $testbranchName"
-parametersList+=(${scriptsDir}/parameters-elk.json)
-
-# parameters for cluster+db+aad
-bash ${scriptsDir}/gen-parameters-db-aad.sh <<< "${scriptsDir}/parameters-db-aad.json $repoPath $testbranchName"
-parametersList+=(${scriptsDir}/parameters-db-aad.json)
 
 # parameters for cluster+ag
 bash ${scriptsDir}/gen-parameters-ag.sh <<< "${scriptsDir}/parameters-ag.json $repoPath $testbranchName \
@@ -60,16 +48,6 @@ parametersList+=(${scriptsDir}/parameters-ag.json)
 bash ${scriptsDir}/gen-parameters-db-ag.sh <<< "${scriptsDir}/parameters-db-ag.json $repoPath $testbranchName \
     ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
 parametersList+=(${scriptsDir}/parameters-db-ag.json)
-
-# parameters for cluster+aad+ag
-bash ${scriptsDir}/gen-parameters-aad-ag.sh <<< "${scriptsDir}/parameters-aad-ag.json $repoPath $testbranchName \
-    ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
-parametersList+=(${scriptsDir}/parameters-aad-ag.json)
-
-# parameters for cluster+db+aad+ag
-bash ${scriptsDir}/gen-parameters-db-aad-ag.sh <<< "${scriptsDir}/parameters-db-aad-ag.json $repoPath $testbranchName \
-    ${keyVaultName} ${groupName} ${certDataName} ${certPasswordName}"
-parametersList+=(${scriptsDir}/parameters-db-aad-ag.json)
 
 # run preflight tests
 success=true

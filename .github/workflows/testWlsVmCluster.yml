@@ -6,10 +6,6 @@ name: Test Configured Cluster on VM
 on:
   workflow_dispatch:
     inputs:
-      enableELK:
-        description: "Specify whether to enable ELK depoyment or not."
-        required: true
-        default: "false"
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
@@ -17,7 +13,7 @@ on:
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
-  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-cluster", "client_payload": {"enableELK": "false", "ref": "refs/heads/main"}}'
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-cluster", "client_payload": {"ref": "refs/heads/main"}}'
   repository_dispatch:
     types: [test-vm-cluster,integration-test-all]
 
@@ -66,21 +62,14 @@ jobs:
         id: setup-env-variables-based-on-dispatch-event
         run: |
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
-            enableELK=${{ github.event.inputs.enableELK }}
             ref=${{ github.event.inputs.ref }}
           else
-            enableELK=${{ github.event.client_payload.enableELK }}
             ref=${{ github.event.client_payload.ref }}
-          fi
-          if [ -z "$enableELK" ]; then
-            enableELK='false'
           fi
           if [ -z "$ref" ]; then
             ref='refs/heads/main'
           fi
-          echo "##[set-output name=enableELK;]${enableELK}"
           echo "##[set-output name=ref;]${ref}"
-          echo "enableELK=${enableELK}" >> $GITHUB_ENV
           echo "ref=${ref}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
       - name: Set up Maven with GitHub token
@@ -296,9 +285,6 @@ jobs:
            s/#repoPath#/$repoPath/g" \
            ${{ env.offerPath }}/test/data/parameters-test.json
 
-          sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-          ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
-
       - name: Accept Image Terms
         id: accept-terms
         run: |
@@ -420,17 +406,7 @@ jobs:
               --resource-group $resourceGroup \
               --name ${{ env.adminVMName }}
             sleep 1m
-
-      - name: Verify WebLogic Server Installation
-        id: verify-wls
-        run: |
-          echo "pubilc IP of wls machine: ${wlsPublicIP}"
-          echo "Verifying Weblgic server installation"
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
-          echo install sshpass
-          sudo apt-get install -y sshpass
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
-
+            
       - name: Verify wls admin services
         id: veriy-admin-service
         run: |
@@ -647,36 +623,7 @@ jobs:
         id: verify-webapp-deployment
         run: |
           echo "Verify WebLogicCafe app is successfully deployed"
-          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh <<< "${appGatewayURL}"
-
-      - name: Set up ELK by deploying sub template
-        id: enable-elk
-        if: ${{ env.enableELK == 'true' }}
-        run: |
-            # Generate parameters for ELK template deployment
-            bash ${{ env.offerPath }}/test/scripts/gen-parameters-deploy-elk.sh \
-            <<< "${{ env.offerPath }}/test/scripts/parameters-deploy-elk.json \
-            ${{ env.adminVMName }} \
-            ${{ env.elkPassword }} \
-            ${{ env.elkURI }} \
-            ${{ env.elkUser }} \
-            ${{ env.location }} \
-            ${{ env.numberOfInstances }} \
-            ${{ env.wlsDomainName }} \
-            ${{ env.wlsUserName }} \
-            ${{ env.wlsPassword }} \
-            ${GITHUB_REPOSITORY} \
-            ${{ env.testbranchName }} \
-            ${{ env.managedServerPrefix }} \
-            ${{ github.run_id }}${{ github.run_number }}"
-
-            echo "Deploy ELK Template..."
-            az group deployment create \
-            --debug \
-            --resource-group ${resourceGroup} \
-            --name elk \
-            --parameters @${{ env.offerPath }}/test/scripts/parameters-deploy-elk.json \
-            --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
+          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh <<< "${appGatewayURL}"      
 
       - name: Get storage account name
         id: query-storage-account-name
