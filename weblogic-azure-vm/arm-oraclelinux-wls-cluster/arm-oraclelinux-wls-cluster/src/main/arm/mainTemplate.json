@@ -15,25 +15,7 @@
             "metadata": {
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
             }
-        },
-        "aadsPortNumber": {
-            "defaultValue": "636",
-            "type": "string",
-            "metadata": {
-                "description": "Accessible port of the LDAP server."
-            }
-        },
-        "aadsPublicIP": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "aadsServerHost": {
-            "defaultValue": "",
-            "type": "string",
-            "metadata": {
-                "description": "The LDAP server host."
-            }
-        },
+        },        
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -202,13 +184,6 @@
             "defaultValue": "elastic",
             "metadata": {
                 "description": "The credentials to distribute message to Elasticsearch instance with REST API."
-            }
-        },
-        "enableAAD": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
             }
         },
         "enableAppGateway": {
@@ -740,7 +715,6 @@
         "const_guidValue": "[parameters('guidValue')]",
         "const_vmSize": "[parameters('vmSize')]",
         "const_vmSizeCoherence": "[parameters('vmSizeSelectForCoherence')]",
-        "name_aadLinkedTemplateName": "aadNestedTemplate.json",
         "name_appGatewayConnector": "_keyvaultAppGatewayConnectorTemplate.json",
         "name_clusterLinkedTemplateName": "clusterTemplate.json",
         "name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
@@ -1697,8 +1671,6 @@
                 "[resourceId('Microsoft.Resources/deployments', 'keyVaultLinkedAppGatewayTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-                "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
-                "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplateWithCustomSSL')]",
                 "[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
                 "[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
                 "[resourceId('Microsoft.Resources/deployments', 'sslKeyVaultNestedTemplate')]"
