@@ -6,7 +6,7 @@
 # This script is to generate test parameters for database datasource and Appgateway testing.
 
 #read arguments from stdin
-read parametersPath repoPath testbranchName keyVaultName keyVaultResourceGroup keyVaultSSLCertDataSecretName keyVaultSSLCertPasswordSecretName 
+read parametersPath repoPath testbranchName
 
 cat <<EOF > ${parametersPath}
 {
@@ -45,18 +45,6 @@ cat <<EOF > ${parametersPath}
         },
         "jdbcDataSourceName": {
             "value": "jdbc/postgresql"
-        },
-        "keyVaultName": {
-            "value": "${keyVaultName}"
-        },
-        "keyVaultResourceGroup": {
-            "value": "${keyVaultResourceGroup}"
-        },
-        "keyVaultSSLCertDataSecretName": {
-            "value": "${keyVaultSSLCertDataSecretName}"
-        },
-        "keyVaultSSLCertPasswordSecretName": {
-            "value": "${keyVaultSSLCertPasswordSecretName}"
         },
         "numberOfInstances": {
             "value": 4

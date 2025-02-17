@@ -31,18 +31,6 @@ cat <<EOF > ${parametersPath}
         "enableDB": {
             "value": false
         },
-        "keyVaultName": {
-            "value": "${keyVaultName}"
-        },
-        "keyVaultResourceGroup": {
-            "value": "${keyVaultResourceGroup}"
-        },
-        "keyVaultSSLCertDataSecretName": {
-            "value": "${keyVaultSSLCertDataSecretName}"
-        },
-        "keyVaultSSLCertPasswordSecretName": {
-            "value": "${keyVaultSSLCertPasswordSecretName}"
-        },
         "numberOfInstances": {
             "value": 4
         },
