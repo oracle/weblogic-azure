@@ -29,6 +29,9 @@
 				"description": "Admin Server hosting VM name."
 			}
 		},
+		"appGatewaySSLBackendCertData": {
+            "type": "securestring"
+        },
 		"appGatewaySSLCertificateData": {
 			"type": "securestring"
 		},
@@ -56,6 +59,10 @@
                 "description": "true to enable cookie based affinity."
             }
         },
+		"enableCustomSSL": {
+			"defaultValue": false,
+            "type": "bool"
+		},
 		"gatewayPublicIPAddressName": {
 			"defaultValue": "gwip",
 			"type": "string",
@@ -179,6 +186,12 @@
 		"name_probe": "HTTPhealthProbe",
 		"name_scriptAGWConfiguration": "setupApplicationGateway.sh",
 		"name_virtualNetwork": "[parameters('virtualNetworkName')]",
+		"obj_backendTrustedRootCerts": {
+			"name": "appGatewayTrustedRootCert",
+			"properties": {
+				"data": "appGatewaySSLBackendCertData"
+			}
+		},
 		"obj_HTTPSettingsDefault": {
 			"provisioningState": "Succeeded",
 			"port": "[int(variables('const_backendPort'))]",
@@ -309,6 +322,7 @@
 						}
 					}
 				],
+				"trustedRootCertificates": "[if(parameters('enableCustomSSL'),variables('obj_backendTrustedRootCerts'), '[]')]",
 				"backendAddressPools": [
 					{
 						"name": "myGatewayBackendPool",
