@@ -88,13 +88,6 @@
                 "description": "Specifies whether Local Storage is enabled for the Coherence*Web cluster tier."
             }
         },
-        "enableELK": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "If true, use the supplied parameters to distribute WebLogic Server logs to the Elasticsearch instance."
-            }
-        },
         "guidValue": {
             "type": "string",
             "defaultValue": "[newGuid()]"
@@ -103,21 +96,6 @@
             "type": "string",
             "metadata": {
                 "description": "Location for all resources."
-            }
-        },
-        "logIndex": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Elasticsearch index you expect to export the logs to."
-            }
-        },
-        "logsToIntegrate": {
-            "type": "array",
-            "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
-            "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput","NodeManagerLog" ],
-            "metadata": {
-                "description": "Specify the expeted logs to integrate, you must input at least one log."
             }
         },
         "managedServerPrefix": {
@@ -331,7 +309,6 @@
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
         "name_nic": "_NIC",
         "name_publicIPAddress": "_PublicIP",
-        "name_scriptELKConfiguration": "elkIntegration.sh",
         "name_scriptFile": "setupCoherence.sh",
         "name_share": "wlsshare",
         "name_subnet": "[parameters('subnetName')]",
@@ -513,7 +490,6 @@
                 "settings": {
                     "fileUris": [
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameGeneratorscriptFile'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameVerifierJavaFile'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameValuesTemplate'), parameters('_artifactsLocationSasToken')))]",
@@ -521,7 +497,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'), ' <<< \"', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersionForStorage}').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'),' ',parameters('enableELK'),' ',variables('const_singleQuote'),parameters('elasticsearchEndpoint'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchUserName'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchPassword'),variables('const_singleQuote'),' ',array.join(parameters('logsToIntegrate')),' ',variables('const_singleQuote'),parameters('logIndex'),variables('const_singleQuote'),' ',variables('name_wlsServerPrefix'),' ',copyIndex(),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),parameters('adminVMName')),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ','False',' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'), ' <<< \"', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersionForStorage}').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'),' ',variables('name_wlsServerPrefix'),' ',copyIndex(),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),parameters('adminVMName')),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ','False',' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },
