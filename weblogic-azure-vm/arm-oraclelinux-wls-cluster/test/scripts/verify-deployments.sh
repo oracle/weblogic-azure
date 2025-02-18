@@ -41,6 +41,7 @@ parametersList+=(${scriptsDir}/parameters-db-ag.json)
 success=true
 for parameters in "${parametersList[@]}";
 do
+    echo "Validating deployment for ${parameters}"
     az deployment group validate -g ${groupName} -f ${template} -p @${parameters} --no-prompt
     if [[ $? != 0 ]]; then
         echo "deployment validation for ${parameters} failed!"
