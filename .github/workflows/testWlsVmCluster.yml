@@ -247,6 +247,7 @@ jobs:
       - name: Download artifact for deployment
         uses: actions/download-artifact@v4
         with:
+          path: ${{ needs.preflight.outputs.artifactName }}
           name: ${{ needs.preflight.outputs.artifactName }}
       - uses: azure/login@v1
         id: azure-login
@@ -662,6 +663,7 @@ jobs:
       - name: Download artifact for deployment
         uses: actions/download-artifact@v4
         with:
+          path: ${{ needs.preflight.outputs.addnodeArtifactName }}
           name: ${{ needs.preflight.outputs.addnodeArtifactName }}
 
       - name: Add new nodes to existing cluster
@@ -710,6 +712,7 @@ jobs:
       - name: Download artifact for deployment
         uses: actions/download-artifact@v4
         with:
+          path: ${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
           name: ${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
 
       - name: Add new cache node to coherence cluster
@@ -758,6 +761,7 @@ jobs:
       - name: Download artifact for deployment
         uses: actions/download-artifact@v4
         with:
+          path: ${{ needs.preflight.outputs.deletenodeArtifactName }}
           name: ${{ needs.preflight.outputs.deletenodeArtifactName }}
       - name: Delete nodes from existing cluster
         id: delete-node
