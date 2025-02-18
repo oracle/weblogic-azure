@@ -4,21 +4,120 @@
   "parameters": {
     "adminUsername": {
       "value": "GEN-UNIQUE"
-    },
+    },    
     "adminPasswordOrKey": {
       "value": "GEN-SSH-PUB-KEY"
+    },
+    "adminVMName":{
+      "value": "GEN-UNIQUE"
+    },
+    "appGatewayCertificateOption":{
+      "value": "GEN-UNIQUE"
+    },
+    "appGatewaySSLBackendCertData":{
+      "value": "GEN-UNIQUE"
+    },
+    "appGatewaySSLCertData":{
+      "value": "GEN-UNIQUE"
+    },
+    "appGatewaySSLCertPassword":{
+      "value": "GEN-UNIQUE"
+    },
+    "authenticationType": {
+      "value": "password"
+    },
+    "databaseType": {
+      "value": "mysql"
+    },
+    "dbGlobalTranProperty": {
+      "value": "OnePhaseCommit"
+    },
+    "dbIdentity": {
+      "value": {}
+    },
+    "dbPassword": {
+      "value": "GEN-UNIQUE"
+    },
+    "dbUser": {
+      "value": "GEN-UNIQUE"
+    },
+    "denyPublicTrafficForManagedServer": {
+      "value": false
+    },
+    "dsConnectionURL": {
+      "value": "GEN-UNIQUE"
     },
     "dnsLabelPrefix": {
       "value": "GEN-UNIQUE"
     },
-    "acceptOTNLicenseAgreement": {
+    "dnsNameforApplicationGateway":{
       "value": "GEN-UNIQUE"
     },
-    "otnAccountUsername": {
+    "dnszoneName": {
       "value": "GEN-UNIQUE"
     },
-    "otnAccountPassword": {
+    "dnszoneResourceGroup": {
       "value": "GEN-UNIQUE"
+    },
+    "dnszoneAdminConsoleLabel": {
+      "value": "GEN-UNIQUE"
+    },
+    "dnszoneAppGatewayLabel": {
+      "value": "GEN-UNIQUE"
+    },
+    "enableAppGateway": {
+      "value": false
+    },
+    "enableCoherence": {
+      "value": false
+    },
+    "enableCoherenceWebLocalStorage": {
+      "value": false
+    },
+    "enableCookieBasedAffinity": {
+      "value": false
+    },
+    "enableDB": {
+      "value": false
+    },
+    "enableDNSConfiguration": {
+      "value": false
+    },
+    "enableHTTPAdminListenPort": {
+      "value": false
+    },
+    "enablePswlessConnection": {
+      "value": false
+    },
+    "gatewayPublicIPAddressName": {
+      "value": "GEN-UNIQUE"
+    },
+    "hasDNSZones": {
+      "value": false
+    },
+    "jdbcDataSourceName": {
+      "value": "GEN-UNIQUE"
+    },
+    "keyVaultSku": {
+      "value": "standard"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "portsToExpose": {
+      "value": "GEN-UNIQUE"
+    },
+    "skuUrnVersion": {
+      "value": "GEN-UNIQUE"
+    },
+    "tagsByResource": {
+      "value": {}
+    },
+    "usePreviewImage": {
+      "value": false
+    },
+    "useSystemAssignedManagedIdentity": {
+      "value": false
     },
     "wlsDomainName": {
       "value": "GEN-UNIQUE"
@@ -32,20 +131,68 @@
     "managedServerPrefix":{
       "value": "GEN-UNIQUE"
     },
+    "virtualNetworkNewOrExisting": {
+      "value": "new"
+    },
+    "virtualNetworkName": {
+      "value": "GEN-UNIQUE"
+    },
+    "virtualNetworkResourceGroupName": {
+      "value": "GEN-UNIQUE"
+    },
+    "addressPrefixes": {
+      "value": "10.0.0.0/16"
+    },
+    "subnetName": {
+      "value": "GEN-UNIQUE"
+    },
+    "subnetPrefix":{
+      "value": "10.0.0.0/24"
+    },
+    "subnetForAppGateway":{
+      "value": "GEN-UNIQUE"
+    },
+    "subnetPrefixForAppGateway":{
+      "value": "10.0.1.0/24"
+    },
     "vmSize":{
+      "value": "GEN-UNIQUE"
+    },
+    "vmSizeSelectForCoherence":{
       "value": "GEN-UNIQUE"
     },
     "numberOfInstances": {
       "value": "GEN-UNIQUE"    
-    },
-    "adminVMName": {
-      "value": "GEN-UNIQUE"        
     },
     "denyPublicTrafficForAdminServer": {
       "value": false
     },
     "enableCustomSSL": {
       "value": false
+    },
+    "uploadedCustomIdentityKeyStoreData": {
+      "value": "GEN-UNIQUE"
+    },
+    "uploadedCustomIdentityKeyStorePassphrase": {
+      "value": "GEN-UNIQUE"
+    },
+    "uploadedCustomIdentityKeyStoreType": {
+      "value": "JKS"
+    },
+    "uploadedCustomTrustKeyStoreData": {
+      "value": "GEN-UNIQUE"
+    },
+    "uploadedCustomTrustKeyStorePassPhrase": {
+      "value": "GEN-UNIQUE"
+    },
+    "uploadedCustomTrustKeyStoreType": {
+      "value": "JKS"
+    },
+    "uploadedPrivateKeyAlias": {
+      "value": "GEN-UNIQUE"
+    },
+    "uploadedPrivateKeyPassPhrase": {
+      "value": "GEN-UNIQUE"
     }
   }
 }
