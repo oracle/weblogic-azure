@@ -15,6 +15,12 @@
                 "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
             }
         },
+        "_globalResourceNameSuffix": {
+            "type": "string",
+            "metadata": {
+                "description": "A unique suffix that was specified during the deployment of the solution template."
+            }
+        },
         "_artifactsLocationSasToken": {
             "defaultValue": "",
             "type": "securestring",
@@ -142,7 +148,7 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'uamiDeployment')]"
             ],
-            "name": "script-createDNSRecords",
+            "name": "[concat('script-createDNSRecords-', parameters('_globalResourceNameSuffix'))]",
             "location": "[parameters('location')]",
             "identity": {
                 "type": "UserAssigned",

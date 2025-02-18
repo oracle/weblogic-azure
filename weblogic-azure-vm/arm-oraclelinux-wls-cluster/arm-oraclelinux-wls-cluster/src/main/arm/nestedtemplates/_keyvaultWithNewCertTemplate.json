@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "_globalResourceNameSuffix": {
+            "type": "string",
+            "metadata": {
+                "description": "A unique suffix that was specified during the deployment of the solution template."
+            }
+        },
         "keyvaultName": {
             "type": "string",
             "defaultValue": "[concat('wls-kv-', uniqueString(resourceGroup().id, deployment().name))]",
@@ -63,7 +69,7 @@
     },
     "variables": {
         "const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-        "name_deploymentScriptUserDefinedManagedIdentity": "wls-vm-keyvault-user-defined-managed-itentity",
+        "name_deploymentScriptUserDefinedManagedIdentity": "[concat('wls-vm-keyvault-user-defined-managed-itentity', parameters('_globalResourceNameSuffix'))]",
         "name_roleAssignmentName": "[guid(format('{0}{1}Role assignment in resource group scope', subscription().id, parameters('utcValue')))]"
     },
     "resources": [
@@ -121,7 +127,7 @@
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "${azure.apiVersionForDeploymentScript}",
             "tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
-            "name": "script-createAddCertificate",
+            "name": "[concat('script-createAddCertificate-', parameters('_globalResourceNameSuffix'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
@@ -150,9 +156,15 @@
                 ],
                 "scriptContent": "
                     param(
-                        [string] [Parameter(Mandatory=$true)] $vaultName,
-                        [string] [Parameter(Mandatory=$true)] $certificateName,
-                        [string] [Parameter(Mandatory=$true)] $subjectName
+                        [string
+                ] [Parameter(Mandatory=$true)
+                ] $vaultName,
+                [string
+                ] [Parameter(Mandatory=$true)
+                ] $certificateName,
+                [string
+                ] [Parameter(Mandatory=$true)
+                ] $subjectName
                     )
 
                     $ErrorActionPreference = 'Stop'
@@ -164,9 +176,10 @@
 
                         Write-Host 'Certificate $certificateName in vault $vaultName is already present.'
 
-                        $DeploymentScriptOutputs['certThumbprint'] = $existingCert.Thumbprint
+                        $DeploymentScriptOutputs['certThumbprint'
+                    ] = $existingCert.Thumbprint
                         $existingCert | Out-String
-                    }
+                }
                     else {
                         $policy = New-AzKeyVaultCertificatePolicy -SubjectName $subjectName -IssuerName Self -ValidityInMonths 12 -Verbose
 
@@ -192,20 +205,22 @@
                         {
                             throw 'Timed out waiting for creation of certificate $certificateName in vault $vaultName'
                         }
-                        } while ($operation.Status -ne 'completed')
+                    } while ($operation.Status -ne 'completed')
 
-                        $DeploymentScriptOutputs['certThumbprint'] = $newCert.Thumbprint
+                        $DeploymentScriptOutputs['certThumbprint'
+                    ] = $newCert.Thumbprint
                         $newCert | Out-String
-                    }
+                }
                     
                     # Do not load MSI module to resolve issue 288. It's loaded by default in new PowerShell.
                     # Install-Module -Name Az.ManagedServiceIdentity -AllowClobber -Force
                     # delete user assigned managed identity.
-                    $identityName = [System.Environment]::GetEnvironmentVariable('MANAGED_IDENTITY_ID')
-                    $resourceGroupName= [System.Environment]::GetEnvironmentVariable('RESOURCE_GROUP_NAME')
+                    $identityName = [System.Environment
+                ]: :GetEnvironmentVariable('MANAGED_IDENTITY_ID')
+                    $resourceGroupName= [System.Environment
+                ]: :GetEnvironmentVariable('RESOURCE_GROUP_NAME')
                     Get-AzUserAssignedIdentity -ResourceGroupName $resourceGroupName -Name $identityName | Remove-AzUserAssignedIdentity
-                ",
-                "cleanupPreference": "OnSuccess",
+                ","cleanupPreference": "OnSuccess",
                 "retentionInterval": "P1D"
             }
         }

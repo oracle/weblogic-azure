@@ -22,6 +22,12 @@
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
             }
         },
+        "_globalResourceNameSuffix":{
+            "type": "string",
+            "metadata": {
+                "description": "The suffix to be appended to the globally unique resource name"
+            }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -58,10 +64,6 @@
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
             }
-        },
-        "guidValue": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
         },
         "location": {
             "type": "string",
@@ -178,6 +180,12 @@
                "description": "Address prefix of the VNET."
             }
          },
+         "nsgName": {
+            "type": "string",
+            "metadata": {
+               "description": "Name of the new Network Security Group"
+            }
+         },
          "subnetName": {
             "type": "string",
             "defaultValue": "wls-subnet",
@@ -283,21 +291,20 @@
         "name_availabilitySet": "WLSCluster-AvailabilitySet",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
-        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
-        "name_nic": "_NIC",
+        "name_nic": "[concat('_NIC_',parameters('_globalResourceNameSuffix'))]",
         "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
         "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
-        "name_publicIPAddress": "_PublicIP",
+        "name_publicIPAddress": "[concat('_PublicIP_',parameters('_globalResourceNameSuffix'))]",
         "name_outputAdminHost_with_pub_ip": "[concat(parameters('adminVMName'),variables('name_publicIPAddress'))]",
         "name_outputAdminHost_without_pub_ip": "[concat(parameters('adminVMName'),variables('name_nic_without_pub_ip'))]",
-        "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
+        "name_privateSaEndpoint": "[concat('saep', parameters('_globalResourceNameSuffix'))]",
         "name_scriptFile": "setupClusterDomain.sh",
         "name_share": "wlsshare",
-        "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
+        "name_storageAccount": "[concat('olvmstg', parameters('_globalResourceNameSuffix'))]",
         "name_subnet": "[parameters('subnetName')]",
         "name_virtualNetwork": "[parameters('virtualNetworkName')]",
         "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
-        "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
+        "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
         "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
@@ -361,7 +368,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "tags": "[parameters('tagsByResource')['${identifier.networkSecurityGroups}']]",
             "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-            "name": "[variables('name_networkSecurityGroup')]",
+            "name": "[parameters('nsgName')]",
             "location": "[parameters('location')]",
             "properties": {
                 "securityRules": [
@@ -436,7 +443,7 @@
                 "supportsHttpsTrafficOnly": false
             },
             "dependsOn": [
-                "[variables('name_networkSecurityGroup')]"
+                "[parameters('nsgName')]"
             ]
         },
         {

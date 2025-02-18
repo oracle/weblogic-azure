@@ -513,23 +513,26 @@
     "variables": {
         "const_appGatewaySSLCertOptionGenerateCert": "generateCert",
         "const_azureSubjectName": "[format('{0}.{1}.{2}', variables('name_domainLabelforApplicationGateway'), parameters('location'),'.cloudapp.azure.com')]",
-        "const_guidValue": "[parameters('guidValue')]",
+        "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
         "const_vmSize": "[parameters('vmSize')]",
         "const_vmSizeCoherence": "[parameters('vmSizeSelectForCoherence')]",
+        "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
         "name_appGatewayConnector": "_appGatewayConnectorTemplate.json",
         "name_clusterLinkedTemplateName": "clusterTemplate.json",
         "name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
         "name_coherenceTemplateName": "coherenceTemplate.json",
         "name_dbLinkedTemplateName": "dbTemplate.json",
-        "name_dnsNameforApplicationGateway": "[concat(parameters('dnsNameforApplicationGateway'), take(replace(variables('const_guidValue'),'-',''),6))]",
+        "name_dnsNameforApplicationGateway": "[concat(parameters('dnsNameforApplicationGateway'), take(variables('const_globalResourceNameSuffix'), 6))]",
         "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
         "name_domainLabelforApplicationGateway": "[take(concat(variables('name_dnsNameforApplicationGateway'),'-',toLower(resourceGroup().name),'-',toLower(parameters('wlsDomainName'))),63)]",
         "name_keyVaultLinkedTemplateName": "_keyvaultWithNewCertTemplate.json",
+        "name_managedServerPrefix": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'))]",
+        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', variables('const_globalResourceNameSuffix'))]",
         "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
         "clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
         "name_clusterTemplate": "clusterLinkedTemplate",
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
-        "name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcNow'))), 24)]",
+        "name_keyVaultName": "[concat('wls-kv', variables('const_globalResourceNameSuffix'))]",
         "name_secretName": "mySelfSignedCertificate",
         // If adding a new resource, add the resource identifier to the array below
         // Also modify createUIDefinition.json to include the new resource
@@ -617,7 +620,7 @@
                         "value": "[parameters('adminUsername')]"
                     },
                     "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
+                        "value": "[variables('name_adminVM')]"
                     },
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
@@ -632,10 +635,13 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                        "value": "[variables('name_managedServerPrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
+                    },
+                    "nsgName": {
+                        "value": "[variables('name_networkSecurityGroup')]"
                     },
                     "portsToExpose": {
                         "value": "[parameters('portsToExpose')]"
@@ -719,6 +725,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[variables('const_globalResourceNameSuffix')]"
+                    },
                     "adminPasswordOrKey": {
                         "value": "[parameters('adminPasswordOrKey')]"
                     },
@@ -726,7 +735,7 @@
                         "value": "[parameters('adminUsername')]"
                     },
                     "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
+                        "value": "[variables('name_adminVM')]"
                     },
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
@@ -741,10 +750,13 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                        "value": "[variables('name_managedServerPrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
+                    },
+                    "nsgName": {
+                        "value": "[variables('name_networkSecurityGroup')]"
                     },
                     "portsToExpose": {
                         "value": "[parameters('portsToExpose')]"
@@ -858,6 +870,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[variables('const_globalResourceNameSuffix')]"
+                    },
                     "keyVaultName": {
                         "value": "[variables('name_keyVaultName')]"
                     },
@@ -893,7 +908,7 @@
                 },
                 "parameters": {
                     "networkSecurityGroupName": {
-                        "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+                        "value": "[variables('name_networkSecurityGroup')]"
                     },
                     "denyPublicTrafficForAdminServer": {
                         "value": "[parameters('denyPublicTrafficForAdminServer')]"
@@ -930,7 +945,7 @@
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
                     "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
+                        "value": "[variables('name_adminVM')]"
                     },
                     "appGatewayCertificateOption": {
                         "value": "[parameters('appGatewayCertificateOption')]"
@@ -963,7 +978,7 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                        "value": "[variables('name_managedServerPrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
@@ -1029,6 +1044,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[variables('const_globalResourceNameSuffix')]"
+                    },
                     "dnszonesARecordSetNames": {
                         "value": [
                             "[parameters('dnszoneAdminConsoleLabel')]"
@@ -1086,7 +1104,7 @@
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
                     "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
+                        "value": "[variables('name_adminVM')]"
                     },
                     "databaseType": {
                         "value": "[parameters('databaseType')]"
@@ -1116,7 +1134,7 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                        "value": "[variables('name_managedServerPrefix')]"
                     },
                     "numberOfManagedApplicationInstances": {
                         "value": "[add(parameters('numberOfInstances'),-1)]"
@@ -1165,7 +1183,7 @@
                         "value": "[parameters('adminUsername')]"
                     },
                     "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
+                        "value": "[variables('name_adminVM')]"
                     },
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
@@ -1180,7 +1198,7 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                        "value": "[variables('name_managedServerPrefix')]"
                     },
                     "numberOfCoherenceCacheInstances": {
                         "value": "[parameters('numberOfCoherenceCacheInstances')]"
@@ -1259,7 +1277,7 @@
                         "value": "[parameters('adminUsername')]"
                     },
                     "adminVMName": {
-                        "value": "[parameters('adminVMName')]"
+                        "value": "[variables('name_adminVM')]"
                     },
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
@@ -1274,7 +1292,7 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                        "value": "[variables('name_managedServerPrefix')]"
                     },
                     "numberOfCoherenceCacheInstances": {
                         "value": "[parameters('numberOfCoherenceCacheInstances')]"

@@ -15,6 +15,12 @@
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
             }
         },
+        "_globalResourceNameSuffix": {
+            "type": "string",
+            "metadata": {
+                "description": "A unique suffix that was specified during the deployment of the solution template."
+            }
+        },
         "dnszonesARecordSetNames": {
             "type": "array",
             "defaultValue": [],
@@ -115,8 +121,7 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                    "resources": []
                 }
             }
         },
@@ -179,6 +184,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[parameters('_globalResourceNameSuffix')]"
+                    },
                     "dnszonesARecordSetNames": {
                         "value": "[parameters('dnszonesARecordSetNames')]"
                     },
@@ -222,12 +230,10 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                    "resources": []
                 }
             }
         }
     ],
-    "outputs": {
-    }
+    "outputs": {}
 }
