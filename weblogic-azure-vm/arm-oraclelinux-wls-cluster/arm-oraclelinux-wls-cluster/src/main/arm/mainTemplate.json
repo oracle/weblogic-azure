@@ -336,13 +336,6 @@
                 "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
             }
         },
-        "utcNow": {
-            "type": "string",
-            "defaultValue": "[utcNow()]",
-            "metadata": {
-                "description": "Returns the current (UTC) datetime value in the ISO 8601 format."
-            }
-        },
         "vmSize": {
             "defaultValue": "Standard_A3",
             "type": "string",
@@ -370,7 +363,7 @@
         },
         "virtualNetworkName": {
             "type": "string",
-            "defaultValue": "wls-vnet",
+            "defaultValue": "[concat('wls-vnet-', utcNow())]",
             "metadata": {
                 "description": "Name of the existing or new VNET"
             }
@@ -1382,6 +1375,14 @@
         }
     ],
     "outputs": {
+        "adminVMName": {
+            "type": "string",
+            "value": "[variables('name_adminVM')]"
+        },
+        "managedServerPrefix": {
+            "type": "string",
+            "value": "[concat(variables('name_managedServerPrefix'),'VM')]"
+        },
         "wlsDomainLocation": {
             "type": "string",
             "value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs.wlsDomainLocation.value]"

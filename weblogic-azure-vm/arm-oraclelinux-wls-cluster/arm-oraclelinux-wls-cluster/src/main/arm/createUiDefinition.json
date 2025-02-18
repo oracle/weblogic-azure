@@ -399,7 +399,7 @@
                     {
                         "name": "uploadedCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
-                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
+                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
                         "label": "TLS/SSL Configuration Settings",
                         "elements": [
                             {
@@ -1294,7 +1294,6 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "icon": "None",
                             "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the Coherence cluster, the WebLogic Domain will be configured with a data tier for cache.",
                             "link": {
                                 "label": "Learn more",
