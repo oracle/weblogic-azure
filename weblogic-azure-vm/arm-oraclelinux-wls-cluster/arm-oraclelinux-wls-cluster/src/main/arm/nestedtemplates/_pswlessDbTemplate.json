@@ -15,12 +15,6 @@
             },
             "defaultValue": ""
         },
-        "_globalResourceNameSuffix": {
-            "type": "string",
-            "metadata": {
-                "description": "A unique suffix that was specified during the deployment of the solution template."
-            }
-        },
         "adminVMName": {
             "type": "string",
             "defaultValue": "adminVM",
