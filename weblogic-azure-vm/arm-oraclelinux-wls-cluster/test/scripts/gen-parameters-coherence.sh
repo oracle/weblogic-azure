@@ -31,9 +31,6 @@ cat <<EOF >${parametersPath}
         "enableCoherence": {
             "value": true
         },
-        "storageAccountName": {
-            "value": "GEN-UNIQUE"
-        },
         "vmSize": {
             "value": "Standard_B2ms"
         },

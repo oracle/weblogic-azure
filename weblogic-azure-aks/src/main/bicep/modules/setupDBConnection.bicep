@@ -65,6 +65,8 @@ param identity object = {}
 
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
+@description('tags for the resources')
+param tagsByResource object = {}
 param utcValue string = utcNow()
 @description('UID of WebLogic domain, used in WebLogic Operator.')
 param wlsDomainUID string = 'sample-domain1'
