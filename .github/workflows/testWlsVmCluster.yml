@@ -296,7 +296,7 @@ jobs:
             ${{ env.dbServerName }} \
             ${{ env.wlsPassword }} \
             ${{ env.dbAdminUser }} \
-            ${{ env.wlsPassword }} "
+            ${{ env.wlsPassword }}"
 
       - name: Accept Image Terms
         id: accept-terms

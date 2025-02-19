@@ -153,4 +153,5 @@ cat <<EOF > ${parametersPath}
         }
     }
 }
+}
 EOF
