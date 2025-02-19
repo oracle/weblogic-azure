@@ -2,9 +2,6 @@
 # Copyright (c) 2021, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
-# Description
-#  This script configures ELK (Elasticsearch, Logstash and Kibana) Stack on WebLogic Server Domain.
-
 #Function to output message to StdErr
 function echo_stderr ()
 {
@@ -390,6 +387,12 @@ function validateInput()
         echo_stderr "storageAccountPrivateIp is required. "
         exit 1
     fi
+
+    if [ -z "${fileShareName}" ];
+    then
+        echo_stderr "fileShareName is required. "
+        exit 1
+    fi
 }
 
 function enableAndStartAdminServerService()
@@ -514,13 +517,13 @@ function mountFileShare()
   fi
   echo "chmod 600 /etc/smbcredentials/${storageAccountName}.cred"
   sudo chmod 600 /etc/smbcredentials/${storageAccountName}.cred
-  echo "//${storageAccountPrivateIp}/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
-  sudo bash -c "echo \"//${storageAccountPrivateIp}/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
-  echo "mount -t cifs //${storageAccountPrivateIp}/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
-  sudo mount -t cifs //${storageAccountPrivateIp}/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
+  echo "//${storageAccountPrivateIp}/${fileShareName} $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo bash -c "echo \"//${storageAccountPrivateIp}/${fileShareName} $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
+  echo "mount -t cifs //${storageAccountPrivateIp}/${fileShareName} $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo mount -t cifs //${storageAccountPrivateIp}/${fileShareName} $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
   if [[ $? != 0 ]];
   then
-         echo "Failed to mount //${storageAccountPrivateIp}/wlsshare $mountpointPath"
+         echo "Failed to mount //${storageAccountPrivateIp}/${fileShareName} $mountpointPath"
 	 exit 1
   fi
 }
@@ -632,7 +635,7 @@ MIN_CERT_VALIDITY="1"
 
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled adminPublicHostName dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp fileShareName isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 wlsServerName="admin"
 DOMAIN_PATH="/u01/domains"

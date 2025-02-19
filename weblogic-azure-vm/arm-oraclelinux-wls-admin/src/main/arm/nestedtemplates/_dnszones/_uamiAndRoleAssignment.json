@@ -2,6 +2,9 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+      "_globalResourceNameSuffix": {
+        "type": "string"
+      },
       "location": {
         "type": "string"
       },
@@ -19,7 +22,7 @@
     "functions": [],
     "variables": {
       "const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "name_deploymentScriptContributorRoleAssignmentName": "[guid(format('{0}{1}Deployment Script', resourceGroup().id, parameters('uamiName')))]"
+      "name_deploymentScriptContributorRoleAssignmentName": "[guid(format('{0}{1}Deployment Script', parameters('_globalResourceNameSuffix'), parameters('uamiName')))]"
     },
     "resources": [
       {
@@ -42,6 +45,9 @@
           },
           "mode": "Incremental",
           "parameters": {
+            "_globalResourceNameSuffix": {
+              "value": "[parameters('_globalResourceNameSuffix')]"
+            },
             "roleDefinition": {
               "value": "[variables('const_roleDefinitionIdOfContributor')]"
             },
@@ -53,6 +59,10 @@
             "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
             "contentVersion": "1.0.0.0",
             "parameters": {
+              "_globalResourceNameSuffix": {
+                "type": "string",
+                "defaultValue": ""
+              },
               "roleDefinition": {
                 "type": "string",
                 "defaultValue": ""
@@ -64,7 +74,7 @@
             },
             "functions": [],
             "variables": {
-              "name_roleAssignmentName": "[guid(format('{0}{1}Role assignment in subscription scope', subscription().id, parameters('principalId')))]"
+              "name_roleAssignmentName": "[guid(format('{0}{1}Role assignment in subscription scope', parameters('_globalResourceNameSuffix'), parameters('principalId')))]"
             },
             "resources": [
               {

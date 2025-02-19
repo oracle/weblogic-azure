@@ -115,6 +115,11 @@
             "sqlserver": "authentication=ActiveDirectoryMSI"
         },
         "array_urlJoiner": {
+            "mysql": "[if(contains(variables('const_connectionString'), '?'), '&', '?')]",
+            "postgresql": "[if(contains(variables('const_connectionString'), '?'), '&', '?')]",
+            "sqlserver": ";"
+        },
+        "array_paramJoiner": {
             "mysql": "&",
             "postgresql": "&",
             "sqlserver": ";"
@@ -246,7 +251,7 @@
                         "value": "[parameters('dbGlobalTranPro')]"
                     },
                     "dsConnectionURL": {
-                        "value": "[uri(format('{0}{4}{1}{4}{2}={3}', variables('const_connectionString'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')]), '')]"
+                        "value": "[uri(format('{0}{4}{1}{5}{2}={3}', variables('const_connectionString'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')], variables('array_paramJoiner')[parameters('databaseType')]), '')]"
                     },
                     "dbUser": {
                         "value": "[if(equals(parameters('databaseType'), 'sqlserver'), variables('const_msiDefaultUser'), parameters('dbUser'))]"

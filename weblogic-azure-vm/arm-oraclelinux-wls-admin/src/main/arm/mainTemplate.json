@@ -16,42 +16,10 @@
          },
          "defaultValue": ""
       },
-      "aadsPortNumber": {
-         "type": "string",
-         "defaultValue": "636",
-         "metadata": {
-            "description": "Accessible port of the LDAP server."
-         }
-      },
-      "aadsPublicIP": {
-         "type": "string",
-         "defaultValue": "The LDAP server public IP address"
-      },
-      "aadsServerHost": {
-         "type": "string",
-         "defaultValue": "ldaps.example.com",
-         "metadata": {
-            "description": "The LDAP server host."
-         }
-      },
       "adminPasswordOrKey": {
          "type": "securestring",
          "metadata": {
             "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
-         }
-      },
-      "adminSSLKeyVaultName": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "Keyvault name containing Weblogic SSL Certificates"
-         }
-      },
-      "adminSSLKeyVaultResourceGroup": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "Resource Group containing Weblogic SSL Certificates"
          }
       },
       "adminUsername": {
@@ -156,34 +124,6 @@
             "description": "JDBC Connection String"
          }
       },
-      "elasticsearchEndpoint": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "Endpoint of the Elasticsearch instance."
-         }
-      },
-      "elasticsearchPassword": {
-         "type": "securestring",
-         "defaultValue": "[newGuid()]",
-         "metadata": {
-            "description": "The credentials to distibute message with REST API to Elasticsearch instance."
-         }
-      },
-      "elasticsearchUserName": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "The credentials to distibute message with REST API to Elasticsearch instance."
-         }
-      },
-      "enableAAD": {
-         "type": "bool",
-         "defaultValue": false,
-         "metadata": {
-            "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
-         }
-      },
       "enableDB": {
          "defaultValue": false,
          "type": "bool",
@@ -212,24 +152,6 @@
             "description": "True to enable passwordless JDBC connection."
          }
       },
-      "sslConfigurationAccessOption": {
-         "type": "string",
-         "metadata": {
-            "description": "Options to provide required configuration for SSL configuration"
-         },
-         "allowedValues": [
-            "uploadConfig",
-            "keyVaultStoredConfig"
-         ],
-         "defaultValue": "keyVaultStoredConfig"
-      },
-      "enableELK": {
-         "defaultValue": false,
-         "type": "bool",
-         "metadata": {
-            "description": "If true, use the supplied parameters to distribute WebLogic Server logs to the Elasticsearch instance."
-         }
-      },
       "enableHTTPAdminListenPort": {
          "defaultValue": true,
          "type": "bool",
@@ -251,68 +173,16 @@
             "description": "JNDI Name for JDBC Datasource"
          }
       },
+      "guidValue": {
+         "type": "string",
+         "defaultValue": "[newGuid()]"
+      },
       "location": {
          "type": "string",
          "defaultValue": "[resourceGroup().location]",
          "metadata": {
             "description": "Location for all resources."
          }
-      },
-      "keyVaultCustomIdentityKeyStoreDataSecretName": {
-         "type": "string",
-         "metadata": {
-            "description": "Secret name in KeyVault containing Weblogic Custom Identity Keystore Data"
-         },
-         "defaultValue": "CustomIdentityKeyStoreDataSecret"
-      },
-      "keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
-         "type": "string",
-         "metadata": {
-            "description": "Secret name in KeyVault containing Weblogic Custom Identity Keystore Passphrase"
-         },
-         "defaultValue": "CustomIdentityKeyStorePassPhraseSecret"
-      },
-      "keyVaultCustomIdentityKeyStoreType": {
-         "type": "string",
-         "metadata": {
-            "description": "Weblogic Custom Identity Keystore Type"
-         },
-         "defaultValue": "JKS"
-      },
-      "keyVaultCustomTrustKeyStoreDataSecretName": {
-         "type": "string",
-         "metadata": {
-            "description": "Secret name in KeyVault containing Weblogic Custom Trust Store Data"
-         },
-         "defaultValue": "CustomTrustStoreDataSecret"
-      },
-      "keyVaultCustomTrustKeyStorePassPhraseSecretName": {
-         "type": "string",
-         "metadata": {
-            "description": "Secret name in KeyVault containing Weblogic Custom Trust Store Passphrase"
-         },
-         "defaultValue": "CustomTrustStorePassPhraseSecret"
-      },
-      "keyVaultCustomTrustKeyStoreType": {
-         "type": "string",
-         "metadata": {
-            "description": "Weblogic Custom Trust Store Type"
-         },
-         "defaultValue": "JKS"
-      },
-      "keyVaultPrivateKeyAliasSecretName": {
-         "type": "string",
-         "metadata": {
-            "description": "Secret name in KeyVault containing Weblogic Server Private  Key Alias"
-         },
-         "defaultValue": "ServerPrivateKeyAlias"
-      },
-      "keyVaultPrivateKeyPassPhraseSecretName": {
-         "type": "string",
-         "metadata": {
-            "description": "Secret name in KeyVault containing Weblogic Server Private  KeyPassPhrase"
-         },
-         "defaultValue": "ServerPrivateKeyPassPhraseSecret"
       },
       "uploadedCustomIdentityKeyStoreData": {
          "type": "securestring",
@@ -369,28 +239,6 @@
             "description": "Password of the private key"
          },
          "defaultValue": ""
-      },
-      "enabledForTemplateDeployment": {
-         "type": "bool",
-         "metadata": {
-            "description": "Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
-         },
-         "defaultValue": true
-      },
-      "keyVaultSku": {
-         "defaultValue": "Standard",
-         "type": "string",
-         "metadata": {
-            "description": "Price tier for Key Vault."
-         }
-      },
-      "logsToIntegrate": {
-         "type": "array",
-         "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
-         "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
-         "metadata": {
-            "description": "Specify the expeted logs to integrate, you must input at least one log."
-         }
       },
       "portsToExpose": {
          "type": "string",
@@ -457,7 +305,7 @@
       },
       "virtualNetworkName": {
          "type": "string",
-         "defaultValue": "wls-vnet",
+         "defaultValue": "[concat('wls-vnet', uniqueString(utcNow()))]",
          "metadata": {
             "description": "Name of the existing or new VNET"
          }
@@ -506,48 +354,6 @@
             "description": "Provide Weblogic domain name"
          }
       },
-      "wlsLDAPGroupBaseDN": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
-         }
-      },
-      "wlsLDAPPrincipal": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
-         }
-      },
-      "wlsLDAPPrincipalPassword": {
-         "type": "securestring",
-         "defaultValue": "[newGuid()]",
-         "metadata": {
-            "description": "The credential (usually a password) used to connect to the LDAP server."
-         }
-      },
-      "wlsLDAPProviderName": {
-         "type": "string",
-         "defaultValue": "AzureActiveDirectoryProvider",
-         "metadata": {
-            "description": "The value used for creating authentication provider name of WebLogic Server."
-         }
-      },
-      "wlsLDAPSSLCertificate": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "Client certificate that will be imported to trust store of SSL."
-         }
-      },
-      "wlsLDAPUserBaseDN": {
-         "type": "string",
-         "defaultValue": "null",
-         "metadata": {
-            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
-         }
-      },
       "wlsPassword": {
          "type": "securestring",
          "metadata": {
@@ -563,18 +369,15 @@
       }
    },
    "variables": {
-      "const_currentSubscription": "[subscription().subscriptionId]",
-      "const_sslConfigurationAccessOptionUploadConfig": "uploadConfig",
-      "const_sslConfigurationAccessOptionKeyVaultStoredConfig": "keyVaultStoredConfig",
-      "name_aadLinkedTemplateName": "aadNestedTemplate.json",
+      "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_adminLinkedTemplateDeployment": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
       "name_adminLinkedTemplateName": "adminTemplate.json",
+      "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
       "name_dbLinkedTemplate": "dbTemplate.json",
       "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
-      "name_elkLinkedTemplateName": "elkNestedTemplate.json",
+      "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', variables('const_globalResourceNameSuffix'))]",
       "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
-      "name_keyVaultNestedTemplate": "_keyVaultNestedTemplate.json",
       // If adding a new resource, add the resource identifier to the array below
       // Also modify createUIDefinition.json to include the new resource
       "obj_tagsByResources":{
@@ -584,7 +387,6 @@
          "${identifier.publicIPAddresses}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.publicIPAddresses}')]",
          "${identifier.privateEndpoints}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.privateEndpoints}')]",
          "${identifier.storageAccounts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.storageAccounts}')]",
-         "${identifier.vaults}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.vaults}')]",
          "${identifier.virtualNetworks}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualNetworks}')]",
          "${identifier.virtualMachines}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachines}')]",
          "${identifier.virtualMachinesExtensions}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachinesExtensions}')]",
@@ -653,6 +455,9 @@
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
+               },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
                },
@@ -660,7 +465,7 @@
                   "value": "[parameters('adminUsername')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "authenticationType": {
                   "value": "[parameters('authenticationType')]"
@@ -682,6 +487,9 @@
                },
                "location": {
                   "value": "[parameters('location')]"
+               },
+               "nsgName": {
+                  "value": "[variables('name_networkSecurityGroup')]"
                },
                "portsToExpose": {
                   "value": "[parameters('portsToExpose')]"
@@ -727,53 +535,7 @@
                }
             }
          }
-      },
-      {
-         "name": "keyVaultNestedTemplate",
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "condition": "[and(parameters('enableCustomSSL'), equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionUploadConfig')))]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_keyVaultNestedTemplate')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "uploadedCustomIdentityKeyStoreData": {
-                  "value": "[parameters('uploadedCustomIdentityKeyStoreData')]"
-               },
-               "uploadedCustomIdentityKeyStorePassphrase": {
-                  "value": "[parameters('uploadedCustomIdentityKeyStorePassphrase')]"
-               },
-               "uploadedCustomTrustKeyStoreData": {
-                  "value": "[parameters('uploadedCustomTrustKeyStoreData')]"
-               },
-               "uploadedCustomTrustKeyStorePassPhrase": {
-                  "value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
-               },
-               "uploadedPrivateKeyAlias": {
-                  "value": "[parameters('uploadedPrivateKeyAlias')]"
-               },
-               "uploadedPrivateKeyPassPhrase": {
-                  "value": "[parameters('uploadedPrivateKeyPassPhrase')]"
-               },
-               "enabledForTemplateDeployment": {
-                  "value": "[parameters('enabledForTemplateDeployment')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "sku": {
-                  "value": "[parameters('keyVaultSku')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               }
-            }
-         }
-      },
+      },      
       {
          "name": "adminCustomSSLLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
@@ -793,6 +555,9 @@
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
+               },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
                },
@@ -800,7 +565,7 @@
                   "value": "[parameters('adminUsername')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "authenticationType": {
                   "value": "[parameters('authenticationType')]"
@@ -823,62 +588,35 @@
                "enableHTTPAdminListenPort": {
                   "value": "[parameters('enableHTTPAdminListenPort')]"
                },
+               "nsgName": {
+                  "value": "[variables('name_networkSecurityGroup')]"
+               },
                "location": {
                   "value": "[parameters('location')]"
                },
-               "keyVaultCustomIdentityKeyStoreData": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStoreDataSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customIdentityKeyStoreDataSecretName.value)]"
-                  }
+               "sslCustomIdentityKeyStoreData": {
+                  "value": "[parameters('uploadedCustomIdentityKeyStoreData')]"
                },
-               "keyVaultCustomIdentityKeyStorePassPhrase": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customIdentityKeyStorePassPhraseSecretName.value)]"
-                  }
+               "sslCustomIdentityKeyStorePassPhrase": {
+                  "value": "[parameters('uploadedCustomIdentityKeyStorePassphrase')]"
                },
-               "keyVaultCustomIdentityKeyStoreType": {
-                  "value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStoreType'), parameters('uploadedCustomIdentityKeyStoreType'))]"
+               "sslCustomIdentityKeyStoreType": {
+                  "value": "[parameters('uploadedCustomIdentityKeyStoreType')]"
                },
-               "keyVaultCustomTrustKeyStoreData": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreDataSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStoretDataSecretName.value)]"
-                  }
+               "sslCustomTrustKeyStoreData": {
+                  "value": "[parameters('uploadedCustomTrustKeyStoreData')]"
                },
-               "keyVaultCustomTrustKeyStorePassPhrase": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStorePassPhraseSecretName.value)]"
-                  }
+               "sslCustomTrustKeyStorePassPhrase": {
+                  "value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
                },
-               "keyVaultCustomTrustKeyStoreType": {
-                  "value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreType'), parameters('uploadedCustomTrustKeyStoreType'))]"
+               "sslCustomTrustKeyStoreType": {
+                  "value": "[parameters('uploadedCustomTrustKeyStoreType')]"
                },
-               "keyVaultPrivateKeyAlias": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultPrivateKeyAliasSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.privateKeyAliasSecretName.value)]"
-                  }
+               "sslPrivateKeyAlias": {
+                  "value": "[parameters('uploadedPrivateKeyAlias')]"
                },
-               "keyVaultPrivateKeyPassPhrase": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultPrivateKeyPassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.privateKeyPassPhraseSecretName.value)]"
-                  }
+               "sslPrivateKeyPassPhrase": {
+                  "value": "[parameters('uploadedPrivateKeyPassPhrase')]"
                },
                "portsToExpose": {
                   "value": "[parameters('portsToExpose')]"
@@ -923,10 +661,7 @@
                   "value": "[parameters('wlsUserName')]"
                }
             }
-         },
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
-         ]
+         }
       },
       {
          "type": "Microsoft.Resources/deployments",
@@ -945,7 +680,7 @@
                   "value": "[parameters('denyPublicTrafficForAdminServer')]"
                },
                "networkSecurityGroupName": {
-                  "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+                  "value": "[variables('name_networkSecurityGroup')]"
                }
             }
          },
@@ -975,6 +710,9 @@
                },
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
+               },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
                },
                "dnszonesARecordSetNames": {
                   "value": [
@@ -1027,7 +765,7 @@
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
                "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
+                  "value": "[variables('name_adminVM')]"
                },
                "databaseType": {
                   "value": "[parameters('databaseType')]"
@@ -1071,217 +809,7 @@
 
             }
          }
-      },
-      {
-         "name": "aadLinkedTemplate",
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
-         ],
-         "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "condition": "[and(parameters('enableAAD'),not(parameters('enableCustomSSL')))]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
-               "_artifactsLocationSasToken": {
-                  "value": "[parameters('_artifactsLocationSasToken')]"
-               },
-               "aadsPortNumber": {
-                  "value": "[parameters('aadsPortNumber')]"
-               },
-               "aadsPublicIP": {
-                  "value": "[parameters('aadsPublicIP')]"
-               },
-               "aadsServerHost": {
-                  "value": "[parameters('aadsServerHost')]"
-               },
-               "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               },
-               "wlsDomainName": {
-                  "value": "[parameters('wlsDomainName')]"
-               },
-               "wlsLDAPGroupBaseDN": {
-                  "value": "[parameters('wlsLDAPGroupBaseDN')]"
-               },
-               "wlsLDAPPrincipal": {
-                  "value": "[parameters('wlsLDAPPrincipal')]"
-               },
-               "wlsLDAPPrincipalPassword": {
-                  "value": "[parameters('wlsLDAPPrincipalPassword')]"
-               },
-               "wlsLDAPProviderName": {
-                  "value": "[parameters('wlsLDAPProviderName')]"
-               },
-               "wlsLDAPSSLCertificate": {
-                  "value": "[parameters('wlsLDAPSSLCertificate')]"
-               },
-               "wlsLDAPUserBaseDN": {
-                  "value": "[parameters('wlsLDAPUserBaseDN')]"
-               },
-               "wlsPassword": {
-                  "value": "[parameters('wlsPassword')]"
-               },
-               "wlsUserName": {
-                  "value": "[parameters('wlsUserName')]"
-               }
-            }
-         }
-      },
-      {
-         "name": "aadLinkedTemplateWithCustomSSL",
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
-         ],
-         "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "condition": "[and(parameters('enableAAD'),parameters('enableCustomSSL'))]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
-               "_artifactsLocationSasToken": {
-                  "value": "[parameters('_artifactsLocationSasToken')]"
-               },
-               "aadsPortNumber": {
-                  "value": "[parameters('aadsPortNumber')]"
-               },
-               "aadsPublicIP": {
-                  "value": "[parameters('aadsPublicIP')]"
-               },
-               "aadsServerHost": {
-                  "value": "[parameters('aadsServerHost')]"
-               },
-               "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               },
-               "wlsDomainName": {
-                  "value": "[parameters('wlsDomainName')]"
-               },
-               "wlsLDAPGroupBaseDN": {
-                  "value": "[parameters('wlsLDAPGroupBaseDN')]"
-               },
-               "wlsLDAPPrincipal": {
-                  "value": "[parameters('wlsLDAPPrincipal')]"
-               },
-               "wlsLDAPPrincipalPassword": {
-                  "value": "[parameters('wlsLDAPPrincipalPassword')]"
-               },
-               "wlsLDAPProviderName": {
-                  "value": "[parameters('wlsLDAPProviderName')]"
-               },
-               "wlsLDAPSSLCertificate": {
-                  "value": "[parameters('wlsLDAPSSLCertificate')]"
-               },
-               "wlsLDAPUserBaseDN": {
-                  "value": "[parameters('wlsLDAPUserBaseDN')]"
-               },
-               "wlsPassword": {
-                  "value": "[parameters('wlsPassword')]"
-               },
-               "wlsUserName": {
-                  "value": "[parameters('wlsUserName')]"
-               },
-               "enableCustomSSL": {
-                  "value": "[parameters('enableCustomSSL')]"
-               },
-               "keyVaultCustomTrustKeyStorePassPhrase": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-                     },
-                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStorePassPhraseSecretName.value)]"
-                  }
-               },
-               "keyVaultCustomTrustKeyStoreType": {
-                  "value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreType'), parameters('uploadedCustomTrustKeyStoreType'))]"
-               }
-            }
-         }
-      },
-      {
-         "name": "elkLinkedTemplate",
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
-         ],
-         "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "condition": "[parameters('enableELK')]",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_elkLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
-               "_artifactsLocationSasToken": {
-                  "value": "[parameters('_artifactsLocationSasToken')]"
-               },
-               "adminVMName": {
-                  "value": "[parameters('adminVMName')]"
-               },
-               "elasticsearchEndpoint": {
-                  "value": "[parameters('elasticsearchEndpoint')]"
-               },
-               "elasticsearchPassword": {
-                  "value": "[parameters('elasticsearchPassword')]"
-               },
-               "elasticsearchUserName": {
-                  "value": "[parameters('elasticsearchUserName')]"
-               },
-               "location": {
-                  "value": "[parameters('location')]"
-               },
-               "logsToIntegrate": {
-                  "value": "[parameters('logsToIntegrate')]"
-               },
-               "tagsByResource": {
-                  "value": "[variables('obj_tagsByResources')]"
-               },
-               "wlsDomainName": {
-                  "value": "[parameters('wlsDomainName')]"
-               },
-               "wlsPassword": {
-                  "value": "[parameters('wlsPassword')]"
-               },
-               "wlsUserName": {
-                  "value": "[parameters('wlsUserName')]"
-               }
-            }
-         }
-      },
+      },     
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
@@ -1291,9 +819,7 @@
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
             "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -1307,6 +833,10 @@
       }
    ],
    "outputs": {
+      "adminVMName": {
+         "type": "string",
+         "value": "[variables('name_adminVM')]"
+      },
       "hostname": {
          "type": "string",
          "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.hostname.value]"
@@ -1326,10 +856,6 @@
       "adminConsoleSecureURL": {
          "type": "string",
          "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminConsoleSecureURL.value)]"
-      },
-      "logIndex": {
-         "type": "string",
-         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.logIndex.value, '')]"
       },
       "dnsZoneNameServers": {
          "type": "array",

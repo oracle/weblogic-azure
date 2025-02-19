@@ -118,7 +118,7 @@ function install_azure_identity_extension() {
         sudo mv target/dependency/jackson-annotations-*.jar ${domainBase}/azure-libraries/jackson
         sudo mv target/dependency/jackson-core-*.jar ${domainBase}/azure-libraries/jackson
         sudo mv target/dependency/jackson-databind-*.jar ${domainBase}/azure-libraries/jackson
-        sudo mv target/dependency/jackson-dataformat-xml-*.jar ${domainBase}/azure-libraries/jackson
+        sudo mv target/dependency/jackson-datatype-*.jar ${domainBase}/azure-libraries/jackson
         # Those jars will be appended to CLASSPATH
         sudo mv target/dependency/*.jar ${domainBase}/azure-libraries/identity
         sudo chown -R oracle:oracle ${domainBase}/azure-libraries
