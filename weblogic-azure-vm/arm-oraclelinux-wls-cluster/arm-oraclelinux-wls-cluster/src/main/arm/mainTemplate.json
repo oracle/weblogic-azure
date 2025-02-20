@@ -520,7 +520,7 @@
         "name_domainLabelforApplicationGateway": "[take(concat(variables('name_dnsNameforApplicationGateway'),'-',toLower(resourceGroup().name),'-',toLower(parameters('wlsDomainName'))),63)]",
         "name_keyVaultLinkedTemplateName": "_keyvaultWithNewCertTemplate.json",
         "name_managedServerPrefix": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'))]",
-        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', variables('const_globalResourceNameSuffix'))]",
+        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg-', variables('const_globalResourceNameSuffix'))]",
         "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
         "clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
         "name_clusterTemplate": "clusterLinkedTemplate",
