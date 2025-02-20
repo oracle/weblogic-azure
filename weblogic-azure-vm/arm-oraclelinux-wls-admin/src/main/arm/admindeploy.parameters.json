@@ -2,15 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-     "aadsPortNumber": {
-        "value": "GEN-UNIQUE"
-     },
-     "aadsPublicIP": {
-        "value": "GEN-UNIQUE"
-     },
-     "aadsServerHost": {
-        "value": "GEN-UNIQUE"
-     },
      "adminPasswordOrKey": {
         "value": "GEN-SSH-PUB-KEY"
      },
@@ -38,9 +29,6 @@
      "dsUser": {
         "value": "GEN-UNIQUE"
      },
-     "enableAAD": {
-        "value": "GEN-UNIQUE"
-     },
      "enableDB": {
         "value": "GEN-UNIQUE"
      },
@@ -51,24 +39,6 @@
         "value": "GEN-UNIQUE"
      },
      "wlsDomainName": {
-        "value": "GEN-UNIQUE"
-     },
-     "wlsLDAPProviderName": {
-        "value": "GEN-UNIQUE"
-     },
-     "wlsLDAPPrincipal": {
-        "value": "GEN-UNIQUE"
-     },
-     "wlsLDAPPrincipalPassword": {
-        "value": "GEN-UNIQUE"
-     },
-     "wlsLDAPUserBaseDN": {
-        "value": "GEN-UNIQUE"
-     },
-     "wlsLDAPGroupBaseDN": {
-        "value": "GEN-UNIQUE"
-     },
-     "wlsLDAPSSLCertificate": {
         "value": "GEN-UNIQUE"
      },
      "wlsPassword": {

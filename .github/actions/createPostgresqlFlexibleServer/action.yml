@@ -57,6 +57,6 @@ runs:
           az postgres flexible-server firewall-rule create \
             -g ${{ inputs.resourceGroupName }} \
             -n ${{ inputs.dbName }} \
-            -r "AllowAllWindowsAzureIps" \
+            -r "AllowAllAzureServices" \
             --start-ip-address "0.0.0.0" \
             --end-ip-address "0.0.0.0"

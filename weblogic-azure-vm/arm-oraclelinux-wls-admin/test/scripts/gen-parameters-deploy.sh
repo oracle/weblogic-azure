@@ -5,10 +5,16 @@
 #Generate parameters with value for deploying db template independently
 
 #read arguments from stdin
-read parametersPath adminVMName dbPassword dbAdminUser dbName location wlsusername wlspassword repoPath testbranchName
+read parametersPath adminPasswordOrKey skuUrnVersion wlsdomainname adminVMName dbPassword dbAdminUser dbName location wlsusername wlspassword repoPath testbranchName
 
-cat <<EOF > ${parametersPath}/parameters-deploy-db.json
+cat <<EOF > ${parametersPath}/parameters-deploy.json
 {
+     "adminPasswordOrKey": {
+        "value": "${adminPasswordOrKey}"
+      },
+     "adminUsername": {
+        "value": "weblogic"
+      },
      "adminVMName":{
         "value": "${adminVMName}"
       },
@@ -29,6 +35,15 @@ cat <<EOF > ${parametersPath}/parameters-deploy-db.json
       },
       "location": {
         "value": "${location}"
+      },
+      "skuUrnVersion": {
+        "value": "${skuUrnVersion}"
+      },
+      "vmSize": {
+        "value": "Standard_B2ms"
+      },
+      "wlsDomainName": {
+        "value": "${wlsdomainname}"
       },
       "wlsPassword": {
         "value": "${wlsPassword}"
