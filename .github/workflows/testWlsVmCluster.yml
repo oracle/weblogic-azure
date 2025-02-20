@@ -357,7 +357,7 @@ jobs:
           fi
 
       - name: Verify wls managed server services
-        id: veriy-msservice
+        id: verify-msservice
         run: |
           managedServerPrefix=$(az deployment group show \
               --resource-group $resourceGroup \
@@ -408,7 +408,6 @@ jobs:
           export managedServers="'${managedServers}'"' ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh
 
           echo "Verifying Weblogic managed server lifecycle"
-          echo "Verifying WebLogic services at admin server"
           message=$(az vm run-command invoke \
             --resource-group $resourceGroup \
             --name $adminVMName \
