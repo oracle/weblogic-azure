@@ -289,11 +289,11 @@ jobs:
             ${{ env.testbranchName }} \
             ${{ env.location }} \
             ${{ env.wlsPassword }} \
-            ${{ env.wlsUserName }} \            
+            ${{ env.wlsUserName }} \
             ${{ env.wlsDomainName }} \
             ${{ matrix.images }} \
-            ${{ env.dbName }} \
             ${{ env.dbServerName }} \
+            ${{ env.dbName }} \
             ${{ env.wlsPassword }} \
             ${{ env.dbAdminUser }} \
             ${{ env.wlsPassword }}"
@@ -313,14 +313,14 @@ jobs:
             artifactName=${{ needs.preflight.outputs.artifactName }}
             echo "artifactName=${{ needs.preflight.outputs.artifactName }}" >> $GITHUB_ENV
 
-            az group deployment create \
+            az deployment group create \
               --verbose \
               --resource-group $resourceGroup \
               --name wls-cluster-node \
               --parameters ${{ env.offerPath }}/test/scripts/parameters-test.json \
               --template-file ${artifactName}/mainTemplate.json
 
-            export adminVMName=$(az group deployment show \
+            export adminVMName=$(az deployment group show \
               --resource-group $resourceGroup \
               --name wls-cluster-node \
               --query "properties.outputs.adminVMName.value" -o tsv)
@@ -359,7 +359,7 @@ jobs:
       - name: Verify wls managed server services
         id: veriy-msservice
         run: |
-          managedServerPrefix=$(az group deployment show \
+          managedServerPrefix=$(az deployment group show \
               --resource-group $resourceGroup \
               --name wls-cluster-node \
               --query "properties.outputs.managedServerPrefix.value" -o tsv)
@@ -551,12 +551,12 @@ jobs:
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "deploy add-node template to create new nodes"
-            az group deployment validate \
+            az deployment group validate \
               -g ${resourceGroup} \
               -f ${artifactNameOfAddnode}/mainTemplate.json \
               -p @${{ env.offerPath }}/test/scripts/parameters-deploy-addnode.json \
               --no-prompt
-            az group deployment create \
+            az deployment group create \
               --debug \
               --resource-group ${resourceGroup} \
               --name addnode \
@@ -600,12 +600,12 @@ jobs:
               ${{ env.testbranchName }} \
               ${{ env.managedServerPrefix }}"
             echo "deploy add-node template to create new nodes"
-            az group deployment validate \
+            az deployment group validate \
               -g ${resourceGroup} \
               -f ${artifactNameOfAddnodeCo}/mainTemplate.json \
               -p @${{ env.offerPath }}/test/scripts/parameters-deploy-addnode-coherence.json \
               --no-prompt
-            az group deployment create \
+            az deployment group create \
               --debug \
               --resource-group ${resourceGroup} \
               --name addnode \
