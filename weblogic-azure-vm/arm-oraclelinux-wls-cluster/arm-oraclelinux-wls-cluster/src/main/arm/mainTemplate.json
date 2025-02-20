@@ -860,12 +860,6 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
-                    "_artifactsLocationSasToken": {
-                        "value": "[parameters('_artifactsLocationSasToken')]"
-                    },
                     "_globalResourceNameSuffix": {
                         "value": "[variables('const_globalResourceNameSuffix')]"
                     },

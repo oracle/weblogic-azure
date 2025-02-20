@@ -341,7 +341,7 @@ jobs:
               --source-address-prefixes 10.0.0.0/24
       
       - name: Verify system services at admin server
-        id: veriy-admin-service
+        id: verify-admin-service
         run: |
           echo "Verifying WebLogic services at admin server"
           message=$(az vm run-command invoke \
