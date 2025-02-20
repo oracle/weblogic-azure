@@ -750,7 +750,7 @@
                             "subnets": "Subnets for the virtual network"
                         },
                         "defaultValue": {
-                            "name": "[concat('wlscluster-vnet',take(guid(), 8))]",
+                            "name": "[concat('wlscluster-vnet-',take(guid(), 8))]",
                             "addressPrefixSize": "/23"
                         },
                         "constraints": {
