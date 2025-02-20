@@ -505,7 +505,7 @@
     },
     "variables": {
         "const_appGatewaySSLCertOptionGenerateCert": "generateCert",
-        "const_azureSubjectName": "[format('{0}.{1}.{2}', variables('name_domainLabelforApplicationGateway'), parameters('location'),'.cloudapp.azure.com')]",
+        "const_azureSubjectName": "[format('{0}.{1}.{2}', variables('name_domainLabelforApplicationGateway'), parameters('location'),'cloudapp.azure.com')]",
         "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
         "const_vmSize": "[parameters('vmSize')]",
         "const_vmSizeCoherence": "[parameters('vmSizeSelectForCoherence')]",
