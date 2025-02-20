@@ -1418,7 +1418,7 @@
             "adminUsername": "[basics('basicsRequired').adminUsername]",
             "addressPrefixes": "[if(steps('section_appGateway').enableAppGateway, steps('section_networkingConfiguration').virtualNetworkWithAppGateway.addressPrefixes, steps('section_networkingConfiguration').virtualNetworkWithoutAppGateway.addressPrefixes)]",
             "appGatewayCertificateOption": "[steps('section_appGateway').certificateOption]",
-            "appGatewaySSLBackendCertData": "[[steps('section_appGateway').sslBackendCertData]]",
+            "appGatewaySSLBackendCertData": "[steps('section_appGateway').sslBackendCertData]",
             "appGatewaySSLCertData": "[steps('section_appGateway').appGatewaySSLCertData]",
             "appGatewaySSLCertPassword": "[steps('section_appGateway').appGatewaySSLCertPassword]",
             "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
