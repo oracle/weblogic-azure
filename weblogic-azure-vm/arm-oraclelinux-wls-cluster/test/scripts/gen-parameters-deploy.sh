@@ -83,7 +83,7 @@ cat <<EOF > ${parametersPath}
             "value": 4
         },
         "skuUrnVersion": {
-            "value": ${skuUrnVersion}
+            "value": "${skuUrnVersion}"
         },
         "vmSize": {
             "value": "Standard_B1ms"
