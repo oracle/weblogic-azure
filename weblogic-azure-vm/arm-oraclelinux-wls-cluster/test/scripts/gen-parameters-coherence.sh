@@ -25,7 +25,7 @@ cat <<EOF >${parametersPath}
         "adminUsername": {
             "value": "GEN-UNIQUE"
         },
-        "adminVMName": {
+        "adminVMNamePrefix": {
             "value": "GEN-UNIQUE"
         },
         "enableCoherence": {

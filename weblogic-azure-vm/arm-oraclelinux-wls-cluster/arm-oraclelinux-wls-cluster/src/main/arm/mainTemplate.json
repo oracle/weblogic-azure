@@ -29,11 +29,11 @@
                 "description": "User name for the Virtual Machine."
             }
         },
-        "adminVMName": {
-            "defaultValue": "adminVM",
+        "adminVMNamePrefix": {
+            "defaultValue": "admin",
             "type": "string",
             "metadata": {
-                "description": "Admin Server hosting VM name."
+                "description": "Admin Server hosting VM name prefix."
             }
         },
         "appGatewayCertificateOption": {
@@ -509,7 +509,7 @@
         "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
         "const_vmSize": "[parameters('vmSize')]",
         "const_vmSizeCoherence": "[parameters('vmSizeSelectForCoherence')]",
-        "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
+        "name_adminVM": "[concat(parameters('adminVMNamePrefix'), variables('const_globalResourceNameSuffix'), 'VM')]",
         "name_appGatewayConnector": "_appGatewayConnectorTemplate.json",
         "name_clusterLinkedTemplateName": "clusterTemplate.json",
         "name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
@@ -525,7 +525,7 @@
         "clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
         "name_clusterTemplate": "clusterLinkedTemplate",
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
-        "name_keyVaultName": "[concat('wls-kv', variables('const_globalResourceNameSuffix'))]",
+        "name_keyVaultName": "[concat('wls-kv-', variables('const_globalResourceNameSuffix'))]",
         "name_secretName": "mySelfSignedCertificate",
         // If adding a new resource, add the resource identifier to the array below
         // Also modify createUIDefinition.json to include the new resource

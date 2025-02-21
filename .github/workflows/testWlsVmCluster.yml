@@ -24,18 +24,13 @@ on:
 env:
   adminConsolePort: 7001
   adminPassword: ${{ secrets.WLS_PSW }}
-  adminVMName: adminServerVM
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   dbServerName: weblogicdb
-  elkURI: ${{ secrets.ELK_URI }}
-  elkUser: ${{ secrets.ELK_USER_NAME }}
-  elkPassword: ${{ secrets.ELK_PSW }}
   gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   gitUserName: ${{ secrets.USER_NAME }}
   managedServers: "msp1"
-  nsg: wls-nsg
   numberOfInstances: 2
   offerName: arm-oraclelinux-wls-cluster
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
