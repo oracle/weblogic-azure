@@ -415,8 +415,9 @@ jobs:
             --scripts @${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh \
             --query value[*].message)
           
-          if [[ $message == *"managed server is not in SHUTDOWN state after multiple attempts"* ]] 
-            || [[ $message == *"managed server is not in RUNNING state after multiple attempts"* ]]
+          messageNotShutdown="managed server is not in SHUTDOWN state after multiple attempts";
+          messageNotRunning="managed server is not in RUNNING state after multiple attempts";
+          if [[ $message == *"${messageNotShutdown}"* ]] || [[ $message == *"${messageNotRunning}"* ]]
           then
             echo "Error: $message"
             exit 1
