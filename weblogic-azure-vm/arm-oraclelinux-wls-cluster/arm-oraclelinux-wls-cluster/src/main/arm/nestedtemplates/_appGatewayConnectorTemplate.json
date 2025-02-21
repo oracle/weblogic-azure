@@ -229,9 +229,6 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
-                    "_globalResourceNameSuffix": {
-                        "value": "[parameters('_globalResourceNameSuffix')]"
-                    },
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
                     },
@@ -316,9 +313,6 @@
                     },
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
-                    },
-                    "_globalResourceNameSuffix": {
-                        "value": "[parameters('_globalResourceNameSuffix')]"
                     },
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
