@@ -962,7 +962,7 @@
                         "value": "[parameters('enableCookieBasedAffinity')]"
                     },
                     "gatewayPublicIPAddressName": {
-                        "value": "[parameters('gatewayPublicIPAddressName')]"
+                        "value": "[concat(parameters('gatewayPublicIPAddressName'), variables('const_globalResourceNameSuffix'))]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
