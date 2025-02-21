@@ -354,13 +354,13 @@ jobs:
       - name: Verify wls managed server services
         id: verify-msservice
         run: |
-          managedServerPrefix=$(az deployment group show \
+          managedServerVMNamePrefix=$(az deployment group show \
               --resource-group $resourceGroup \
               --name wls-cluster-node \
-              --query "properties.outputs.managedServerPrefix.value" -o tsv)
-          echo "managedServerPrefix=${managedServerPrefix}" >> $GITHUB_ENV
+              --query "properties.outputs.managedServerVMNamePrefix.value" -o tsv)
+          echo "managedServerVMNamePrefix=${managedServerVMNamePrefix}" >> $GITHUB_ENV
           
-          managedServer1="${managedServerPrefix}1"          
+          managedServer1="${managedServerVMNamePrefix}1"          
 
           echo "Verifying WebLogic services at admin server"
           message=$(az vm run-command invoke \
@@ -395,37 +395,18 @@ jobs:
       - name: Verify WebLogic Managed Server LifeCycle check
         id: verify-server-lifecycle
         run: |
-          sed -i '/read wlsUserName wlspassword adminPublicIP adminPort managedServers/c\
-          export wlsUserName="'${wlsUserName}'"\
-          export wlspassword="'${wlsPassword}'"\
-          export adminPublicIP="'${wlsPublicIP}'"\
-          export adminPort="'${adminConsolePort}'"\
-          export managedServers="'${managedServers}'"' ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh
-
           echo "Verifying Weblogic managed server lifecycle"
-          message=$(az vm run-command invoke \
-            --resource-group $resourceGroup \
-            --name $adminVMName \
-            --command-id RunShellScript \
-            --scripts @${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh \
-            --query value[*].message)
+          bash ${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName ${wlsPassword} $wlsPublicIP $adminConsolePort $managedServers"
           
-          messageNotShutdown="managed server is not in SHUTDOWN state after multiple attempts";
-          messageNotRunning="managed server is not in RUNNING state after multiple attempts";
-          if [[ $message == *"${messageNotShutdown}"* ]] || [[ $message == *"${messageNotRunning}"* ]]
-          then
-            echo "Error: $message"
-            exit 1
-          fi
-
       - name: Query appGatewayURL of appgateway deployment
         id: query-agwurl
         run: |
             echo "query appgatewayURL"
-            appGatewayURL=$(az network public-ip show \
+            export appGatewayURL=$(az deployment group show \
               --resource-group $resourceGroup \
-              --name gwip \
-              --query dnsSettings.fqdn -o tsv)
+              --name wls-cluster-node \
+              --query "properties.outputs.appGatewayURL.value" -o tsv)
+              
             echo "appGatewayURL=${appGatewayURL}" >> $GITHUB_ENV
             
       - name: Checkout WebLogic-Cafe
@@ -455,46 +436,7 @@ jobs:
               --id "adminPublicIPId" \
               --query dnsSettings.fqdn -o tsv)
             echo "save the adminVMDNS in environment variable"
-            echo "adminVMDNS=${adminVMDNS}" >> $GITHUB_ENV
-      - name: Get IP of build machine
-        id: get-ip-address
-        run: |
-          myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short | tr -d "\"")
-          echo "myIP=${myIP}" >> $GITHUB_ENV
-
-      - name: Add ip address to security rule to access the wls machine
-        id: add-ip-to-security-rule-105
-        run: |
-            echo "query existing source address prefixes"
-            attempt=0
-            toCreateRule105=false
-            while [[ -z `az network nsg show -g $resourceGroup -n ${nsg} | grep "NRMS-Rule-105"` && $attempt -le 5 ]]
-            do
-              if [ $attempt -eq 5 ]; then
-                toCreateRule105=true
-              fi
-              echo "network security group rule NRMS-Rule-105 is not ready"
-              sleep 1m
-              attempt=$((attempt + 1))
-            done
-            if [ $toCreateRule105 == true ]; then
-              az network nsg rule create --name NRMS-Rule-105 \
-                           --nsg-name ${nsg} \
-                           --priority 102 \
-                           --resource-group $resourceGroup \
-                           --access Allow \
-                           --destination-address-prefixes "*" \
-                           --destination-port-ranges 1433 1434 3306 4333 5432 6379 7000 7199 9042 9160 9300 16379 26379 27017 \
-                           --direction Inbound \
-                           --protocol Tcp \
-                           --source-address-prefixes $myIP
-            else
-              az network nsg rule update \
-                --resource-group $resourceGroup \
-                --nsg-name ${nsg} \
-                --name NRMS-Rule-105 \
-                --destination-port-ranges 1433 1434 3306 4333 5432 6379 7000 7199 9042 9160 9300 16379 26379 27017
-            fi
+            echo "adminVMDNS=${adminVMDNS}" >> $GITHUB_ENV      
 
       - name: Deploy WebLogicCafe app using WebLogic Management Services
         id: deploy-webapp
@@ -544,7 +486,7 @@ jobs:
               ${{ env.wlsPassword }} \
               ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
-              ${{ env.managedServerPrefix }}"
+              ${{ env.managedServerVMNamePrefix }}"
             echo "deploy add-node template to create new nodes"
             az deployment group validate \
               -g ${resourceGroup} \
@@ -560,9 +502,9 @@ jobs:
       - name: Verify new nodes
         id: verify-new-nodes
         run: |
-          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}VM2 --query [0].name -o tsv)
+          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerVMNamePrefix }}VM2 --query [0].name -o tsv)
           if [ -z "$mspVM2" ]; then
-            echo "Add-node failure: new machine ${{ env.managedServerPrefix }}VM2 does not exist."
+            echo "Add-node failure: new machine ${{ env.managedServerVMNamePrefix }}VM2 does not exist."
             exit 1
           fi
 
@@ -593,7 +535,7 @@ jobs:
               ${{ env.wlsPassword }} \
               ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
-              ${{ env.managedServerPrefix }}"
+              ${{ env.managedServerVMNamePrefix }}"
             echo "deploy add-node template to create new nodes"
             az deployment group validate \
               -g ${resourceGroup} \
@@ -609,9 +551,9 @@ jobs:
       - name: Verify new nodes
         id: verify-new-nodes-coherence
         run: |
-          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}StorageVM2 --query [0].name -o tsv)
+          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerVMNamePrefix }}StorageVM2 --query [0].name -o tsv)
           if [ -z "$mspVM2" ]; then
-            echo "Add-node failure: new machine ${{ env.managedServerPrefix }}StorageVM2 does not exist."
+            echo "Add-node failure: new machine ${{ env.managedServerVMNamePrefix }}StorageVM2 does not exist."
             exit 1
           fi
 
@@ -634,7 +576,7 @@ jobs:
               ${{ env.wlsPassword }} \
               ${GITHUB_REPOSITORY} \
               ${{ env.testbranchName }} \
-              ${{ env.managedServerPrefix }}"
+              ${{ env.managedServerVMNamePrefix }}"
             echo "Run deletenode-cli.sh to remove nodes"
             chmod ugo+x ${artifactNameOfDeleteNode}/scripts/deletenode-cli.sh
             ${artifactNameOfDeleteNode}/scripts/deletenode-cli.sh \
@@ -645,21 +587,21 @@ jobs:
       - name: Verify deleted nodes
         id: verify-deleted-nodes
         run: |
-          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}VM2 --query [0].name -o tsv)
+          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerVMNamePrefix }}VM2 --query [0].name -o tsv)
           count=0
           while [[ -n "$mspVM2" && $count -lt 10 ]];
           do
             echo "waiting for $mspVM2 deleted..."
             sleep 1m
             count=$((count+1))
-            mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}VM2 --query [0].name -o tsv)
+            mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerVMNamePrefix }}VM2 --query [0].name -o tsv)
             if [ -z "$mspVM2" ]; then
               break;
             fi
           done
 
           if [ -n "$mspVM2" ]; then
-            echo "Delete-node failure: machine ${{ env.managedServerPrefix }}VM2 is not removed."
+            echo "Delete-node failure: machine ${{ env.managedServerVMNamePrefix }}VM2 is not removed."
             exit 1
           fi
 

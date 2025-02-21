@@ -56,6 +56,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Managed Server hosting VM name prefix."
+            }
+        },
         "numberOfManagedApplicationInstances": {
             "type": "int",
             "defaultValue": 2,
@@ -93,7 +99,7 @@
         }
     },
     "variables": {
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMNamePrefix'), 'VM')]",
         "const_wlsAdminPort": "7005",
         "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",

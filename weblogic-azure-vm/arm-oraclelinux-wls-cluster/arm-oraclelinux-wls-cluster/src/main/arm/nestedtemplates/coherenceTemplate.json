@@ -84,6 +84,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Managed VM name prefix"
+            }
+        },
         "numberOfCoherenceCacheInstances": {
             "defaultValue": 1,
             "type": "int",
@@ -291,7 +297,7 @@
         "name_share": "wlsshare",
         "name_subnet": "[parameters('subnetName')]",
         "name_virtualNetwork": "[parameters('virtualNetworkName')]",
-        "name_vmMachine": "[concat(parameters('managedServerPrefix'),'StorageVM')]",
+        "name_vmMachine": "[concat(parameters('managedVMNamePrefix'), 'StorageVM')]",
         "name_wlsServerPrefix": "[concat(parameters('managedServerPrefix'),'Storage')]",
         "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",

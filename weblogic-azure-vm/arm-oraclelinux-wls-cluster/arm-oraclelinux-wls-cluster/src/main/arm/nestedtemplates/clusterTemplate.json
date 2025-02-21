@@ -78,6 +78,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide managed server VM name prefix"
+            }
+        },
         "numberOfInstances": {
             "type": "int",
             "defaultValue": 2,
@@ -279,7 +285,7 @@
                 ]
             }
         },
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMNamePrefix'), 'VM')]",
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_publicIPAddressType": "Dynamic",
         "const_requiredPortrange": ",65200-65535,5556",
@@ -288,7 +294,7 @@
         "const_vmSize": "[parameters('vmSize')]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "name_appGatewaySubnet": "[parameters('subnetForAppGateway')]",
-        "name_availabilitySet": "[concat('WLSCluster-AvailabilitySet-', parameters('_globalResourceNameSuffix'))]",
+        "name_availabilitySet": "[concat('wlscluster-availabilityset-', parameters('_globalResourceNameSuffix'))]",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
         "name_nic": "_NIC",

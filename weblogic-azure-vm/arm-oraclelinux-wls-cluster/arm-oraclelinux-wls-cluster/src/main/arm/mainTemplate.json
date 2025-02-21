@@ -519,9 +519,9 @@
         "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
         "name_domainLabelforApplicationGateway": "[take(concat(variables('name_dnsNameforApplicationGateway'),'-',toLower(resourceGroup().name),'-',toLower(parameters('wlsDomainName'))),63)]",
         "name_keyVaultLinkedTemplateName": "_keyvaultWithNewCertTemplate.json",
-        "name_managedServerPrefix": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'))]",
         "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg-', variables('const_globalResourceNameSuffix'))]",
         "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
+        "name_managedVMNamePrefix": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'))]",
         "clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
         "name_clusterTemplate": "clusterLinkedTemplate",
         "name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
@@ -631,7 +631,10 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[variables('name_managedServerPrefix')]"
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[variables('name_managedVMNamePrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
@@ -746,7 +749,10 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[variables('name_managedServerPrefix')]"
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[variables('name_managedVMNamePrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
@@ -967,8 +973,8 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
-                    "managedServerPrefix": {
-                        "value": "[variables('name_managedServerPrefix')]"
+                    "managedVMNamePrefix": {
+                        "value": "[variables('name_managedVMNamePrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
@@ -1125,7 +1131,10 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[variables('name_managedServerPrefix')]"
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[variables('name_managedVMNamePrefix')]"
                     },
                     "numberOfManagedApplicationInstances": {
                         "value": "[add(parameters('numberOfInstances'),-1)]"
@@ -1189,7 +1198,10 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[variables('name_managedServerPrefix')]"
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[variables('name_managedVMNamePrefix')]"
                     },
                     "numberOfCoherenceCacheInstances": {
                         "value": "[parameters('numberOfCoherenceCacheInstances')]"
@@ -1283,7 +1295,10 @@
                         "value": "[parameters('location')]"
                     },
                     "managedServerPrefix": {
-                        "value": "[variables('name_managedServerPrefix')]"
+                        "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[variables('name_managedVMNamePrefix')]"
                     },
                     "numberOfCoherenceCacheInstances": {
                         "value": "[parameters('numberOfCoherenceCacheInstances')]"
@@ -1377,9 +1392,9 @@
             "type": "string",
             "value": "[variables('name_adminVM')]"
         },
-        "managedServerPrefix": {
+        "managedServerVMNamePrefix": {
             "type": "string",
-            "value": "[concat(variables('name_managedServerPrefix'),'VM')]"
+            "value": "[concat(pamameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'), 'VM')]"
         },
         "wlsDomainLocation": {
             "type": "string",

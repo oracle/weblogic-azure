@@ -77,6 +77,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide managed VM name prefix"
+            }
+        },
         "numberOfManagedApplicationInstances": {
             "type": "int",
             "defaultValue": 2,
@@ -116,7 +122,7 @@
     "variables": {
         "const_connectionString": "[if(and(equals(parameters('databaseType'),'sqlserver'), equals(last(parameters('dsConnectionURL')),';')), take(parameters('dsConnectionURL'), add(length(parameters('dsConnectionURL')),-1)),parameters('dsConnectionURL'))]",
         "const_identityAPIVersion": "${azure.apiVersionForIdentity}",
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMNamePrefix'), 'VM')]",
         "const_msiDefaultUser": "msiUser",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
@@ -228,6 +234,9 @@
                     },
                     "managedServerPrefix": {
                         "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
                     },
                     "numberOfManagedApplicationInstances": {
                         "value": "[parameters('numberOfManagedApplicationInstances')]"

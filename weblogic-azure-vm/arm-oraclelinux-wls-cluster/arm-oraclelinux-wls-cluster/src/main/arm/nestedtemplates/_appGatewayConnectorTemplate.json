@@ -92,11 +92,10 @@
                 "description": "Location for all resources."
             }
         },
-        "managedServerPrefix": {
-            "defaultValue": "msp",
+        "managedVMNamePrefix": {
             "type": "string",
             "metadata": {
-                "description": "Provide managed server prefix names"
+                "description": "Provide managed VM prefix names"
             }
         },
         "numberOfInstances": {
@@ -230,6 +229,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[parameters('_globalResourceNameSuffix')]"
+                    },
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
                     },
@@ -260,8 +262,8 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
-                    "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
@@ -315,6 +317,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[parameters('_globalResourceNameSuffix')]"
+                    },
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
                     },
@@ -350,8 +355,8 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
-                    "managedServerPrefix": {
-                        "value": "[parameters('managedServerPrefix')]"
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
                     },
                     "numberOfInstances": {
                         "value": "[parameters('numberOfInstances')]"
