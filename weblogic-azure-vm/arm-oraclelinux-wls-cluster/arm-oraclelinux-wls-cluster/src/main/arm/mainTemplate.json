@@ -1394,7 +1394,7 @@
         },
         "managedServerVMNamePrefix": {
             "type": "string",
-            "value": "[concat(pamameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'), 'VM')]"
+            "value": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'), 'VM')]"
         },
         "wlsDomainLocation": {
             "type": "string",
