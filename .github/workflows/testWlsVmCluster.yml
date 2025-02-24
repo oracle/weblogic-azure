@@ -426,14 +426,14 @@ jobs:
         id: query-adminvmdns
         run: |
             echo "query public ip id of $adminVMName"
-            adminPublicIPId=$(az vm show \
+            adminNicId=$(az vm show \
               --resource-group $resourceGroup \
               --name $adminVMName \
-              --query publicIps -o tsv)
+              --query networkProfile.networkInterfaces[0].id -o tsv)
+            adminPublicIPId=$(az network nic show --id ${adminNicId} --query ipConfigurations[0].publicIPAddress.id -o tsv)
             echo "query adminVMsver DNS for $adminVMName"
             adminVMDNS=$(az network public-ip show \
-              --resource-group $resourceGroup \
-              --id "adminPublicIPId" \
+              --id "${adminPublicIPId}" \
               --query dnsSettings.fqdn -o tsv)
             echo "save the adminVMDNS in environment variable"
             echo "adminVMDNS=${adminVMDNS}" >> $GITHUB_ENV      
