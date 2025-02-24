@@ -10,7 +10,7 @@ on:
       pidType:
         description: 'Specify which pids to use, oracle or microsoft.'
         required: true
-        default: 'microsoft'
+        default: 'oracle'
       ref:
         description: 'Specify Git Ref if needed.'
         required: false
