@@ -181,6 +181,7 @@
 		"name_httpSetting": "myHTTPSetting",
 		"name_httpsListener": "HTTPSListener",
 		"name_httpsPort": "https_port",
+		"name_managedVMNamePrefix": "[concat(parameters('managedVMNamePrefix'),'VM')]",
 		"name_probe": "HTTPhealthProbe",
 		"name_scriptAGWConfiguration": "setupApplicationGateway.sh",
 		"name_virtualNetwork": "[parameters('virtualNetworkName')]",
@@ -330,7 +331,7 @@
 									"name": "BackendAddresses",
 									"count": "[sub(int(parameters('numberOfInstances')),1)]",
 									"input": {
-										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(parameters('managedVMNamePrefix'), copyIndex('BackendAddresses',1), if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), variables('name_nic_with_pub_ip'), variables('name_nic_without_pub_ip')))),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
+										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('name_managedVMNamePrefix'), copyIndex('BackendAddresses',1), if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), variables('name_nic_with_pub_ip'), variables('name_nic_without_pub_ip')))),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
 									}
 								}
 							]
