@@ -325,6 +325,9 @@
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
                     },
+                    "appGatewayName": {
+                        "value": "[parameters('appGatewayName')]"
+                    },
                     "appGatewaySSLBackendCertData": {
                         "value": "[parameters('appGatewaySSLBackendCertData')]"
                     },
