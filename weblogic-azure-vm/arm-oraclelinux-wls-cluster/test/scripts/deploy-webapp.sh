@@ -13,6 +13,7 @@ CURL_REQD_PARMS="--user ${wlsUserName}:${wlspassword} -H X-Requested-By:MyClient
 CURL_RETRY_PARMS="--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180 --retry-connrefused"
 
 echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form-data  \
+-H "weblogic.edit.session: default" \
 -F \"model={
   name:    'weblogic-cafe',
   targets: [ { identity: [ 'clusters', 'cluster1' ] } ]
@@ -23,6 +24,7 @@ echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form
 
 # Deploy webapp to weblogic server
 curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form-data  \
+-H "weblogic.edit.session: default" \
 -F "model={
   name:    'weblogic-cafe',
   targets: [ { identity: [ 'clusters', 'cluster1' ] } ]
