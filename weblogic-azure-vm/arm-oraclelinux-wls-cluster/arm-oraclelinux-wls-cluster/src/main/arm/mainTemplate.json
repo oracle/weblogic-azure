@@ -943,6 +943,9 @@
                     "adminVMName": {
                         "value": "[variables('name_adminVM')]"
                     },
+                    "appGatewayName": {
+                        "value": "[concat(parameters('dnsLabelPrefix'), '-agw-', variables('const_globalResourceNameSuffix'))]"
+                    },
                     "appGatewayCertificateOption": {
                         "value": "[parameters('appGatewayCertificateOption')]"
                     },

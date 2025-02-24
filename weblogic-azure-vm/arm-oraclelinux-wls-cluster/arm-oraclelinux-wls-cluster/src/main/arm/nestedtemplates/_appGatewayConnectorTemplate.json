@@ -16,10 +16,15 @@
             }
         },
         "adminVMName": {
-            "defaultValue": "adminVM",
             "type": "string",
             "metadata": {
                 "description": "Admin Server hosting VM name."
+            }
+        },
+        "appGatewayName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Application Gateway"
             }
         },
         "appGatewayCertificateOption": {
@@ -231,6 +236,9 @@
                     },
                     "adminVMName": {
                         "value": "[parameters('adminVMName')]"
+                    },
+                    "appGatewayName": {
+                        "value": "[parameters('appGatewayName')]"
                     },
                     "appGatewaySSLBackendCertData": {
                         "value": "[parameters('appGatewaySSLBackendCertData')]"
