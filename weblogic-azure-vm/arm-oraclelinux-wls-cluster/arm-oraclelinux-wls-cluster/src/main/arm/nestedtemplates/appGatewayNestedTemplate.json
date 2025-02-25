@@ -190,12 +190,14 @@
 		"name_probe": "HTTPhealthProbe",
 		"name_scriptAGWConfiguration": "setupApplicationGateway.sh",
 		"name_virtualNetwork": "[parameters('virtualNetworkName')]",
-		"obj_backendTrustedRootCerts": {
-			"name": "appGatewayTrustedRootCert",
-			"properties": {
-				"data": "[parameters('appGatewaySSLBackendCertData')]"
+		"obj_backendTrustedRootCerts": [
+			{
+				"name": "appGatewayTrustedRootCert",
+				"properties": {
+					"data": "[parameters('appGatewaySSLBackendCertData')]"
+				}
 			}
-		},
+		],
 		"obj_HTTPSettingsDefault": {
 			"provisioningState": "Succeeded",
 			"port": "[int(variables('const_backendPort'))]",
