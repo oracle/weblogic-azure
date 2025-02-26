@@ -47,9 +47,6 @@ jobs:
   preflight:
     outputs: 
       artifactName: ${{steps.artifact_file.outputs.artifactName}}
-      addnodeArtifactName: ${{steps.addnode_artifact_file.outputs.addnode_artifactName}}
-      addCoherenceNodeArtifactName: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactName}}
-      deletenodeArtifactName: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactName}}
       location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
     runs-on: ubuntu-latest
     steps:
@@ -143,55 +140,7 @@ jobs:
         if: success()
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}
-          path: ${{steps.artifact_file.outputs.artifactPath}}
-
-      - name: Generate addnode artifact file name and path
-        id: addnode_artifact_file
-        run: |
-          addnode_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-cluster-addnode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          addnode_artifactName=${{ env.offerName }}-addnode-$addnode_version-arm-assembly
-          ls ${{ env.offerPath }}/addnode/target
-          unzip ${{ env.offerPath }}/addnode/target/$addnode_artifactName.zip -d ${{ env.offerPath }}/addnode/target/$addnode_artifactName
-          echo "##[set-output name=addnode_artifactName;]${addnode_artifactName}"
-          echo "##[set-output name=addnode_artifactPath;]${{ env.offerPath }}/addnode/target/$addnode_artifactName"
-      - name: Archive ${{ env.offerName }} addnode template
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{steps.addnode_artifact_file.outputs.addnode_artifactName}}
-          path: ${{steps.addnode_artifact_file.outputs.addnode_artifactPath}}
-
-      - name: Generate delete node artifact file name and path
-        id: deletenode_artifact_file
-        run: |
-          deletenode_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-cluster-deletenode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          deletenode_artifactName=${{ env.offerName }}-deletenode-$deletenode_version-arm-assembly
-          unzip ${{ env.offerPath }}/deletenode/target/$deletenode_artifactName.zip -d ${{ env.offerPath }}/deletenode/target/$deletenode_artifactName
-          echo "##[set-output name=deletenode_artifactName;]${deletenode_artifactName}"
-          echo "##[set-output name=deletenode_artifactPath;]${{ env.offerPath }}/deletenode/target/$deletenode_artifactName"
-
-      - name: Archive ${{ env.offerName }} deletenode template
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactName}}
-          path: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactPath}}
-
-      - name: Generate addnode-coherence artifact file name and path
-        id: addnode_coherence_artifact_file
-        run: |
-          addnode_coherence_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-cluster-addnode-coherence}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          addnode_coherence_artifactName=${{ env.offerName }}-addnode-coherence-$addnode_coherence_version-arm-assembly
-          unzip ${{ env.offerPath }}/addnode-coherence/target/$addnode_coherence_artifactName.zip -d ${{ env.offerPath }}/addnode-coherence/target/$addnode_coherence_artifactName
-          echo "##[set-output name=addnode_coherence_artifactName;]${addnode_coherence_artifactName}"
-          echo "##[set-output name=addnode_coherence_artifactPath;]${{ env.offerPath }}/addnode-coherence/target/$addnode_coherence_artifactName"
-
-      - name: Archive ${{ env.offerName }} addnode-coherence template
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactName}}
-          path: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactPath}}
+          path: ${{steps.artifact_file.outputs.artifactPath}}      
 
   deploy-dependencies:
     needs: preflight
