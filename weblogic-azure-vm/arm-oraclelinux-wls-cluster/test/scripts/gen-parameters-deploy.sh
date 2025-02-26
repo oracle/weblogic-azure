@@ -85,6 +85,20 @@ cat <<EOF > ${parametersPath}
         "skuUrnVersion": {
             "value": "${skuUrnVersion}"
         },
+        "virtualNetworkNewOrExisting": {
+            "value": "new"
+        },
+        "addressPrefixes": {
+            "value": [
+                "172.16.6.0/23"
+            ]
+        },
+        "subnetPrefix": {
+            "value": "172.16.7.0/28"
+        },
+        "subnetPrefixForAppGateway": {
+            "value": "172.16.6.0/24"
+        },
         "vmSize": {
             "value": "Standard_B1ms"
         },
