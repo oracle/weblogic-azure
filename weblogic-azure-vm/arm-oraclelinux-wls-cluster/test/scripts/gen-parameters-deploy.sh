@@ -56,7 +56,7 @@ cat <<EOF > ${parametersPath}
             "value": true
         },
         "enableCoherence": {
-            "value": false
+            "value": true
         },
         "enableCoherenceWebLocalStorage": {
             "value": true
