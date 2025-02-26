@@ -13,6 +13,7 @@ CURL_REQD_PARMS="--user ${wlsUserName}:${wlspassword} -H X-Requested-By:MyClient
 CURL_RETRY_PARMS="--connect-timeout 60 --max-time 180 --retry 10 --retry-delay 30 --retry-max-time 180 --retry-connrefused"
 
 echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form-data  \
+-H "weblogic.edit.session: default" \
 -F \"model={
   name:    'weblogic-cafe',
   targets: [ { identity: [ 'clusters', 'cluster1' ] } ]
@@ -23,6 +24,7 @@ echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form
 
 # Deploy webapp to weblogic server
 curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:multipart/form-data  \
+-H "weblogic.edit.session: default" \
 -F "model={
   name:    'weblogic-cafe',
   targets: [ { identity: [ 'clusters', 'cluster1' ] } ]
@@ -56,9 +58,10 @@ sleep 1m
 attempt=0
 while [ $attempt -le 5 ]
 do
-	echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json -d {target='cluster1'} -X POST  -i http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/getState" 
+	echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H weblogic.edit.session: default -H Content-Type:application/json -d {target='cluster1'} -X POST  -i http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/getState" 
 	curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json \
-	-d "{target='cluster1'}" \
+		-H "weblogic.edit.session: default" \
+		-d "{target='cluster1'}" \
 		-X POST  -i "http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/getState" > out
 	
 	echo "Deployment state received"
@@ -76,8 +79,9 @@ do
 	if [[ $? == 0 ]]; then
 	  # Ideally this is not required but noticed only for 122130 OL7.4 it is required	
 	  echo "Starting the service explicitly"
-	  echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json -d {} -X POST  -i http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/start" 
+	  echo "curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H weblogic.edit.session: default -H Content-Type:application/json -d {} -X POST  -i http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/start" 
 	  curl ${CURL_REQD_PARMS} ${CURL_RETRY_PARMS} -H Content-Type:application/json \
+	  	 -H "weblogic.edit.session: default" \
 	     -d "{}" \
 	     -X POST  -i "http://${adminVMDNS}:${adminPort}/management/weblogic/latest/domainRuntime/deploymentManager/appDeploymentRuntimes/weblogic-cafe/start" 
 	fi 

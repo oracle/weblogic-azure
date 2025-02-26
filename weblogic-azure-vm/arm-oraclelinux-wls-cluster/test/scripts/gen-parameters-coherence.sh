@@ -25,14 +25,11 @@ cat <<EOF >${parametersPath}
         "adminUsername": {
             "value": "GEN-UNIQUE"
         },
-        "adminVMName": {
+        "adminVMNamePrefix": {
             "value": "GEN-UNIQUE"
         },
         "enableCoherence": {
             "value": true
-        },
-        "storageAccountName": {
-            "value": "GEN-UNIQUE"
         },
         "vmSize": {
             "value": "Standard_B2ms"

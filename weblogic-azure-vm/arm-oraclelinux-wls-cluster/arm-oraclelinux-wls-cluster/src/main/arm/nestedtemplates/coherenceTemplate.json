@@ -22,6 +22,12 @@
             },
             "defaultValue": ""
         },
+        "_globalResourceNameSuffix":{
+            "type": "string",
+            "metadata": {
+                "description": "The suffix to be appended to the globally unique resource name"
+            }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -59,28 +65,7 @@
             "metadata": {
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
             }
-        },
-        "elasticsearchEndpoint": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Endpoint of the Elasticsearch instance."
-            }
-        },
-        "elasticsearchPassword": {
-            "type": "securestring",
-            "defaultValue": "[newGuid()]",
-            "metadata": {
-                "description": "The credentials to distribute message to Elasticsearch instance with REST API."
-            }
-        },
-        "elasticsearchUserName": {
-            "type": "string",
-            "defaultValue": "elastic",
-            "metadata": {
-                "description": "The credentials to distribute message to Elasticsearch instance with REST API."
-            }
-        },
+        },        
         "enableCoherenceWebLocalStorage": {
             "defaultValue": true,
             "type": "bool",
@@ -88,36 +73,10 @@
                 "description": "Specifies whether Local Storage is enabled for the Coherence*Web cluster tier."
             }
         },
-        "enableELK": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "If true, use the supplied parameters to distribute WebLogic Server logs to the Elasticsearch instance."
-            }
-        },
-        "guidValue": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
-        },
         "location": {
             "type": "string",
             "metadata": {
                 "description": "Location for all resources."
-            }
-        },
-        "logIndex": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Elasticsearch index you expect to export the logs to."
-            }
-        },
-        "logsToIntegrate": {
-            "type": "array",
-            "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
-            "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput","NodeManagerLog" ],
-            "metadata": {
-                "description": "Specify the expeted logs to integrate, you must input at least one log."
             }
         },
         "managedServerPrefix": {
@@ -125,6 +84,12 @@
             "defaultValue": "msp",
             "metadata": {
                 "description": "Provide managed server prefix name"
+            }
+        },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Managed VM name prefix"
             }
         },
         "numberOfCoherenceCacheInstances": {
@@ -249,56 +214,56 @@
                "description": "Boolean value indicating, if custom SSL is enabled or not"
             }
         },
-        "keyVaultCustomIdentityKeyStoreData": {
+        "sslCustomIdentityKeyStoreData": {
             "type": "securestring",
             "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Data"
             }
         },
-        "keyVaultCustomIdentityKeyStorePassPhrase": {
+        "sslCustomIdentityKeyStorePassPhrase": {
             "type": "securestring",
             "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Passphrase"
             }
         },
-        "keyVaultCustomIdentityKeyStoreType": {
+        "sslCustomIdentityKeyStoreType": {
             "type": "string",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Type"
             },
             "defaultValue": "JKS"
         },
-        "keyVaultCustomTrustKeyStoreData": {
+        "sslCustomTrustKeyStoreData": {
             "type": "securestring",
             "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Data"
             }
         },
-        "keyVaultCustomTrustKeyStorePassPhrase": {
+        "sslCustomTrustKeyStorePassPhrase": {
             "type": "securestring",
             "defaultValue":"",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Passphrase"
             }
         },
-        "keyVaultCustomTrustKeyStoreType": {
+        "sslCustomTrustKeyStoreType": {
             "type": "string",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Type"
             },
             "defaultValue": "JKS"
         },
-        "keyVaultPrivateKeyAlias": {
+        "sslPrivateKeyAlias": {
             "type": "string",
             "defaultValue":"null",
             "metadata": {
                 "description": "Weblogic Server Private Key Alias"
             }
         },
-        "keyVaultPrivateKeyPassPhrase": {
+        "sslPrivateKeyPassPhrase": {
             "type": "securestring",
             "defaultValue":"",
             "metadata": {
@@ -323,7 +288,6 @@
         },
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_publicIPAddressType": "Dynamic",
-        "const_singleQuote": "'",
         "const_vmSize": "[parameters('vmSizeSelectForCoherence')]",
         "const_wlsDomainPath": "/u01/domains",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
@@ -331,12 +295,11 @@
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
         "name_nic": "_NIC",
         "name_publicIPAddress": "_PublicIP",
-        "name_scriptELKConfiguration": "elkIntegration.sh",
         "name_scriptFile": "setupCoherence.sh",
         "name_share": "wlsshare",
         "name_subnet": "[parameters('subnetName')]",
         "name_virtualNetwork": "[parameters('virtualNetworkName')]",
-        "name_vmMachine": "[concat(parameters('managedServerPrefix'),'StorageVM')]",
+        "name_vmPrefix": "[concat(parameters('managedVMNamePrefix'), 'StorageVM')]",
         "name_wlsServerPrefix": "[concat(parameters('managedServerPrefix'),'Storage')]",
         "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
@@ -383,7 +346,7 @@
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
             "tags": "[parameters('tagsByResource')['${identifier.publicIPAddresses}']]",
-            "name": "[concat(variables('name_vmMachine'),copyIndex(1),variables('name_publicIPAddress'))]",
+            "name": "[concat(variables('name_vmPrefix'),copyIndex(1),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "publicIPLoop",
@@ -392,7 +355,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(1),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',toLower(variables('name_vmPrefix')),copyindex(1),'-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName')))]"
                 }
             }
         },
@@ -406,14 +369,14 @@
             "apiVersion": "${azure.apiVersionForNetworkInterfaces}",
             "type": "Microsoft.Network/networkInterfaces",
             "tags": "[parameters('tagsByResource')['${identifier.networkInterfaces}']]",
-            "name": "[concat(variables('name_vmMachine'), copyIndex(1), variables('name_nic'))]",
+            "name": "[concat(variables('name_vmPrefix'), copyIndex(1), variables('name_nic'))]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "nicLoop",
                 "count": "[parameters('numberOfCoherenceCacheInstances')]"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('name_vmMachine'),copyIndex(1),variables('name_publicIPAddress')))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('name_vmPrefix'),copyIndex(1),variables('name_publicIPAddress')))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -422,7 +385,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('name_vmMachine'),copyIndex(1),variables('name_publicIPAddress')))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('name_vmPrefix'),copyIndex(1),variables('name_publicIPAddress')))]"
                             },
                             "subnet": {
                                 "id": "[variables('ref_subnet')]"
@@ -431,7 +394,7 @@
                     }
                 ],
                 "dnsSettings": {
-                    "internalDnsNameLabel": "[concat(variables('name_vmMachine'), copyIndex(1))]"
+                    "internalDnsNameLabel": "[concat(variables('name_vmPrefix'), copyIndex(1))]"
                 }
             }
         },
@@ -439,7 +402,7 @@
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines",
             "tags": "[parameters('tagsByResource')['${identifier.virtualMachines}']]",
-            "name": "[concat(variables('name_vmMachine'), copyIndex(1))]",
+            "name": "[concat(variables('name_vmPrefix'), copyIndex(1))]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "virtualMachineLoop",
@@ -453,7 +416,7 @@
                     "vmSize": "[variables('const_vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[concat(variables('name_vmMachine'), copyIndex(1))]",
+                    "computerName": "[concat(variables('name_vmPrefix'), copyIndex(1))]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPasswordOrKey')]",
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
@@ -475,7 +438,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('name_vmMachine'), copyIndex(1), variables('name_nic')))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('name_vmPrefix'), copyIndex(1), variables('name_nic')))]"
                         }
                     ]
                 },
@@ -495,7 +458,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
-            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('name_vmMachine'), copyIndex(),'/newuserscript'))]",
+            "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),'/newuserscript'),concat(variables('name_vmPrefix'), copyIndex(),'/newuserscript'))]",
             "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "location": "[parameters('location')]",
             "copy": {
@@ -513,7 +476,6 @@
                 "settings": {
                     "fileUris": [
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]",
-                        "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameGeneratorscriptFile'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameVerifierJavaFile'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationCoherenceTemplate'), concat('../../../../../utilities/custom-hostname-verifier/', variables('name_customHostnameValuesTemplate'), parameters('_artifactsLocationSasToken')))]",
@@ -521,7 +483,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'), ' <<< \"', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersionForStorage}').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'),' ',parameters('enableELK'),' ',variables('const_singleQuote'),parameters('elasticsearchEndpoint'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchUserName'),variables('const_singleQuote'),' ',variables('const_singleQuote'),parameters('elasticsearchPassword'),variables('const_singleQuote'),' ',array.join(parameters('logsToIntegrate')),' ',variables('const_singleQuote'),parameters('logIndex'),variables('const_singleQuote'),' ',variables('name_wlsServerPrefix'),' ',copyIndex(),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),parameters('adminVMName')),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ','False',' ',string(parameters('enableCustomSSL')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'), ' <<< \"', parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ', parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ', parameters('storageAccountName'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '${azure.apiVersionForStorage}').keys[0].value,' ', variables('const_mountPointPath'),' ', parameters('enableCoherenceWebLocalStorage'),' ',variables('name_wlsServerPrefix'),' ',copyIndex(),' ',if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),parameters('adminVMName')),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ','False',' ',string(parameters('enableCustomSSL')),' ',base64(parameters('sslCustomIdentityKeyStoreData')),' ',base64(parameters('sslCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('sslCustomIdentityKeyStoreType')),' ',base64(parameters('sslCustomTrustKeyStoreData')),' ',base64(parameters('sslCustomTrustKeyStorePassPhrase')),' ',base64(parameters('sslCustomTrustKeyStoreType')),' ',base64(parameters('sslPrivateKeyAlias')),' ',base64(parameters('sslPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },

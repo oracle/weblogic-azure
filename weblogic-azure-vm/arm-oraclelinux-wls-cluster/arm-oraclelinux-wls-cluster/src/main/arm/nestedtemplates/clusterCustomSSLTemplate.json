@@ -22,6 +22,12 @@
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
             }
         },
+        "_globalResourceNameSuffix":{
+            "type": "string",
+            "metadata": {
+                "description": "The suffix to be appended to the globally unique resource name"
+            }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -59,10 +65,6 @@
                 "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
             }
         },
-        "guidValue": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
-        },
         "location": {
             "type": "string",
             "metadata": {
@@ -76,6 +78,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide managed server VM prefix name"
+            }
+        },
         "numberOfInstances": {
             "type": "int",
             "defaultValue": 2,
@@ -85,6 +93,12 @@
                 "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
             }
         },
+        "nsgName": {
+            "type": "string",
+            "metadata": {
+               "description": "Name of the new Network Security Group"
+            }
+         },
         "portsToExpose": {
             "type": "string",
             "defaultValue": "80,443,7001-9000",
@@ -260,51 +274,51 @@
                "description": "Boolean value indicating, if custom SSL is enabled or not"
             }
         },
-        "keyVaultCustomIdentityKeyStoreData": {
+        "sslCustomIdentityKeyStoreData": {
             "type": "securestring",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Data"
             }
         },
-        "keyVaultCustomIdentityKeyStorePassPhrase": {
+        "sslCustomIdentityKeyStorePassPhrase": {
             "type": "securestring",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Passphrase"
             }
         },
-        "keyVaultCustomIdentityKeyStoreType": {
+        "sslCustomIdentityKeyStoreType": {
             "type": "string",
             "metadata": {
                 "description": "Weblogic Custom Identity Keystore Type"
             },
             "defaultValue": "JKS"
         },
-        "keyVaultCustomTrustKeyStoreData": {
+        "sslCustomTrustKeyStoreData": {
             "type": "securestring",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Data"
             }
         },
-        "keyVaultCustomTrustKeyStorePassPhrase": {
+        "sslCustomTrustKeyStorePassPhrase": {
             "type": "securestring",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Passphrase"
             }
         },
-        "keyVaultCustomTrustKeyStoreType": {
+        "sslCustomTrustKeyStoreType": {
             "type": "string",
             "metadata": {
                 "description": "Weblogic Custom Trust Store Type"
             },
             "defaultValue": "JKS"
         },
-        "keyVaultPrivateKeyAlias": {
+        "sslPrivateKeyAlias": {
             "type": "string",
             "metadata": {
                 "description": "Weblogic Server Private Key Alias"
             }
         },
-        "keyVaultPrivateKeyPassPhrase": {
+        "sslPrivateKeyPassPhrase": {
             "type": "securestring",
             "metadata": {
                 "description": "Weblogic Server Private Key Pass Phrase"
@@ -328,7 +342,7 @@
                 ]
             }
         },
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMNamePrefix'),'VM')]",
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_publicIPAddressType": "Dynamic",
         "const_requiredPortrange": ",65200-65535,5556",
@@ -337,24 +351,23 @@
         "const_vmSize": "[parameters('vmSize')]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "name_appGatewaySubnet": "[parameters('subnetForAppGateway')]",
-        "name_availabilitySet": "WLSCluster-AvailabilitySet",
+        "name_availabilitySet": "[concat('wlscluster-availabilityset-', parameters('_globalResourceNameSuffix'))]",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
-        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
         "name_nic": "_NIC",
         "name_publicIPAddress": "_PublicIP",
         "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
         "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
         "name_outputAdminHost_with_pub_ip": "[concat(parameters('adminVMName'),variables('name_publicIPAddress'))]",
         "name_outputAdminHost_without_pub_ip": "[concat(parameters('adminVMName'),variables('name_nic_without_pub_ip'))]",
-        "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
+        "name_privateSaEndpoint": "[concat('saep', parameters('_globalResourceNameSuffix'))]",
         "name_scriptFile": "setupClusterDomain.sh",
         "name_share": "wlsshare",
-        "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
+        "name_storageAccount": "[concat('olvmstg', parameters('_globalResourceNameSuffix'))]",
         "name_subnet": "[parameters('subnetName')]",
         "name_virtualNetwork": "[parameters('virtualNetworkName')]",
         "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
-        "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
+        "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
         "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "name_customHostnameGeneratorscriptFile": "generateCustomHostNameVerifier.sh",
@@ -432,7 +445,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "tags": "[parameters('tagsByResource')['${identifier.networkSecurityGroups}']]",
             "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-            "name": "[variables('name_networkSecurityGroup')]",
+            "name": "[parameters('nsgName')]",
             "location": "[parameters('location')]",
             "properties": {
                 "securityRules": [
@@ -507,7 +520,7 @@
                 "supportsHttpsTrafficOnly": false
             },
             "dependsOn": [
-                "[variables('name_networkSecurityGroup')]"
+                "[parameters('nsgName')]"
             ]
         },
         {
@@ -575,7 +588,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName')))]"
                 }
             },
             "dependsOn": [
@@ -772,7 +785,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',if(equals(copyIndex(),0),'admin',concat(parameters('managedServerPrefix'), copyIndex())),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersionForStorage}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn), reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ', parameters('virtualNetworkNewOrExisting'),' ',reference(resourceId('Microsoft.Network/privateEndpoints/', variables('name_privateSaEndpoint')), '${azure.apiVersionForPrivateEndpoint}').customDnsConfigs[0].ipAddresses[0],' ',base64(parameters('keyVaultCustomIdentityKeyStoreData')),' ',base64(parameters('keyVaultCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomIdentityKeyStoreType')),' ',base64(parameters('keyVaultCustomTrustKeyStoreData')),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')),' ',base64(parameters('keyVaultPrivateKeyAlias')),' ',base64(parameters('keyVaultPrivateKeyPassPhrase')),'\"')]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' <<< \"',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',if(equals(copyIndex(),0),'admin',concat(parameters('managedServerPrefix'), copyIndex())),' ',parameters('adminVMName'),' ',variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersionForStorage}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), if(parameters('enableDNSConfiguration'),parameters('customDNSNameForAdminServer'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn), reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),' ',parameters('dnsLabelPrefix'),' ',parameters('location'),' ', parameters('virtualNetworkNewOrExisting'),' ',reference(resourceId('Microsoft.Network/privateEndpoints/', variables('name_privateSaEndpoint')), '${azure.apiVersionForPrivateEndpoint}').customDnsConfigs[0].ipAddresses[0],' ',base64(parameters('sslCustomIdentityKeyStoreData')),' ',base64(parameters('sslCustomIdentityKeyStorePassPhrase')),' ',base64(parameters('sslCustomIdentityKeyStoreType')),' ',base64(parameters('sslCustomTrustKeyStoreData')),' ',base64(parameters('sslCustomTrustKeyStorePassPhrase')),' ',base64(parameters('sslCustomTrustKeyStoreType')),' ',base64(parameters('sslPrivateKeyAlias')),' ',base64(parameters('sslPrivateKeyPassPhrase')),'\"')]"
                 }
             }
         },

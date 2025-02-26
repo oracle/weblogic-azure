@@ -2,6 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "_globalResourceNameSuffix": {
+            "type": "string",
+            "metadata": {
+                "description": "A unique suffix that was specified during the deployment of the solution template."
+            }
+        },
         "keyvaultName": {
             "type": "string",
             "defaultValue": "[concat('wls-kv-', uniqueString(resourceGroup().id, deployment().name))]",
@@ -63,7 +69,7 @@
     },
     "variables": {
         "const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-        "name_deploymentScriptUserDefinedManagedIdentity": "wls-vm-keyvault-user-defined-managed-itentity",
+        "name_deploymentScriptUserDefinedManagedIdentity": "[concat('wls-vm-keyvault-user-defined-managed-itentity', parameters('_globalResourceNameSuffix'))]",
         "name_roleAssignmentName": "[guid(format('{0}{1}Role assignment in resource group scope', subscription().id, parameters('utcValue')))]"
     },
     "resources": [
@@ -113,14 +119,15 @@
                 "enabledForDeployment": false,
                 "enabledForDiskEncryption": false,
                 "enabledForTemplateDeployment": true,
-                "enableSoftDelete": true
+                "enableSoftDelete": true,
+                "enableRbacAuthorization": false
             }
         },
         {
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "${azure.apiVersionForDeploymentScript}",
             "tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
-            "name": "script-createAddCertificate",
+            "name": "[concat('script-generate-certificate-', parameters('_globalResourceNameSuffix'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
