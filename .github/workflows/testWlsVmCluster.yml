@@ -456,12 +456,7 @@ jobs:
         if: always()
         run: |
             echo "delete... " $resourceGroup
-            az group delete --yes --no-wait --verbose --name $resourceGroup
-      - name: Delete ELK index
-        id: delete-elk-index
-        if: ${{ env.enableELK == 'true' }}
-        run: |
-          curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-cluster-${{ github.run_id }}${{ github.run_number }}
+            az group delete --yes --no-wait --verbose --name $resourceGroup      
 
   cleanup-github-resource:
     needs: deploy-weblogic-cluster
