@@ -1179,6 +1179,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[variables('const_globalResourceNameSuffix')]"
+                    },
                     "adminPasswordOrKey": {
                         "value": "[parameters('adminPasswordOrKey')]"
                     },
@@ -1276,6 +1279,9 @@
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
                     },
+                    "_globalResourceNameSuffix": {
+                        "value": "[variables('const_globalResourceNameSuffix')]"
+                    },
                     "adminPasswordOrKey": {
                         "value": "[parameters('adminPasswordOrKey')]"
                     },
@@ -1312,6 +1318,9 @@
                     "storageAccountName": {
                         "value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
                     },
+                    "subnetName": {
+                        "value": "[parameters('subnetName')]"
+                    },
                     "tagsByResource": {
                         "value": "[variables('obj_tagsByResources')]"
                     },
@@ -1320,6 +1329,12 @@
                     },
                     "vmSizeSelectForCoherence": {
                         "value": "[variables('const_vmSizeCoherence')]"
+                    },
+                    "virtualNetworkResourceGroupName": {
+                        "value": "[parameters('virtualNetworkResourceGroupName')]"
+                    },
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
                     },
                     "wlsDomainName": {
                         "value": "[parameters('wlsDomainName')]"
