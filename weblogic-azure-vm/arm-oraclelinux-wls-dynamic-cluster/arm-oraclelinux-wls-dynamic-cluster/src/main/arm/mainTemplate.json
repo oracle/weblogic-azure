@@ -16,24 +16,6 @@
 			},
 			"defaultValue": ""
 		},
-		"aadsPortNumber": {
-			"defaultValue": "636",
-			"type": "string",
-			"metadata": {
-				"description": "Accessible port of the LDAP server."
-			}
-		},
-		"aadsPublicIP": {
-			"defaultValue": "",
-			"type": "string"
-		},
-		"aadsServerHost": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "The LDAP server host."
-			}
-		},
 		"adminPasswordOrKey": {
 			"type": "securestring",
 			"metadata": {
@@ -160,34 +142,6 @@
 				"description": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster"
 			}
 		},
-		"elasticsearchEndpoint": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "Endpoint of the Elasticsearch instance."
-			}
-		},
-		"elasticsearchPassword": {
-			"type": "securestring",
-			"defaultValue": "[newGuid()]",
-			"metadata": {
-				"description": "The credentials to distibute message with REST API to Elasticsearch instance."
-			}
-		},
-		"elasticsearchUserName": {
-			"type": "string",
-			"defaultValue": "",
-			"metadata": {
-				"description": "The credentials to distibute message with REST API to Elasticsearch instance."
-			}
-		},
-		"enableAAD": {
-			"defaultValue": false,
-			"type": "bool",
-			"metadata": {
-				"description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
-			}
-		},
 		"enableCoherence": {
 			"defaultValue": false,
 			"type": "bool",
@@ -214,13 +168,6 @@
 			"type": "bool",
 			"metadata": {
 				"description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
-			}
-		},
-		"enableELK": {
-			"defaultValue": false,
-			"type": "bool",
-			"metadata": {
-				"description": "If true, use the supplied parameters to distribute WebLogic Server logs to the Elasticsearch instance."
 			}
 		},
 		"enableOHS": {
@@ -623,48 +570,6 @@
 				"description": "Provide Weblogic domain name"
 			}
 		},
-		"wlsLDAPGroupBaseDN": {
-			"defaultValue": "",
-			"type": "securestring",
-			"metadata": {
-				"description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
-			}
-		},
-		"wlsLDAPPrincipal": {
-			"defaultValue": "",
-			"type": "securestring",
-			"metadata": {
-				"description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
-			}
-		},
-		"wlsLDAPPrincipalPassword": {
-			"defaultValue": "[newGuid()]",
-			"type": "securestring",
-			"metadata": {
-				"description": "The credential (usually a password) used to connect to the LDAP server."
-			}
-		},
-		"wlsLDAPProviderName": {
-			"defaultValue": "AzureActiveDirectoryProvider",
-			"type": "string",
-			"metadata": {
-				"description": "The value used for creating authentication provider name of WebLogic Server."
-			}
-		},
-		"wlsLDAPSSLCertificate": {
-			"defaultValue": "",
-			"type": "securestring",
-			"metadata": {
-				"description": "Client certificate that will be imported to trust store of SSL."
-			}
-		},
-		"wlsLDAPUserBaseDN": {
-			"defaultValue": "",
-			"type": "securestring",
-			"metadata": {
-				"description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
-			}
-		},
 		"wlsPassword": {
 			"type": "securestring",
 			"metadata": {
@@ -776,12 +681,10 @@
 		"const_sslConfigurationAccessOptionUploadConfig": "uploadConfig",
 		"const_sslConfigurationAccessOptionKeyVaultStoredConfig": "keyVaultStoredConfig",
 		"const_currentSubscription": "[subscription().subscriptionId]",
-		"name_aadLinkedTemplateName": "aadNestedTemplate.json",
 		"name_clusterLinkedTemplateName": "clusterTemplate.json",
 		"name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
 		"name_dbLinkedTemplateName": "dbTemplate.json",
 		"name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
-		"name_elkLinkedTemplateName": "elkNestedTemplate.json",
 		"name_coherenceTemplateName": "coherenceTemplate.json",
 		"name_ohsLinkedTemplateName": "ohsNestedTemplate.json",
 		"name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
@@ -1238,232 +1141,12 @@
 					}
 				}
 			}
-		},
-		{
-			"name": "aadLinkedTemplate",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
-			],
-			"condition": "[and(parameters('enableAAD'),not(parameters('enableCustomSSL')))]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"_artifactsLocation": {
-						"value": "[parameters('_artifactsLocation')]"
-					},
-					"_artifactsLocationSasToken": {
-						"value": "[parameters('_artifactsLocationSasToken')]"
-					},
-					"aadsPortNumber": {
-						"value": "[parameters('aadsPortNumber')]"
-					},
-					"aadsPublicIP": {
-						"value": "[parameters('aadsPublicIP')]"
-					},
-					"aadsServerHost": {
-						"value": "[parameters('aadsServerHost')]"
-					},
-					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
-					},
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"managedServerPrefix": {
-						"value": "[parameters('managedServerPrefix')]"
-					},
-					"dynamicClusterSize": {
-						"value": "[parameters('dynamicClusterSize')]"
-					},
-					"wlsDomainName": {
-						"value": "[parameters('wlsDomainName')]"
-					},
-					"wlsLDAPGroupBaseDN": {
-						"value": "[parameters('wlsLDAPGroupBaseDN')]"
-					},
-					"wlsLDAPPrincipal": {
-						"value": "[parameters('wlsLDAPPrincipal')]"
-					},
-					"wlsLDAPPrincipalPassword": {
-						"value": "[parameters('wlsLDAPPrincipalPassword')]"
-					},
-					"wlsLDAPProviderName": {
-						"value": "[parameters('wlsLDAPProviderName')]"
-					},
-					"wlsLDAPSSLCertificate": {
-						"value": "[parameters('wlsLDAPSSLCertificate')]"
-					},
-					"wlsLDAPUserBaseDN": {
-						"value": "[parameters('wlsLDAPUserBaseDN')]"
-					},
-					"wlsPassword": {
-						"value": "[parameters('wlsPassword')]"
-					},
-					"wlsUserName": {
-						"value": "[parameters('wlsUserName')]"
-					}
-				}
-			}
-		},
-		{
-			"name": "aadLinkedTemplateWithCustomSSL",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-				"[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
-			],
-			"condition": "[and(parameters('enableAAD'),parameters('enableCustomSSL'))]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"_artifactsLocation": {
-						"value": "[parameters('_artifactsLocation')]"
-					},
-					"_artifactsLocationSasToken": {
-						"value": "[parameters('_artifactsLocationSasToken')]"
-					},
-					"aadsPortNumber": {
-						"value": "[parameters('aadsPortNumber')]"
-					},
-					"aadsPublicIP": {
-						"value": "[parameters('aadsPublicIP')]"
-					},
-					"aadsServerHost": {
-						"value": "[parameters('aadsServerHost')]"
-					},
-					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
-					},
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"managedServerPrefix": {
-						"value": "[parameters('managedServerPrefix')]"
-					},
-					"dynamicClusterSize": {
-						"value": "[parameters('dynamicClusterSize')]"
-					},
-					"wlsDomainName": {
-						"value": "[parameters('wlsDomainName')]"
-					},
-					"wlsLDAPGroupBaseDN": {
-						"value": "[parameters('wlsLDAPGroupBaseDN')]"
-					},
-					"wlsLDAPPrincipal": {
-						"value": "[parameters('wlsLDAPPrincipal')]"
-					},
-					"wlsLDAPPrincipalPassword": {
-						"value": "[parameters('wlsLDAPPrincipalPassword')]"
-					},
-					"wlsLDAPProviderName": {
-						"value": "[parameters('wlsLDAPProviderName')]"
-					},
-					"wlsLDAPSSLCertificate": {
-						"value": "[parameters('wlsLDAPSSLCertificate')]"
-					},
-					"wlsLDAPUserBaseDN": {
-						"value": "[parameters('wlsLDAPUserBaseDN')]"
-					},
-					"wlsPassword": {
-						"value": "[parameters('wlsPassword')]"
-					},
-					"wlsUserName": {
-						"value": "[parameters('wlsUserName')]"
-					},
-					"enableCustomSSL": {
-						"value": "[parameters('enableCustomSSL')]"
-					},
-					"keyVaultCustomTrustKeyStorePassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStorePassPhraseSecretName.value)]"
-						}
-					},
-					"keyVaultCustomTrustKeyStoreType": {
-						"value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreType'), parameters('uploadedCustomTrustKeyStoreType'))]"
-					}
-				}
-			}
-		},
-		{
-			"name": "elkLinkedTemplate",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
-				"[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplateWithCustomSSL')]"
-			],
-			"condition": "[parameters('enableELK')]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_elkLinkedTemplateName')))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"_artifactsLocation": {
-						"value": "[parameters('_artifactsLocation')]"
-					},
-					"_artifactsLocationSasToken": {
-						"value": "[parameters('_artifactsLocationSasToken')]"
-					},
-					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
-					},
-					"elasticsearchEndpoint": {
-						"value": "[parameters('elasticsearchEndpoint')]"
-					},
-					"elasticsearchPassword": {
-						"value": "[parameters('elasticsearchPassword')]"
-					},
-					"elasticsearchUserName": {
-						"value": "[parameters('elasticsearchUserName')]"
-					},
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"logsToIntegrate": {
-						"value": "[parameters('logsToIntegrate')]"
-					},
-					"managedServerPrefix": {
-						"value": "[parameters('managedServerPrefix')]"
-					},
-					"maxDynamicClusterSize": {
-						"value": "[parameters('maxDynamicClusterSize')]"
-					},
-					"numberOfManagedApplicationInstances": {
-						"value": "[parameters('dynamicClusterSize')]"
-					},
-					"wlsDomainName": {
-						"value": "[parameters('wlsDomainName')]"
-					},
-					"wlsPassword": {
-						"value": "[parameters('wlsPassword')]"
-					},
-					"wlsUserName": {
-						"value": "[parameters('wlsUserName')]"
-					}
-				}
-			}
-		},
+		},		
 		{
 			"name": "coherenceTemplate",
 			"type": "Microsoft.Resources/deployments",
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
+				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
 			],
 			"apiVersion": "${azure.apiVersionForDeployment}",
 			"condition": "[and(parameters('enableCoherence'),not(parameters('enableCustomSSL')))]",
@@ -1495,29 +1178,11 @@
 					"dnsLabelPrefix": {
 						"value": "[parameters('dnsLabelPrefix')]"
 					},
-					"elasticsearchEndpoint": {
-						"value": "[parameters('elasticsearchEndpoint')]"
-					},
-					"elasticsearchPassword": {
-						"value": "[parameters('elasticsearchPassword')]"
-					},
-					"elasticsearchUserName": {
-						"value": "[parameters('elasticsearchUserName')]"
-					},
 					"enableCoherenceWebLocalStorage": {
 						"value": "[parameters('enableCoherenceWebLocalStorage')]"
 					},
-					"enableELK": {
-						"value": "[parameters('enableELK')]"
-					},
 					"location": {
 						"value": "[parameters('location')]"
-					},
-					"logIndex": {
-						"value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.logIndex.value, '')]"
-					},
-					"logsToIntegrate": {
-						"value": "[parameters('logsToIntegrate')]"
 					},
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
@@ -1571,7 +1236,7 @@
 			"name": "coherenceTemplateWithCustomSSL",
 			"type": "Microsoft.Resources/deployments",
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
+				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
 			],
 			"apiVersion": "${azure.apiVersionForDeployment}",
 			"condition": "[and(parameters('enableCoherence'),parameters('enableCustomSSL'))]",
@@ -1603,29 +1268,11 @@
 					"dnsLabelPrefix": {
 						"value": "[parameters('dnsLabelPrefix')]"
 					},
-					"elasticsearchEndpoint": {
-						"value": "[parameters('elasticsearchEndpoint')]"
-					},
-					"elasticsearchPassword": {
-						"value": "[parameters('elasticsearchPassword')]"
-					},
-					"elasticsearchUserName": {
-						"value": "[parameters('elasticsearchUserName')]"
-					},
 					"enableCoherenceWebLocalStorage": {
 						"value": "[parameters('enableCoherenceWebLocalStorage')]"
 					},
-					"enableELK": {
-						"value": "[parameters('enableELK')]"
-					},
 					"location": {
 						"value": "[parameters('location')]"
-					},
-					"logIndex": {
-						"value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.logIndex.value, '')]"
-					},
-					"logsToIntegrate": {
-						"value": "[parameters('logsToIntegrate')]"
 					},
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
@@ -1885,9 +1532,7 @@
 			"name": "${dynamic.end}",
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
-				"[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-				"[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
 				"[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
@@ -1922,11 +1567,6 @@
 		"adminSecuredConsole": {
 			"type": "string",
 			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.adminSecuredConsole.value)]"
-		},
-		"logIndex": {
-			"type": "string",
-			"condition": "[parameters('enableELK')]",
-			"value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.logIndex.value, '')]"
 		},
 		"ohsAccessURL": {
 			"type": "string",

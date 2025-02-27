@@ -73,30 +73,6 @@ function validateInput() {
         echo_stderr "enableWebLocalStorage is required. "
     fi
 
-    if [ -z "$enableELK" ]; then
-        echo_stderr "enableELK is required. "
-    fi
-
-    if [ -z "$elasticURI" ]; then
-        echo_stderr "elasticURI is required. "
-    fi
-
-    if [ -z "$elasticUserName" ]; then
-        echo_stderr "elasticUserName is required. "
-    fi
-
-    if [ -z "$elasticPassword" ]; then
-        echo_stderr "elasticPassword is required. "
-    fi
-
-    if [ -z "$logsToIntegrate" ]; then
-        echo_stderr "logsToIntegrate is required. "
-    fi
-
-    if [ -z "$logIndex" ]; then
-        echo_stderr "logIndex is required. "
-    fi
-
     if [ -z "$serverIndex" ]; then
         echo_stderr "serverIndex is required. "
     fi
@@ -749,7 +725,7 @@ MIN_CERT_VALIDITY="1"
 #    echo "ARG[${args[${i}]}]"
 #done
 
-read wlsDomainName wlsUserName wlsPassword adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
@@ -799,25 +775,4 @@ else
     configureCustomHostNameVerifier
     startManagedServer
     cleanup
-
-    echo "enable ELK? ${enableELK}"
-    chmod ugo+x ${SCRIPT_PWD}/elkIntegrationForConfiguredCluster.sh
-    if [[ "${enableELK,,}" == "true" ]]; then
-        echo "Set up ELK..."
-        ${SCRIPT_PWD}/elkIntegrationForConfiguredCluster.sh \
-            ${oracleHome} \
-            ${wlsAdminURL} \
-            ${wlsUserName} \
-            ${wlsPassword} \
-            "admin" \
-            ${elasticURI} \
-            ${elasticUserName} \
-            ${elasticPassword} \
-            ${wlsDomainName} \
-            ${wlsDomainPath}/${wlsDomainName} \
-            ${logsToIntegrate} \
-            ${serverIndex} \
-            ${logIndex} \
-            ${managedServerPrefix}
-    fi
 fi
