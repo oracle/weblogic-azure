@@ -513,17 +513,9 @@
 			"metadata": {
 				"description": "Boolean value indicating, if custom SSL is enabled or not"
 			}
-		},
-		"utcValue": {
-			"type": "string",
-			"defaultValue": "[utcNow()]",
-			"metadata": {
-				"description": "Current deployment time. Used as a tag in deployment script."
-			}
 		}
 	},
 	"variables": {
-		"const_currentSubscription": "[subscription().subscriptionId]",
 		"name_clusterLinkedTemplateName": "clusterTemplate.json",
 		"name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
 		"name_dbLinkedTemplateName": "dbTemplate.json",

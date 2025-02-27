@@ -273,7 +273,6 @@
         },
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_publicIPAddressType": "Dynamic",
-        "const_singleQuote": "'",
         "const_vmSize": "[parameters('vmSizeSelectForCoherence')]",
         "const_wlsDomainPath": "/u01/domains",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
