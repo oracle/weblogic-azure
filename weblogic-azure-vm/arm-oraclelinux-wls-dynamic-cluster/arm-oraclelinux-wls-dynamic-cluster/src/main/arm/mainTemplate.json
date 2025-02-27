@@ -29,11 +29,11 @@
 				"description": "User name for the Virtual Machine."
 			}
 		},
-		"adminVMName": {
-			"defaultValue": "adminVM",
+		"adminVMNamePrefix": {
+			"defaultValue": "admin",
 			"type": "string",
 			"metadata": {
-				"description": "Admin Server hosting VM name."
+				"description": "Admin Server hosting VM name prefix."
 			}
 		},
 		"authenticationType": {
@@ -184,6 +184,13 @@
 				"description": "True to enable passwordless JDBC connection."
 			}
 		},
+		"guidValue": {
+			"type": "string",
+			"defaultValue": "[newGuid()]",
+			"metadata": {
+				"description": "A unique value to ensure the generated names are unique."
+			}
+		},
 		"hasDNSZones": {
 			"type": "bool",
 			"defaultValue": false,
@@ -324,8 +331,8 @@
 				"description": "The Oracle Linux image with OHS and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
 			}
 		},
-		"ohsVMName": {
-			"defaultValue": "ohsVM",
+		"ohsVMNamePrefix": {
+			"defaultValue": "ohs",
 			"type": "string",
 			"metadata": {
 				"description": "OHS Server hosting VM name."
@@ -445,7 +452,7 @@
 		},
 		"virtualNetworkName": {
 			"type": "string",
-			"defaultValue": "wls-vnet",
+			"defaultValue": "[concat('wlsdcluster-vnet-', uniqueString(utcNow()))]",
 			"metadata": {
 				"description": "Name of the existing or new VNET"
 			}
@@ -516,16 +523,20 @@
 		}
 	},
 	"variables": {
-		"name_clusterLinkedTemplateName": "clusterTemplate.json",
+		"const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
+		"name_adminVM": "[concat(parameters('adminVMNamePrefix'), variables('const_globalResourceNameSuffix'), 'VM')]",
+		"name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
 		"name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
+		"name_clusterLinkedTemplateName": "clusterTemplate.json",
+		"name_clusterTemplate": "clusterLinkedTemplate",
+		"name_coherenceTemplateName": "coherenceTemplate.json",
 		"name_dbLinkedTemplateName": "dbTemplate.json",
 		"name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
-		"name_coherenceTemplateName": "coherenceTemplate.json",
-		"name_ohsLinkedTemplateName": "ohsNestedTemplate.json",
+		"name_managedVMNamePrefix": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'))]",
+		"name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg-', variables('const_globalResourceNameSuffix'))]",
 		"name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
-		"clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
-		"name_clusterTemplate": "clusterLinkedTemplate",
-		"name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate"
+		"name_ohsLinkedTemplateName": "ohsNestedTemplate.json",
+		"ref_clusterTemplate": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]"
 	},
 	"resources": [
 		{
@@ -540,7 +551,7 @@
 					"resources": []
 				}
 			}
-		},		
+		},
 		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersionForDeployment}",
@@ -559,6 +570,9 @@
 					"_artifactsLocationSasToken": {
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
 					"adminPasswordOrKey": {
 						"value": "[parameters('adminPasswordOrKey')]"
 					},
@@ -566,7 +580,7 @@
 						"value": "[parameters('adminUsername')]"
 					},
 					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
+						"value": "[variables('name_adminVM')]"
 					},
 					"authenticationType": {
 						"value": "[parameters('authenticationType')]"
@@ -586,8 +600,14 @@
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
 					},
+					"managedVMPrefix": {
+						"value": "[variables('name_managedVMNamePrefix')]"
+					},
 					"maxDynamicClusterSize": {
 						"value": "[parameters('maxDynamicClusterSize')]"
+					},
+					"nsgName": {
+						"value": "[variables('name_networkSecurityGroup')]"
 					},
 					"portsToExpose": {
 						"value": "[parameters('portsToExpose')]"
@@ -658,6 +678,9 @@
 					"_artifactsLocationSasToken": {
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
 					"adminPasswordOrKey": {
 						"value": "[parameters('adminPasswordOrKey')]"
 					},
@@ -665,7 +688,7 @@
 						"value": "[parameters('adminUsername')]"
 					},
 					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
+						"value": "[variables('name_adminVM')]"
 					},
 					"authenticationType": {
 						"value": "[parameters('authenticationType')]"
@@ -685,8 +708,14 @@
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
 					},
+					"managedVMPrefix": {
+						"value": "[variables('name_managedVMNamePrefix')]"
+					},
 					"maxDynamicClusterSize": {
 						"value": "[parameters('maxDynamicClusterSize')]"
+					},
+					"nsgName": {
+						"value": "[variables('name_networkSecurityGroup')]"
 					},
 					"portsToExpose": {
 						"value": "[parameters('portsToExpose')]"
@@ -788,12 +817,12 @@
 						"value": "[parameters('enableOHS')]"
 					},
 					"networkSecurityGroupName": {
-						"value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+						"value": "[variables('name_networkSecurityGroup')]"
 					}
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
+				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
 				"[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]"
 			]
 		},
@@ -803,7 +832,7 @@
 			"name": "dbLinkedTemplate",
 			"condition": "[parameters('enableDB')]",
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]"
+				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]"
 			],
 			"properties": {
 				"mode": "Incremental",
@@ -819,7 +848,7 @@
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
 					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
+						"value": "[variables('name_adminVM')]"
 					},
 					"databaseType": {
 						"value": "[parameters('databaseType')]"
@@ -851,6 +880,9 @@
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
 					},
+					"managedVMNamePrefix": {
+						"value": "[variables('name_managedVMNamePrefix')]"
+					},
 					"numberOfManagedApplicationInstances": {
 						"value": "[parameters('dynamicClusterSize')]"
 					},
@@ -862,7 +894,7 @@
 					}
 				}
 			}
-		},		
+		},
 		{
 			"name": "coherenceTemplate",
 			"type": "Microsoft.Resources/deployments",
@@ -884,6 +916,9 @@
 					"_artifactsLocationSasToken": {
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
 					"adminPasswordOrKey": {
 						"value": "[parameters('adminPasswordOrKey')]"
 					},
@@ -894,7 +929,7 @@
 						"value": "[parameters('authenticationType')]"
 					},
 					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
+						"value": "[variables('name_adminVM')]"
 					},
 					"dnsLabelPrefix": {
 						"value": "[parameters('dnsLabelPrefix')]"
@@ -908,6 +943,9 @@
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
 					},
+					"managedVMNamePrefix": {
+						"value": "[variables('name_managedVMNamePrefix')]"
+					},
 					"numberOfCoherenceCacheInstances": {
 						"value": "[parameters('numberOfCoherenceCacheInstances')]"
 					},
@@ -918,7 +956,7 @@
 						"value": "[parameters('subnetName')]"
 					},
 					"storageAccountName": {
-						"value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
 					},
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
@@ -974,6 +1012,9 @@
 					"_artifactsLocationSasToken": {
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
 					"adminPasswordOrKey": {
 						"value": "[parameters('adminPasswordOrKey')]"
 					},
@@ -984,7 +1025,7 @@
 						"value": "[parameters('authenticationType')]"
 					},
 					"adminVMName": {
-						"value": "[parameters('adminVMName')]"
+						"value": "[variables('name_adminVM')]"
 					},
 					"dnsLabelPrefix": {
 						"value": "[parameters('dnsLabelPrefix')]"
@@ -998,6 +1039,9 @@
 					"managedServerPrefix": {
 						"value": "[parameters('managedServerPrefix')]"
 					},
+					"managedVMNamePrefix": {
+						"value": "[variables('name_managedVMNamePrefix')]"
+					},
 					"numberOfCoherenceCacheInstances": {
 						"value": "[parameters('numberOfCoherenceCacheInstances')]"
 					},
@@ -1005,7 +1049,7 @@
 						"value": "[parameters('skuUrnVersion')]"
 					},
 					"storageAccountName": {
-						"value": "[reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
 					},
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
@@ -1071,9 +1115,9 @@
 			"name": "ohsLinkedTemplate",
 			"type": "Microsoft.Resources/deployments",
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
+				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
-				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
+				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]"
 			],
 			"apiVersion": "${azure.apiVersionForDeployment}",
 			"condition": "[parameters('enableOHS')]",
@@ -1103,7 +1147,7 @@
 						"value": "[parameters('dnsLabelPrefix')]"
 					},
 					"storageAccountName": {
-						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
 					},
 					"subnetName": {
 						"value": "[parameters('subnetName')]"
@@ -1127,7 +1171,7 @@
 						"value": "[parameters('ohsSkuUrnVersion')]"
 					},
 					"ohsVMName": {
-						"value": "[parameters('ohsVMName')]"
+						"value": "[concat(parameters('ohsVMNamePrefix'), variables('const_globalResourceNameSuffix'), 'VM')]"
 					},
 					"ohshttpPort": {
 						"value": "[parameters('ohshttpPort')]"
@@ -1136,7 +1180,7 @@
 						"value": "[parameters('ohshttpsPort')]"
 					},
 					"ohsSSLKeystoreData": {
-						"value":"[parameters('uploadedKeyStoreData')]"
+						"value": "[parameters('uploadedKeyStoreData')]"
 					},
 					"ohsSSLKeystorePassword": {
 						"value": "[parameters('uploadedKeyStorePassword')]"
@@ -1151,13 +1195,13 @@
 						"value": "[parameters('virtualNetworkResourceGroupName')]"
 					},
 					"virtualNetworkName": {
-						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.virtualNetworkName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.virtualNetworkName.value]"
 					},
 					"vmSize": {
 						"value": "[parameters('vmSize')]"
 					},
 					"adminRestMgmtURL": {
-						"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.adminRestMgmtURL.value]"
+						"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminRestMgmtURL.value]"
 					},
 					"wlsPassword": {
 						"value": "[parameters('wlsPassword')]"
@@ -1208,10 +1252,9 @@
 						"value": "[parameters('dnszoneResourceGroup')]"
 					},
 					"targetResources": {
-						"value": "[if(parameters('enableOHS'), createArray(reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value, reference('ohsLinkedTemplate', '${azure.apiVersionForDeployment}').outputs._ohsPublicIP.value), createArray(reference(variables('clusterTemplateRef'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value))]"
+						"value": "[if(parameters('enableOHS'), createArray(reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value, reference('ohsLinkedTemplate', '${azure.apiVersionForDeployment}').outputs._ohsPublicIP.value), createArray(reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value))]"
 					}
 				}
-
 			}
 		},
 		{
@@ -1219,7 +1262,7 @@
 			"apiVersion": "${azure.apiVersionForDeployment}",
 			"name": "${dynamic.end}",
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
+				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
 				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
@@ -1236,24 +1279,31 @@
 				}
 			}
 		}
-
 	],
 	"outputs": {
+		"adminVMName": {
+			"type": "string",
+			"value": "[variables('name_adminVM')]"
+		},
+		"managedServerVMNamePrefix": {
+			"type": "string",
+			"value": "[variables('name_managedVMNamePrefix')]"
+		},
 		"wlsDomainLocation": {
 			"type": "string",
-			"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.wlsDomainLocation.value]"
+			"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.wlsDomainLocation.value]"
 		},
 		"adminHostName": {
 			"type": "string",
-			"value": "[reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.adminHostName.value]"
+			"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminHostName.value]"
 		},
 		"adminConsole": {
 			"type": "string",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.adminConsole.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminConsole.value)]"
 		},
 		"adminSecuredConsole": {
 			"type": "string",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('clusterTemplateRef'),'${azure.apiVersionForDeployment}').outputs.adminSecuredConsole.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminSecuredConsole.value)]"
 		},
 		"ohsAccessURL": {
 			"type": "string",

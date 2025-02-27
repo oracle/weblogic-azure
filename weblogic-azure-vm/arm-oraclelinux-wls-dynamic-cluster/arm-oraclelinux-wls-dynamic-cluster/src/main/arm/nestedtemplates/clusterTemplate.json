@@ -22,6 +22,12 @@
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
             }
         },
+        "_globalResourceNameSuffix": {
+            "type": "string",
+            "metadata": {
+                "description": "A suffix to be appended to all resources created by this template."
+            }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -66,10 +72,6 @@
                 "description": "Initial Number of Managed Servers that will be configured in the Dynamic Cluster"
             }
         },
-        "guidValue": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
-        },
         "location": {
             "type": "string",
             "metadata": {
@@ -82,11 +84,23 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Managed Server hosting VM name prefix."
+            }
+        },
         "maxDynamicClusterSize": {
             "type": "int",
             "defaultValue": 10,
             "metadata": {
                 "description": "Maximum Number of Managed Servers allowed to be configured in the Dynamic Cluster"
+            }
+        },
+        "nsgName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Network Security Group."
             }
         },
         "portsToExpose": {
@@ -245,7 +259,7 @@
                 ]
             }
         },
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'),'VM')]",
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
         "const_publicIPAddressType": "Dynamic",
         "const_requiredPortrange": ",65200-65535,5556",
@@ -255,7 +269,6 @@
         "const_vmSize": "[parameters('vmSize')]",
         "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
         "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
-        "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
         "name_nic": "NIC",
         "name_nic_with_pub_ip": "[concat(variables('name_nic'), '_with_pub_ip')]",
         "name_nic_without_pub_ip": "[concat(variables('name_nic'), '_without_pub_ip')]",
@@ -264,12 +277,12 @@
         "name_publicIPAddress": "PublicIP",
         "name_scriptFile": "setupDynamicClusterDomain.sh",
         "name_share": "wlsshare",
-        "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
+        "name_storageAccount": "[concat('olvmstg', parameters('_globalResourceNameSuffix'))]",
         "name_subnet": "[parameters('subnetName')]",
         "name_virtualNetwork": "[parameters('virtualNetworkName')]",
-        "name_privateSaEndpoint": "[concat(take(replace(parameters('guidValue'),'-',''),6),'saep')]",
+        "name_privateSaEndpoint": "[concat('saep', parameters('_globalResourceNameSuffix'))]",
         "ref_fileService": "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('name_storageAccount'), 'default')]",
-        "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
+        "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
         "ref_storage": "[resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount'))]",
         "ref_subnet": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
         "t3AdminPort": "[if(not(parameters('enableHTTPAdminListenPort')),'7005','7001')]",
@@ -297,7 +310,7 @@
             "apiVersion": "${azure.apiVersionForNetworkSecurityGroups}",
             "type": "Microsoft.Network/networkSecurityGroups",
             "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-            "name": "[variables('name_networkSecurityGroup')]",
+            "name": "[parameters('nsgName')]",
             "location": "[parameters('location')]",
             "properties": {
                 "securityRules": [
@@ -419,7 +432,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',take(replace(parameters('guidValue'),'-',''),10),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), '-', toLower(variables('const_managedVMPrefix')), copyindex(),'-', parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName')))]"
                 }
             }
         },

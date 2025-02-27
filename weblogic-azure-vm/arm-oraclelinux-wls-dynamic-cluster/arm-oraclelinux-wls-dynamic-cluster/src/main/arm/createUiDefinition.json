@@ -1333,7 +1333,6 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "icon": "None",
                             "text": "Selecting 'Yes' here and providing the configuration will cause the template to create a Coherence cluster, the WebLogic Domain will create a data tier configured with Managed Coherence cache servers.",
                             "link": {
                                 "label": "Learn more",
