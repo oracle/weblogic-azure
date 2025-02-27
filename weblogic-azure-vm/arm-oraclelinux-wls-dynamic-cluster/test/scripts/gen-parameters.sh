@@ -22,9 +22,6 @@ cat <<EOF > ${parametersPath}
         "adminUsername": {
             "value": "GEN-UNIQUE"
         },
-        "enableAAD": {
-            "value": false
-        },
         "enableDB": {
             "value": false
         },

@@ -6,10 +6,10 @@ name: Test Dynamic Cluster on VM
 on:
   workflow_dispatch:
     inputs:
-      enableELK:
-        description: 'Specify whether to enable ELK depoyment or not.'
+      location:
+        description: 'Location of the resources'
         required: true
-        default: 'false'
+        default: 'eastus'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
@@ -25,9 +25,6 @@ env:
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   dbServerName: weblogicdb
   dynamicClusterSize: 1
-  elkURI: ${{ secrets.ELK_URI }}
-  elkUser: ${{ secrets.ELK_USER_NAME }}
-  elkPassword: ${{ secrets.ELK_PSW }}
   gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   gitUserName: ${{ secrets.USER_NAME }} 
@@ -39,8 +36,6 @@ env:
   maxDynamicClusterSize: 2
   offerName: arm-oraclelinux-wls-dynamic-cluster
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
-  otnUser: ${{ secrets.OTN_USERID }}
-  otnPassword: ${{ secrets.OTN_PASSWORD }}
   repoName: weblogic-azure
   repoOwner: ${{ secrets.USER_NAME }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
@@ -56,9 +51,6 @@ jobs:
   preflight:
     outputs: 
       artifactName: ${{steps.artifact_file.outputs.artifactName}}
-      addnodeArtifactName: ${{steps.addnode_artifact_file.outputs.addnode_artifactName}}
-      addCoherenceNodeArtifactName: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactName}}
-      deletenodeArtifactName: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactName}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -133,53 +125,6 @@ jobs:
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}
           path: ${{steps.artifact_file.outputs.artifactPath}}
-
-      - name: Generate addnode artifact file name and path
-        id: addnode_artifact_file
-        run: |
-          addnode_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          addnode_artifactName=${{ env.offerName }}-addnode-$addnode_version-arm-assembly
-          unzip ${offerPath}/addnode/target/$addnode_artifactName.zip -d ${offerPath}/addnode/target/$addnode_artifactName
-          echo "##[set-output name=addnode_artifactName;]${addnode_artifactName}"
-          echo "##[set-output name=addnode_artifactPath;]${offerPath}/addnode/target/$addnode_artifactName"
-      - name: Archive ${{env.offerName}} addnode template
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{steps.addnode_artifact_file.outputs.addnode_artifactName}}
-          path: ${{steps.addnode_artifact_file.outputs.addnode_artifactPath}}
-
-      - name: Generate delete node artifact file name and path
-        id: deletenode_artifact_file
-        run: |
-          deletenode_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-deletenode}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          deletenode_artifactName=${{ env.offerName }}-deletenode-$deletenode_version-arm-assembly
-          unzip ${offerPath}/deletenode/target/$deletenode_artifactName.zip -d ${offerPath}/deletenode/target/$deletenode_artifactName
-          echo "##[set-output name=deletenode_artifactName;]${deletenode_artifactName}"
-          echo "##[set-output name=deletenode_artifactPath;]${offerPath}/deletenode/target/$deletenode_artifactName"
-
-      - name: Archive ${{env.offerName}} deletenode template
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactName}}
-          path: ${{steps.deletenode_artifact_file.outputs.deletenode_artifactPath}}
-
-      - name: Generate addnode-coherence artifact file name and path
-        id: addnode_coherence_artifact_file
-        run: |
-          addnode_coherence_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.arm-oraclelinux-wls-dynamic-cluster-addnode-coherence}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-          addnode_coherence_artifactName=${{ env.offerName }}-addnode-coherence-$addnode_coherence_version-arm-assembly
-          unzip ${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName.zip -d ${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName
-          echo "##[set-output name=addnode_coherence_artifactName;]${addnode_coherence_artifactName}"
-          echo "##[set-output name=addnode_coherence_artifactPath;]${offerPath}/addnode-coherence/target/$addnode_coherence_artifactName"
-
-      - name: Archive ${{env.offerName}} addnode-coherence template
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactName}}
-          path: ${{steps.addnode_coherence_artifact_file.outputs.addnode_coherence_artifactPath}}
 
   deploy-dependencies:
     needs: preflight
@@ -401,16 +346,6 @@ jobs:
               --name ${{ env.adminVMName }}
             sleep 1m
 
-      - name: Verify WebLogic Server Installation
-        id: verify-wls
-        run: |
-          echo "pubilc IP of wls machine: ${wlsPublicIP}"
-          echo "Verifying Weblgic server installation"
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
-          echo install sshpass
-          sudo apt-get install -y sshpass
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-wls-path.sh
-
       - name: Verify wls admin services
         id: veriy-admin-service
         run: |
@@ -447,236 +382,7 @@ jobs:
         run: |
           echo "wait for port 22"
           echo "Verifying Weblogic managed server lifecycle"
-          bash ${offerPath}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName $wlsPassword ${wlsPublicIP} ${adminConsolePort} ${managedServers}"
-
-      - name: Deploy DB Template to Connect to Azure Postgresql Database
-        id: enable-postgresql-db
-        run: |
-            # Generate parameters for db template deployment
-            bash ${offerPath}/test/scripts/gen-parameters-deploy-db.sh  <<< \
-            "${offerPath}/test/scripts/ \
-            ${{ env.adminVMName }} \
-            ${{ env.wlsPassword}} \
-            ${{ env.dbAdminUser }} \
-            ${{ env.dbName }} \
-            ${{ env.location }} \
-            ${{ env.wlsUserName }} \
-            ${{ env.wlsPassword }} \
-            ${GITHUB_REPOSITORY} \
-            ${{ env.testbranchName }}"
-            echo "Deploy DB Template..."
-            az group deployment create \
-            --verbose \
-            --resource-group ${resourceGroup} \
-            --name db \
-            --parameters @${offerPath}/test/scripts/parameters-deploy-db.json \
-            --template-file ${artifactName}/nestedtemplates/dbTemplate.json
-
-      - name: Set up ELK by deploying sub template
-        id: enable-elk
-        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
-        run: |
-            # Generate parameters for ELK template deployment
-            bash ${offerPath}/test/scripts/gen-parameters-deploy-elk.sh <<< \
-            "${offerPath}/test/scripts/parameters-deploy-elk.json \
-            ${{ env.adminVMName }} \
-            ${{ env.elkPassword }} \
-            ${{ env.elkURI }} \
-            ${{ env.elkUser }} \
-            ${{ env.location }} \
-            ${{ env.wlsDomainName }} \
-            ${{ env.wlsUserName }} \
-            ${{ env.wlsPassword }} \
-            ${GITHUB_REPOSITORY} \
-            ${{ env.testbranchName }} \
-            ${{ env.managedServerPrefix }} \
-            ${{ env.maxDynamicClusterSize }} \
-            ${{ env.dynamicClusterSize }} \
-            ${{ github.run_id }}${{ github.run_number }}"
-
-            echo "Deploy ELK Template..."
-            az group deployment create \
-            --debug \
-            --resource-group ${resourceGroup} \
-            --name elk \
-            --parameters @${offerPath}/test/scripts/parameters-deploy-elk.json \
-            --template-file ${artifactName}/nestedtemplates/elkNestedTemplate.json
-
-      - name: Get storage account name
-        id: query-storage-account-name
-        run: |
-          echo "query storage account name"
-          storageAccount=$(az resource list -g $resourceGroup --resource-type Microsoft.Storage/storageAccounts --query [0].name -o tsv)
-          echo "Storage account name: ${storageAccount}"
-          echo "storageAccount=${storageAccount}" >> $GITHUB_ENV
-
-      - name: Set up Coherence by deploying sub template
-        id: enable-coherence
-        run: |
-            # Generate parameters for Coherence template deployment
-            bash ${offerPath}/test/scripts/gen-parameters-deploy-coherence.sh <<< \
-            "${offerPath}/test/scripts/parameters-deploy-coherence.json \
-            ${{ env.adminVMName }} \
-            ${{ env.wlsPassword }} \
-            ${{ matrix.images }} \
-            ${{ env.location }} \
-            ${storageAccount} \
-            ${{ env.wlsDomainName }} \
-            ${{ env.wlsUserName }} \
-            ${{ env.wlsPassword }} \
-            ${GITHUB_REPOSITORY} \
-            ${{ env.testbranchName }} \
-            ${{ env.managedServerPrefix }}"
-            
-            echo "Deploy Coherence Template..."
-            az group deployment create \
-            --debug \
-            --resource-group ${resourceGroup} \
-            --name coherence \
-            --parameters @${offerPath}/test/scripts/parameters-deploy-coherence.json \
-            --template-file ${artifactName}/nestedtemplates/coherenceTemplate.json
-
-      - name: Download artifact for deployment
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.preflight.outputs.addnodeArtifactName }}
-
-      - name: Add new nodes to existing cluster
-        id: add-node
-        run: |
-            artifactNameOfAddnode=${{ needs.preflight.outputs.addnodeArtifactName }}
-
-            echo "add two new nodes"
-            echo "generate add-node parameters"
-            bash ${offerPath}/test/scripts/gen-parameters-deploy-addnode.sh  <<< \
-            "${offerPath}/test/scripts/parameters-deploy-addnode.json \
-              ${{ env.wlsPassword }} \
-              ${{ env.adminVMName }}:${adminConsolePort} \
-              weblogic \
-              1 \
-              ${{ matrix.images }} \
-              ${storageAccount} \
-              ${{ env.wlsDomainName }} \
-              ${{ env.location }} \
-              ${{ env.wlsUserName }} \
-              ${{ env.wlsPassword }} \
-              ${GITHUB_REPOSITORY} \
-              ${{ env.testbranchName }} \
-              ${{ env.managedServerPrefix }} \
-              ${{ env.dynamicClusterSize }} \
-              ${{ env.maxDynamicClusterSize }}"
-
-            echo "deploy add-node template to create new nodes"
-            az group deployment validate \
-              -g ${resourceGroup} \
-              -f ${artifactNameOfAddnode}/mainTemplate.json \
-              -p @${offerPath}/test/scripts/parameters-deploy-addnode.json \
-              --no-prompt
-            az group deployment create \
-              --debug \
-              --resource-group ${resourceGroup} \
-              --name addnode \
-              --parameters @${offerPath}/test/scripts/parameters-deploy-addnode.json \
-              --template-file ${artifactNameOfAddnode}/mainTemplate.json
-      - name: Verify new nodes
-        id: verify-new-nodes
-        run: |
-          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}VM2 --query [0].name -o tsv)
-          if [ -z "$mspVM2" ]; then
-            echo "Add-node failure: new machine ${{ env.managedServerPrefix }}VM2 does not exist."
-            exit 1
-          fi
-
-      - name: Download artifact for deployment
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
-
-      - name: Add new cache node to coherence cluster
-        id: add-node-coherence
-        run: |
-            artifactNameOfAddnodeCo=${{ needs.preflight.outputs.addCoherenceNodeArtifactName }}
-
-            echo "add new cache server"
-            echo "generate parameters"
-            bash ${offerPath}/test/scripts/gen-parameters-deploy-addnode-coherence.sh  <<< \
-            "${offerPath}/test/scripts/parameters-deploy-addnode-coherence.json \
-              ${{ env.wlsPassword }} \
-              ${{ env.adminVMName }} \
-              weblogic \
-              1 \
-              ${{ matrix.images }} \
-              ${storageAccount} \
-              ${{ env.wlsDomainName }} \
-              ${{ env.location }} \
-              ${{ env.wlsUserName }} \
-              ${{ env.wlsPassword }} \
-              ${GITHUB_REPOSITORY} \
-              ${{ env.testbranchName }} \
-              ${{ env.managedServerPrefix }}"
-            echo "deploy add-node template to create new nodes"
-            az group deployment validate \
-              -g ${resourceGroup} \
-              -f ${artifactNameOfAddnodeCo}/mainTemplate.json \
-              -p @${offerPath}/test/scripts/parameters-deploy-addnode-coherence.json \
-              --no-prompt
-            az group deployment create \
-              --debug \
-              --resource-group ${resourceGroup} \
-              --name addnode \
-              --parameters @${offerPath}/test/scripts/parameters-deploy-addnode-coherence.json \
-              --template-file ${artifactNameOfAddnodeCo}/mainTemplate.json
-      - name: Verify new nodes
-        id: verify-new-nodes-coherence
-        run: |
-          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}StorageVM2 --query [0].name -o tsv)
-          if [ -z "$mspVM2" ]; then
-            echo "Add-node failure: new machine ${{ env.managedServerPrefix }}StorageVM2 does not exist."
-            exit 1
-          fi
-
-      - name: Download artifact for deployment
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.preflight.outputs.deletenodeArtifactName }}
-      - name: Delete nodes from existing cluster
-        id: delete-node
-        run: |
-            artifactNameOfDeleteNode=${{ needs.preflight.outputs.deletenodeArtifactName }}
-            
-            echo "generate delete-node parameters"
-            bash ${offerPath}/test/scripts/gen-parameters-deploy-deletenode.sh <<< \
-            "${offerPath}/test/scripts/parameters-deploy-deletenode.json \
-              ${{ env.adminVMName }} \
-              ${{ env.location }} \
-              ${{ env.wlsUserName }} \
-              ${{ env.wlsPassword }} \
-              ${GITHUB_REPOSITORY} \
-              ${{ env.testbranchName }} \
-              ${{ env.managedServerPrefix }}"
-            echo "Run deletenode-cli.sh to remove nodes"
-            chmod ugo+x ${artifactNameOfDeleteNode}/scripts/deletenode-cli.sh
-            ${artifactNameOfDeleteNode}/scripts/deletenode-cli.sh \
-              -g ${resourceGroup} \
-              -f ${artifactNameOfDeleteNode}/mainTemplate.json \
-              -p ${offerPath}/test/scripts/parameters-deploy-deletenode.json \
-              -s
-      - name: Verify deleted nodes
-        id: verify-deleted-nodes
-        run: |
-          mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}VM2 --query [0].name -o tsv)
-          count=0
-          while [[ -n "$mspVM2" && $count -lt 10 ]];
-          do
-            echo "waiting for $mspVM2 deleted..."
-            sleep 1m
-            count=$((count+1))
-            mspVM2=$(az resource list -g ${resourceGroup} --resource-type Microsoft.Compute/virtualMachines --name ${{ env.managedServerPrefix }}VM2 --query [0].name -o tsv)
-          done
-          if [ -n "$mspVM2" ]; then
-            echo "Delete-node failure: machine ${{ env.managedServerPrefix }}VM2 is not removed."
-            exit 1
-          fi
+          bash ${offerPath}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName $wlsPassword ${wlsPublicIP} ${adminConsolePort} ${managedServers}"     
 
       - name: Delete Resource Group
         id: delete-resource-group
@@ -684,12 +390,6 @@ jobs:
         run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name $resourceGroup
-
-      - name: Delete ELK index
-        id: delete-elk-index
-        if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
-        run: |
-          curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-dynamic-cluster-${{ github.run_id }}${{ github.run_number }}
 
   cleanup-github-resource:
     needs: deploy-weblogic-cluster

@@ -34,9 +34,6 @@ cat <<EOF > ${parametersPath}
         "dsConnectionURL": {
             "value": "GEN-UNIQUE"
         },
-        "enableAAD": {
-            "value": false
-        },
         "enableDB": {
             "value": true
         },
