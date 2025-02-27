@@ -105,13 +105,13 @@
         "ohsSSLKeystoreData": {
             "type": "securestring",
             "metadata": {
-                "description": "The name of the secret in the specified KeyVault whose value is the SSL Certificate Data"
+                "description": "The SSL Certificate Data"
             }
         },
         "ohsSSLKeystorePassword": {
             "type": "securestring",
             "metadata": {
-                "description": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate"
+                "description": "The password for the SSL Certificate"
             }
         },
         "ohsSkuUrnVersion": {

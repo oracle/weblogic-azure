@@ -254,83 +254,11 @@
 			},
 			"defaultValue": ""
 		},
-		"enabledForTemplateDeployment": {
-			"type": "bool",
-			"metadata": {
-				"description": "Property to specify whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
-			},
-			"defaultValue": true
-		},
-		"keyVaultSku": {
-			"defaultValue": "Standard",
-			"type": "string",
-			"metadata": {
-				"description": "Price tier for Key Vault."
-			}
-		},
-		"sslConfigurationAccessOption": {
-			"type": "string",
-			"metadata": {
-				"description": "Options to provide required configuration for SSL configuration"
-			},
-			"allowedValues": [
-				"uploadConfig",
-				"keyVaultStoredConfig"
-			],
-			"defaultValue": "keyVaultStoredConfig"
-		},
-		"keyType": {
-			"type": "string",
-			"defaultValue": "PKCS12",
-			"allowedValues": [
-				"JKS",
-				"PKCS12"
-			],
-			"metadata": {
-				"description": "Provide Key type is JKS or PKCS12 signed certificates for OHS. Default is PKCS12 format"
-			}
-		},
-		"keyVaultName": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "KeyVault Name where certificates are stored for OHS"
-			}
-		},
-		"keyVaultResourceGroup": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "Resource group name in current subscription containing the KeyVault for OHS"
-			}
-		},
-		"keyVaultSSLCertDataSecretName": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "The name of the secret in the specified KeyVault whose value is the SSL Certificate Data for OHS"
-			}
-		},
-		"keyVaultSSLCertPasswordSecretName": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "The name of the secret in the specified KeyVault whose value is the password for the SSL Certificate for OHS"
-			}
-		},
 		"location": {
 			"type": "string",
 			"defaultValue": "[resourceGroup().location]",
 			"metadata": {
 				"description": "Location for all resources."
-			}
-		},
-		"logsToIntegrate": {
-			"type": "array",
-			"defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
-			"allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput", "NodeManagerLog" ],
-			"metadata": {
-				"description": "Specify the expeted logs to integrate, you must input at least one log."
 			}
 		},
 		"managedServerPrefix": {
@@ -454,17 +382,6 @@
 			"metadata": {
 				"description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
 			}
-		},
-		"ohsSSLConfigAccessOption": {
-			"type": "string",
-			"metadata": {
-				"description": "Options to provide required configuration for SSL configuration"
-			},
-			"allowedValues": [
-				"uploadConfig",
-				"keyVaultStoredConfig"
-			],
-			"defaultValue": "keyVaultStoredConfig"
 		},
 		"usePreviewImage": {
 			"type": "bool",
@@ -597,76 +514,6 @@
 				"description": "Boolean value indicating, if custom SSL is enabled or not"
 			}
 		},
-		"adminSSLKeyVaultResourceGroup": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "Resource group name in current subscription containing the KeyVault for SSL Configuration of WebLogic Administration Server"
-			}
-		},
-		"adminSSLKeyVaultName": {
-			"defaultValue": "",
-			"type": "string",
-			"metadata": {
-				"description": "KeyVault Name for SSL Configuration of WebLogic Administration Server"
-			}
-		},
-		"keyVaultCustomIdentityKeyStoreDataSecretName": {
-			"type": "string",
-			"metadata": {
-				"description": "Secret name in KeyVault containing Weblogic Custom Identity Keystore Data"
-			},
-			"defaultValue": "CustomIdentityKeyStoreDataSecret"
-		},
-		"keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
-			"type": "string",
-			"metadata": {
-				"description": "Secret name in KeyVault containing Weblogic Custom Identity Keystore Passphrase"
-			},
-			"defaultValue": "CustomIdentityKeyStorePassPhraseSecret"
-		},
-		"keyVaultCustomIdentityKeyStoreType": {
-			"type": "string",
-			"metadata": {
-				"description": "Weblogic Custom Identity Keystore Type"
-			},
-			"defaultValue": "JKS"
-		},
-		"keyVaultCustomTrustKeyStoreDataSecretName": {
-			"type": "string",
-			"metadata": {
-				"description": "Secret name in KeyVault containing Weblogic Custom Trust Store Data"
-			},
-			"defaultValue": "CustomTrustStoreDataSecret"
-		},
-		"keyVaultCustomTrustKeyStorePassPhraseSecretName": {
-			"type": "string",
-			"metadata": {
-				"description": "Secret name in KeyVault containing Weblogic Custom Trust Store Passphrase"
-			},
-			"defaultValue": "CustomTrustStorePassPhraseSecret"
-		},
-		"keyVaultCustomTrustKeyStoreType": {
-			"type": "string",
-			"metadata": {
-				"description": "Weblogic Custom Trust Store Type"
-			},
-			"defaultValue": "JKS"
-		},
-		"keyVaultPrivateKeyAliasSecretName": {
-			"type": "string",
-			"metadata": {
-				"description": "Secret name in KeyVault containing Weblogic Server Private  Key Alias"
-			},
-			"defaultValue": "ServerPrivateKeyAlias"
-		},
-		"keyVaultPrivateKeyPassPhraseSecretName": {
-			"type": "string",
-			"metadata": {
-				"description": "Secret name in KeyVault containing Weblogic Server Private  KeyPassPhrase"
-			},
-			"defaultValue": "ServerPrivateKeyPassPhraseSecret"
-		},
 		"utcValue": {
 			"type": "string",
 			"defaultValue": "[utcNow()]",
@@ -676,10 +523,6 @@
 		}
 	},
 	"variables": {
-		"const_ohsSSLConfigAccessOptionUploadConfig": "uploadConfig",
-		"const_ohsSSLConfigAccessOptionKeyVaultStoredConfig": "keyVaultStoredConfig",
-		"const_sslConfigurationAccessOptionUploadConfig": "uploadConfig",
-		"const_sslConfigurationAccessOptionKeyVaultStoredConfig": "keyVaultStoredConfig",
 		"const_currentSubscription": "[subscription().subscriptionId]",
 		"name_clusterLinkedTemplateName": "clusterTemplate.json",
 		"name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
@@ -690,10 +533,7 @@
 		"name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
 		"clusterTemplateRef": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
 		"name_clusterTemplate": "clusterLinkedTemplate",
-		"name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
-		"name_ohsKeyVaultNestedTemplate": "_ohsKeyVaultNestedTemplate.json",
-		"name_keyVaultNestedTemplate": "_sslKeyVaultNestedTemplate.json",
-		"name_keyVaultName": "[take(concat('wls-kv', uniqueString(parameters('utcValue'))), 24)]"
+		"name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate"
 	},
 	"resources": [
 		{
@@ -708,52 +548,7 @@
 					"resources": []
 				}
 			}
-		},
-		{
-			"name": "keyVaultNestedTemplate",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"condition": "[and(parameters('enableCustomSSL'), equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionUploadConfig')))]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_keyVaultNestedTemplate')))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"uploadedCustomIdentityKeyStoreData": {
-						"value": "[parameters('uploadedCustomIdentityKeyStoreData')]"
-					},
-					"uploadedCustomIdentityKeyStorePassphrase": {
-						"value": "[parameters('uploadedCustomIdentityKeyStorePassphrase')]"
-					},
-					"uploadedCustomTrustKeyStoreData": {
-						"value": "[parameters('uploadedCustomTrustKeyStoreData')]"
-					},
-					"uploadedCustomTrustKeyStorePassPhrase": {
-						"value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
-					},
-					"uploadedPrivateKeyAlias": {
-						"value": "[parameters('uploadedPrivateKeyAlias')]"
-					},
-					"uploadedPrivateKeyPassPhrase": {
-						"value": "[parameters('uploadedPrivateKeyPassPhrase')]"
-					},
-					"enabledForTemplateDeployment": {
-						"value": "[parameters('enabledForTemplateDeployment')]"
-					},
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"sku": {
-						"value": "[parameters('keyVaultSku')]"
-					},
-					"keyVaultName": {
-						"value": "[variables('name_keyVaultName')]"
-					}
-				}
-			}
-		},
+		},		
 		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersionForDeployment}",
@@ -952,98 +747,32 @@
 					"enableCustomSSL": {
 						"value": "[parameters('enableCustomSSL')]"
 					},
-					"keyVaultCustomIdentityKeyStoreData": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStoreDataSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customIdentityKeyStoreDataSecretName.value)]"
-						}
+					"sslCustomIdentityKeyStoreData": {
+						"value": "[parameters('uploadedCustomIdentityKeyStoreData')]"
 					},
-					"keyVaultCustomIdentityKeyStorePassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customIdentityKeyStorePassPhraseSecretName.value)]"
-						}
+					"sslCustomIdentityKeyStorePassPhrase": {
+						"value": "[parameters('uploadedCustomIdentityKeyStorePassphrase')]"
 					},
-					"keyVaultCustomIdentityKeyStoreType": {
-						"value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStoreType'), parameters('uploadedCustomIdentityKeyStoreType'))]"
+					"sslCustomIdentityKeyStoreType": {
+						"value": "[parameters('uploadedCustomIdentityKeyStoreType')]"
 					},
-					"keyVaultCustomTrustKeyStoreData": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreDataSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStoretDataSecretName.value)]"
-						}
+					"sslCustomTrustKeyStoreData": {
+						"value": "[parameters('uploadedCustomTrustKeyStoreData')]"
 					},
-					"keyVaultCustomTrustKeyStorePassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStorePassPhraseSecretName.value)]"
-						}
+					"sslCustomTrustKeyStorePassPhrase": {
+						"value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
 					},
-					"keyVaultCustomTrustKeyStoreType": {
-						"value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreType'), parameters('uploadedCustomTrustKeyStoreType'))]"
+					"sslCustomTrustKeyStoreType": {
+						"value": "[parameters('uploadedCustomTrustKeyStoreType')]"
 					},
-					"keyVaultPrivateKeyAlias": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultPrivateKeyAliasSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.privateKeyAliasSecretName.value)]"
-						}
+					"sslPrivateKeyAlias": {
+						"value": "[parameters('uploadedPrivateKeyAlias')]"
 					},
-					"keyVaultPrivateKeyPassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultPrivateKeyPassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.privateKeyPassPhraseSecretName.value)]"
-						}
+					"sslPrivateKeyPassPhrase": {
+						"value": "[parameters('uploadedPrivateKeyPassPhrase')]"
 					}
 				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
-			]
-		},
-		{
-			"name": "ohsKeyVaultNestedTemplate",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"condition": "[and(parameters('enableOHS'), equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionUploadConfig')))]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_ohsKeyVaultNestedTemplate')))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"uploadedKeyStoreData": {
-						"value": "[parameters('uploadedKeyStoreData')]"
-					},
-					"uploadedKeyStorePassword": {
-						"value": "[parameters('uploadedKeyStorePassword')]"
-					},
-					"location": {
-						"value": "[parameters('location')]"
-					},
-					"sku": {
-						"value": "[parameters('keyVaultSku')]"
-					},
-					"keyVaultName": {
-						"value": "[variables('name_keyVaultName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
-			]
+			}
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
@@ -1289,6 +1018,15 @@
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
 					},
+					"subnetName": {
+						"value": "[parameters('subnetName')]"
+					},
+					"virtualNetworkResourceGroupName": {
+						"value": "[parameters('virtualNetworkResourceGroupName')]"
+					},
+					"virtualNetworkName": {
+						"value": "[parameters('virtualNetworkName')]"
+					},
 					"vmSizeSelectForCoherence": {
 						"value": "[parameters('vmSizeSelectForCoherence')]"
 					},
@@ -1310,59 +1048,29 @@
 					"enableCustomSSL": {
 						"value": "[parameters('enableCustomSSL')]"
 					},
-					"keyVaultCustomIdentityKeyStoreData": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStoreDataSecretName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customIdentityKeyStoreDataSecretName.value)]"
-						}
+					"sslCustomIdentityKeyStoreData": {
+						"value": "[parameters('uploadedKeyStoreData')]"
 					},
-					"keyVaultCustomIdentityKeyStorePassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customIdentityKeyStorePassPhraseSecretName.value)]"
-						}
+					"sslCustomIdentityKeyStorePassPhrase": {
+						"value": "[parameters('uploadedKeyStorePassword')]"
 					},
-					"keyVaultCustomIdentityKeyStoreType": {
-						"value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomIdentityKeyStoreType'), parameters('uploadedCustomIdentityKeyStoreType'))]"
+					"sslCustomIdentityKeyStoreType": {
+						"value": "[parameters('uploadedKeyStoreType')]"
 					},
-					"keyVaultCustomTrustKeyStoreData": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreDataSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStoretDataSecretName.value)]"
-						}
+					"sslCustomTrustKeyStoreData": {
+						"value": "[parameters('uploadedCustomTrustKeyStoreData')]"
 					},
-					"keyVaultCustomTrustKeyStorePassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.customTrustKeyStorePassPhraseSecretName.value)]"
-						}
+					"sslCustomTrustKeyStorePassPhrase": {
+						"value": "[parameters('uploadedCustomTrustKeyStorePassPhrase')]"
 					},
-					"keyVaultCustomTrustKeyStoreType": {
-						"value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreType'), parameters('uploadedCustomTrustKeyStoreType'))]"
+					"sslCustomTrustKeyStoreType": {
+						"value": "[parameters('uploadedCustomTrustKeyStoreType')]"
 					},
-					"keyVaultPrivateKeyAlias": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultPrivateKeyAliasSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.privateKeyAliasSecretName.value)]"
-						}
+					"sslPrivateKeyAlias": {
+						"value": "[parameters('uploadedPrivateKeyAlias')]"
 					},
-					"keyVaultPrivateKeyPassPhrase": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultPrivateKeyPassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.privateKeyPassPhraseSecretName.value)]"
-						}
+					"sslPrivateKeyPassPhrase": {
+						"value": "[parameters('uploadedPrivateKeyPassPhrase')]"
 					}
 				}
 			}
@@ -1374,7 +1082,6 @@
 				"[resourceId('Microsoft.Resources/deployments', variables('clusterTemplateRef'))]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
-				"[resourceId('Microsoft.Resources/deployments', 'ohsKeyVaultNestedTemplate')]"
 			],
 			"apiVersion": "${azure.apiVersionForDeployment}",
 			"condition": "[parameters('enableOHS')]",
@@ -1437,21 +1144,10 @@
 						"value": "[parameters('ohshttpsPort')]"
 					},
 					"ohsSSLKeystoreData": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('ohsKeyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertDataSecretName'),reference('ohsKeyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyStoreDataSecretName.value)]"
-
-						}
+						"value":"[parameters('uploadedKeyStoreData')]"
 					},
 					"ohsSSLKeystorePassword": {
-						"reference": {
-							"keyVault": {
-								"id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyVaultName'),reference('ohsKeyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyVaultName.value))]"
-							},
-							"secretName": "[if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyVaultSSLCertPasswordSecretName'),reference('ohsKeyVaultNestedTemplate', '${azure.apiVersionForDeployment}').outputs.keyStorePwdSecretName.value)]"
-						}
+						"value": "[parameters('uploadedKeyStorePassword')]"
 					},
 					"oracleVaultPswd": {
 						"value": "[parameters('oracleVaultPswd')]"
@@ -1478,7 +1174,7 @@
 						"value": "[parameters('wlsUserName')]"
 					},
 					"keyType": {
-						"value": "[if(equals(parameters('ohsSSLConfigAccessOption'), variables('const_ohsSSLConfigAccessOptionKeyVaultStoredConfig')),parameters('keyType'),parameters('uploadedKeyStoreType'))]"
+						"value": "[parameters('uploadedKeyStoreType')]"
 					}
 				}
 			}
@@ -1537,8 +1233,7 @@
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
 				"[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
-				"[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
-				"[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
+				"[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
 			],
 			"properties": {
 				"mode": "Incremental",
