@@ -877,7 +877,7 @@
                             "subnets": "Subnets for the virtual network"
                         },
                         "defaultValue": {
-                            "name": "wls-vnet",
+                            "name": "[concat('wlsdcluster-vnet-',take(guid(), 8))]",
                             "addressPrefixSize": "/28"
                         },
                         "constraints": {
