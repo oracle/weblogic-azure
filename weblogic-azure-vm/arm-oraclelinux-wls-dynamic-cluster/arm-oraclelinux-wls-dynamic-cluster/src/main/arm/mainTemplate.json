@@ -1156,6 +1156,9 @@
 					"location": {
 						"value": "[parameters('location')]"
 					},
+					"nsgName": {
+						"value": "[variables('name_networkSecurityGroup')]"
+					},
 					"ohsComponentName": {
 						"value": "[parameters('ohsComponentName')]"
 					},
