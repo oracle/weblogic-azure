@@ -165,7 +165,7 @@ jobs:
           resourceGroupName: ${{ env.resourceGroupForDependency }}
 
   deploy-weblogic-cluster:
-    needs: preflight
+    needs: [preflight, deploy-dependencies]
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
