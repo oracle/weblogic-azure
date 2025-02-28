@@ -20,7 +20,6 @@ on:
 env:
   adminConsolePort: 7001
   adminPassword: ${{ secrets.WLS_PSW }}
-  adminVMName: adminServerVM
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   dbServerName: weblogicdb
@@ -41,9 +40,7 @@ env:
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
   resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
-  wlsAdminServices: "rngd wls_admin wls_nodemanager"
   wlsDomainName: dyClusterDomain
-  wlsMsServices: "rngd wls_nodemanager"
   wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
 
@@ -51,8 +48,22 @@ jobs:
   preflight:
     outputs: 
       artifactName: ${{steps.artifact_file.outputs.artifactName}}
+      location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
     runs-on: ubuntu-latest
     steps:
+      - name: Setup environment variables
+        id: setup-env-variables-based-on-dispatch-event
+        run: |
+          location=eastus # default value
+
+          if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+            location=${{ github.event.inputs.location }}
+          else
+            location=${{ github.event.client_payload.location }}
+          fi
+
+          echo "##[set-output name=location;]${location}"
+          echo "location=${location}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
       - name: Set up Maven with GitHub token
         uses: ./.github/actions/setupmaven
@@ -130,6 +141,9 @@ jobs:
     needs: preflight
     runs-on: ubuntu-latest
     steps:
+      - name: Initialize environment variables
+        run: |
+          echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
       - uses: azure/login@v1
         id: azure-login
         with:
@@ -173,6 +187,9 @@ jobs:
             "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
           ]
     steps:
+      - name: Initialize environment variables
+        run: |
+          echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
         with:
@@ -206,9 +223,6 @@ jobs:
         run: |
           imageUrn="${{ matrix.images }}"
 
-          sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-          ${{ env.offerPath }}/test/scripts/verify-wls-path.sh
-
           echo "Generate deployment parameters..."
           bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
             "${offerPath}/test/scripts/parameters-test.json \
@@ -220,7 +234,6 @@ jobs:
             $managedServerPrefix \
             $maxDynamicClusterSize \
             $dynamicClusterSize \
-            $adminVMName \
             $imageUrn \
             $testbranchName \
             $GITHUB_REPOSITORY"
@@ -247,69 +260,52 @@ jobs:
               --parameters @${offerPath}/test/scripts/parameters-test.json \
               --template-file ${artifactName}/mainTemplate.json
 
-      - name: Verify Network Security Group
-        id: verify-nsg
-        run: |
-            echo "query nsg name, will exit with error if nsg does not exist."
-            az network nsg show -g $resourceGroup -n ${nsg} --query "name"
+            export adminVMName=$(az deployment group show \
+              --resource-group $resourceGroup \
+              --name wls-dycluster-node \
+              --query "properties.outputs.adminVMName.value" -o tsv)
+            echo "adminVMName=${adminVMName}" >> $GITHUB_ENV
 
-      - name: Get IP of build machine
-        id: get-ip-address
+      - name: Verify wls admin services
+        id: veriy-admin-service
         run: |
-          myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short | tr -d "\"")
-          echo "myIP=${myIP}" >> $GITHUB_ENV
+          echo "Verifying WebLogic services at admin server"
+          message=$(az vm run-command invoke \
+            --resource-group $resourceGroup \
+            --name $adminVMName \
+            --command-id RunShellScript \
+            --scripts @${{ env.offerPath }}/test/scripts/verify-admin-services.sh \
+            --query value[*].message)
+          
+          if [[ $message == *"not in active (running) state"* ]]; then
+            echo "Error: $message"
+            exit 1
+          fi
 
-      - name: Add ip address to security rule to access the wls machine
-        id: add-ip-to-security-rule
+      - name: Verify wls managed server services
+        id: veriy-msservice
         run: |
-            echo "query existing source address prefixes"
-            attempt=0
-            toCreateRule101=false
-            while [[ -z `az network nsg show -g $resourceGroup -n ${nsg} | grep "NRMS-Rule-101"` && $attempt -le 5 ]]
-            do
-              if [ $attempt -eq 5 ]; then
-                toCreateRule101=true
-              fi
-              echo "network security group rule NRMS-Rule-101 is not ready"
-              sleep 1m
-              attempt=$((attempt + 1))
-            done
-            if [ $toCreateRule101 == true ]; then
-              az network nsg rule create --name NRMS-Rule-101 \
-                           --nsg-name ${nsg} \
-                           --priority 101 \
-                           --resource-group $resourceGroup \
-                           --access Allow \
-                           --destination-address-prefixes "*" \
-                           --destination-port-ranges 22 43 ${adminConsolePort} \
-                           --direction Inbound \
-                           --protocol Tcp \
-                           --source-address-prefixes $myIP
-            else
-              sourceAddressPrefixes=$(az network nsg rule show \
-                --resource-group $resourceGroup \
-                --nsg-name ${nsg} \
-                --name NRMS-Rule-101 \
-                --query "sourceAddressPrefixes")
-              echo "IP of this machine: " ${myIP}
-              sourceAddressPrefixes=$(echo ${myIP} ${sourceAddressPrefixes} | \
-                sed 's/,/ /g; s/\[//g; s/\]//g; s/"//g')
-              echo ${sourceAddressPrefixes}
-              az network nsg rule update \
-                --resource-group $resourceGroup \
-                --nsg-name ${nsg} \
-                --name NRMS-Rule-101 \
-                --source-address-prefixes $sourceAddressPrefixes \
-                --destination-port-ranges 443 22 ${adminConsolePort}
-            fi
-      - name: Restart wls VM
-        id: restart-wls-wm
-        run: |
-            echo "restart vm to make sure security rule work."
-            az vm restart --force --no-wait -g $resourceGroup -n $adminVMName
-            echo "Wait for few minutes to restart"
-            sleep 3m
+          managedServerVMNamePrefix=$(az deployment group show \
+              --resource-group $resourceGroup \
+              --name wls-dycluster-node \
+              --query "properties.outputs.managedServerVMNamePrefix.value" -o tsv)
+          echo "managedServerVMNamePrefix=${managedServerVMNamePrefix}" >> $GITHUB_ENV
+          
+          managedServer1="${managedServerVMNamePrefix}1"          
 
+          echo "Verifying WebLogic services at admin server"
+          message=$(az vm run-command invoke \
+            --resource-group $resourceGroup \
+            --name $managedServer1 \
+            --command-id RunShellScript \
+            --scripts @${{ env.offerPath }}/test/scripts/verify-node-services.sh \
+            --query value[*].message)
+          
+          if [[ $message == *"not in active (running) state"* ]]; then
+            echo "Error: $message"
+            exit 1
+          fi
+      
       - name: Query public IP of AdminServer VM
         id: query-wls-admin-ip
         run: |
@@ -318,58 +314,8 @@ jobs:
               --resource-group $resourceGroup \
               --name $adminVMName -d \
               --query publicIps -o tsv)
-            echo "##[set-output name=publicIP;]${publicIP}"
-            
-      - name: Create environment variable for AdminServer IP
-        id: env-admin-ip
-        run: echo "wlsPublicIP=${{steps.query-wls-admin-ip.outputs.publicIP}}" >> $GITHUB_ENV
-
-      - name: Query public IP of managedServerVM1
-        id: query-wls-managed-ip
-        run: |
-            echo "query public ip"
-            publicIP=$(az vm show \
-              --resource-group $resourceGroup \
-              --name $managedServerVM -d \
-              --query publicIps -o tsv)
-            echo "##[set-output name=publicIP;]${publicIP}"
-      - name: Create environment variable for managedServerVM1 IP
-        id: env-managedserver-vm1-ip
-        run: echo "ms1PublicIP=${{steps.query-wls-managed-ip.outputs.publicIP}}" >> $GITHUB_ENV
-
-      # Fix failure that caused by remote server closed.
-      - name: Restart remote SSH agent
-        run: |
-            echo "Restart remote SSH agent"
-            az vm user reset-ssh \
-              --resource-group $resourceGroup \
-              --name ${{ env.adminVMName }}
-            sleep 1m
-
-      - name: Verify wls admin services
-        id: veriy-admin-service
-        run: |
-          echo "wait for port 22"
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
-          echo "Verifying WebLogic services at admin server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-services.sh $wlsAdminServices
-
-      # Fix failure that caused by remote server closed.
-      - name: Restart remote SSH agent
-        run: |
-            echo "Restart remote SSH agent"
-            az vm user reset-ssh \
-              --resource-group $resourceGroup \
-              --name ${{ env.adminVMName }}
-            sleep 1m
-
-      - name: Verify wls managed server services
-        id: veriy-msservice
-        run: |
-          echo "wait for port 22"
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
-          echo "Verifying WebLogic services at managed server"
-          sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveCountMax=20 -o ServerAliveInterval=15 -o ConnectTimeout=100 -v -tt weblogic@${ms1PublicIP} 'bash -s' < ${offerPath}/test/scripts/verify-services.sh $wlsMsServices
+            # echo environment variable
+            echo "wlsPublicIP=${publicIP}" >> $GITHUB_ENV
 
       - name: Verify WebLogic Server Access
         id: verify-wls-access
@@ -380,10 +326,61 @@ jobs:
       - name: Verify WebLogic Managed Server LifeCycle check
         id: verify-server-lifecycle
         run: |
-          echo "wait for port 22"
           echo "Verifying Weblogic managed server lifecycle"
           bash ${offerPath}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName $wlsPassword ${wlsPublicIP} ${adminConsolePort} ${managedServers}"     
 
+      - name: Checkout WebLogic-Cafe
+        id: checkout-webapp
+        uses: actions/checkout@v2
+        with:
+          repository: microsoft/weblogic-on-azure
+          path: weblogic-on-azure
+
+      - name: Maven build the web app
+        id: maven-build-webapp
+        run: |
+          echo "build the WebLogic Cafe web app"
+          mvn -DskipTests clean install --file weblogic-on-azure/javaee/weblogic-cafe/pom.xml
+
+      - name: Query adminVMsver DNS
+        id: query-adminvmdns
+        run: |
+            echo "query public ip id of $adminVMName"
+            adminNicId=$(az vm show \
+              --resource-group $resourceGroup \
+              --name $adminVMName \
+              --query networkProfile.networkInterfaces[0].id -o tsv)
+            adminPublicIPId=$(az network nic show --id ${adminNicId} --query ipConfigurations[0].publicIPAddress.id -o tsv)
+            echo "query adminVMsver DNS for $adminVMName"
+            adminVMDNS=$(az network public-ip show \
+              --id "${adminPublicIPId}" \
+              --query dnsSettings.fqdn -o tsv)
+            echo "save the adminVMDNS in environment variable"
+            echo "adminVMDNS=${adminVMDNS}" >> $GITHUB_ENV      
+
+      - name: Deploy WebLogicCafe app using WebLogic Management Services
+        id: deploy-webapp
+        run: |
+          echo "Deploy WebLogic Cafe to server"          
+          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} ${adminConsolePort}
+          bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh <<< "$wlsUserName $wlsPassword ${adminVMDNS} ${adminConsolePort} "
+
+      - name: Query OHS Server URI
+        id: query-ohs-server-uri
+        run: |
+            echo "query ohs server uri"
+            ohsAccessURL=$(az deployment group show \
+              --resource-group $resourceGroup \
+              --name wls-dycluster-node \
+              --query "properties.outputs.ohsAccessURL.value" -o tsv)
+            echo "ohsAccessURL=${ohsAccessURL}" >> $GITHUB_ENV
+
+      - name: Verify WebLogicCafe app is successfully deployed
+        id: verify-webapp-deployment
+        run: |
+          echo "Verify WebLogicCafe app is successfully deployed"
+          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh <<< "${ohsAccessURL}" 
+      
       - name: Delete Resource Group
         id: delete-resource-group
         if: always()

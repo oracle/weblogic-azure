@@ -39,15 +39,7 @@ cat <<EOF >${parametersPath}
         },
         "wlsUserName": {
             "value": "GEN-UNIQUE"
-        },
-        "addressPrefixes": {
-            "value": [
-                "172.16.8.0/28"
-            ]
-        },
-        "subnetPrefix": {
-            "value": "172.16.8.0/28"
-        },
+        }
     }
 }
 EOF

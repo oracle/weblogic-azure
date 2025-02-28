@@ -536,6 +536,7 @@
 		"name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg-', variables('const_globalResourceNameSuffix'))]",
 		"name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
 		"name_ohsLinkedTemplateName": "ohsNestedTemplate.json",
+		"name_ohsVMName": "[concat(parameters('ohsVMNamePrefix'), variables('const_globalResourceNameSuffix'), 'VM')]",
 		"ref_clusterTemplate": "[concat('cluster',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]"
 	},
 	"resources": [
@@ -1171,7 +1172,7 @@
 						"value": "[parameters('ohsSkuUrnVersion')]"
 					},
 					"ohsVMName": {
-						"value": "[concat(parameters('ohsVMNamePrefix'), variables('const_globalResourceNameSuffix'), 'VM')]"
+						"value": "[variables('name_ohsVMName')]"
 					},
 					"ohshttpPort": {
 						"value": "[parameters('ohshttpPort')]"
@@ -1304,6 +1305,10 @@
 		"adminSecuredConsole": {
 			"type": "string",
 			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminSecuredConsole.value)]"
+		},
+		"ohsVMName": {
+			"type": "string",
+			"value": "[variables('name_ohsVMName')]"
 		},
 		"ohsAccessURL": {
 			"type": "string",
