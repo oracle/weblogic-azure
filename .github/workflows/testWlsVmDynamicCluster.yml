@@ -190,8 +190,13 @@ jobs:
       - name: Initialize environment variables
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
@@ -224,6 +229,12 @@ jobs:
         run: |
           imageUrn="${{ matrix.images }}"
 
+          echo "Generate selfsigned certificate"
+          echo $JAVA_HOME
+          bash ${offerPath}/test/scripts/gen-selfsigned-certificate.sh <<< \
+            "${{ wlsPassword }} ${wlsPassword} ${wlsPassword}"
+          local sslIdentityData=$(cat identity.p12 | base64 -w 0)
+
           echo "Generate deployment parameters..."
           bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
             "${offerPath}/test/scripts/parameters-test.json \
@@ -237,7 +248,12 @@ jobs:
             $dynamicClusterSize \
             $imageUrn \
             $testbranchName \
-            $GITHUB_REPOSITORY"
+            $GITHUB_REPOSITORY \
+            ${{ env.dbServerName }} \
+            ${{ env.dbName }} \
+            ${{ env.wlsPassword }} \
+            ${{ env.dbAdminUser }} \
+            ${sslIdentityData}"
 
       - name: Accept Image Terms
         id: accept-terms
