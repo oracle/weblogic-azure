@@ -232,7 +232,7 @@ jobs:
           echo "Generate selfsigned certificate"
           echo $JAVA_HOME
           bash ${offerPath}/test/scripts/gen-selfsigned-certificate.sh <<< \
-            "${{ wlsPassword }} ${wlsPassword} ${wlsPassword}"
+            "${wlsPassword} ${wlsPassword} ${wlsPassword}"
           local sslIdentityData=$(cat identity.p12 | base64 -w 0)
 
           echo "Generate deployment parameters..."
