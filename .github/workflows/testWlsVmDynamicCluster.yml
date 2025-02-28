@@ -231,9 +231,9 @@ jobs:
 
           echo "Generate selfsigned certificate"
           echo $JAVA_HOME
-          bash ${offerPath}/test/scripts/gen-selfsigned-certificate.sh <<< \
+          bash ${offerPath}/test/scripts/generate-selfsigned-keystore.sh <<< \
             "${wlsPassword} ${wlsPassword} ${wlsPassword}"
-          local sslIdentityData=$(cat identity.p12 | base64 -w 0)
+          sslIdentityData=$(cat identity.p12 | base64 -w 0)
 
           echo "Generate deployment parameters..."
           bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
