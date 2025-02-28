@@ -355,7 +355,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',toLower(variables('name_vmPrefix')),copyindex(1),'-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[take(concat(toLower(parameters('dnsLabelPrefix')),'-',toLower(variables('name_vmPrefix')),copyindex(1),'-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName'))), 61)]"
                 }
             }
         },

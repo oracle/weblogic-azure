@@ -517,7 +517,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), '-', if(equals(copyIndex(),0),toLower(parameters('adminVMName')), concat(toLower(variables('const_managedVMPrefix')), copyindex())), '-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[take(concat(toLower(parameters('dnsLabelPrefix')), '-', if(equals(copyIndex(),0),toLower(parameters('adminVMName')), concat(toLower(variables('const_managedVMPrefix')), copyindex())), '-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName'))), 61)]"
                 }
             },
             "dependsOn": [
