@@ -360,27 +360,11 @@ jobs:
             echo "adminVMDNS=${adminVMDNS}" >> $GITHUB_ENV      
 
       - name: Deploy WebLogicCafe app using WebLogic Management Services
-        id: deploy-webapp
+        id: deploy-and-verify-webapp
         run: |
           echo "Deploy WebLogic Cafe to server"          
           timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} ${adminConsolePort}
           bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh <<< "$wlsUserName $wlsPassword ${adminVMDNS} ${adminConsolePort} "
-
-      - name: Query OHS Server URI
-        id: query-ohs-server-uri
-        run: |
-            echo "query ohs server uri"
-            ohsAccessURL=$(az deployment group show \
-              --resource-group $resourceGroup \
-              --name wls-dycluster-node \
-              --query "properties.outputs.ohsAccessURL.value" -o tsv)
-            echo "ohsAccessURL=${ohsAccessURL}" >> $GITHUB_ENV
-
-      - name: Verify WebLogicCafe app is successfully deployed
-        id: verify-webapp-deployment
-        run: |
-          echo "Verify WebLogicCafe app is successfully deployed"
-          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh <<< "${ohsAccessURL}" 
       
       - name: Delete Resource Group
         id: delete-resource-group

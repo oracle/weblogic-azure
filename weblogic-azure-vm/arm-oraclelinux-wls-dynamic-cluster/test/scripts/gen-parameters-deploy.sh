@@ -64,9 +64,6 @@ cat <<EOF >${parametersPath}
     },
     "enableCoherenceWebLocalStorage": {
         "value": true
-    },
-    "enableOHS": {
-        "value": true
     }
   }
 }
