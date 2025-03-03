@@ -7,15 +7,15 @@
 
 read wlsDemoIdentityKeyStorePassPhrase wlsDemoIdentityPassPhrase wlsDemoTrustPassPhrase
 
-export wlsIdentityKeyStoreFileName="identity.jks"
-export wlsTrustKeyStoreFileName="trust.jks"
+export wlsIdentityKeyStoreFileName="identity.p12"
+export wlsTrustKeyStoreFileName="trust.p12"
 export wlsIdentityRootCertFileName="root.cert"
 export wlsDemoIndetityKeyAlias="demoidentity"
 
 function generate_selfsigned_certificates() {
     # Note: JDK 8 keytool will create jks by default
     # JDK 11 keytool will create PKCS12 by default
-    # This file uses JDK 8.
+    # This file uses JDK 11.
     echo "Generate identity key store."
     ${JAVA_HOME}/bin/keytool -genkey \
         -alias ${wlsDemoIndetityKeyAlias} \
