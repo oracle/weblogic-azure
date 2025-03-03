@@ -7,8 +7,8 @@
 
 read wlsDemoIdentityKeyStorePassPhrase wlsDemoIdentityPassPhrase wlsDemoTrustPassPhrase
 
-export wlsIdentityKeyStoreFileName="identity.p12"
-export wlsTrustKeyStoreFileName="trust.p12"
+export wlsIdentityKeyStoreFileName="identity.jks"
+export wlsTrustKeyStoreFileName="trust.jks"
 export wlsIdentityRootCertFileName="root.cert"
 export wlsDemoIndetityKeyAlias="demoidentity"
 
@@ -24,6 +24,7 @@ function generate_selfsigned_certificates() {
         -keystore $wlsIdentityKeyStoreFileName \
         -keypass ${wlsDemoIdentityPassPhrase} \
         -storepass ${wlsDemoIdentityKeyStorePassPhrase} \
+        -storetype JKS \
         -dname "CN=test, OU=test, O=test, L=test, ST=test, C=test"
 
     # update the input variables with Demo values
@@ -34,14 +35,16 @@ function generate_selfsigned_certificates() {
         -file ${wlsIdentityRootCertFileName} \
         -keystore $wlsIdentityKeyStoreFileName \
         -storepass ${wlsDemoIdentityKeyStorePassPhrase}
-    echo "Exporting root cert from identity key store"
+
+    echo "Generate trust key store."
     ${JAVA_HOME}/bin/keytool -import \
         -alias ${wlsDemoIndetityKeyAlias} \
         -noprompt \
         -file ${wlsIdentityRootCertFileName} \
         -keystore ${wlsTrustKeyStoreFileName} \
-        -storepass ${wlsDemoTrustPassPhrase}
-    echo "Generate trust key store."
+        -storepass ${wlsDemoTrustPassPhrase} \
+        -storetype JKS
+    
 }
 
 echo "Starting to generate selfsigned certificates"

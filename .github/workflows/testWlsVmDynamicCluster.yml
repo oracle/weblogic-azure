@@ -233,7 +233,7 @@ jobs:
           echo $JAVA_HOME
           bash ${offerPath}/test/scripts/generate-selfsigned-keystore.sh <<< \
             "${wlsPassword} ${wlsPassword} ${wlsPassword}"
-          sslIdentityData=$(cat identity.p12 | base64 -w 0)
+          sslIdentityData=$(cat identity.jks | base64 -w 0)
 
           echo "Generate deployment parameters..."
           bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
