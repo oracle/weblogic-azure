@@ -1291,7 +1291,7 @@
 		},
 		"managedServerVMNamePrefix": {
 			"type": "string",
-			"value": "[variables('name_managedVMNamePrefix')]"
+			"value": "[concat(variables('name_managedVMNamePrefix'), 'VM')]"
 		},
 		"wlsDomainLocation": {
 			"type": "string",
