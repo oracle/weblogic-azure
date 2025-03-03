@@ -105,7 +105,7 @@ cat <<EOF >${parametersPath}
       "value": "$wlspassword"
     },
     "uploadedKeyStoreType": {
-      "value": "JKS"
+      "value": "PKCS12"
     }
   }
 }
