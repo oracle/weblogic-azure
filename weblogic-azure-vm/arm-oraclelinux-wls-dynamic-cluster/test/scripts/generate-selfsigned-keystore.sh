@@ -15,7 +15,7 @@ export wlsDemoIndetityKeyAlias="demoidentity"
 function generate_selfsigned_certificates() {
     # Note: JDK 8 keytool will create jks by default
     # JDK 11 keytool will create PKCS12 by default
-    # This file uses JDK 11.
+    # This file uses JDK 11 and generates JKS.
     echo "Generate identity key store."
     ${JAVA_HOME}/bin/keytool -genkey \
         -alias ${wlsDemoIndetityKeyAlias} \
@@ -43,8 +43,7 @@ function generate_selfsigned_certificates() {
         -file ${wlsIdentityRootCertFileName} \
         -keystore ${wlsTrustKeyStoreFileName} \
         -storepass ${wlsDemoTrustPassPhrase} \
-        -storetype JKS
-    
+        -storetype JKS    
 }
 
 echo "Starting to generate selfsigned certificates"
