@@ -159,7 +159,7 @@ function createCoherenceClusterModel() {
     cat <<EOF >$wlsDomainPath/configure-coherence-cluster.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
-    shutdown('$wlsClusterName','Cluster')
+    shutdown('$clientClusterName','Cluster')
 except Exception, e:
     print e
     dumpStack()
