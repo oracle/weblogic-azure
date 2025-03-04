@@ -1447,6 +1447,7 @@
             "enableCoherenceWebLocalStorage": "[bool(if(bool(steps('section_coherence').enableCoherence),steps('section_coherence').coherenceInfo.enableCoherenceWebLocalStorage,'false'))]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "enableCustomDNS": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
+            "enableCustomSSL": "[bool(steps('section_sslConfiguration').enableCustomSSL)]",
             "enableOHS": "[bool(steps('section_ohs').enableOHS)]",
             "enablePswlessConnection": "[or(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]",
             "hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
