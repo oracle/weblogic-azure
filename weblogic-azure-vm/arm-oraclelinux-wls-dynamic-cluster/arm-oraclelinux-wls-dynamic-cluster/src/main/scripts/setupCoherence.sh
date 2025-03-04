@@ -158,7 +158,12 @@ function verifyCertValidity()
 function createCoherenceClusterModel() {
     cat <<EOF >$wlsDomainPath/configure-coherence-cluster.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
-shutdown('$clientClusterName', 'Cluster')
+try:
+    shutdown('$wlsClusterName','Cluster')
+except Exception, e:
+    print e
+    dumpStack()
+
 try:
     edit()
     startEdit(60000,60000,'true')
