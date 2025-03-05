@@ -177,6 +177,9 @@
                     "managedServerPrefix": {
                         "value": "[parameters('managedServerPrefix')]"
                     },
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
+                    },
                     "numberOfManagedApplicationInstances": {
                         "value": "[parameters('numberOfManagedApplicationInstances')]"
                     },
