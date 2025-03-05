@@ -25,7 +25,7 @@ function generate_selfsigned_certificates() {
         -keypass ${wlsDemoIdentityPassPhrase} \
         -storepass ${wlsDemoIdentityKeyStorePassPhrase} \
         -storetype JKS \
-        -dname "CN=test, OU=test, O=test, L=test, ST=test, C=test"
+        -dname "CN=*.cloudapp.azure.com, OU=test, O=test, L=test, ST=test, C=test"
 
     # update the input variables with Demo values
     echo "Exporting root cert from identity key store"
