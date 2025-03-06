@@ -1240,6 +1240,9 @@
 					"_artifactsLocationSasToken": {
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
 					"dnszonesARecordSetNames": {
 						"value": "[if(parameters('enableOHS'), createArray(parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneLoadBalancerLabel')), createArray(parameters('dnszoneAdminConsoleLabel')))]"
 					},
