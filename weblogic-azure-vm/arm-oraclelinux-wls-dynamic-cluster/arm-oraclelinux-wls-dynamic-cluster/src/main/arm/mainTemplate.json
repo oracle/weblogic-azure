@@ -1086,13 +1086,13 @@
 						"value": "[parameters('enableCustomSSL')]"
 					},
 					"sslCustomIdentityKeyStoreData": {
-						"value": "[parameters('uploadedKeyStoreData')]"
+						"value": "[parameters('uploadedCustomIdentityKeyStoreData')]"
 					},
 					"sslCustomIdentityKeyStorePassPhrase": {
-						"value": "[parameters('uploadedKeyStorePassword')]"
+						"value": "[parameters('uploadedCustomIdentityKeyStorePassphrase')]"
 					},
 					"sslCustomIdentityKeyStoreType": {
-						"value": "[parameters('uploadedKeyStoreType')]"
+						"value": "[parameters('uploadedCustomIdentityKeyStoreType')]"
 					},
 					"sslCustomTrustKeyStoreData": {
 						"value": "[parameters('uploadedCustomTrustKeyStoreData')]"
