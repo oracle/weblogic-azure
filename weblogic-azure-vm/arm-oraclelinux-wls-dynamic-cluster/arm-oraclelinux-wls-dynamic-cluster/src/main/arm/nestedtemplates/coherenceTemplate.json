@@ -347,7 +347,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[take(concat(toLower(parameters('dnsLabelPrefix')), copyindex(),'-', parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName'))), 50)]"
+                    "domainNameLabel": "[take(concat(toLower(parameters('dnsLabelPrefix')), 'co', copyindex(),'-', parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName'))), 50)]"
                 }
             }
         },
