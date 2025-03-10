@@ -14,7 +14,7 @@ SP_ID=$( az ad sp list --display-name $SERVICE_PRINCIPAL_NAME_WLS_AKS --query \[
 az role assignment create --assignee ${SP_ID} --scope="/subscriptions/${SUBSCRIPTION_ID}" --role "User Access Administrator"
 
 ## Set the Azure Credentials as a secret in the repository
-gh secret set "AZURE_CREDENTIALS" -b"${AZURE_CREDENTIALS}"
-gh variable set "SERVICE_PRINCIPAL_NAME_WLS_AKS" -b"${SERVICE_PRINCIPAL_NAME_WLS_AKS}"
+gh secret --repo $(gh repo set-default --view) set "AZURE_CREDENTIALS" -b"${AZURE_CREDENTIALS}"
+gh variable --repo $(gh repo set-default --view) set "SERVICE_PRINCIPAL_NAME_WLS_AKS" -b"${SERVICE_PRINCIPAL_NAME_WLS_AKS}"
 
 echo "Execute azure-credential-setup.sh - End--------------------------------------------"

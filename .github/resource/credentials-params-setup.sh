@@ -40,7 +40,7 @@ set_values() {
     yq eval -o=json '.[]' "$param_file" | jq -c '.' | while read -r line; do
         name=$(echo "$line" | jq -r '.name')
         value=$(echo "$line" | jq -r '.value')
-        gh secret set "$name" -b"${value}"
+        gh secret --repo $(gh repo set-default --view) set "$name" -b"${value}"
     done
 }
 
