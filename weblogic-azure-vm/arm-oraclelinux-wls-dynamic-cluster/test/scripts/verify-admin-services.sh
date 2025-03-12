@@ -31,7 +31,7 @@ function verifyServiceActive()
 # For admin server    : rngd wls_admin wls_nodemanager
 # For managed server  : rngd wls_nodemanager
 
-servicesList=$*
+servicesList="rngd wls_admin wls_nodemanager"
 
 for service in $servicesList
 do

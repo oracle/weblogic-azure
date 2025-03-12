@@ -588,7 +588,7 @@
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex(),'-',parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName')))]"
+                    "domainNameLabel": "[take(concat(toLower(parameters('dnsLabelPrefix')), copyindex(),'-', parameters('_globalResourceNameSuffix'),'-',toLower(parameters('wlsDomainName'))), 50)]"
                 }
             },
             "dependsOn": [

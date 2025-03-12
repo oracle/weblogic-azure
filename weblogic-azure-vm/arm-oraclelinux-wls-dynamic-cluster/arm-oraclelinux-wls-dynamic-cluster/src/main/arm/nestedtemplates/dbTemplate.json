@@ -91,6 +91,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide managed VM prefix name"
+            }
+        },
         "numberOfManagedApplicationInstances": {
             "type": "int",
             "defaultValue": 2,
@@ -171,6 +177,9 @@
                     "managedServerPrefix": {
                         "value": "[parameters('managedServerPrefix')]"
                     },
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
+                    },
                     "numberOfManagedApplicationInstances": {
                         "value": "[parameters('numberOfManagedApplicationInstances')]"
                     },
@@ -218,6 +227,9 @@
                     },
                     "managedServerPrefix": {
                         "value": "[parameters('managedServerPrefix')]"
+                    },
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
                     },
                     "numberOfManagedApplicationInstances": {
                         "value": "[parameters('numberOfManagedApplicationInstances')]"

@@ -3,7 +3,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 #
 #Generate parameters with value for deployment
-read parametersPath location adminPasswordOrKey wlsdomainname wlsusername wlspassword managedserverprefix maxDynamicClusterSize dynamicClusterSize adminvmname skuUrnVersion testbranchName repoPath 
+read parametersPath location adminPasswordOrKey wlsdomainname wlsusername wlspassword managedserverprefix maxDynamicClusterSize dynamicClusterSize skuUrnVersion testbranchName repoPath dbName dbServerName dbPassword dbUser uploadedKeyStoreData
 
 cat <<EOF >${parametersPath}
 {
@@ -38,9 +38,6 @@ cat <<EOF >${parametersPath}
     "dynamicClusterSize": {
       "value": $dynamicClusterSize
     },
-    "adminVMName": {
-      "value": "$adminvmname"
-    },
     "vmSize": {
       "value": "Standard_B2ms"
     },
@@ -53,6 +50,62 @@ cat <<EOF >${parametersPath}
     "_artifactsLocation": {
 
       "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
+    },
+    "addressPrefixes": {
+        "value": [
+            "172.16.8.0/28"
+        ]
+    },
+    "subnetPrefix": {
+        "value": "172.16.8.0/28"
+    },
+    "enableCoherence": {
+        "value": true
+    },
+    "enableCoherenceWebLocalStorage": {
+        "value": true
+    },
+    "enableDB": {
+        "value": true
+    },
+    "databaseType": {
+        "value": "postgresql"
+    },
+    "dsConnectionURL": {
+        "value": "jdbc:postgresql://${dbServerName}.postgres.database.azure.com:5432/${dbName}?sslmode=require"
+    },
+    "dbGlobalTranPro": {
+        "value": "EmulateTwoPhaseCommit"
+    },
+    "dbPassword": {
+        "value": "${dbPassword}"
+    },
+    "dbUser": {
+        "value": "${dbUser}"
+    },
+    "jdbcDataSourceName": {
+        "value": "jdbc/WebLogicCafeDB"
+    },
+    "enableOHS": {
+      "value": true
+    },
+    "ohsNMUser": {
+      "value": "weblogic"
+    },
+    "ohsNMPassword": {
+      "value": "$wlspassword"
+    },
+    "oracleVaultPswd": {
+      "value": "$wlspassword"
+    },
+    "uploadedKeyStoreData": {
+      "value": "${uploadedKeyStoreData}"
+    },
+    "uploadedKeyStorePassword": {
+      "value": "$wlspassword"
+    },
+    "uploadedKeyStoreType": {
+      "value": "JKS"
     }
   }
 }

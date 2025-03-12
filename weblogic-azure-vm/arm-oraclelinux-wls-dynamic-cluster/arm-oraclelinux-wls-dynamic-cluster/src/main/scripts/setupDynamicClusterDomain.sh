@@ -876,7 +876,7 @@ function storeCustomSSLCerts()
         serverPrivateKeyAlias=$(echo "$serverPrivateKeyAlias" | base64 --decode)
         serverPrivateKeyPassPhrase=$(echo "$serverPrivateKeyPassPhrase" | base64 --decode)
 
-        #decode cert data once again as it would got base64 encoded while  storing in azure keyvault
+        #decode cert data once again as it would got base64 encoded while uploading
         echo "$customIdentityKeyStoreData" | base64 --decode > $customIdentityKeyStoreFileName
         echo "$customTrustKeyStoreData" | base64 --decode > $customTrustKeyStoreFileName
 

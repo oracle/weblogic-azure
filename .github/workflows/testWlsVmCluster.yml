@@ -362,7 +362,7 @@ jobs:
         id: checkout-webapp
         uses: actions/checkout@v2
         with:
-          repository: microsoft/weblogic-on-azure
+          repository: azure-javaee/weblogic-on-azure
           path: weblogic-on-azure
 
       - name: Maven build the web app

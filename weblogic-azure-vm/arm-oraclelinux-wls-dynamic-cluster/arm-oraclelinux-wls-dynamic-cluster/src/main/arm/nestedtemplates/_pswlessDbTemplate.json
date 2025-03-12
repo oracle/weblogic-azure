@@ -77,6 +77,12 @@
                 "description": "Provide managed server prefix name"
             }
         },
+        "managedVMNamePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide managed VM name prefix"
+            }
+        },
         "numberOfManagedApplicationInstances": {
             "type": "int",
             "defaultValue": 2,
@@ -109,7 +115,7 @@
     "variables": {
         "const_connectionString": "[if(and(equals(parameters('databaseType'),'sqlserver'), equals(last(parameters('dsConnectionURL')),';')), take(parameters('dsConnectionURL'), add(length(parameters('dsConnectionURL')),-1)),parameters('dsConnectionURL'))]",
         "const_identityAPIVersion": "${azure.apiVersionForIdentity}",
-        "const_managedVMPrefix": "[concat(parameters('managedServerPrefix'),'VM')]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMNamePrefix'), 'VM')]",
         "const_msiDefaultUser": "msiUser",
         "name_appendIdentityTemplate": "_appendUserManagedIdentity.json",
         "name_installJdbcLibsTemplate": "_installJdbcLibsTemplate.json",
@@ -120,6 +126,11 @@
             "sqlserver": "authentication=ActiveDirectoryMSI"
         },
         "array_urlJoiner": {
+            "mysql": "[if(contains(variables('const_connectionString'), '?'), '&', '?')]",
+            "postgresql": "[if(contains(variables('const_connectionString'), '?'), '&', '?')]",
+            "sqlserver": ";"
+        },
+        "array_paramJoiner": {
             "mysql": "&",
             "postgresql": "&",
             "sqlserver": ";"
@@ -214,6 +225,9 @@
                     "managedServerPrefix": {
                         "value": "[parameters('managedServerPrefix')]"
                     },
+                    "managedVMNamePrefix": {
+                        "value": "[parameters('managedVMNamePrefix')]"
+                    },
                     "numberOfManagedApplicationInstances": {
                         "value": "[parameters('numberOfManagedApplicationInstances')]"
                     },
@@ -259,7 +273,7 @@
                         "value": "[parameters('dbGlobalTranPro')]"
                     },
                     "dsConnectionURL": {
-                        "value": "[uri(format('{0}{4}{1}{4}{2}={3}', variables('const_connectionString'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')]), '')]"
+                        "value": "[uri(format('{0}{4}{1}{5}{2}={3}', variables('const_connectionString'), variables('array_azureJdbcPlugins')[parameters('databaseType')], variables('array_msiClientId')[parameters('databaseType')], reference(items(parameters('dbIdentity').userAssignedIdentities)[0].key,variables('const_identityAPIVersion'), 'full').properties.clientId, variables('array_urlJoiner')[parameters('databaseType')], variables('array_paramJoiner')[parameters('databaseType')]), '')]"
                     },
                     "dbUser": {
                         "value": "[if(equals(parameters('databaseType'), 'sqlserver'), variables('const_msiDefaultUser'), parameters('dbUser'))]"
