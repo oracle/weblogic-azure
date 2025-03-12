@@ -13,7 +13,7 @@ SERVICE_PRINCIPAL=$(az ad sp create-for-rbac --name ${SERVICE_PRINCIPAL_NAME_WLS
 AZURE_CREDENTIALS=$(echo $SERVICE_PRINCIPAL | base64 -d)
 
 ## Set the Azure Credentials as a secret in the repository
-gh secret set "AZURE_CREDENTIALS" -b"${AZURE_CREDENTIALS}"
-gh variable set "SERVICE_PRINCIPAL_NAME_WLS_VM" -b"${SERVICE_PRINCIPAL_NAME_WLS_VM}"
+gh secret --repo $(gh repo set-default --view) set "AZURE_CREDENTIALS" -b"${AZURE_CREDENTIALS}"
+gh variable --repo $(gh repo set-default --view) set "SERVICE_PRINCIPAL_NAME_WLS_VM" -b"${SERVICE_PRINCIPAL_NAME_WLS_VM}"
 
 echo "Execute azure-credential-setup.sh - End--------------------------------------------"

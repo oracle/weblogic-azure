@@ -63,3 +63,6 @@ fi
 echo "6/6...You are logged in to Azure CLI (az)."
 
 echo "Checking progress completed..."
+
+echo "Select default repository for this project"
+gh repo set-default
