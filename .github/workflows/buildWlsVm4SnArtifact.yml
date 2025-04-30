@@ -86,7 +86,7 @@ jobs:
           echo "##[set-output name=artifactName;]${artifactName}-${{ env.pidType }}"
           echo "##[set-output name=artifactPath;]${{env.repoName}}/weblogic-azure-vm/${{ env.offerName }}/target/$artifactName"
       - name: Archive ${{ env.offerName }} template
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: success()
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}

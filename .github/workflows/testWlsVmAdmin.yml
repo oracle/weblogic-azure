@@ -156,7 +156,7 @@ jobs:
         run: unzip ${{ env.adminOfferPath }}/target/$artifactName.zip -d ${{ env.adminOfferPath }}/target/$artifactName
 
       - name: Archive ${{ env.offerName }} template
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: success()
         with:
           name: ${{steps.artifact_file.outputs.artifactName}}
@@ -223,7 +223,7 @@ jobs:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v4.2.1
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: ${{ needs.preflight.outputs.artifactName }}
           path: ${{needs.preflight.outputs.artifactName}}
