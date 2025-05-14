@@ -106,7 +106,7 @@ function build_docker_image() {
     # query AKS vm size
     # use the same VM size to create the Ubuntu machine, make sure the architecture is matched.
     local vmSize=$(az aks show --name ${AKS_CLUSTER_NAME} --resource-group ${AKS_CLUSTER_RESOURCEGROUP_NAME} \
-        | jq '.agentPoolProfiles[] | select(.name=='${AKS_NODE_POOL_NAME}') | .vmSize' \
+        | jq '.agentPoolProfiles[] | select(.name=="'${AKS_NODE_POOL_NAME}'") | .vmSize' \
         | tr -d "\"")
     
     # if vmSize is empty or null, exit
