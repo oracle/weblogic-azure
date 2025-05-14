@@ -11,7 +11,7 @@ param agentAvailabilityZones array = []
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
-param aksAgentPoolName string = 'agentpool'
+param aksAgentPoolName string = 'nodepool1'
 @maxValue(10000)
 @minValue(1)
 @description('The number of nodes that should be created along with the cluster. You will be able to resize the cluster later.')

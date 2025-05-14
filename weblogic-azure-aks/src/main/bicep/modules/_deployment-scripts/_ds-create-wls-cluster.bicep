@@ -6,6 +6,7 @@ param _artifactsLocation string = deployment().properties.templateLink.uri
 param _artifactsLocationSasToken string = ''
 param _globalResourceNameSuffix string
 
+param aksAgentPoolName string = ''
 param aksClusterRGName string = ''
 param aksClusterName string = ''
 param acrName string = ''
@@ -102,6 +103,14 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
       {
         name: 'AKS_CLUSTER_NAME'
         value: aksClusterName
+      }
+      {
+        name: 'AKS_NODE_POOL_NAME'
+        value: aksAgentPoolName
+      }
+      {
+        name: 'AKS_CLUSTER_LOCATION'
+        value: location
       }
       {
         name: 'AKS_CLUSTER_RESOURCEGROUP_NAME'
