@@ -20,6 +20,7 @@ function validate_app() {
 export script="${BASH_SOURCE[0]}"
 export scriptDir="$(cd "$(dirname "${script}")" && pwd)"
 
+source ${scriptDir}/common.sh
 source ${scriptDir}/utility.sh
 
 install_kubectl
