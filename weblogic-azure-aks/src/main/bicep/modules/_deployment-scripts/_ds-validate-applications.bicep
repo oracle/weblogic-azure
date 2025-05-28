@@ -24,6 +24,7 @@ var const_pyCheckAppStatusScript = 'checkApplicationStatus.py'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_validateAppScript= 'validateApplications.sh'
 var const_utilityScript= 'utility.sh'
+var const_commonScript= 'common.sh'
 
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
@@ -58,6 +59,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
     ]
     primaryScriptUri: uri(const_scriptLocation, '${const_validateAppScript}${_artifactsLocationSasToken}')
     supportingScriptUris: [
+      uri(const_scriptLocation, '${const_commonScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_utilityScript}${_artifactsLocationSasToken}')
       uri(const_scriptLocation, '${const_pyCheckAppStatusScript}${_artifactsLocationSasToken}')
     ]

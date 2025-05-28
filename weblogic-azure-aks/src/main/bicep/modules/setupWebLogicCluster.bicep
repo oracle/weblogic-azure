@@ -34,7 +34,7 @@ param aksAgentAvailabilityZones array = []
 @maxLength(12)
 @minLength(1)
 @description('The name for this node pool. Node pool must contain only lowercase letters and numbers. For Linux node pools the name cannot be longer than 12 characters.')
-param aksAgentPoolName string = 'agentpool'
+param aksAgentPoolName string = 'nodepool1'
 @maxValue(10000)
 @minValue(1)
 @description('Set the minimum node count for the cluster..')
@@ -202,6 +202,7 @@ module wlsDomainDeployment './_deployment-scripts/_ds-create-wls-cluster.bicep' 
     _artifactsLocation: _artifactsLocation
     _artifactsLocationSasToken: _artifactsLocationSasToken
     _globalResourceNameSuffix: _globalResourceNameSuffix
+    aksAgentPoolName: aksAgentPoolName
     aksClusterRGName: createAKSCluster ? resourceGroup().name : aksClusterRGName
     aksClusterName: aksClusterName
     acrName: useOracleImage ? acrName : userProvidedAcr
