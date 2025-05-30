@@ -128,6 +128,7 @@ module agicRoleAssignment '_rolesAssignment/_agicRoleAssignment.bicep' = if (ena
 
 module agicNetworkContributorRoleAssignment '_rolesAssignment/_agicNetworkContributor.bicep' = if (enableAppGWIngress && newOrExistingVnetForApplicationGateway != 'new' && vnetRGNameForApplicationGateway != resourceGroup().name) {
   name: 'allow-agic-access-vnet'
+  scope: resourceGroup(vnetRGNameForApplicationGateway)
   params: {
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
