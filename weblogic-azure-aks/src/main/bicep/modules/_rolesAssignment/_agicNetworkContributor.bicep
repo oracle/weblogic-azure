@@ -6,7 +6,6 @@ Licensed under the Universal Permissive License v 1.0 as shown at https://oss.or
 param aksClusterName string 
 param aksClusterRGName string
 param utcValue string = utcNow()
-param vnetRgName string
 
 var const_APIVersion = '2020-12-01'
 var name_appGwContributorRoleAssignmentName = guid('${resourceGroup().id}${uniqueString(utcValue)}NetworkContributor')
@@ -20,7 +19,6 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersi
 
 resource agicUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = {
   name: name_appGwContributorRoleAssignmentName
-  scope: resourceGroup(vnetRgName)
   properties: {
     description: 'Assign Network Contributor role to AGIC Identity '
     principalId: reference(aksCluster.id, const_APIVersion , 'Full').properties.addonProfiles.ingressApplicationGateway.identity.objectId

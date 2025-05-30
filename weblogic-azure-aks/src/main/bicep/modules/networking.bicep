@@ -132,7 +132,6 @@ module agicNetworkContributorRoleAssignment '_rolesAssignment/_agicNetworkContri
   params: {
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
-    vnetRgName: vnetRGNameForApplicationGateway
   }
   dependsOn: [
     installAgic
