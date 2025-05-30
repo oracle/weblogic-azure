@@ -637,6 +637,8 @@ module networkingDeployment 'modules/networking.bicep' = if (const_enableNetwork
     identity: obj_uamiForDeploymentScript
     location: location
     lbSvcValues: lbSvcValues
+    newOrExistingVnetForApplicationGateway: newOrExistingVnetForApplicationGateway
+    vnetRGNameForApplicationGateway: vnetRGNameForApplicationGateway
     tagsByResource: _objTagsByResource
     useInternalLB: useInternalLB
     wlsDomainName: wlsDomainName
