@@ -47,6 +47,8 @@ param identity object = {}
 param location string
 @description('Object array to define Load Balancer service, each object must include service name, service target[admin-server or cluster-1], port.')
 param lbSvcValues array = []
+param newOrExistingVnetForApplicationGateway string
+param vnetRGNameForApplicationGateway string
 @description('${label.tagsLabel}')
 param tagsByResource object
 @description('True to set up internal load balancer service.')
@@ -115,6 +117,18 @@ module installAgic '_deployment-scripts/_ds_install_agic.bicep' = if (enableAppG
 
 module agicRoleAssignment '_rolesAssignment/_agicRoleAssignment.bicep' = if (enableAppGWIngress) {
   name: 'allow-agic-access-current-resource-group'
+  params: {
+    aksClusterName: aksClusterName
+    aksClusterRGName: aksClusterRGName
+  }
+  dependsOn: [
+    installAgic
+  ]
+}
+
+module agicNetworkContributorRoleAssignment '_rolesAssignment/_agicNetworkContributor.bicep' = if (enableAppGWIngress && newOrExistingVnetForApplicationGateway != 'new' && vnetRGNameForApplicationGateway != resourceGroup().name) {
+  name: 'allow-agic-access-vnet'
+  scope: resourceGroup(vnetRGNameForApplicationGateway)
   params: {
     aksClusterName: aksClusterName
     aksClusterRGName: aksClusterRGName
