@@ -228,7 +228,7 @@ function utility_validate_application_status() {
     local targetFilePath=/tmp/checkApplicationStatus.py
     echo "copy ${pyScriptPath} to ${targetFilePath}"
     kubectl cp ${pyScriptPath} -n ${wlsDomainNS} ${podName}:${targetFilePath}
-    kubectl exec -it ${podName} -n ${wlsDomainNS} -c "weblogic-server" \
+    kubectl exec ${podName} -n ${wlsDomainNS} -c "weblogic-server" \
         -- bash -c "wlst.sh ${targetFilePath} -user ${wlsUser} -password ${wlsPassword} -t3ChannelAddress ${t3ChannelAddress} -t3ChannelPort ${adminTargetPort}" |
         grep "Summary: all applications are active"
 
@@ -349,7 +349,7 @@ function utility_wait_for_pod_restarted() {
     while [ ${updatedPodNum} -le ${appReplicas} ] && [ $attempt -le ${checkPodStatusMaxAttemps} ]; do
         echo "attempts ${attempt}"
         ret=$(kubectl get pods -n ${wlsDomainNS} -l weblogic.domainUID=${wlsDomainUID} -o json |
-            jq '.items[] | .metadata.creationTimestamp' | tr -d "\"")
+            jq '.items[] | select(all(.status.containerStatuses[]; .ready == true)) | .metadata.creationTimestamp' | tr -d "\"")
 
         counter=0
         for item in $ret; do

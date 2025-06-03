@@ -3,6 +3,22 @@
     "description": "List image tag mapping from Oracle Container Registry middleware/weblogic and middleware/weblogic_cpu repository.",
     "items": [
         {
+            "gaTag": "14.1.2.0-generic-jdk17-ol9",
+            "cpuTag": "14.1.2.0-generic-jdk17-ol9"
+        },
+        {
+            "gaTag": "14.1.2.0-generic-jdk21-ol9",
+            "cpuTag": "14.1.2.0-generic-jdk21-ol9"
+        },
+        {
+            "gaTag": "14.1.2.0-generic-jdk17-ol8",
+            "cpuTag": "14.1.2.0-generic-jdk17-ol8"
+        },
+        {
+            "gaTag": "14.1.2.0-generic-jdk21-ol8",
+            "cpuTag": "14.1.2.0-generic-jdk21-ol8"
+        },
+        {
             "gaTag": "14.1.1.0-11",
             "cpuTag": "14.1.1.0-generic-jdk11-ol7"
         },

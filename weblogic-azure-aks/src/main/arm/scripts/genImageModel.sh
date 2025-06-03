@@ -135,7 +135,9 @@ cat <<EOF >>${filePath}
   SecurityConfiguration:
     NodeManagerUsername: "@@SECRET:__weblogic-credentials__:username@@"
     NodeManagerPasswordEncrypted: "@@SECRET:__weblogic-credentials__:password@@"
-    
+    SecureMode:
+        SecureModeEnabled: false
+
 resources:
   SelfTuning:
     MinThreadsConstraint:

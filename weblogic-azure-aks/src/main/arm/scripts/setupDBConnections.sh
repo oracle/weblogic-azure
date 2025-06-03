@@ -252,7 +252,7 @@ EOF
     echo "copy test script ${testDatasourceScript} to pod path /tmp/${dsScriptFileName}"
     targetDSFilePath=/tmp/${dsScriptFileName}
     kubectl cp ${testDatasourceScript} -n ${wlsDomainNS} ${podName}:${targetDSFilePath}
-    kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} -- bash -c "wlst.sh ${targetDSFilePath}" | grep "State is Running"
+    kubectl exec ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} -- bash -c "wlst.sh ${targetDSFilePath}" | grep "State is Running"
     
     if [ $? == 1 ];then
         echo_stderr "Failed to configure datasource ${JDBC_DATASOURCE_NAME}. Please make sure the input values are correct."

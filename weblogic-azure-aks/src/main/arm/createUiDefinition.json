@@ -556,19 +556,39 @@
                                 "name": "oracleImageSelector",
                                 "type": "Microsoft.Common.DropDown",
                                 "label": "Select desired combination of WebLogic Server, JDK and Operating System or fully qualified Docker tag",
-                                "defaultValue": "14.1.1.0-11",
+                                "defaultValue": "14.1.2.0-17-ol9",
                                 "multiLine": true,
                                 "toolTip": "Select image",
                                 "constraints": {
                                     "allowedValues": [
                                         {
+                                            "label": "14.1.2.0-17-ol9",
+                                            "description": "14c (14.1.2.0) on JDK 17 on Oracle Linux 9",
+                                            "value": "14.1.2.0-generic-jdk17-ol9"
+                                        },
+                                        {
+                                            "label": "14.1.2.0-21-ol9",
+                                            "description": "14c (14.1.2.0) on JDK 21 on Oracle Linux 9",
+                                            "value": "14.1.2.0-generic-jdk21-ol9"
+                                        },
+                                        {
+                                            "label": "14.1.2.0-17-ol8",
+                                            "description": "14c (14.1.2.0) on JDK 17 on Oracle Linux 8",
+                                            "value": "14.1.2.0-generic-jdk17-ol8"
+                                        },
+                                        {
+                                            "label": "14.1.2.0-21-ol8",
+                                            "description": "14c (14.1.2.0) on JDK 21 on Oracle Linux 8",
+                                            "value": "14.1.2.0-generic-jdk21-ol8"
+                                        },
+                                        {
                                             "label": "14.1.1.0-8",
-                                            "description": "14c on JDK 8 on Oracle Linux 7",
+                                            "description": "14c (14.1.1.0) on JDK 8 on Oracle Linux 7",
                                             "value": "14.1.1.0-8"
                                         },
                                         {
                                             "label": "14.1.1.0-11",
-                                            "description": "14c on JDK 11 on Oracle Linux 7",
+                                            "description": "14c (14.1.1.0) on JDK 11 on Oracle Linux 7",
                                             "value": "14.1.1.0-11"
                                         },
                                         {
@@ -578,12 +598,12 @@
                                         },
                                         {
                                             "label": "14.1.1.0-8-ol8",
-                                            "description": "14c on JDK 8 on Oracle Linux 8",
+                                            "description": "14c (14.1.1.0.0) on JDK 8 on Oracle Linux 8",
                                             "value": "14.1.1.0-8-ol8"
                                         },
                                         {
                                             "label": "14.1.1.0-11-ol8",
-                                            "description": "14c on JDK 11 on Oracle Linux 8",
+                                            "description": "14c (14.1.1.0.0) on JDK 11 on Oracle Linux 8",
                                             "value": "14.1.1.0-11-ol8"
                                         },
                                         {
