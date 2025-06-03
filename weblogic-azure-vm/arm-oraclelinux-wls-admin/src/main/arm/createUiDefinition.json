@@ -693,6 +693,16 @@
                                 }
                             },
                             {
+                                "name": "createDNSZonePublicResolveWarning",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "The referenced hostnames must be publicly resolvable before deployment.",
+                                    "uri": "https://learn.microsoft.com/en-us/azure/dns/dns-getstarted-portal"
+                                }
+                            },
+                            {
                                 "name": "infoDNSIndentity",
                                 "type": "Microsoft.Common.InfoBox",
                                 "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]",
