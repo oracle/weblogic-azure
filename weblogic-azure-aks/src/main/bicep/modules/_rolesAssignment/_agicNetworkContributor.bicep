@@ -12,12 +12,12 @@ var name_appGwContributorRoleAssignmentName = guid('${resourceGroup().id}${uniqu
 // https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 var const_roleDefinitionIdOfVnetContributor = '4d97b98b-1d4f-4787-a291-c67834d212e7'
 
-resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersionForManagedClusters}' existing = {
+resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' existing = {
   name: aksClusterName
   scope: resourceGroup(aksClusterRGName)
 }
 
-resource agicUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = {
+resource agicUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: name_appGwContributorRoleAssignmentName
   properties: {
     description: 'Assign Network Contributor role to AGIC Identity '

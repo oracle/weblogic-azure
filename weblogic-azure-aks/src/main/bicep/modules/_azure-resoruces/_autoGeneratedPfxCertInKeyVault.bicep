@@ -28,7 +28,7 @@ param sku string = 'Standard'
 
 @description('Subject name to create a new certificate, example: \'CN=contoso.com\'.')
 param subjectName string = 'contoso.xyz'
-@description('${label.tagsLabel}')
+@description('Tags for the resources')
 param tagsByResource object
 param utcValue string = utcNow()
 
@@ -37,10 +37,10 @@ var obj_extraTag= {
 }
 var const_identityId = '${substring(string(identity.userAssignedIdentities), indexOf(string(identity.userAssignedIdentities), '"') + 1, lastIndexOf(string(identity.userAssignedIdentities), '"') - (indexOf(string(identity.userAssignedIdentities), '"') + 1))}'
 
-resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
+resource keyvault 'Microsoft.KeyVault/vaults@2024-11-01' = {
   name: keyVaultName
   location: location
-  tags: union(tagsByResource['${identifier.vaults}'], obj_extraTag)
+  tags: union(tagsByResource['Microsoft.KeyVault/vaults'], obj_extraTag)
   properties: {
     sku: {
       family: 'A'
@@ -63,15 +63,15 @@ resource keyvault 'Microsoft.KeyVault/vaults@${azure.apiVersionForKeyVault}' = {
   }
 }
 
-resource createAddCertificate 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
+resource createAddCertificate 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'ds-create-add-appgw-certificate-${_globalResourceNameSuffix}'
   location: location
   identity: identity
   kind: 'AzurePowerShell'
-  tags: tagsByResource['${identifier.deploymentScripts}']
+  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
   properties: {
     forceUpdateTag: utcValue
-    azPowerShellVersion: '${azure.powershell.version}'
+    azPowerShellVersion: '11.5'
     timeout: 'PT30M'
     arguments: ' -vaultName ${keyVaultName} -certificateName ${secretName} -subjectName ${subjectName}'
     scriptContent: '\n                    param(\n                        [string] [Parameter(Mandatory=$true)] $vaultName,\n                        [string] [Parameter(Mandatory=$true)] $certificateName,\n                        [string] [Parameter(Mandatory=$true)] $subjectName\n                    )\n\n                    $ErrorActionPreference = \'Stop\'\n                    $DeploymentScriptOutputs = @{}\n\n                    $existingCert = Get-AzKeyVaultCertificate -VaultName $vaultName -Name $certificateName\n\n                    if ($existingCert -and $existingCert.Certificate.Subject -eq $subjectName) {\n\n                        Write-Host \'Certificate $certificateName in vault $vaultName is already present.\'\n\n                        $DeploymentScriptOutputs[\'certThumbprint\'] = $existingCert.Thumbprint\n                        $existingCert | Out-String\n                    }\n                    else {\n                        $policy = New-AzKeyVaultCertificatePolicy -SubjectName $subjectName -IssuerName Self -ValidityInMonths 12 -Verbose\n\n                        # private key is added as a secret that can be retrieved in the ARM template\n                        Add-AzKeyVaultCertificate -VaultName $vaultName -Name $certificateName -CertificatePolicy $policy -Verbose\n\n                        $newCert = Get-AzKeyVaultCertificate -VaultName $vaultName -Name $certificateName\n\n                        # it takes a few seconds for KeyVault to finish\n                        $tries = 0\n                        do {\n                        Write-Host \'Waiting for certificate creation completion...\'\n                        Start-Sleep -Seconds 10\n                        $operation = Get-AzKeyVaultCertificateOperation -VaultName $vaultName -Name $certificateName\n                        $tries++\n\n                        if ($operation.Status -eq \'failed\')\n                        {\n                            throw \'Creating certificate $certificateName in vault $vaultName failed with error $($operation.ErrorMessage)\'\n                        }\n\n                        if ($tries -gt 120)\n                        {\n                            throw \'Timed out waiting for creation of certificate $certificateName in vault $vaultName\'\n                        }\n                        } while ($operation.Status -ne \'completed\')\n\n                        $DeploymentScriptOutputs[\'certThumbprint\'] = $newCert.Thumbprint\n                        $newCert | Out-String\n                    }\n                '

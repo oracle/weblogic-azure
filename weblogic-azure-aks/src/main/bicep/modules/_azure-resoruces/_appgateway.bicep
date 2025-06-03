@@ -20,7 +20,7 @@ param staticPrivateFrontentIP string = '10.0.0.1'
 @secure()
 param trustedRootCertData string = newGuid()
 param usePrivateIP bool = false
-@description('${label.tagsLabel}')
+@description('Tags for the resources')
 param tagsByResource object
 param utcValue string = utcNow()
 
@@ -80,13 +80,13 @@ var obj_tagIngress = {
   'managed-by-k8s-ingress': 'true'
 }
 
-resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersionForPublicIPAddresses}' = {
+resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@2023-06-01' = {
   name: gatewayPublicIPAddressName
   sku: {
     name: 'Standard'
   }
   location: location
-  tags: tagsByResource['${identifier.publicIPAddresses}']
+  tags: tagsByResource['Microsoft.Network/publicIPAddresses']
   properties: {
     publicIPAllocationMethod: 'Static'
     dnsSettings: {
@@ -95,10 +95,10 @@ resource gatewayPublicIP 'Microsoft.Network/publicIPAddresses@${azure.apiVersion
   }
 }
 
-resource wafv2AppGateway 'Microsoft.Network/applicationGateways@${azure.apiVersionForApplicationGateways}' = {
+resource wafv2AppGateway 'Microsoft.Network/applicationGateways@2023-06-01' = {
   name: gatewayName
   location: location
-  tags: union(tagsByResource['${identifier.applicationGateways}'], obj_tagIngress)
+  tags: union(tagsByResource['Microsoft.Network/applicationGateways'], obj_tagIngress)
   properties: {
     sku: {
       name: 'WAF_v2'

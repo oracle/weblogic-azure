@@ -22,7 +22,7 @@ param enablePswlessConnection bool = false
 param identity object = {}
 param jdbcDataSourceName string
 param location string
-@description('${label.tagsLabel}')
+@description('Tags for the resources')
 param tagsByResource object
 param utcValue string = utcNow()
 param wlsDomainUID string = 'sample-domain1'
@@ -38,12 +38,12 @@ var const_dbUtilityScript='dbUtility.sh'
 var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_utilityScript= 'utility.sh'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'ds-wls-db-connection-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['${identifier.deploymentScripts}']
+  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [

@@ -84,7 +84,7 @@ param ocrSSOUser string
 param storageAccountName string = 'stg-contoso'
 param t3ChannelAdminPort int = 7005
 param t3ChannelClusterPort int = 8011
-@description('${label.tagsLabel}')
+@description('Tags for the resources')
 param tagsByResource object
 param userProvidedAcr string = 'null'
 param userProvidedAcrRgName string = 'null'
@@ -149,7 +149,7 @@ module pidSSLStart './_pids/_pid.bicep' = if (enableCustomSSL) {
   }
 }
 
-resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersionForManagedClusters}' existing = if (!createAKSCluster) {
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' existing = if (!createAKSCluster) {
   name: aksClusterName
   scope: resourceGroup(aksClusterRGName)
 }

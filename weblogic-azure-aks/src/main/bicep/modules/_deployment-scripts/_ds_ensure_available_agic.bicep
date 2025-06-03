@@ -15,7 +15,7 @@ var base64_enableAgic = loadFileAsBase64('../../../arm/scripts/inline-scripts/en
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var const_deploymentName='ds-validate-agic-${uniqueString(utcValue)}'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
