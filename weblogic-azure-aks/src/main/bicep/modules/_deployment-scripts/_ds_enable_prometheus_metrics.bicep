@@ -9,7 +9,7 @@ param azCliVersion string
 param identity object = {}
 param kedaUamiName string
 param location string
-@description('Tags for the resources')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 param wlsClusterSize int
@@ -28,12 +28,12 @@ var const_deploymentName = 'ds-enable-promethues-metrics-${_globalResourceNameSu
 var const_kedaNamespace= 'keda'
 var const_kedaSa= 'keda-operator'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}', base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableHpa))

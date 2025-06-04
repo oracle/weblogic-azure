@@ -35,7 +35,7 @@ param useInternalLB bool = false
 param utcValue string = utcNow()
 param wlsDomainName string = 'domain1'
 param wlsDomainUID string = 'sample-domain1'
-@description('Tags for the resources')
+@description('${label.tagsLabel}')
 param tagsByResource object
 
 var const_commonScript = 'common.sh'
@@ -46,12 +46,12 @@ var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_primaryScript = 'setupNetworking.sh'
 var const_utilityScript = 'utility.sh'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-networking-deployment-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [

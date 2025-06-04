@@ -35,7 +35,7 @@ param identity object = {}
 @description('JNDI Name for JDBC Datasource')
 param jdbcDataSourceName string = 'jdbc/contoso'
 param location string
-@description('Tags for the resources')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 @description('UID of WebLogic domain, used in WebLogic Operator.')
@@ -87,7 +87,7 @@ module dbIdentityVMContributorRoleAssignment '_rolesAssignment/_roleAssignmentin
   }
 }
 
-resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' existing = {
+resource existingAKSCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersionForManagedClusters}' existing = {
   name: aksClusterName
   scope: resourceGroup(aksClusterRGName)
 }

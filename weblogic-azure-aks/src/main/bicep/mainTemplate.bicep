@@ -199,7 +199,7 @@ param sslUploadedPrivateKeyAlias string = newGuid()
 @secure()
 @description('Password of the private key')
 param sslUploadedPrivateKeyPassPhrase string = newGuid()
-@description('Tags for the resources')
+@description('${label.tagsLabel}')
 param tagsByResource object = {}
 @description('Public port of the custom T3 channel in admin server')
 param t3ChannelAdminPort int = 7005
@@ -266,22 +266,22 @@ var _enableAppGWIngress = enableAppGWIngress
 // We can streamline the following code with a user-defined function, but it is not supported in Partner Center.
 // For status, see https://dev.azure.com/edburns-msft/Open%20Standard%20Enterprise%20Java%20(Java%20EE)%20on%20Azure/_workitems/edit/6219
 var _objTagsByResource = {
-  'Microsoft.Monitor/accounts': contains(tagsByResource, 'Microsoft.Monitor/accounts') ? tagsByResource['Microsoft.Monitor/accounts'] : json('{}')
-  'Microsoft.ContainerService/managedClusters': contains(tagsByResource, 'Microsoft.ContainerService/managedClusters') ? tagsByResource['Microsoft.ContainerService/managedClusters'] : json('{}')
-  'Microsoft.Network/applicationGateways': contains(tagsByResource, 'Microsoft.Network/applicationGateways') ? tagsByResource['Microsoft.Network/applicationGateways'] : json('{}')
-  'Microsoft.ContainerRegistry/registries': contains(tagsByResource, 'Microsoft.ContainerRegistry/registries') ? tagsByResource['Microsoft.ContainerRegistry/registries'] : json('{}')
-  'Microsoft.Compute/virtualMachines': contains(tagsByResource, 'Microsoft.Compute/virtualMachines') ? tagsByResource['Microsoft.Compute/virtualMachines'] : json('{}')
-  'Virtual machine extension': contains(tagsByResource, 'Virtual machine extension') ? tagsByResource['Virtual machine extension'] : json('{}')
-  'Microsoft.Network/virtualNetworks': contains(tagsByResource, 'Microsoft.Network/virtualNetworks') ? tagsByResource['Microsoft.Network/virtualNetworks'] : json('{}')
-  'Microsoft.Network/networkInterfaces': contains(tagsByResource, 'Microsoft.Network/networkInterfaces') ? tagsByResource['Microsoft.Network/networkInterfaces'] : json('{}')
-  'Microsoft.Network/networkSecurityGroups': contains(tagsByResource, 'Microsoft.Network/networkSecurityGroups') ? tagsByResource['Microsoft.Network/networkSecurityGroups'] : json('{}')
-  'Microsoft.Network/publicIPAddresses': contains(tagsByResource, 'Microsoft.Network/publicIPAddresses') ? tagsByResource['Microsoft.Network/publicIPAddresses'] : json('{}')
-  'Microsoft.Storage/storageAccounts': contains(tagsByResource, 'Microsoft.Storage/storageAccounts') ? tagsByResource['Microsoft.Storage/storageAccounts'] : json('{}')
-  'Microsoft.KeyVault/vaults': contains(tagsByResource, 'Microsoft.KeyVault/vaults') ? tagsByResource['Microsoft.KeyVault/vaults'] : json('{}')
-  'Microsoft.ManagedIdentity/userAssignedIdentities': contains(tagsByResource, 'Microsoft.ManagedIdentity/userAssignedIdentities') ? tagsByResource['Microsoft.ManagedIdentity/userAssignedIdentities'] : json('{}')
-  'Microsoft.Network/dnszones': contains(tagsByResource, 'Microsoft.Network/dnszones') ? tagsByResource['Microsoft.Network/dnszones'] : json('{}')
-  'Microsoft.OperationalInsights/workspaces': contains(tagsByResource, 'Microsoft.OperationalInsights/workspaces') ? tagsByResource['Microsoft.OperationalInsights/workspaces'] : json('{}')
-  'Microsoft.Resources/deploymentScripts': contains(tagsByResource, 'Microsoft.Resources/deploymentScripts') ? tagsByResource['Microsoft.Resources/deploymentScripts'] : json('{}')
+  '${identifier.accounts}': contains(tagsByResource, '${identifier.accounts}') ? tagsByResource['${identifier.accounts}'] : json('{}')
+  '${identifier.managedClusters}': contains(tagsByResource, '${identifier.managedClusters}') ? tagsByResource['${identifier.managedClusters}'] : json('{}')
+  '${identifier.applicationGateways}': contains(tagsByResource, '${identifier.applicationGateways}') ? tagsByResource['${identifier.applicationGateways}'] : json('{}')
+  '${identifier.registries}': contains(tagsByResource, '${identifier.registries}') ? tagsByResource['${identifier.registries}'] : json('{}')
+  '${identifier.virtualMachines}': contains(tagsByResource, '${identifier.virtualMachines}') ? tagsByResource['${identifier.virtualMachines}'] : json('{}')
+  '${identifier.virtualMachinesExtensions}': contains(tagsByResource, '${identifier.virtualMachinesExtensions}') ? tagsByResource['${identifier.virtualMachinesExtensions}'] : json('{}')
+  '${identifier.virtualNetworks}': contains(tagsByResource, '${identifier.virtualNetworks}') ? tagsByResource['${identifier.virtualNetworks}'] : json('{}')
+  '${identifier.networkInterfaces}': contains(tagsByResource, '${identifier.networkInterfaces}') ? tagsByResource['${identifier.networkInterfaces}'] : json('{}')
+  '${identifier.networkSecurityGroups}': contains(tagsByResource, '${identifier.networkSecurityGroups}') ? tagsByResource['${identifier.networkSecurityGroups}'] : json('{}')
+  '${identifier.publicIPAddresses}': contains(tagsByResource, '${identifier.publicIPAddresses}') ? tagsByResource['${identifier.publicIPAddresses}'] : json('{}')
+  '${identifier.storageAccounts}': contains(tagsByResource, '${identifier.storageAccounts}') ? tagsByResource['${identifier.storageAccounts}'] : json('{}')
+  '${identifier.vaults}': contains(tagsByResource, '${identifier.vaults}') ? tagsByResource['${identifier.vaults}'] : json('{}')
+  '${identifier.userAssignedIdentities}': contains(tagsByResource, '${identifier.userAssignedIdentities}') ? tagsByResource['${identifier.userAssignedIdentities}'] : json('{}')
+  '${identifier.dnszones}': contains(tagsByResource, '${identifier.dnszones}') ? tagsByResource['${identifier.dnszones}'] : json('{}')
+  '${identifier.workspaces}': contains(tagsByResource, '${identifier.workspaces}') ? tagsByResource['${identifier.workspaces}'] : json('{}')
+  '${identifier.deploymentScripts}': contains(tagsByResource, '${identifier.deploymentScripts}') ? tagsByResource['${identifier.deploymentScripts}'] : json('{}')
 }
 var const_aksName = createAKSCluster ? 'wlsonaks${const_globalResourceNameSuffix}' : aksClusterName
 var const_appGatewaySSLCertOptionGenerateCert = 'generateCert'

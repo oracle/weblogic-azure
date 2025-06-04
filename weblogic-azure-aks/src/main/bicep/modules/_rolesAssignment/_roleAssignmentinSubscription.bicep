@@ -25,12 +25,12 @@ param principalId string = ''
 var name_roleAssignmentName = guid('${subscription().id}${principalId}Role assignment in subscription scope')
 
 // Get role resource id in subscription
-resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = {
   name: roleDefinitionId
 }
 
 // Assign role
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = {
   name: name_roleAssignmentName
   properties: {
     description: 'Assign subscription scope role to User Assigned Managed Identity '
