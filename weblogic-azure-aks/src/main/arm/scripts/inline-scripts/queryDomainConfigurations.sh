@@ -53,7 +53,7 @@ fi
 
 echo "Query WebLogic version and patch numbers"
 targetFile4Versions=/tmp/version.info
-kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+kubectl exec ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
     -- bash -c 'source $ORACLE_HOME/wlserver/server/bin/setWLSEnv.sh > /dev/null 2>&1 && java weblogic.version -verbose >"'${targetFile4Versions}'"'
 if [ $? != 0 ]; then
     echo >&2 "Fail to run java weblogic.version."

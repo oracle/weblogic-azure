@@ -11,23 +11,23 @@
         {
             "key": "WDT",
             "description": "Oracle WebLogic Deploy Tooling",
-            "version": "3.5.2",
-            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-3.5.2/weblogic-deploy.zip",
-            "testedDate": "2024-03-13"
+            "version": "4.3.5",
+            "downloadURL": "https://github.com/oracle/weblogic-deploy-tooling/releases/download/release-4.3.5/weblogic-deploy.zip",
+            "testedDate": "2025-05-26"
         },
         {
             "key": "WIT",
             "description": "Oracle WebLogic Image Tool",
-            "version": "1.13.2",
-            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.13.2/imagetool.zip",
-            "testedDate": "2024-07-15"
+            "version": "1.15.0",
+            "downloadURL": "https://github.com/oracle/weblogic-image-tool/releases/download/release-1.15.0/imagetool.zip",
+            "testedDate": "2025-05-08"
         },
         {
             "key": "WME",
             "description": "Oracle Weblogic Monitoring Exporter. IMPORTANT note to maintener: This value is hard coded in enablePrometheusMetrics.sh. Please update it there also.",
-            "version": "2.1.9",
-            "imageURL": "ghcr.io/oracle/weblogic-monitoring-exporter:2.1.9",
-            "testedDate": "2024-02-29"
+            "version": "2.3.0",
+            "imageURL": "ghcr.io/oracle/weblogic-monitoring-exporter:2.3.0",
+            "testedDate": "2025-05-08"
         }
     ]
 }

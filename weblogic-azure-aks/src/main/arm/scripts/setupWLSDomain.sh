@@ -663,7 +663,7 @@ function parsing_ssl_certs_and_create_ssl_secret() {
             --from-literal=ssltruststorepassword=${WLS_SSL_TRUST_PASSWORD}
 
         kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${WLS_DOMAIN_UID}
-        javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} ${javaOptions}"
+        javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} -Dweblogic.security.SSL.trustedCAKeyStorePassPhrase=${WLS_SSL_TRUST_PASSWORD} ${javaOptions}"
     fi
 }
 

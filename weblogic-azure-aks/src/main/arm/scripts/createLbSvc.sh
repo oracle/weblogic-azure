@@ -393,7 +393,7 @@ function validate_admin_console_url() {
     jq '.spec.ports[] | select(.name=="internal-t3") | .port')
   local adminConsoleUrl="http://${svcAdminServer}.${wlsDomainNS}:${adminTargetPort}/console/"
 
-  kubectl exec -it ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
+  kubectl exec ${podName} -n ${wlsDomainNS} -c ${wlsContainerName} \
     -- bash -c 'curl --write-out "%{http_code}\n" --silent --output /dev/null "'${adminConsoleUrl}'" | grep "302"'
 
   if [ $? == 1 ]; then
