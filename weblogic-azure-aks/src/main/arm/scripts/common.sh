@@ -35,7 +35,7 @@ export constFalse="false"
 export constTrue="true"
 export constIntrospectorJobActiveDeadlineSeconds=300  # for Guaranteed Qos
 export constPostgreDriverName="postgresql-42.7.5.jar"
-export constMSSQLDriverName="mssql-jdbc-11.2.3.jre17.jar"
+export constMSSQLDriverName="mssql-jdbc-12.8.1.jre11.jar"
 export constAzureCoreVersion="1.34.0"
 export constDbPodIdentitySelector="db-pod-identity" # do not change the value
 export constPreclassDirectoryName="preclassLibraries"
@@ -65,5 +65,5 @@ export retryInterval=10
 
 export wlsContainerName="weblogic-server"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.7.5.jar"
-export wlsMSSQLDriverUrl="https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.3.jre17/mssql-jdbc-11.2.3.jre17.jar"
+export wlsMSSQLDriverUrl="https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.8.1.jre11/mssql-jdbc-12.8.1.jre11.jar"
 export jdkArm64Url="https://aka.ms/download-jdk/microsoft-jdk-11.0.23-linux-aarch64.tar.gz"
