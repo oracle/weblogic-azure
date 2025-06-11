@@ -54,7 +54,7 @@ export gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure
 export gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
 export gitUrl4AksToolingWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_tooling_well_tested_versions.json"
 export gitUrl4WLSToolingFamilyJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_tooling_family.json"
-export gitUrl4AzureIdentityExtensionsPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
+export gitUrl4AzureIdentityExtensionsPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/b67a5f95a6c2f590fe8ff938daa298fe7adf7a45/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml" # PR https://github.com/oracle/weblogic-azure/pull/352 "https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
 export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
