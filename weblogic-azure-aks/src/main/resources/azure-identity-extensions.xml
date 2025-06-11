@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-identity-extensions</artifactId>
-            <version>1.2.0</version>
+            <version>1.12.2</version>
         </dependency>
     </dependencies>
 </project>
