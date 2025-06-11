@@ -1,1084 +1,1090 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-    "handler": "Microsoft.Azure.CreateUIDef",
-    "version": "0.1.2-preview",
-    "parameters": {
-        "config": {
-            "basics": {
-                "resourceGroup": {
-                    "allowExisting": true
-                }
-            }
-        },
-        "basics": [
-            {
-                "name": "skuUrnVersion",
-                "type": "Microsoft.Common.DropDown",
-                "label": "Oracle WebLogic Image",
-                "defaultValue": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9.1",
-                "toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
-                "constraints": {
-                    "allowedValues": [
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9.1",
-                            "value": "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 8.7",
-                            "value": "owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 9.1",
-                            "value": "owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 8.7",
-                            "value": "owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 9.1",
-                            "value": "owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 8.7",
-                            "value": "owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Oracle Linux 7.6",
-                            "value": "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Oracle Linux 7.6",
-                            "value": "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Oracle Linux 7.6",
-                            "value": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Red Hat Enterprise Linux 8.7",
-                            "value": "owls-141100-jdk11-rhel87;Oracle:weblogic-141100-jdk11-rhel87:owls-141100-jdk11-rhel87;latest"                            
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Red Hat Enterprise Linux 8.7",
-                            "value": "owls-141100-jdk8-rhel87;Oracle:weblogic-141100-jdk8-rhel87:owls-141100-jdk8-rhel87;latest"                            
-                        },
-                        {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Red Hat Enterprise Linux 8.7",
-                            "value": "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest"                            
-                        }                        
-                    ],
-                    "required": true
-                },
-                "visible": true
-            },
-            {
-                "name": "vmSizeSelect",
-                "type": "Microsoft.Compute.SizeSelector",
-                "label": "Virtual machine size",
-                "toolTip": "The size of virtual machine to provision.",
-                "recommendedSizes": [
-                    "Standard_A1",
-                    "Standard_A2",
-                    "Standard_A3",
-                    "Standard_A4",
-                    "Standard_B1ms"
-                ],
-                "constraints": {
-                    "excludedSizes": [
-                        "Standard_B1ls",
-                        "Standard_A0",
-                        "Basic_A0",
-                        "Standard_B1s",
-                        ${azure.armBased.vmSize.list}
-                    ]
-                },
-                "osPlatform": "Linux",
-                "count": "1",
-                "visible": true
-            },
-            {
-                "name": "invalidVMSizeInfo",
-                    "type": "Microsoft.Common.InfoBox",
-                    "visible": "[contains(basics('vmSizeSelect'),'p')]",
-                    "options": {
-                        "icon": "Error",
-                        "text": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM platform is not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
-                }
-            },
-            {
-                "name": "basicsRequired",
-                "type": "Microsoft.Common.Section",
-                "label": "Credentials for Virtual Machines and WebLogic",
-                "elements": [
-                    {
-                        "name": "adminUsername",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Username for admin account of VMs",
-                        "defaultValue": "weblogic",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "validations": [
-                                {
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "message": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                },
-                                {
-                                    "isValid": "[not(contains(basics('vmSizeSelect'),'p'))]",
-                                    "message": "ARM platform is not supported. Please select a different VM size."
-                                }
-                            ]
-                        },
-                        "visible": true
-                    },
-                    {
-                        "name": "adminPasswordOrKey",
-                        "type": "Microsoft.Compute.CredentialsCombo",
-                        "label": {
-                            "authenticationType": "Authentication type",
-                            "password": "Password",
-                            "confirmPassword": "Confirm password",
-                            "sshPublicKey": "SSH public key"
-                        },
-                        "toolTip": {
-                            "authenticationType": "Use username and password or SSH public key for authentication to the VM",
-                            "password": "Password for admin account of VMs",
-                            "sshPublicKey": "SSH key for admin account of VMs"
-                        },
-                        "constraints": {
-                            "required": true,
-                            "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
-                            "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
-                        },
-                        "options": {
-                            "hideConfirmation": false,
-                            "hidePassword": false
-                        },
-                        "osPlatform": "Linux",
-                        "visible": true
-                    },
-                    {
-                        "name": "wlsUserName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Username for WebLogic Administrator",
-                        "defaultValue": "weblogic",
-                        "toolTip": "Use only letters and numbers",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{1,30}$",
-                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                        },
-                        "visible": true
-                    },
-                    {
-                        "name": "wlsPassword",
-                        "type": "Microsoft.Common.PasswordBox",
-                        "label": {
-                            "password": "Password for WebLogic Administrator",
-                            "confirmPassword": "Confirm password"
-                        },
-                        "toolTip": "Password for WebLogic Administrator",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
-                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
-                        },
-                        "options": {
-                            "hideConfirmation": false
-                        },
-                        "visible": true
-                    }
-                ],
-                "visible": true
-            },
-            {
-                "name": "basicsOptional",
-                "type": "Microsoft.Common.Section",
-                "label": "Optional Basic Configuration",
-                "elements": [
-                    {
-                        "name": "basicsOptionalAcceptDefaults",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Accept defaults for optional configuration?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'No' to edit optional basic configuration.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "false"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "true"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "wlsDomainName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "WebLogic Domain Name",
-                        "toolTip": "The name of the WebLogic Domain to create.",
-                        "defaultValue": "adminDomain",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,20}$",
-                            "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
-                        },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
-                        "name": "enableAdminHTTPListenPort",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Enable HTTP listen port on WebLogic Administration Server?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'No' to disable HTTP listen port on WebLogic Administration Server.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": true
-                        },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
-                        "name": "useSystemAssignedManagedIdentity",
-                        "label": "Create a system assigned managed identity to be created for the VM(s).",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "toolTip": "System assigned managed identities enable credential-free secure access to many Azure resources from this VM.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": true
-                        },
-                        "defaultValue": "Yes",
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    }
-                ],
-                "visible": true
-            },
-            {
-                "name": "howToReportIssues",
-                "type": "Microsoft.Common.Section",
-                "label": "Report issues, get help, and share feedback",
-                "elements": [
-                    {
-                        "name": "help",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "See the documentation for this offer.",
-                            "link": {
-                                "label": "Offer documentation",
-                                "uri": "https://aka.ms/wls-vm-docs"
-                            }
-                        }
-                    },
-                    {
-                        "name": "howToReportIssueText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
-                            "link": {
-                                "label": "Issue tracker",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=${project.version}"
-                            }
-                        }
-                    },
-                    {
-                        "name": "howToJoinSlack",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "If you want to interact directly with the Oracle WebLogic community, join the public Slack channel named 'oracle-weblogic'.",
-                            "link": {
-                                "label": "Join Slack",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-slack"
-                            }
-                        }
-                    },
-                    {
-                        "name": "survey",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "To get free help with Azure migration from the development team, fill out this survey.",
-                            "link": {
-                                "label": "Take survey",
-                                "uri": "https://aka.ms/wls-on-azure-survey"
-                            }
-                        }
-                    }
-                ],
-                "visible": true
-            }
-        ],
-        "steps": [
-            {
-                "name": "section_sslConfiguration",
-                "type": "Microsoft.Common.Section",
-                "label": "TLS/SSL Configuration",
-                "elements": [
-                    {
-                        "name": "sslConfigurationText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate.",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableCustomSSL",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own TLS/SSL certificate.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "uploadedCustomSSLSettings",
-                        "type": "Microsoft.Common.Section",
-                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
-                        "label": "TLS/SSL Configuration Settings",
-                        "elements": [
-                            {
-                                "name": "sslKeystoreInfo0",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "true",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
-                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
-                                }
-                            },
-                            {
-                                "name": "uploadedCustomIdentityKeyStoreData",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Identity KeyStore Data file(.jks,.p12)",
-                                "toolTip": "Identity KeyStore for TLS/SSL configuration",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".jks,.p12"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomIdentityKeyStorePassphrase",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": " The passphrase for the Identity KeyStore",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^.{6,}$",
-                                    "validationMessage": "Keypass must be at least 6 characters long."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomIdentityKeyStoreType",
-                                "type": "Microsoft.Common.DropDown",
-                                "visible": "true",
-                                "label": "The Identity KeyStore type (JKS,PKCS12)",
-                                "defaultValue": "JKS",
-                                "toolTip": "One of the supported KeyStore types",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "JKS",
-                                            "value": "JKS"
-                                        },
-                                        {
-                                            "label": "PKCS12",
-                                            "value": "PKCS12"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "uploadedPrivateKeyAlias",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": "true",
-                                "label": "The alias of the server's private key within the Identity KeyStore",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "uploadedPrivateKeyPassPhrase",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "visible": "true",
-                                "label": {
-                                    "password": "The passphrase for the server's private key within the Identity KeyStore",
-                                    "confirmPassword": "Confirm passphrase"
-                                },
-                                "toolTip": "Use only letters and numbers",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^.{6,}$",
-                                    "validationMessage": "Keypass must be at least 6 characters long."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                }
-                            },
-                            {
-                                "name": "uploadedCustomTrustKeyStoreData",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": "Trust KeyStore Data file(.jks,.p12)",
-                                "toolTip": "Trust KeyStore for TLS/SSL configuration.",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".jks,.p12"
-                                },
-                                "options": {
-                                    "multiple": false,
-                                    "uploadMode": "file",
-                                    "openMode": "binary"
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomTrustKeyStorePassPhrase",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": " The passphrase for the Trust KeyStore",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^.{6,}$",
-                                    "validationMessage": "Keypass must be at least 6 characters long."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "uploadedCustomTrustKeyStoreType",
-                                "type": "Microsoft.Common.DropDown",
-                                "visible": "true",
-                                "label": "The Trust KeyStore type (JKS,PKCS12)",
-                                "defaultValue": "JKS",
-                                "toolTip": "One of the supported KeyStore types",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "JKS",
-                                            "value": "JKS"
-                                        },
-                                        {
-                                            "label": "PKCS12",
-                                            "value": "PKCS12"
-                                        }
-                                    ],
-                                    "required": true
-                                }
-                            }
-                        ]
-                    }                    
-                ]
-            },
-            {
-                "name": "section_networkingConfiguration",
-                "type": "Microsoft.Common.Section",
-                "label": "Networking",
-                "elements": [
-                    {
-                        "name": "vnetInfo",
-                        "type": "Microsoft.Common.InfoBox",
-                        "options": {
-                            "icon": "Info",
-                            "text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual<br>network's address prefix. When using an existing virtual network, a minimum virtual network size of /28 and a<br>minimum subnet size of /29 are required. Additionally, the subnet must have adequate available addresses for<br>the server setup."
-                        }
-                    },
-                    {
-                        "name": "virtualNetwork",
-                        "type": "Microsoft.Network.VirtualNetworkCombo",
-                        "label": {
-                            "virtualNetwork": "Virtual network",
-                            "subnets": "Subnets"
-                        },
-                        "toolTip": {
-                            "virtualNetwork": "Name of the virtual network",
-                            "subnets": "Subnets for the virtual network"
-                        },
-                        "defaultValue": {
-                            "name": "[concat('wlsadmin-vnet',take(guid(), 8))]",
-                            "addressPrefixSize": "/28"
-                        },
-                        "constraints": {
-                            "minAddressPrefixSize": "/28"
-                        },
-                        "subnets": {
-                            "subnet1": {
-                                "label": "Subnet",
-                                "defaultValue": {
-                                    "name": "Subnet-1",
-                                    "addressPrefixSize": "/29"
-                                },
-                                "constraints": {
-                                    "minAddressPrefixSize": "/29",
-                                    "minAddressCount": 2,
-                                    "requireContiguousAddresses": false
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "denyPublicTrafficForAdminServer",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
-                        "label": "Deny public traffic for admin server?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "No",
-                                    "value": false
-                                },
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "dnsConfigurationText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console using custom DNS Name (example: admin.contoso.com)",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableCustomDNS",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
-                        "label": "Configure Custom DNS Alias?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "dnsLabelPrefix",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "DNS Label Prefix",
-                        "toolTip": "The string to prepend to the DNS label.",
-                        "defaultValue": "wls",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-z0-9A-Z]{3,10}$",
-                            "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
-                        },
-                        "visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]"
-                    },
-                    {
-                        "name": "portsToExpose",
-                        "label": "Ports and port ranges to expose (N or N-N, comma separated)",
-                        "type": "Microsoft.Common.TextBox",
-                        "toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
-                        "defaultValue": "80,443,7001-9000",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]$",
-                            "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
-                        },
-                        "visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]"
-                    },
-                    {
-                        "name": "customDNSSettings",
-                        "type": "Microsoft.Common.Section",
-                        "label": "DNS Configuration Settings",
-                        "visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
-                        "elements": [
-                            {
-                                "name": "bringDNSZone",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Use an existing Azure DNS Zone",
-                                "defaultValue": "No",
-                                "toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": true
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": false
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "createDNSZoneText",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[not(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone))]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "You must perform DNS Domain Delegation at your DNS Registry after deployment.",
-                                    "uri": "https://aka.ms/dns-domain-delegation"
-                                }
-                            },
-                            {
-                                "name": "createDNSZonePublicResolveWarning",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "The referenced hostnames must be publicly resolvable before deployment.",
-                                    "uri": "https://learn.microsoft.com/en-us/azure/dns/dns-getstarted-portal"
-                                }
-                            },
-                            {
-                                "name": "infoDNSIndentity",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "This option will add/update records in your Azure DNS Zone.The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
-                                }
-                            },
-                            {
-                                "name": "dnszoneName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DNS Zone Name",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers and periods to separate Domains",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
-                                    "validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                }
-                            },
-                            {
-                                "name": "dnsZoneResourceGroup",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Name of the resource group which contains the DNS Zone in current subscription",
-                                "defaultValue": "",
-                                "toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_networkingConfiguration').existingDNSZonesSettings.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
-                                },
-                                "visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
-                            },
-                            {
-                                "name": "dnszoneAdminConsoleLabel",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Label for Oracle WebLogic Administration Console",
-                                "defaultValue": "admin",
-                                "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
-                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
-                                        },
-                                        {
-                                            "isValid": "[less(sub(length(concat(steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
-                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "name": "section_database",
-                "type": "Microsoft.Common.Section",
-                "label": "Database",
-                "subLabel": {
-                    "preValidation": "Configure integrations to database",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Database",
-                "elements": [
-                    {
-                        "name": "aboutDatabase",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the template."
-                        }
-                    },
-                    {
-                        "name": "enableDB",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Connect to database?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": "true"
-                                },
-                                {
-                                    "label": "No",
-                                    "value": "false"
-                                }
-                            ],
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "databaseConnectionInfo",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Connection settings",
-                        "elements": [
-                            {
-                                "name": "databaseType",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "Choose database type",
-                                "toolTip": "Choose database type",
-                                "defaultValue": "Oracle database",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "PostgreSQL (Supports passwordless connection)",
-                                            "value": "postgresql"
-                                        },
-                                        {
-                                            "label": "Oracle database",
-                                            "value": "oracle"
-                                        },
-                                        {
-                                            "label": "Microsoft SQL Server (Supports passwordless connection)",
-                                            "value": "sqlserver"
-                                        },
-                                        {
-                                            "label": "MySQL (Supports passwordless connection)",
-                                            "value": "mysql"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "mysqlJDBCDriverInfo",
-                                "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]",
-                                "options": {
-                                    "icon": "Info",
-                                    "text": "To support passwordless connection and various functionalities, the offer will upgrade the<br><a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
-                                }
-                            },
-                            {
-                                "name": "jdbcDataSourceName",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "JNDI Name",
-                                "toolTip": "The JNDI name for the database JDBC connection",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^[a-z0-9A-Z/]{1,30}$",
-                                            "message": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
-                                        }
-                                    ]
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "dsConnectionURL",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "DataSource Connection String",
-                                "toolTip": "The JDBC connection string for the database",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^jdbc:.*$",
-                                            "message": "A valid JDBC URL must start with 'jdbc:'."
-                                        },
-                                        {
-                                            "isValid": "[startsWith(steps('section_database').databaseConnectionInfo.dsConnectionURL, concat('jdbc:', steps('section_database').databaseConnectionInfo.databaseType))]",
-                                            "message": "A valid JDBC URL for the chosen database type must be provided."
-                                        },
-                                        {
-                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
-                                            "message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
-                                        },
-                                        {
-                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPluginClassName')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
-                                            "message": "The offer will append authenticationPluginClassName with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
-                                        },
-                                        {
-                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authentication=ActiveDirectoryMSI')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'msiClientId'))), 'true')]",
-                                            "message": "The offer will append authentication with ActiveDirectoryMSI, and append msiClientId with your managed identity client ID automatically, please do not specify them in your connection string."
-                                        },
-                                        {
-                                            "isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0),equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver')), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
-                                            "message": "You must select at least one managed identity that has access to your database."
-                                        }
-                                    ]
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "dbGlobalTranPro",
-                                "type": "Microsoft.Common.DropDown",
-                                "label": "Global transactions protocol",
-                                "defaultValue": "OnePhaseCommit",
-                                "multiLine": true,
-                                "toolTip": "Determines the transaction protocol (global transaction processing behavior) for the data source.",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "TwoPhaseCommit",
-                                            "description": "Standard XA transaction processing. Requires an XA driver.",
-                                            "value": "TwoPhaseCommit"
-                                        },
-                                        {
-                                            "label": "LoggingLastResource",
-                                            "description": "A performance enhancement for one non-XA resource.",
-                                            "value": "LoggingLastResource"
-                                        },
-                                        {
-                                            "label": "EmulateTwoPhaseCommit",
-                                            "description": "Enables one non-XA resource to participate in a global transaction, but has some risk to data.",
-                                            "value": "EmulateTwoPhaseCommit"
-                                        },
-                                        {
-                                            "label": "OnePhaseCommit",
-                                            "description": "One-phase XA transaction processing using a non-XA driver. This is the default setting.",
-                                            "value": "OnePhaseCommit"
-                                        },
-                                        {
-                                            "label": "None",
-                                            "description": "Support for local transactions only.",
-                                            "value": "None"
-                                        }
-                                    ],
-                                    "required": true
-                                },
-                                "visible": true
-                            },
-                            {
-                                "name": "enablePswlessConnection0",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Use passwordless datasource connection",
-                                "toolTip": "Use passwordless datasource connection.",
-                                "visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))]"
-                            },
-                            {
-                                "name": "dbUser",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Database username",
-                                "toolTip": "Use only letters and numbers",
-                                "defaultValue": "",
-                                "constraints": {
-                                    "required": true,
-                                    "validations": [
-                                        {
-                                            "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
-                                            "message": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
-                                        },
-                                        {
-                                            "isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
-                                            "message": "You must select at least one managed identity that has access to your database."
-                                        }
-                                    ]
-                                },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(and(steps('section_database').databaseConnectionInfo.enablePswlessConnection0, equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))))]"
-                            },
-                            {
-                                "name": "enablePswlessConnection",
-                                "type": "Microsoft.Common.CheckBox",
-                                "label": "Use passwordless datasource connection",
-                                "toolTip": "Use passwordless datasource connection.",
-                                "visible": "[and(bool(steps('section_database').enableDB),or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'),equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')))]"
-                            },
-                            {
-                                "name": "dbPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Database Password",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Database Password",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
-                                    "validationMessage": "The password must be between 5 and 128 characters long and have at least one number."
-                                },
-                                "options": {
-                                    "hideConfirmation": false
-                                },
-                                "visible": "[and(bool(steps('section_database').enableDB), not(or(steps('section_database').databaseConnectionInfo.enablePswlessConnection, steps('section_database').databaseConnectionInfo.enablePswlessConnection0)))]"
-                            },
-                            {
-                                "name": "dbIdentity",
-                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
-                                "label": "Connect database with Managed Identity",
-                                "toolTip": {
-                                    "userAssignedIdentity": "Select a user assigned identity that has access to your database. For how to create a database user for your managed identity, see https://aka.ms/javaee-db-identity."
-                                },
-                                "defaultValue": {
-                                    "systemAssignedIdentity": "Off"
-                                },
-                                "options": {
-                                    "hideSystemAssignedIdentity": true,
-                                    "hideUserAssignedIdentity": false
-                                },
-                                "visible": "[and(bool(steps('section_database').enableDB), or(steps('section_database').databaseConnectionInfo.enablePswlessConnection, steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]"
-                            }
-                        ],
-                        "visible": "[bool(steps('section_database').enableDB)]"
-                    }
-                ]
-            },
-            {
-                "name": "section_tags",
-                "label": "Tags",
-                "elements": [
-                    {
-                        "name": "tagsByResource",
-                        "type": "Microsoft.Common.TagsByResource",
-                        "resources": [
-                            "${identifier.dnszones}",
-                            "${identifier.networkInterfaces}",
-                            "${identifier.networkSecurityGroups}",
-                            "${identifier.publicIPAddresses}",
-                            "${identifier.privateEndpoints}",
-                            "${identifier.storageAccounts}",
-                            "${identifier.virtualNetworks}",
-                            "${identifier.virtualMachines}",
-                            "${identifier.virtualMachinesExtensions}",
-                            "${identifier.deploymentScripts}",
-                            "${identifier.userAssignedIdentities}",
-                            "${identifier.resourcesDeployment}"
-                        ],
-                        "toolTip": "Tags help you organize your resources and categorize them for billing or management purposes. You can apply tags to resources deployed by the offer."
-                    }
-                ]
-            }
-        ],
-        "outputs": {
-            "Location": "[location()]",
-            "adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
-            "adminUsername": "[basics('basicsRequired').adminUsername]",
-            "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
-            "addressPrefixes": "[steps('section_networkingConfiguration').virtualNetwork.addressPrefixes]",
-            "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
-            "denyPublicTrafficForAdminServer": "[steps('section_networkingConfiguration').denyPublicTrafficForAdminServer]",
-            "dbIdentity": "[steps('section_database').databaseConnectionInfo.dbIdentity]",
-            "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
-            "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
-            "dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
-            "dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
-            "dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
-            "dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
-            "dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
-            "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "enableDB": "[bool(steps('section_database').enableDB)]",
-            "enableCustomDNS": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
-            "enablePswlessConnection": "[or(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]",
-            "hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
-            "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "portsToExpose": "[steps('section_networkingConfiguration').portsToExpose]",
-            "skuUrnVersion": "[basics('skuUrnVersion')]",
-            "useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
-            "vmSize": "[basics('vmSizeSelect')]",
-            "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
-            "wlsPassword": "[basics('basicsRequired').wlsPassword]",
-            "wlsUserName": "[basics('basicsRequired').wlsUserName]",
-            "enableHTTPAdminListenPort": "[basics('basicsOptional').enableAdminHTTPListenPort]",
-            "enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
-            "subnetName": "[steps('section_networkingConfiguration').virtualNetwork.subnets.subnet1.name]",
-            "subnetPrefix": "[steps('section_networkingConfiguration').virtualNetwork.subnets.subnet1.addressPrefix]",
-            "tagsByResource": "[steps('section_tags').tagsByResource]",
-            "uploadedCustomIdentityKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreData]",
-            "uploadedCustomIdentityKeyStorePassphrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStorePassphrase]",
-            "uploadedCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreType]",
-            "uploadedCustomTrustKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreData]",
-            "uploadedCustomTrustKeyStorePassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStorePassPhrase]",
-            "uploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
-            "uploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
-            "uploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
-            "virtualNetworkName": "[steps('section_networkingConfiguration').virtualNetwork.name]",
-            "virtualNetworkResourceGroupName": "[steps('section_networkingConfiguration').virtualNetwork.resourceGroup]",
-            "virtualNetworkNewOrExisting": "[steps('section_networkingConfiguration').virtualNetwork.newOrExisting]"
-        }
-    }
+	"$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+	"handler": "Microsoft.Azure.CreateUIDef",
+	"version": "0.1.2-preview",
+	"parameters": {
+		"config": {
+			"basics": {
+				"resourceGroup": {
+					"allowExisting": true
+				}
+			}
+		},
+		"basics": [
+			{
+				"name": "skuUrnVersion",
+				"type": "Microsoft.Common.DropDown",
+				"label": "Oracle WebLogic Image",
+				"defaultValue": "WebLogic Server 14.1.2.0.0 and JDK 21 on Oracle Linux 9",
+				"toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
+				"constraints": {
+					"allowedValues": [
+						{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 21 on Oracle Linux 9",
+							"value": "owls-141200-jdk21-ol94;Oracle:weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 21 on Oracle Linux 8",
+							"value": "owls-141200-jdk21-ol810;Oracle:weblogic-141200-jdk21-ol810:owls-141200-jdk21-ol810;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 17 on Oracle Linux 9",
+							"value": "owls-141200-jdk17-ol94;Oracle:weblogic-141200-jdk17-ol94:owls-141200-jdk17-ol94;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 17 on Oracle Linux 8",
+							"value": "owls-141200-jdk17-ol810;Oracle:weblogic-141200-jdk17-ol810:owls-141200-jdk17-ol810;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9",
+							"value": "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 8",
+							"value": "owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 9",
+							"value": "owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 8",
+							"value": "owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest"
+						},
+						{
+							"label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 9",
+							"value": "owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest"
+						},
+						{
+							"label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 8",
+							"value": "owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.1.0.0 and JDK11 on Red Hat Enterprise Linux 8",
+							"value": "owls-141100-jdk11-rhel87;Oracle:weblogic-141100-jdk11-rhel87:owls-141100-jdk11-rhel87;latest"
+						},
+						{
+							"label": "WebLogic Server 14.1.1.0.0 and JDK8 on Red Hat Enterprise Linux 8",
+							"value": "owls-141100-jdk8-rhel87;Oracle:weblogic-141100-jdk8-rhel87:owls-141100-jdk8-rhel87;latest"
+						},
+						{
+							"label": "WebLogic Server 12.2.1.4.0 and JDK8 on Red Hat Enterprise Linux 8",
+							"value": "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest"
+						}
+					],
+					"required": true
+				},
+				"visible": true
+			},
+			{
+				"name": "vmSizeSelect",
+				"type": "Microsoft.Compute.SizeSelector",
+				"label": "Virtual machine size",
+				"toolTip": "The size of virtual machine to provision.",
+				"recommendedSizes": [
+					"Standard_A1",
+					"Standard_A2",
+					"Standard_A3",
+					"Standard_A4",
+					"Standard_B1ms"
+				],
+				"constraints": {
+					"excludedSizes": [
+						"Standard_B1ls",
+						"Standard_A0",
+						"Basic_A0",
+						"Standard_B1s",
+						${
+							azure.armBased.vmSize.list
+						}
+					]
+				},
+				"osPlatform": "Linux",
+				"count": "1",
+				"visible": true
+			},
+			{
+				"name": "invalidVMSizeInfo",
+				"type": "Microsoft.Common.InfoBox",
+				"visible": "[contains(basics('vmSizeSelect'),'p')]",
+				"options": {
+					"icon": "Error",
+					"text": "The VM size you selected includes the feature letter 'p', indicating it uses ARM CPUs. ARM platform is not supported. Please select a different VM size. For more information, refer to the <a href='https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions' target='_blank'>Azure virtual machine sizes naming conventions</a>."
+				}
+			},
+			{
+				"name": "basicsRequired",
+				"type": "Microsoft.Common.Section",
+				"label": "Credentials for Virtual Machines and WebLogic",
+				"elements": [
+					{
+						"name": "adminUsername",
+						"type": "Microsoft.Common.TextBox",
+						"label": "Username for admin account of VMs",
+						"defaultValue": "weblogic",
+						"toolTip": "Use only letters and numbers",
+						"constraints": {
+							"required": true,
+							"validations": [
+								{
+									"regex": "^[a-z0-9A-Z]{1,30}$",
+									"message": "The value must be 1-30 characters long and must only contain letters and numbers."
+								},
+								{
+									"isValid": "[not(contains(basics('vmSizeSelect'),'p'))]",
+									"message": "ARM platform is not supported. Please select a different VM size."
+								}
+							]
+						},
+						"visible": true
+					},
+					{
+						"name": "adminPasswordOrKey",
+						"type": "Microsoft.Compute.CredentialsCombo",
+						"label": {
+							"authenticationType": "Authentication type",
+							"password": "Password",
+							"confirmPassword": "Confirm password",
+							"sshPublicKey": "SSH public key"
+						},
+						"toolTip": {
+							"authenticationType": "Use username and password or SSH public key for authentication to the VM",
+							"password": "Password for admin account of VMs",
+							"sshPublicKey": "SSH key for admin account of VMs"
+						},
+						"constraints": {
+							"required": true,
+							"customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+							"customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
+						},
+						"options": {
+							"hideConfirmation": false,
+							"hidePassword": false
+						},
+						"osPlatform": "Linux",
+						"visible": true
+					},
+					{
+						"name": "wlsUserName",
+						"type": "Microsoft.Common.TextBox",
+						"label": "Username for WebLogic Administrator",
+						"defaultValue": "weblogic",
+						"toolTip": "Use only letters and numbers",
+						"constraints": {
+							"required": true,
+							"regex": "^[a-z0-9A-Z]{1,30}$",
+							"validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+						},
+						"visible": true
+					},
+					{
+						"name": "wlsPassword",
+						"type": "Microsoft.Common.PasswordBox",
+						"label": {
+							"password": "Password for WebLogic Administrator",
+							"confirmPassword": "Confirm password"
+						},
+						"toolTip": "Password for WebLogic Administrator",
+						"constraints": {
+							"required": true,
+							"regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+							"validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
+						},
+						"options": {
+							"hideConfirmation": false
+						},
+						"visible": true
+					}
+				],
+				"visible": true
+			},
+			{
+				"name": "basicsOptional",
+				"type": "Microsoft.Common.Section",
+				"label": "Optional Basic Configuration",
+				"elements": [
+					{
+						"name": "basicsOptionalAcceptDefaults",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Accept defaults for optional configuration?",
+						"defaultValue": "Yes",
+						"toolTip": "Select 'No' to edit optional basic configuration.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "Yes",
+									"value": "false"
+								},
+								{
+									"label": "No",
+									"value": "true"
+								}
+							],
+							"required": true
+						}
+					},
+					{
+						"name": "wlsDomainName",
+						"type": "Microsoft.Common.TextBox",
+						"label": "WebLogic Domain Name",
+						"toolTip": "The name of the WebLogic Domain to create.",
+						"defaultValue": "adminDomain",
+						"constraints": {
+							"required": true,
+							"regex": "^[a-z0-9A-Z]{3,20}$",
+							"validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
+						},
+						"visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+					},
+					{
+						"name": "enableAdminHTTPListenPort",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Enable HTTP listen port on WebLogic Administration Server?",
+						"defaultValue": "Yes",
+						"toolTip": "Select 'No' to disable HTTP listen port on WebLogic Administration Server.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "Yes",
+									"value": true
+								},
+								{
+									"label": "No",
+									"value": false
+								}
+							],
+							"required": true
+						},
+						"visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+					},
+					{
+						"name": "useSystemAssignedManagedIdentity",
+						"label": "Create a system assigned managed identity to be created for the VM(s).",
+						"type": "Microsoft.Common.OptionsGroup",
+						"toolTip": "System assigned managed identities enable credential-free secure access to many Azure resources from this VM.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "Yes",
+									"value": true
+								},
+								{
+									"label": "No",
+									"value": false
+								}
+							],
+							"required": true
+						},
+						"defaultValue": "Yes",
+						"visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+					}
+				],
+				"visible": true
+			},
+			{
+				"name": "howToReportIssues",
+				"type": "Microsoft.Common.Section",
+				"label": "Report issues, get help, and share feedback",
+				"elements": [
+					{
+						"name": "help",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "See the documentation for this offer.",
+							"link": {
+								"label": "Offer documentation",
+								"uri": "https://aka.ms/wls-vm-docs"
+							}
+						}
+					},
+					{
+						"name": "howToReportIssueText",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
+							"link": {
+								"label": "Issue tracker",
+								"uri": "https://aka.ms/arm-oraclelinux-wls-issues?version=${project.version}"
+							}
+						}
+					},
+					{
+						"name": "howToJoinSlack",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "If you want to interact directly with the Oracle WebLogic community, join the public Slack channel named 'oracle-weblogic'.",
+							"link": {
+								"label": "Join Slack",
+								"uri": "https://aka.ms/arm-oraclelinux-wls-slack"
+							}
+						}
+					},
+					{
+						"name": "survey",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "To get free help with Azure migration from the development team, fill out this survey.",
+							"link": {
+								"label": "Take survey",
+								"uri": "https://aka.ms/wls-on-azure-survey"
+							}
+						}
+					}
+				],
+				"visible": true
+			}
+		],
+		"steps": [
+			{
+				"name": "section_sslConfiguration",
+				"type": "Microsoft.Common.Section",
+				"label": "TLS/SSL Configuration",
+				"elements": [
+					{
+						"name": "sslConfigurationText",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate.",
+							"link": {
+								"label": "Learn more",
+								"uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
+							}
+						}
+					},
+					{
+						"name": "enableCustomSSL",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate?",
+						"defaultValue": "No",
+						"toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own TLS/SSL certificate.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "Yes",
+									"value": true
+								},
+								{
+									"label": "No",
+									"value": false
+								}
+							],
+							"required": false
+						}
+					},
+					{
+						"name": "uploadedCustomSSLSettings",
+						"type": "Microsoft.Common.Section",
+						"visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+						"label": "TLS/SSL Configuration Settings",
+						"elements": [
+							{
+								"name": "sslKeystoreInfo0",
+								"type": "Microsoft.Common.InfoBox",
+								"visible": "true",
+								"options": {
+									"icon": "Info",
+									"text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
+									"uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
+								}
+							},
+							{
+								"name": "uploadedCustomIdentityKeyStoreData",
+								"type": "Microsoft.Common.FileUpload",
+								"label": "Identity KeyStore Data file(.jks,.p12)",
+								"toolTip": "Identity KeyStore for TLS/SSL configuration",
+								"constraints": {
+									"required": true,
+									"accept": ".jks,.p12"
+								},
+								"options": {
+									"multiple": false,
+									"uploadMode": "file",
+									"openMode": "binary"
+								},
+								"visible": true
+							},
+							{
+								"name": "uploadedCustomIdentityKeyStorePassphrase",
+								"type": "Microsoft.Common.PasswordBox",
+								"label": {
+									"password": "Password",
+									"confirmPassword": "Confirm password"
+								},
+								"toolTip": " The passphrase for the Identity KeyStore",
+								"constraints": {
+									"required": true,
+									"regex": "^.{6,}$",
+									"validationMessage": "Keypass must be at least 6 characters long."
+								},
+								"options": {
+									"hideConfirmation": false
+								},
+								"visible": true
+							},
+							{
+								"name": "uploadedCustomIdentityKeyStoreType",
+								"type": "Microsoft.Common.DropDown",
+								"visible": "true",
+								"label": "The Identity KeyStore type (JKS,PKCS12)",
+								"defaultValue": "JKS",
+								"toolTip": "One of the supported KeyStore types",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "JKS",
+											"value": "JKS"
+										},
+										{
+											"label": "PKCS12",
+											"value": "PKCS12"
+										}
+									],
+									"required": true
+								}
+							},
+							{
+								"name": "uploadedPrivateKeyAlias",
+								"type": "Microsoft.Common.TextBox",
+								"visible": "true",
+								"label": "The alias of the server's private key within the Identity KeyStore",
+								"defaultValue": "",
+								"toolTip": "Use only letters and numbers",
+								"constraints": {
+									"required": true,
+									"regex": "^[a-z0-9A-Z]{1,30}$",
+									"validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+								}
+							},
+							{
+								"name": "uploadedPrivateKeyPassPhrase",
+								"type": "Microsoft.Common.PasswordBox",
+								"visible": "true",
+								"label": {
+									"password": "The passphrase for the server's private key within the Identity KeyStore",
+									"confirmPassword": "Confirm passphrase"
+								},
+								"toolTip": "Use only letters and numbers",
+								"constraints": {
+									"required": true,
+									"regex": "^.{6,}$",
+									"validationMessage": "Keypass must be at least 6 characters long."
+								},
+								"options": {
+									"hideConfirmation": false
+								}
+							},
+							{
+								"name": "uploadedCustomTrustKeyStoreData",
+								"type": "Microsoft.Common.FileUpload",
+								"label": "Trust KeyStore Data file(.jks,.p12)",
+								"toolTip": "Trust KeyStore for TLS/SSL configuration.",
+								"constraints": {
+									"required": true,
+									"accept": ".jks,.p12"
+								},
+								"options": {
+									"multiple": false,
+									"uploadMode": "file",
+									"openMode": "binary"
+								},
+								"visible": true
+							},
+							{
+								"name": "uploadedCustomTrustKeyStorePassPhrase",
+								"type": "Microsoft.Common.PasswordBox",
+								"label": {
+									"password": "Password",
+									"confirmPassword": "Confirm password"
+								},
+								"toolTip": " The passphrase for the Trust KeyStore",
+								"constraints": {
+									"required": true,
+									"regex": "^.{6,}$",
+									"validationMessage": "Keypass must be at least 6 characters long."
+								},
+								"options": {
+									"hideConfirmation": false
+								},
+								"visible": true
+							},
+							{
+								"name": "uploadedCustomTrustKeyStoreType",
+								"type": "Microsoft.Common.DropDown",
+								"visible": "true",
+								"label": "The Trust KeyStore type (JKS,PKCS12)",
+								"defaultValue": "JKS",
+								"toolTip": "One of the supported KeyStore types",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "JKS",
+											"value": "JKS"
+										},
+										{
+											"label": "PKCS12",
+											"value": "PKCS12"
+										}
+									],
+									"required": true
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "section_networkingConfiguration",
+				"type": "Microsoft.Common.Section",
+				"label": "Networking",
+				"elements": [
+					{
+						"name": "vnetInfo",
+						"type": "Microsoft.Common.InfoBox",
+						"options": {
+							"icon": "Info",
+							"text": "When creating a new virtual network, the subnet's address prefix is calculated automatically based on the virtual<br>network's address prefix. When using an existing virtual network, a minimum virtual network size of /28 and a<br>minimum subnet size of /29 are required. Additionally, the subnet must have adequate available addresses for<br>the server setup."
+						}
+					},
+					{
+						"name": "virtualNetwork",
+						"type": "Microsoft.Network.VirtualNetworkCombo",
+						"label": {
+							"virtualNetwork": "Virtual network",
+							"subnets": "Subnets"
+						},
+						"toolTip": {
+							"virtualNetwork": "Name of the virtual network",
+							"subnets": "Subnets for the virtual network"
+						},
+						"defaultValue": {
+							"name": "[concat('wlsadmin-vnet',take(guid(), 8))]",
+							"addressPrefixSize": "/28"
+						},
+						"constraints": {
+							"minAddressPrefixSize": "/28"
+						},
+						"subnets": {
+							"subnet1": {
+								"label": "Subnet",
+								"defaultValue": {
+									"name": "Subnet-1",
+									"addressPrefixSize": "/29"
+								},
+								"constraints": {
+									"minAddressPrefixSize": "/29",
+									"minAddressCount": 2,
+									"requireContiguousAddresses": false
+								}
+							}
+						}
+					},
+					{
+						"name": "denyPublicTrafficForAdminServer",
+						"type": "Microsoft.Common.OptionsGroup",
+						"visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
+						"label": "Deny public traffic for admin server?",
+						"defaultValue": "No",
+						"toolTip": "Select 'Yes' to deny public traffic for admin server. Configuration here for port 7001 and 7002 has a higher priority than above.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "No",
+									"value": false
+								},
+								{
+									"label": "Yes",
+									"value": true
+								}
+							],
+							"required": true
+						}
+					},
+					{
+						"name": "dnsConfigurationText",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
+						"options": {
+							"text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console using custom DNS Name (example: admin.contoso.com)",
+							"link": {
+								"label": "Learn more",
+								"uri": "https://aka.ms/arm-oraclelinux-wls-dns"
+							}
+						}
+					},
+					{
+						"name": "enableCustomDNS",
+						"type": "Microsoft.Common.OptionsGroup",
+						"visible": "[equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new')]",
+						"label": "Configure Custom DNS Alias?",
+						"defaultValue": "No",
+						"toolTip": "Select 'Yes' to configure Custom DNS Alias.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "Yes",
+									"value": true
+								},
+								{
+									"label": "No",
+									"value": false
+								}
+							],
+							"required": false
+						}
+					},
+					{
+						"name": "dnsLabelPrefix",
+						"type": "Microsoft.Common.TextBox",
+						"label": "DNS Label Prefix",
+						"toolTip": "The string to prepend to the DNS label.",
+						"defaultValue": "wls",
+						"constraints": {
+							"required": true,
+							"regex": "^[a-z0-9A-Z]{3,10}$",
+							"validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
+						},
+						"visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]"
+					},
+					{
+						"name": "portsToExpose",
+						"label": "Ports and port ranges to expose (N or N-N, comma separated)",
+						"type": "Microsoft.Common.TextBox",
+						"toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
+						"defaultValue": "80,443,7001-9000",
+						"constraints": {
+							"required": true,
+							"regex": "^((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]$",
+							"validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
+						},
+						"visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]"
+					},
+					{
+						"name": "customDNSSettings",
+						"type": "Microsoft.Common.Section",
+						"label": "DNS Configuration Settings",
+						"visible": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
+						"elements": [
+							{
+								"name": "bringDNSZone",
+								"type": "Microsoft.Common.OptionsGroup",
+								"label": "Use an existing Azure DNS Zone",
+								"defaultValue": "No",
+								"toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "Yes",
+											"value": true
+										},
+										{
+											"label": "No",
+											"value": false
+										}
+									]
+								}
+							},
+							{
+								"name": "createDNSZoneText",
+								"type": "Microsoft.Common.InfoBox",
+								"visible": "[not(bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone))]",
+								"options": {
+									"icon": "Info",
+									"text": "You must perform DNS Domain Delegation at your DNS Registry after deployment.",
+									"uri": "https://aka.ms/dns-domain-delegation"
+								}
+							},
+							{
+								"name": "createDNSZonePublicResolveWarning",
+								"type": "Microsoft.Common.InfoBox",
+								"visible": "[bool(steps('section_networkingConfiguration').customDNSSettings.bringDNSZone)]",
+								"options": {
+									"icon": "Info",
+									"text": "The referenced hostnames must be publicly resolvable before deployment.",
+									"uri": "https://learn.microsoft.com/en-us/azure/dns/dns-getstarted-portal"
+								}
+							},
+							{
+								"name": "infoDNSIndentity",
+								"type": "Microsoft.Common.InfoBox",
+								"visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]",
+								"options": {
+									"icon": "Info",
+									"text": "This option will add/update records in your Azure DNS Zone.The Azure identity deploying this feature must have one of the following two sets of Azure role-based access control roles:<br> <li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor'>Contributor</a> <b>and</b> <a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator'>User Access Administrator</a> of the current subscription.</li><li><a href='https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner'>Owner</a> of the current subscription.</li>"
+								}
+							},
+							{
+								"name": "dnszoneName",
+								"type": "Microsoft.Common.TextBox",
+								"label": "DNS Zone Name",
+								"defaultValue": "",
+								"toolTip": "Use only letters and numbers and periods to separate Domains",
+								"constraints": {
+									"required": true,
+									"regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
+									"validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+								}
+							},
+							{
+								"name": "dnsZoneResourceGroup",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Name of the resource group which contains the DNS Zone in current subscription",
+								"defaultValue": "",
+								"toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
+								"constraints": {
+									"required": true,
+									"regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+									"validationMessage": "[if(greater(length(steps('section_networkingConfiguration').existingDNSZonesSettings.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+								},
+								"visible": "[steps('section_networkingConfiguration').customDNSSettings.bringDNSZone]"
+							},
+							{
+								"name": "dnszoneAdminConsoleLabel",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Label for Oracle WebLogic Administration Console",
+								"defaultValue": "admin",
+								"toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
+								"constraints": {
+									"required": true,
+									"validations": [
+										{
+											"regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+											"message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+										},
+										{
+											"isValid": "[less(sub(length(concat(steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_networkingConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
+											"message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "section_database",
+				"type": "Microsoft.Common.Section",
+				"label": "Database",
+				"subLabel": {
+					"preValidation": "Configure integrations to database",
+					"postValidation": "Done"
+				},
+				"bladeTitle": "Database",
+				"elements": [
+					{
+						"name": "aboutDatabase",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the template."
+						}
+					},
+					{
+						"name": "enableDB",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Connect to database?",
+						"defaultValue": "No",
+						"toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
+						"constraints": {
+							"allowedValues": [
+								{
+									"label": "Yes",
+									"value": "true"
+								},
+								{
+									"label": "No",
+									"value": "false"
+								}
+							],
+							"required": true
+						}
+					},
+					{
+						"name": "databaseConnectionInfo",
+						"type": "Microsoft.Common.Section",
+						"label": "Connection settings",
+						"elements": [
+							{
+								"name": "databaseType",
+								"type": "Microsoft.Common.DropDown",
+								"label": "Choose database type",
+								"toolTip": "Choose database type",
+								"defaultValue": "Oracle database",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "PostgreSQL (Supports passwordless connection)",
+											"value": "postgresql"
+										},
+										{
+											"label": "Oracle database",
+											"value": "oracle"
+										},
+										{
+											"label": "Microsoft SQL Server (Supports passwordless connection)",
+											"value": "sqlserver"
+										},
+										{
+											"label": "MySQL (Supports passwordless connection)",
+											"value": "mysql"
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "mysqlJDBCDriverInfo",
+								"type": "Microsoft.Common.InfoBox",
+								"visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'))]",
+								"options": {
+									"icon": "Info",
+									"text": "To support passwordless connection and various functionalities, the offer will upgrade the<br><a href=https://aka.ms/wls-jdbc-drivers>Oracle WebLogic Server MySQL driver</a> with recent <a href=https://mvnrepository.com/artifact/mysql/mysql-connector-java>MySQL Connector Java driver</>."
+								}
+							},
+							{
+								"name": "jdbcDataSourceName",
+								"type": "Microsoft.Common.TextBox",
+								"label": "JNDI Name",
+								"toolTip": "The JNDI name for the database JDBC connection",
+								"defaultValue": "",
+								"constraints": {
+									"required": true,
+									"validations": [
+										{
+											"regex": "^[a-z0-9A-Z/]{1,30}$",
+											"message": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
+										}
+									]
+								},
+								"visible": true
+							},
+							{
+								"name": "dsConnectionURL",
+								"type": "Microsoft.Common.TextBox",
+								"label": "DataSource Connection String",
+								"toolTip": "The JDBC connection string for the database",
+								"defaultValue": "",
+								"constraints": {
+									"required": true,
+									"validations": [
+										{
+											"regex": "^jdbc:.*$",
+											"message": "A valid JDBC URL must start with 'jdbc:'."
+										},
+										{
+											"isValid": "[startsWith(steps('section_database').databaseConnectionInfo.dsConnectionURL, concat('jdbc:', steps('section_database').databaseConnectionInfo.databaseType))]",
+											"message": "A valid JDBC URL for the chosen database type must be provided."
+										},
+										{
+											"isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'defaultAuthenticationPlugin')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPlugins')), not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+											"message": "The offer will append defaultAuthenticationPlugin, authenticationPlugins with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
+										},
+										{
+											"isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authenticationPluginClassName')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'azure.clientId'))), 'true')]",
+											"message": "The offer will append authenticationPluginClassName with Azure provided plugins, and append azure.clientId with your managed identity client ID automatically, please do not specify them in your connection string."
+										},
+										{
+											"isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver')), and(not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'authentication=ActiveDirectoryMSI')),not(contains(steps('section_database').databaseConnectionInfo.dsConnectionURL, 'msiClientId'))), 'true')]",
+											"message": "The offer will append authentication with ActiveDirectoryMSI, and append msiClientId with your managed identity client ID automatically, please do not specify them in your connection string."
+										},
+										{
+											"isValid": "[if(and(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0),equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver')), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+											"message": "You must select at least one managed identity that has access to your database."
+										}
+									]
+								},
+								"visible": true
+							},
+							{
+								"name": "dbGlobalTranPro",
+								"type": "Microsoft.Common.DropDown",
+								"label": "Global transactions protocol",
+								"defaultValue": "OnePhaseCommit",
+								"multiLine": true,
+								"toolTip": "Determines the transaction protocol (global transaction processing behavior) for the data source.",
+								"constraints": {
+									"allowedValues": [
+										{
+											"label": "TwoPhaseCommit",
+											"description": "Standard XA transaction processing. Requires an XA driver.",
+											"value": "TwoPhaseCommit"
+										},
+										{
+											"label": "LoggingLastResource",
+											"description": "A performance enhancement for one non-XA resource.",
+											"value": "LoggingLastResource"
+										},
+										{
+											"label": "EmulateTwoPhaseCommit",
+											"description": "Enables one non-XA resource to participate in a global transaction, but has some risk to data.",
+											"value": "EmulateTwoPhaseCommit"
+										},
+										{
+											"label": "OnePhaseCommit",
+											"description": "One-phase XA transaction processing using a non-XA driver. This is the default setting.",
+											"value": "OnePhaseCommit"
+										},
+										{
+											"label": "None",
+											"description": "Support for local transactions only.",
+											"value": "None"
+										}
+									],
+									"required": true
+								},
+								"visible": true
+							},
+							{
+								"name": "enablePswlessConnection0",
+								"type": "Microsoft.Common.CheckBox",
+								"label": "Use passwordless datasource connection",
+								"toolTip": "Use passwordless datasource connection.",
+								"visible": "[and(bool(steps('section_database').enableDB),equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))]"
+							},
+							{
+								"name": "dbUser",
+								"type": "Microsoft.Common.TextBox",
+								"label": "Database username",
+								"toolTip": "Use only letters and numbers",
+								"defaultValue": "",
+								"constraints": {
+									"required": true,
+									"validations": [
+										{
+											"regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
+											"message": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
+										},
+										{
+											"isValid": "[if(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), greater(length(steps('section_database').databaseConnectionInfo.dbIdentity.userAssignedIdentities),0), bool('true'))]",
+											"message": "You must select at least one managed identity that has access to your database."
+										}
+									]
+								},
+								"visible": "[and(bool(steps('section_database').enableDB), not(and(steps('section_database').databaseConnectionInfo.enablePswlessConnection0, equals(steps('section_database').databaseConnectionInfo.databaseType, 'sqlserver'))))]"
+							},
+							{
+								"name": "enablePswlessConnection",
+								"type": "Microsoft.Common.CheckBox",
+								"label": "Use passwordless datasource connection",
+								"toolTip": "Use passwordless datasource connection.",
+								"visible": "[and(bool(steps('section_database').enableDB),or(equals(steps('section_database').databaseConnectionInfo.databaseType, 'mysql'),equals(steps('section_database').databaseConnectionInfo.databaseType, 'postgresql')))]"
+							},
+							{
+								"name": "dbPassword",
+								"type": "Microsoft.Common.PasswordBox",
+								"label": {
+									"password": "Database Password",
+									"confirmPassword": "Confirm password"
+								},
+								"toolTip": "Database Password",
+								"constraints": {
+									"required": true,
+									"regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
+									"validationMessage": "The password must be between 5 and 128 characters long and have at least one number."
+								},
+								"options": {
+									"hideConfirmation": false
+								},
+								"visible": "[and(bool(steps('section_database').enableDB), not(or(steps('section_database').databaseConnectionInfo.enablePswlessConnection, steps('section_database').databaseConnectionInfo.enablePswlessConnection0)))]"
+							},
+							{
+								"name": "dbIdentity",
+								"type": "Microsoft.ManagedIdentity.IdentitySelector",
+								"label": "Connect database with Managed Identity",
+								"toolTip": {
+									"userAssignedIdentity": "Select a user assigned identity that has access to your database. For how to create a database user for your managed identity, see https://aka.ms/javaee-db-identity."
+								},
+								"defaultValue": {
+									"systemAssignedIdentity": "Off"
+								},
+								"options": {
+									"hideSystemAssignedIdentity": true,
+									"hideUserAssignedIdentity": false
+								},
+								"visible": "[and(bool(steps('section_database').enableDB), or(steps('section_database').databaseConnectionInfo.enablePswlessConnection, steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]"
+							}
+						],
+						"visible": "[bool(steps('section_database').enableDB)]"
+					}
+				]
+			},
+			{
+				"name": "section_tags",
+				"label": "Tags",
+				"elements": [
+					{
+						"name": "tagsByResource",
+						"type": "Microsoft.Common.TagsByResource",
+						"resources": [
+							"${identifier.dnszones}",
+							"${identifier.networkInterfaces}",
+							"${identifier.networkSecurityGroups}",
+							"${identifier.publicIPAddresses}",
+							"${identifier.privateEndpoints}",
+							"${identifier.storageAccounts}",
+							"${identifier.virtualNetworks}",
+							"${identifier.virtualMachines}",
+							"${identifier.virtualMachinesExtensions}",
+							"${identifier.deploymentScripts}",
+							"${identifier.userAssignedIdentities}",
+							"${identifier.resourcesDeployment}"
+						],
+						"toolTip": "Tags help you organize your resources and categorize them for billing or management purposes. You can apply tags to resources deployed by the offer."
+					}
+				]
+			}
+		],
+		"outputs": {
+			"Location": "[location()]",
+			"adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
+			"adminUsername": "[basics('basicsRequired').adminUsername]",
+			"authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
+			"addressPrefixes": "[steps('section_networkingConfiguration').virtualNetwork.addressPrefixes]",
+			"databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+			"denyPublicTrafficForAdminServer": "[steps('section_networkingConfiguration').denyPublicTrafficForAdminServer]",
+			"dbIdentity": "[steps('section_database').databaseConnectionInfo.dbIdentity]",
+			"dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
+			"dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
+			"dbGlobalTranPro": "[steps('section_database').databaseConnectionInfo.dbGlobalTranPro]",
+			"dnsLabelPrefix": "[steps('section_networkingConfiguration').dnsLabelPrefix]",
+			"dnszoneName": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneName]",
+			"dnszoneResourceGroup": "[steps('section_networkingConfiguration').customDNSSettings.dnsZoneResourceGroup]",
+			"dnszoneAdminConsoleLabel": "[steps('section_networkingConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
+			"dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+			"enableDB": "[bool(steps('section_database').enableDB)]",
+			"enableCustomDNS": "[bool(steps('section_networkingConfiguration').enableCustomDNS)]",
+			"enablePswlessConnection": "[or(bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection), bool(steps('section_database').databaseConnectionInfo.enablePswlessConnection0))]",
+			"hasDNSZones": "[bool(if(bool(steps('section_networkingConfiguration').enableCustomDNS), steps('section_networkingConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
+			"jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
+			"portsToExpose": "[steps('section_networkingConfiguration').portsToExpose]",
+			"skuUrnVersion": "[basics('skuUrnVersion')]",
+			"useSystemAssignedManagedIdentity": "[basics('basicsOptional').useSystemAssignedManagedIdentity]",
+			"vmSize": "[basics('vmSizeSelect')]",
+			"wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
+			"wlsPassword": "[basics('basicsRequired').wlsPassword]",
+			"wlsUserName": "[basics('basicsRequired').wlsUserName]",
+			"enableHTTPAdminListenPort": "[basics('basicsOptional').enableAdminHTTPListenPort]",
+			"enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
+			"subnetName": "[steps('section_networkingConfiguration').virtualNetwork.subnets.subnet1.name]",
+			"subnetPrefix": "[steps('section_networkingConfiguration').virtualNetwork.subnets.subnet1.addressPrefix]",
+			"tagsByResource": "[steps('section_tags').tagsByResource]",
+			"uploadedCustomIdentityKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreData]",
+			"uploadedCustomIdentityKeyStorePassphrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStorePassphrase]",
+			"uploadedCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreType]",
+			"uploadedCustomTrustKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreData]",
+			"uploadedCustomTrustKeyStorePassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStorePassPhrase]",
+			"uploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
+			"uploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
+			"uploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
+			"virtualNetworkName": "[steps('section_networkingConfiguration').virtualNetwork.name]",
+			"virtualNetworkResourceGroupName": "[steps('section_networkingConfiguration').virtualNetwork.resourceGroup]",
+			"virtualNetworkNewOrExisting": "[steps('section_networkingConfiguration').virtualNetwork.newOrExisting]"
+		}
+	}
 }
