@@ -66,7 +66,7 @@ export retryInterval=10
 
 export wlsContainerName="weblogic-server"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.7.5.jar"
-export wlsMSSQLDriverUrl="https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.8.1.jre11/mssql-jdbc-12.8.1.jre11.jar"
+export wlsMSSQLDriverUrl="https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.10.0.jre8/mssql-jdbc-12.10.0.jre8.jar"
 # The azure-identity is required by specified MSSQL driver, see https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-using-azure-active-directory-authentication?view=sql-server-ver17#connect-using-activedirectorymanagedidentity-authentication-mode 
-export azureIdentityForMSSQLUrl="https://repo1.maven.org/maven2/com/azure/azure-identity/1.12.2/azure-identity-1.12.2.jar"
+export azureIdentityForMSSQLUrl="https://repo1.maven.org/maven2/com/azure/azure-identity/1.15.3/azure-identity-1.15.3.jar"
 export jdkArm64Url="https://aka.ms/download-jdk/microsoft-jdk-11.0.23-linux-aarch64.tar.gz"
