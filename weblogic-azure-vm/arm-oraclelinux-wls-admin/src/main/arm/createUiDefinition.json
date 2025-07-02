@@ -1081,7 +1081,7 @@
             "uploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
             "uploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]",
             "virtualNetworkName": "[steps('section_networkingConfiguration').virtualNetwork.name]",
-            "virtualNetworkResourceGroupName": "[steps('section_networkingConfiguration').virtualNetwork.resourceGroup]",
+            "virtualNetworkResourceGroupName": "[if(equals(steps('section_networkingConfiguration').virtualNetwork.newOrExisting, 'new'),resourceGroup().name,steps('section_networkingConfiguration').virtualNetwork.resourceGroup)]",            
             "virtualNetworkNewOrExisting": "[steps('section_networkingConfiguration').virtualNetwork.newOrExisting]"
         }
     }
