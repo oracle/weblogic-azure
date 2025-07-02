@@ -15,56 +15,60 @@
                 "name": "skuUrnVersion",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Oracle WebLogic Image",
-                "defaultValue": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9.1",
+                "defaultValue": "WebLogic Server 14.1.2.0.0 and JDK 21 on Oracle Linux 9",
                 "toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
                 "constraints": {
                     "allowedValues": [
+                    	{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 21 on Oracle Linux 9",
+							 "value": "owls-141200-jdk21-ol94;Oracle:weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94;latest"                   	
+                    	},
+                    	{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 21 on Oracle Linux 8",
+							"value": "owls-141200-jdk21-ol810;Oracle:weblogic-141200-jdk21-ol810:owls-141200-jdk21-ol810;latest"
+                    	},
+                    	{
+                    		"label": "WebLogic Server 14.1.2.0.0 and JDK 17 on Oracle Linux 9",
+                    		"value": "owls-141200-jdk17-ol94;Oracle:weblogic-141200-jdk17-ol94:owls-141200-jdk17-ol94;latest"
+                    	},
+                    	{
+							"label": "WebLogic Server 14.1.2.0.0 and JDK 17 on Oracle Linux 8",
+							"value": "owls-141200-jdk17-ol810;Oracle:weblogic-141200-jdk17-ol810:owls-141200-jdk17-ol810;latest"
+                    	},
                         {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9.1",
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 9",
                             "value": "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest"
                         },
                         {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 8.7",
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK 11 on Oracle Linux 8",
                             "value": "owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest"
                         },
                         {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 9.1",
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 9",
                             "value": "owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest"
                         },
                         {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 8.7",
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK 8 on Oracle Linux 8",
                             "value": "owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest"
                         },
                         {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 9.1",
+                            "label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 9",
                             "value": "owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest"
                         },
                         {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 8.7",
+                            "label": "WebLogic Server 12.2.1.4.0 and JDK 8 on Oracle Linux 8",
                             "value": "owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest"
                         },
                         {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Oracle Linux 7.6",
-                            "value": "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Oracle Linux 7.6",
-                            "value": "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Oracle Linux 7.6",
-                            "value": "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
-                        },
-                        {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Red Hat Enterprise Linux 8.7",
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK11 on Red Hat Enterprise Linux 8",
                             "value": "owls-141100-jdk11-rhel87;Oracle:weblogic-141100-jdk11-rhel87:owls-141100-jdk11-rhel87;latest"                            
                         },
                         {
-                            "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Red Hat Enterprise Linux 8.7",
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK8 on Red Hat Enterprise Linux 8",
                             "value": "owls-141100-jdk8-rhel87;Oracle:weblogic-141100-jdk8-rhel87:owls-141100-jdk8-rhel87;latest"                            
                         },
                         {
-                            "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Red Hat Enterprise Linux 8.7",
+                            "label": "WebLogic Server 12.2.1.4.0 and JDK8 on Red Hat Enterprise Linux 8",
                             "value": "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest"                            
                         }
                     ],

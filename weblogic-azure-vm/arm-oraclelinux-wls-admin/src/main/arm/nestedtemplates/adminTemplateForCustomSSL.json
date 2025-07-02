@@ -166,23 +166,21 @@
       },
       "skuUrnVersion": {
          "type": "string",
-         "defaultValue": "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest",
+         "defaultValue": "owls-141200-jdk21-ol94;Oracle:weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94;latest",
          "allowedValues": [
+         	"owls-141200-jdk21-ol94;Oracle:weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94;latest",
+         	"owls-141200-jdk21-ol810;Oracle:weblogic-141200-jdk21-ol810:owls-141200-jdk21-ol810;latest",
+         	"owls-141200-jdk17-ol94;Oracle:weblogic-141200-jdk17-ol94:owls-141200-jdk17-ol94;latest",
+         	"owls-141200-jdk17-ol810;Oracle:weblogic-141200-jdk17-ol810:owls-141200-jdk17-ol810;latest",         	
             "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest",
             "owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest",
             "owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest",
             "owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest",
             "owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest",
             "owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest",         
-            "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
-            "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
-            "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
             "owls-141100-jdk11-rhel87;Oracle:weblogic-141100-jdk11-rhel87:owls-141100-jdk11-rhel87;latest",
             "owls-141100-jdk8-rhel87;Oracle:weblogic-141100-jdk8-rhel87:owls-141100-jdk8-rhel87;latest",
-            "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest",
-            "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
-            "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
-            "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
+            "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest"
          ],
          "metadata": {
             "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
@@ -693,6 +691,82 @@
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
+         "name": "${from.owls-141200-jdk21-ol94}",
+         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141200-jdk21-ol94'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "name": "${from.owls-141200-jdk21-ol810}",
+         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141200-jdk21-ol810'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "name": "${from.owls-141200-jdk17-ol94}",
+         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141200-jdk17-ol94'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "name": "${from.owls-141200-jdk17-ol810}",
+         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141200-jdk17-ol810'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "${from.owls-141100-jdk11-ol91}",
          "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol91'), bool('true'), bool('false'))]",
@@ -807,63 +881,6 @@
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
-         "name": "${from.owls-122140-jdk8-ol76}",
-         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-jdk8-ol76'), bool('true'), bool('false'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-         ],
-         "properties": {
-            "mode": "Incremental",
-            "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": [
-               ]
-            }
-         }
-      },
-      {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "name": "${from.owls-141100-jdk8-ol76}",
-         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol76'), bool('true'), bool('false'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-         ],
-         "properties": {
-            "mode": "Incremental",
-            "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": [
-               ]
-            }
-         }
-      },
-      {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "name": "${from.owls-141100-jdk11-ol76}",
-         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol76'), bool('true'), bool('false'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-         ],
-         "properties": {
-            "mode": "Incremental",
-            "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": [
-               ]
-            }
-         }
-      },
-      {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "${from.owls-141100-jdk11-rhel87}",
          "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-rhel87'), bool('true'), bool('false'))]",
@@ -917,64 +934,7 @@
                ]
             }
          }
-      },            
-      {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "name": "${from.owls-122140-jdk8-rhel76}",
-         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122140-jdk8-rhel76'), bool('true'), bool('false'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-         ],
-         "properties": {
-            "mode": "Incremental",
-            "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": [
-               ]
-            }
-         }
-      },
-      {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "name": "${from.owls-141100-jdk8-rhel76}",
-         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-rhel76'), bool('true'), bool('false'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-         ],
-         "properties": {
-            "mode": "Incremental",
-            "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": [
-               ]
-            }
-         }
-      },
-      {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersionForDeployment}",
-         "name": "${from.owls-141100-jdk11-rhel76}",
-         "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-rhel76'), bool('true'), bool('false'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
-         ],
-         "properties": {
-            "mode": "Incremental",
-            "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": [
-               ]
-            }
-         }
-      }
+      }            
    ],
    "outputs": {
       "_adminPublicIPId": {
