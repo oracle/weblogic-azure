@@ -136,7 +136,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     dbConfigurationType: dbConfigurationType
     dbGlobalTranPro: dbGlobalTranPro
     dbUser: dbUser
-    dsConnectionURL: uri(format('{0}{4}{1}{4}{3}={2}', const_connectionString, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId, array_msiClientId[databaseType], array_urlJoiner[databaseType]), '')
+    dsConnectionURL: format('{0}{4}{1}{4}{3}={2}', const_connectionString, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId, array_msiClientId[databaseType], array_urlJoiner[databaseType])
     enablePswlessConnection: true
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
