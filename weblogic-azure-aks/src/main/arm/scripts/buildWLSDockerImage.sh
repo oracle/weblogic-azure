@@ -293,10 +293,6 @@ function install_utilities() {
             --retry ${retryMaxAttempt} \
             -fL ${wlsMSSQLDriverUrl} \
             -o ${scriptDir}/model-images/wlsdeploy/${externalJDBCLibrariesDirectoryName}/${constMSSQLDriverName}
-        curl -m ${curlMaxTime} \
-            --retry ${retryMaxAttempt} \
-            -fL ${azureIdentityForMSSQLUrl} \
-            -o ${scriptDir}/model-images/wlsdeploy/${externalJDBCLibrariesDirectoryName}/${constAzureIdentityForMSSQLJarName}
         validate_status "Install mssql driver."
     fi
     
