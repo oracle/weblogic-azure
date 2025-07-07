@@ -33,7 +33,7 @@ env:
   adminOfferPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   repoName: weblogic-azure
-  repoOwner: ${{ secrets.USER_NAME }}
+  repoOwner: ${{ github.repository_owner }}
   resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
   resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
   userEmail: ${{ secrets.USER_EMAIL }}
