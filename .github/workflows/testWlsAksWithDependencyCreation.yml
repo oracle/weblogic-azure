@@ -41,7 +41,7 @@ env:
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
     resourceGroupForDB: wlsd-db-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
-    resourceGroupForStorageAccount: wlsd-sa-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+    resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
     storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
 
@@ -428,7 +428,7 @@ jobs:
                 fi
     cleanup:
       needs: [deploy-wls-on-aks, preflight]
-      if: ${{ needs.preflight.outputs.isForDemo == 'false' }}
+      if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
       - name: Get AZ CLI Version
