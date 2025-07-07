@@ -13,7 +13,7 @@ on:
       location:
         description: 'The location for the resources'
         required: true
-        default: eastus
+        default: centralus
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=mriccell/weblogic-azure
@@ -34,8 +34,8 @@ env:
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   repoName: weblogic-azure
   repoOwner: ${{ github.repository_owner }}
-  resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
-  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupPrefix: wls-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupForDependency: wlsd-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
   wlsPassword: ${{ secrets.WLS_PSW }}
