@@ -40,8 +40,8 @@ env:
     wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
-    resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
-    resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
+    resourceGroupForDB: wlsd-db-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+    resourceGroupForStorageAccount: wlsd-sa-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
     storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
 

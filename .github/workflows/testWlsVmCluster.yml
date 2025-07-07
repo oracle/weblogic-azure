@@ -13,7 +13,7 @@ on:
       location:
         description: 'The location for the resources'
         required: true
-        default: eastus
+        default: centralus
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
@@ -36,8 +36,8 @@ env:
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
   repoName: weblogic-azure
   repoOwner: ${{ github.repository_owner }}
-  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
-  resourceGroupPrefix: ${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupForDependency: wlsd-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupPrefix: ${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   wlsDomainName: wlsd
   wlsPassword: ${{ secrets.WLS_PSW }}
