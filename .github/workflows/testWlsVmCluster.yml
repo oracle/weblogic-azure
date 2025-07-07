@@ -36,8 +36,8 @@ env:
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
   repoName: weblogic-azure
   repoOwner: ${{ github.repository_owner }}
-  resourceGroupForDependency: wlsd-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
-  resourceGroupPrefix: ${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupPrefix: ${{ github.run_id }}-${{ github.run_number }}
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   wlsDomainName: wlsd
   wlsPassword: ${{ secrets.WLS_PSW }}
@@ -53,7 +53,7 @@ jobs:
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
-          location=eastus # default value
+          location=centralus # default value
 
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
             ref=${{ github.event.inputs.ref }}
