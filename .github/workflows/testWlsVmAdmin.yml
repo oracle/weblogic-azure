@@ -13,7 +13,7 @@ on:
       location:
         description: 'The location for the resources'
         required: true
-        default: eastus2
+        default: eastus
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=mriccell/weblogic-azure
