@@ -9,7 +9,7 @@ on:
       location:
         description: 'Location of the resources'
         required: true
-        default: 'eastus'
+        default: 'centralus'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
@@ -27,7 +27,7 @@ env:
   gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   gitUserName: ${{ secrets.USER_NAME }} 
-  location: eastus
+  location: centralus
   nsg: wls-nsg
   managedServerPrefix: managedServer
   managedServers: "managedServer1"
@@ -54,7 +54,7 @@ jobs:
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
-          location=eastus # default value
+          location=centralus # default value
 
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
             location=${{ github.event.inputs.location }}
