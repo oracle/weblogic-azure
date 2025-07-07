@@ -22,7 +22,7 @@ on:
       location:
         description: 'The location for the resources'
         required: true
-        default: eastus
+        default: centralus
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
   repository_dispatch:
@@ -76,7 +76,7 @@ jobs:
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
-                location=eastus # default value
+                location=centralus # default value
                 if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
                   isForDemo=${{ github.event.inputs.isForDemo }}
                   gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
