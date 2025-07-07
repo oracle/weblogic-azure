@@ -20,7 +20,7 @@ on:
 env:
   offerName: "arm-oraclelinux-wls-admin"
   repoName: "weblogic-azure"
-  repoOwner: ${{ secrets.USER_NAME }}
+  repoOwner: ${{ github.repository_owner }}
 
 jobs:
   package:
