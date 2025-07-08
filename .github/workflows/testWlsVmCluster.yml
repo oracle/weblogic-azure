@@ -266,6 +266,11 @@ jobs:
               
               # Deploy WebLogic Server Cluster Domain offer
               echo 'Deploying WebLogic Server Cluster...'
+              echo 'Template file path: ${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
+              echo 'Parameters file path: ${{ env.offerPath }}/test/scripts/parameters-test.json'
+              ls -la '${{needs.preflight.outputs.artifactName}}/' || echo 'Artifact directory not found'
+              ls -la '${{ env.offerPath }}/test/scripts/' || echo 'Scripts directory not found'
+              
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
@@ -451,11 +456,9 @@ jobs:
             echo "Sending notification to Teams..."
             curl ${{ secrets.MSTEAMS_WEBHOOK }} \
             -H 'Content-Type: application/json' \
-            --data-binary @- << EOF
-            {
-            "@context":"http://schema.org/extensions",
-            "@type":"MessageCard",
-            "text":"WebLogic cluster deployment failed in workflow, please take a look at: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}"
-            }
-          EOF
+            -d '{
+              "@context": "http://schema.org/extensions",
+              "@type": "MessageCard",
+              "text": "WebLogic cluster deployment failed in workflow, please take a look at: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${{ github.run_id }}"
+            }'
           fi
