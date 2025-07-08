@@ -243,7 +243,7 @@ jobs:
               # Prepare deployed parameters and test script
               echo 'Generating deployment parameters...'
               repoPath=\${GITHUB_REPOSITORY//\//\\/}
-              bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.offerPath }}/test/scripts/parameters-test.json \
+              if ! bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.offerPath }}/test/scripts/parameters-test.json \
                 \$repoPath \
                 ${{ env.testbranchName }} \
                 ${{ env.location }} \
@@ -255,14 +255,24 @@ jobs:
                 ${{ env.dbName }} \
                 ${{ env.wlsPassword }} \
                 ${{ env.dbAdminUser }} \
-                ${{ env.wlsPassword }}'
+                ${{ env.wlsPassword }}'; then
+                echo 'Parameter generation failed!'
+                exit 1
+              fi
+              
+              echo 'Parameters generated successfully. Contents:'
+              cat '${{ env.offerPath }}/test/scripts/parameters-test.json' || echo 'Could not read parameters file'
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
               rawUrn='$image'
               publisherAndName=\$(echo \${rawUrn} | grep -o ';.*:' | sed 's/;//g')
               imageVersion=\${rawUrn##*;}
-              az vm image terms accept --urn \${publisherAndName}$sku:\${imageVersion}
+              echo 'Accepting terms for URN: \${publisherAndName}$sku:\${imageVersion}'
+              if ! az vm image terms accept --urn \${publisherAndName}$sku:\${imageVersion}; then
+                echo 'Failed to accept image terms!'
+                exit 1
+              fi
               
               # Deploy WebLogic Server Cluster Domain offer
               echo 'Deploying WebLogic Server Cluster...'
@@ -271,12 +281,32 @@ jobs:
               ls -la '${{needs.preflight.outputs.artifactName}}/' || echo 'Artifact directory not found'
               ls -la '${{ env.offerPath }}/test/scripts/' || echo 'Scripts directory not found'
               
-              az deployment group create \
+              # Validate the ARM template first
+              echo 'Validating ARM template...'
+              if ! az deployment group validate \
+                --resource-group '$resourceGroup' \
+                --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json' \
+                --parameters '${{ env.offerPath }}/test/scripts/parameters-test.json'; then
+                echo 'ARM template validation failed!'
+                exit 1
+              fi
+              
+              echo 'ARM template validation passed, proceeding with deployment...'
+              if ! az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-cluster-node \
                 --parameters '${{ env.offerPath }}/test/scripts/parameters-test.json' \
-                --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
+                --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'; then
+                echo 'Azure deployment failed!'
+                echo 'Checking deployment operation details...'
+                az deployment operation group list \
+                  --resource-group '$resourceGroup' \
+                  --name wls-cluster-node \
+                  --query '[].{status:properties.statusCode,message:properties.statusMessage}' \
+                  --output table || echo 'Could not get deployment details'
+                exit 1
+              fi
 
               export adminVMName=\$(az deployment group show \
                 --resource-group '$resourceGroup' \
