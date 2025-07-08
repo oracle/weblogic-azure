@@ -277,13 +277,12 @@ jobs:
               
               # Deploy WebLogic Server Dynamic Cluster
               echo 'Deploying WebLogic Server Dynamic Cluster...'
-              artifactName='${{ needs.preflight.outputs.artifactName }}'
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-dycluster-node \
                 --parameters @'${offerPath}/test/scripts/parameters-test.json' \
-                --template-file '\${artifactName}/mainTemplate.json'
+                --template-file '${{ needs.preflight.outputs.artifactName }}/mainTemplate.json'
               
               # Get admin VM name
               adminVMName=\$(az deployment group show \
