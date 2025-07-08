@@ -263,6 +263,16 @@ jobs:
               echo 'Parameters generated successfully. Contents:'
               cat '${{ env.offerPath }}/test/scripts/parameters-test.json' || echo 'Could not read parameters file'
               
+              # Validate JSON format
+              echo 'Validating JSON format...'
+              if ! jq empty '${{ env.offerPath }}/test/scripts/parameters-test.json' 2>/dev/null; then
+                echo 'ERROR: Generated parameters file is not valid JSON!'
+                echo 'File contents:'
+                cat '${{ env.offerPath }}/test/scripts/parameters-test.json' || echo 'Could not read file'
+                exit 1
+              fi
+              echo 'JSON format validation passed.'
+              
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
               rawUrn='$image'
@@ -283,11 +293,21 @@ jobs:
               
               # Validate the ARM template first
               echo 'Validating ARM template...'
+              echo 'Template path: ${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
+              echo 'Parameters path: ${{ env.offerPath }}/test/scripts/parameters-test.json'
+              echo 'Resource group: $resourceGroup'
+              echo 'Running command: az deployment group validate --resource-group $resourceGroup --template-file ${{needs.preflight.outputs.artifactName}}/mainTemplate.json --parameters ${{ env.offerPath }}/test/scripts/parameters-test.json'
+              
               if ! az deployment group validate \
                 --resource-group '$resourceGroup' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json' \
                 --parameters '${{ env.offerPath }}/test/scripts/parameters-test.json'; then
                 echo 'ARM template validation failed!'
+                echo 'Checking if files exist:'
+                echo 'Template file:'
+                ls -la '${{needs.preflight.outputs.artifactName}}/mainTemplate.json' || echo 'Template file not found'
+                echo 'Parameters file:'
+                ls -la '${{ env.offerPath }}/test/scripts/parameters-test.json' || echo 'Parameters file not found'
                 exit 1
               fi
               
