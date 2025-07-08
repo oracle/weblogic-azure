@@ -268,7 +268,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-cluster-node \
-                --parameters '${{ env.offerPath }}/test/scripts/parameters-test.json' \
+                --parameters @'${{ env.offerPath }}/test/scripts/parameters-test.json' \
                 --template-file '${{ needs.preflight.outputs.artifactName }}/mainTemplate.json'
               
               # Get admin VM name
