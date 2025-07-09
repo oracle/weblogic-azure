@@ -280,7 +280,7 @@ jobs:
               rawUrn='$image'
               publisherAndName=\$(echo \${rawUrn} | grep -o ';.*:' | sed 's/;//g')
               imageVersion=\${rawUrn##*;}
-              az vm image terms accept --urn \${publisherAndName}$sku:\${imageVersion}
+              az vm image terms accept --urn \${publisherAndName}\$sku:\${imageVersion}
               
               # Deploy WebLogic Server
               echo 'Deploying WebLogic Server...'
