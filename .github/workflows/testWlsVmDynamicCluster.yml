@@ -86,7 +86,7 @@ jobs:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
       - name: Built and test ${{env.offerName}}
-        run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
+        run: mvn -Ptemplate-validation-tests clean install --file ${{ env.offerPath }}/pom.xml
 
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
@@ -105,7 +105,7 @@ jobs:
           echo "create branch $testbranchName"
           git checkout -b $testbranchName
           rm -r -f $current/${offerDevPath}/src/main/arm/nestedtemplates/*
-          cp -r -f $current/${offerPath}/${{ env.offerName }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
+          cp -r -f $current/${{ env.offerPath }}/${{ env.offerName }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
           git status
           git commit -a -m "hard code pids"
           git push https://$gitToken@github.com/${GITHUB_REPOSITORY}.git -f
@@ -117,19 +117,19 @@ jobs:
       - name: Validate deployment templates for different combinations of service integration
         id: validate-deployment-templates
         run: |
-          bash ${offerPath}/test/scripts/verify-deployments.sh <<< \
+          bash ${{ env.offerPath }}/test/scripts/verify-deployments.sh <<< \
             "${{ github.run_id }}${{ github.run_number }} ${location} \
-            ${offerPath}/${offerName}/target/arm/mainTemplate.json \
-            ${GITHUB_REPOSITORY} ${testbranchName} ${offerPath}/test/scripts"
+            ${{ env.offerPath }}/${offerName}/target/arm/mainTemplate.json \
+            ${GITHUB_REPOSITORY} ${testbranchName} ${{ env.offerPath }}/test/scripts"
 
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
           version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${{ env.offerName }}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           artifactName=${{ env.offerName }}-$version-arm-assembly
-          unzip ${offerPath}/${{ env.offerName }}/target/$artifactName.zip -d ${offerPath}/${{ env.offerName }}/target/$artifactName
+          unzip ${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName.zip -d ${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}"
-          echo "##[set-output name=artifactPath;]${offerPath}/${{ env.offerName }}/target/$artifactName"
+          echo "##[set-output name=artifactPath;]${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName"
       - name: Archive ${{env.offerName}} template
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: success()
@@ -252,14 +252,14 @@ jobs:
               
               # Generate selfsigned certificate
               echo 'Generate selfsigned certificate'
-              bash '${offerPath}/test/scripts/generate-selfsigned-keystore.sh' <<< \
+              bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
                 '${wlsPassword} ${wlsPassword} ${wlsPassword}'
               sslIdentityData=\$(cat identity.jks | base64 -w 0)
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
-              bash '${offerPath}/test/scripts/gen-parameters-deploy.sh' <<< \
-                '${offerPath}/test/scripts/parameters-test.json \
+              bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< \
+                '${{ env.offerPath }}/test/scripts/parameters-test.json \
                 $location \
                 $wlsPassword \
                 $wlsDomainName \
@@ -286,14 +286,12 @@ jobs:
               
               # Deploy WebLogic Server Dynamic Cluster
               echo 'Deploying WebLogic Server Dynamic Cluster...'
-              artifactName='${{ needs.preflight.outputs.artifactName }}'
-              echo "Using artifactName: \$artifactName"
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-dycluster-node \
-                --parameters @'${offerPath}/test/scripts/parameters-test.json' \
-                --template-file '\${artifactName}/mainTemplate.json'
+                --parameters @'${{ env.offerPath }}/test/scripts/parameters-test.json' \
+                --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
               adminVMName=\$(az deployment group show \
@@ -343,11 +341,11 @@ jobs:
               
               # Verify WebLogic Server Access
               echo 'Verifying WebLogic Server Access...'
-              bash '${offerPath}/test/scripts/verify-wls-access.sh' <<< \"\$publicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers\"
+              bash '${{ env.offerPath }}/test/scripts/verify-wls-access.sh' <<< \"\$publicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers\"
               
               # Verify WebLogic Managed Server LifeCycle
               echo 'Verifying WebLogic managed server lifecycle...'
-              bash '${offerPath}/test/scripts/verify-servers-lifecycle.sh' <<< \"$wlsUserName $wlsPassword \$publicIP ${adminConsolePort} $managedServers\"
+              bash '${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh' <<< \"$wlsUserName $wlsPassword \$publicIP ${adminConsolePort} $managedServers\"
               
               # Query admin VM DNS
               echo 'Querying admin VM DNS...'
