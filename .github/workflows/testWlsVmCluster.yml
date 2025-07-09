@@ -239,19 +239,19 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
               
               # Prepare deployed parameters
-              repoPath=\${GITHUB_REPOSITORY//\\/\\/\\\/}
-              bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.offerPath }}/test/scripts/parameters-test.json \\
-                \$repoPath \\
-                ${{ env.testbranchName }} \\
-                ${{ env.location }} \\
-                ${{ env.wlsPassword }} \\
-                ${{ env.wlsUserName }} \\
-                ${{ env.wlsDomainName }} \\
-                $image \\
-                ${{ env.dbServerName }} \\
-                ${{ env.dbName }} \\
-                ${{ env.wlsPassword }} \\
-                ${{ env.dbAdminUser }} \\
+              repoPath=\${GITHUB_REPOSITORY//\//\/}
+              bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.offerPath }}/test/scripts/parameters-test.json \
+                \$repoPath \
+                ${{ env.testbranchName }} \
+                ${{ env.location }} \
+                ${{ env.wlsPassword }} \
+                ${{ env.wlsUserName }} \
+                ${{ env.wlsDomainName }} \
+                $image \
+                ${{ env.dbServerName }} \
+                ${{ env.dbName }} \
+                ${{ env.wlsPassword }} \
+                ${{ env.dbAdminUser }} \
                 ${{ env.wlsPassword }}'
               
               # Accept Image Terms
@@ -263,38 +263,38 @@ jobs:
               
               # Deploy WebLogic Server Cluster
               echo 'Deploying WebLogic Server Cluster...'
-              az deployment group create \\
-                --verbose \\
-                --resource-group '$resourceGroup' \\
-                --name wls-cluster-node \\
-                --parameters '${{ env.offerPath }}/test/scripts/parameters-test.json' \\
+              az deployment group create \
+                --verbose \
+                --resource-group '$resourceGroup' \
+                --name wls-cluster-node \
+                --parameters '${{ env.offerPath }}/test/scripts/parameters-test.json' \
                 --template-file '${{ needs.preflight.outputs.artifactName }}/mainTemplate.json'
               
               # Get admin VM name
-              adminVMName=\$(az deployment group show \\
-                --resource-group '$resourceGroup' \\
-                --name wls-cluster-node \\
+              adminVMName=\$(az deployment group show \
+                --resource-group '$resourceGroup' \
+                --name wls-cluster-node \
                 --query 'properties.outputs.adminVMName.value' -o tsv)
               
               # Configure network security group
               echo 'Configuring network security group...'
-              nsg=\$(az network nsg list \\
-                --resource-group '$resourceGroup' \\
+              nsg=\$(az network nsg list \
+                --resource-group '$resourceGroup' \
                 --query '[0].name' -o tsv)
-              az network nsg rule update \\
-                --resource-group '$resourceGroup' \\
-                --nsg-name \${nsg} \\
-                --name WebLogicAdminChannelPort \\
-                --access Allow \\
+              az network nsg rule update \
+                --resource-group '$resourceGroup' \
+                --nsg-name \${nsg} \
+                --name WebLogicAdminChannelPort \
+                --access Allow \
                 --source-address-prefixes 10.0.0.0/24
               
               # Verify system services at admin server
               echo 'Verifying WebLogic services at admin server...'
-              message=\$(az vm run-command invoke \\
-                --resource-group '$resourceGroup' \\
-                --name \$adminVMName \\
-                --command-id RunShellScript \\
-                --scripts @'${{ env.offerPath }}/test/scripts/verify-admin-services.sh' \\
+              message=\$(az vm run-command invoke \
+                --resource-group '$resourceGroup' \
+                --name \$adminVMName \
+                --command-id RunShellScript \
+                --scripts @'${{ env.offerPath }}/test/scripts/verify-admin-services.sh' \
                 --query value[*].message)
               
               if [[ \$message == *'not in active (running) state'* ]]; then
@@ -304,17 +304,17 @@ jobs:
               
               # Verify managed server services
               echo 'Verifying WebLogic managed server services...'
-              managedServerVMNamePrefix=\$(az deployment group show \\
-                --resource-group '$resourceGroup' \\
-                --name wls-cluster-node \\
+              managedServerVMNamePrefix=\$(az deployment group show \
+                --resource-group '$resourceGroup' \
+                --name wls-cluster-node \
                 --query 'properties.outputs.managedServerVMNamePrefix.value' -o tsv)
               managedServer1=\"\${managedServerVMNamePrefix}1\"
               
-              message=\$(az vm run-command invoke \\
-                --resource-group '$resourceGroup' \\
-                --name \$managedServer1 \\
-                --command-id RunShellScript \\
-                --scripts @'${{ env.offerPath }}/test/scripts/verify-node-services.sh' \\
+              message=\$(az vm run-command invoke \
+                --resource-group '$resourceGroup' \
+                --name \$managedServer1 \
+                --command-id RunShellScript \
+                --scripts @'${{ env.offerPath }}/test/scripts/verify-node-services.sh' \
                 --query value[*].message)
               
               if [[ \$message == *'not in active (running) state'* ]]; then
@@ -323,9 +323,9 @@ jobs:
               fi
               
               # Get public IP
-              publicIP=\$(az vm show \\
-                --resource-group '$resourceGroup' \\
-                --name \$adminVMName -d \\
+              publicIP=\$(az vm show \
+                --resource-group '$resourceGroup' \
+                --name \$adminVMName -d \
                 --query publicIps -o tsv)
               
               # Verify WebLogic Server Access
@@ -338,9 +338,9 @@ jobs:
               
               # Query appGatewayURL
               echo 'Getting app gateway URL...'
-              appGatewayURL=\$(az deployment group show \\
-                --resource-group '$resourceGroup' \\
-                --name wls-cluster-node \\
+              appGatewayURL=\$(az deployment group show \
+                --resource-group '$resourceGroup' \
+                --name wls-cluster-node \
                 --query 'properties.outputs.appGatewayURL.value' -o tsv)
               
               # Build WebLogic Cafe app (checkout is done outside the loop for efficiency)
@@ -352,13 +352,13 @@ jobs:
               
               # Get admin VM DNS
               echo 'Getting admin VM DNS...'
-              adminNicId=\$(az vm show \\
-                --resource-group '$resourceGroup' \\
-                --name \$adminVMName \\
+              adminNicId=\$(az vm show \
+                --resource-group '$resourceGroup' \
+                --name \$adminVMName \
                 --query networkProfile.networkInterfaces[0].id -o tsv)
               adminPublicIPId=\$(az network nic show --id \${adminNicId} --query ipConfigurations[0].publicIPAddress.id -o tsv)
-              adminVMDNS=\$(az network public-ip show \\
-                --id \"\${adminPublicIPId}\" \\
+              adminVMDNS=\$(az network public-ip show \
+                --id \"\${adminPublicIPId}\" \
                 --query dnsSettings.fqdn -o tsv)
               
               # Deploy WebLogic Cafe app
