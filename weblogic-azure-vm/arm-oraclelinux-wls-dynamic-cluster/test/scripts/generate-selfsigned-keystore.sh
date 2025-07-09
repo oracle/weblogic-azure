@@ -45,6 +45,12 @@ function generate_selfsigned_certificates() {
         -storepass ${wlsDemoTrustPassPhrase} \
         -storetype JKS    
 }
+# check if the selfsigned certificates alias already exist, if it does, skip the generation
+if ${JAVA_HOME}/bin/keytool -list -keystore $wlsIdentityKeyStoreFileName -storepass ${wlsDemoIdentityKeyStorePassPhrase} | grep -q "${wlsDemoIndetityKeyAlias}"; then
+    echo "Selfsigned certificates alias already exist in the identity keystore, skipping generation"
+    exit 0
+else
+    echo "Selfsigned certificates alias does not exist in the identity keystore, generating selfsigned certificates"
 
 echo "Starting to generate selfsigned certificates"
 generate_selfsigned_certificates
