@@ -263,6 +263,9 @@ jobs:
               
               # Deploy WebLogic Server Cluster
               echo 'Deploying WebLogic Server Cluster...'
+              echo "Using offer path: ${{ env.offerPath }}"
+              echo "Using artifact name: ${{ needs.preflight.outputs.artifactName }}"
+              echo "Using resource group: $resourceGroup"
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
@@ -398,6 +401,9 @@ jobs:
           else
             echo "🎉 Workflow succeeded with image: ${{ env.successful_image }}"
           fi      
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
   cleanup-github-resource:
     needs: deploy-weblogic-cluster
