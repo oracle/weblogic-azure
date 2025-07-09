@@ -252,9 +252,9 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
               
               # Prepare deployed parameters and test script
-              repoPath=\${GITHUB_REPOSITORY//\//\\/}
+              
               bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.offerPath }}/test/scripts/parameters-test.json \
-              \$repoPath \
+              $GITHUB_REPOSITORY \
               ${{ env.testbranchName }} \
               ${{ env.location }} \
               ${{ env.wlsPassword }} \
@@ -284,6 +284,7 @@ jobs:
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
+              echo 'Retrieving admin VM name...'
               adminVMName=\$(az deployment group show \
                 --resource-group '$resourceGroup' \
                 --name wls-cluster-node \
