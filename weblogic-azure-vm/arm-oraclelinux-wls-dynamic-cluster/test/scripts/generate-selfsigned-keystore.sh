@@ -46,5 +46,13 @@ function generate_selfsigned_certificates() {
         -storetype JKS    
 }
 
+# check if the self-signed certificates already exist
+if [ -f "$wlsIdentityKeyStoreFileName" ] && [ -f "$wlsTrustKeyStoreFileName" ] && [ -f "$wlsIdentityRootCertFileName" ]; then
+    echo "Self-signed certificates already exist. Skipping generation."
+    exit 0
+else
+    echo "Self-signed certificates do not exist. Generating new ones."
+fi
+
 echo "Starting to generate selfsigned certificates"
 generate_selfsigned_certificates
