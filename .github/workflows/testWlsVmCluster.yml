@@ -266,6 +266,8 @@ jobs:
               echo "Using offer path: ${{ env.offerPath }}"
               echo "Using artifact name: ${{ needs.preflight.outputs.artifactName }}"
               echo "Using resource group: $resourceGroup"
+              echo "Using image: $image"
+          
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
