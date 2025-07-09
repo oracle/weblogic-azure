@@ -251,6 +251,7 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
               
               # Generate selfsigned certificate
+              # TODO check if the selfsigned certificate already exists
               echo 'Generate selfsigned certificate'
               bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
                 '${wlsPassword} ${wlsPassword} ${wlsPassword}'
