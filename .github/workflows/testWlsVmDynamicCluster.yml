@@ -253,13 +253,13 @@ jobs:
               # Generate selfsigned certificate
               echo 'Generate selfsigned certificate'
               bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
-                '${wlsPassword} ${wlsPassword} ${wlsPassword}'
+                '${env.wlsPassword} ${env.wlsPassword} ${env.wlsPassword}'
               sslIdentityData=$(cat identity.jks | base64 -w 0)
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
               # debug
-              echo wlsPassword=$wlsPassword
+              echo wlsPassword=${env.wlsPassword}
               echo env_wlsPassword=${{ env.wlsPassword }}
               echo wlsDomainName=$wlsDomainName
               echo location=$location
@@ -268,10 +268,10 @@ jobs:
               bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< \
                 '${{ env.offerPath }}/test/scripts/parameters-test.json \
                 $location \
-                $wlsPassword \
+                ${env.wlsPassword} \
                 $wlsDomainName \
                 $wlsUserName \
-                $wlsPassword \
+                ${env.wlsPassword} \
                 $managedServerPrefix \
                 $maxDynamicClusterSize \
                 $dynamicClusterSize \
@@ -348,11 +348,11 @@ jobs:
               
               # Verify WebLogic Server Access
               echo 'Verifying WebLogic Server Access...'
-              bash '${{ env.offerPath }}/test/scripts/verify-wls-access.sh' <<< \"\$publicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers\"
+              bash '${{ env.offerPath }}/test/scripts/verify-wls-access.sh' <<< \"\$publicIP ${adminConsolePort} $wlsUserName ${env.wlsPassword} $managedServers\"
               
               # Verify WebLogic Managed Server LifeCycle
               echo 'Verifying WebLogic managed server lifecycle...'
-              bash '${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh' <<< \"$wlsUserName $wlsPassword \$publicIP ${adminConsolePort} $managedServers\"
+              bash '${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh' <<< \"$wlsUserName ${env.wlsPassword} \$publicIP ${adminConsolePort} $managedServers\"
               
               # Query admin VM DNS
               echo 'Querying admin VM DNS...'
@@ -368,7 +368,7 @@ jobs:
               # Deploy WebLogicCafe app
               echo 'Deploying WebLogicCafe app...'
               timeout 6m sh -c 'until nc -zv \$0 \$1; do echo \"nc rc: \$?\"; sleep 5; done' \${adminVMDNS} ${adminConsolePort}
-              bash '${{ env.offerPath }}/test/scripts/deploy-webapp.sh' <<< \"$wlsUserName $wlsPassword \${adminVMDNS} ${adminConsolePort}\"
+              bash '${{ env.offerPath }}/test/scripts/deploy-webapp.sh' <<< \"$wlsUserName ${env.wlsPassword} \${adminVMDNS} ${adminConsolePort}\"
               
               # Query OHS Access URL
               echo 'Querying OHS Access URL...'
