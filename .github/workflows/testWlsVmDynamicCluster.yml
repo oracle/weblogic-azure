@@ -254,7 +254,7 @@ jobs:
               echo 'Generate selfsigned certificate'
               bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
                 '${wlsPassword} ${wlsPassword} ${wlsPassword}'
-              sslIdentityData=\$(cat identity.jks | base64 -w 0)
+              sslIdentityData=$(cat identity.jks | base64 -w 0)
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
