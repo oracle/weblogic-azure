@@ -275,7 +275,7 @@ jobs:
                 ${{ env.dbName }} \
                 ${{ env.wlsPassword }} \
                 ${{ env.dbAdminUser }} \
-                \${sslIdentityData}'
+                ${sslIdentityData}'
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
