@@ -96,11 +96,11 @@ function build_docker_image() {
     # Create vm to build docker image
     vmName="VM-UBUNTU-WLS-AKS-$(date +%s)"
 
-    # az vm image list --publisher Canonical --offer UbuntuServer --all -o table
-    ubuntuImage="Canonical:UbuntuServer:18.04-LTS:latest"
+    # az vm image list --publisher Canonical --offer 0001-com-ubuntu-server-focal --all -o table
+    ubuntuImage="canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest"
 
     if [[ "${CPU_PLATFORM}" == "${constARM64Platform}" ]]; then
-        ubuntuImage="Canonical:UbuntuServer:18_04-lts-arm64:latest"
+        ubuntuImage="canonical:0001-com-ubuntu-server-focal:20_04-lts-arm64:latest"
     fi
 
     # query AKS vm size
