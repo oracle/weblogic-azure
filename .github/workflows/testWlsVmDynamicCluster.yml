@@ -209,11 +209,6 @@ jobs:
           echo "build the WebLogic Cafe web app"
           mvn -DskipTests clean install --file weblogic-on-azure/javaee/weblogic-cafe/pom.xml
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          detached: true
-      
       - name: Try each image until one succeeds
         run: |
           # Convert multiline string to array
