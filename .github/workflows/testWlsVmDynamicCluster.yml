@@ -256,8 +256,8 @@ jobs:
               else
                   echo 'identity.jks found!'        
               fi
-              export sslIdentityData='$(cat identity.jks | base64 -w 0)'
-              if [ -z '$sslIdentityData' ]; then
+              export sslIdentityData=\$(cat identity.jks | base64 -w 0)
+              if [ -z \"\$sslIdentityData\" ]; then
                   echo 'Error: sslIdentityData is empty!'
               fi
               echo 'sslIdentityData: $sslIdentityData'
