@@ -21,7 +21,7 @@ on:
 env:
   offerName: "arm-oraclelinux-wls-dynamic-cluster"
   repoName: "weblogic-azure"
-  repoOwner: ${{ secrets.USER_NAME }}
+  repoOwner: ${{ github.repository_owner }}
 
 
 jobs:

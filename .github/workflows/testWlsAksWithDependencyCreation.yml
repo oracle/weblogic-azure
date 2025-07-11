@@ -22,7 +22,7 @@ on:
       location:
         description: 'The location for the resources'
         required: true
-        default: eastus
+        default: centralus
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
   repository_dispatch:
@@ -40,7 +40,7 @@ env:
     wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
     wlsUserName: ${{ secrets.WLS_USERNAME }}
     wlsPassword: ${{ secrets.WLS_PSW }}
-    resourceGroupForDB: wlsd-db-${{ github.run_id }}-${{ github.run_number }}
+    resourceGroupForDB: wlsd-db-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
     storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
@@ -76,7 +76,7 @@ jobs:
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
-                location=eastus # default value
+                location=centralus # default value
                 if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
                   isForDemo=${{ github.event.inputs.isForDemo }}
                   gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
@@ -428,7 +428,7 @@ jobs:
                 fi
     cleanup:
       needs: [deploy-wls-on-aks, preflight]
-      if: ${{ needs.preflight.outputs.isForDemo == 'false' }}
+      if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
       - name: Get AZ CLI Version
