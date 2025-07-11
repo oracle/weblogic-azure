@@ -250,6 +250,12 @@ jobs:
                 '${wlsPassword} ${wlsPassword} ${wlsPassword}'
               # echo current working directory
               echo 'Current working directory: $(pwd)'
+              # check whether identity.jks exists
+              if [ ! -f identity.jks ]; then
+                  echo 'Error: identity.jks not found!'
+              else
+                  echo 'identity.jks found!'        
+              fi
               export sslIdentityData=$(cat identity.jks | base64 -w 0)
               echo 'sslIdentityData: $sslIdentityData'
               # get the length of sslIdentityData
