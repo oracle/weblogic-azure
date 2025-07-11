@@ -260,10 +260,10 @@ jobs:
               if [ -z \"\$sslIdentityData\" ]; then
                   echo 'Error: sslIdentityData is empty!'
               fi
-              echo 'sslIdentityData: $sslIdentityData'
+              echo 'sslIdentityData: '\$sslIdentityData
               # get the length of sslIdentityData
-              sslIdentityDataLength=$(echo -n $sslIdentityData | wc -c)
-              echo 'sslIdentityDataLength: $sslIdentityDataLength'
+              sslIdentityDataLength=\$(echo -n \"\$sslIdentityData\" | wc -c)
+              echo 'sslIdentityDataLength: '\$sslIdentityDataLength
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
@@ -291,7 +291,7 @@ jobs:
                 ${{ env.dbName }} \
                 ${{ env.wlsPassword }} \
                 ${{ env.dbAdminUser }} \
-                ${sslIdentityData}'
+                \${sslIdentityData}'
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
