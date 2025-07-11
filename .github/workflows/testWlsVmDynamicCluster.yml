@@ -208,6 +208,11 @@ jobs:
         run: |
           echo "build the WebLogic Cafe web app"
           mvn -DskipTests clean install --file weblogic-on-azure/javaee/weblogic-cafe/pom.xml
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
       
       - name: Try each image until one succeeds
         run: |
@@ -247,7 +252,7 @@ jobs:
               echo 'Current working directory: $(pwd)'
               export sslIdentityData=$(cat identity.jks | base64 -w 0)
               # get the length of sslIdentityData
-              sslIdentityDataLength=$(echo -n "$sslIdentityData" | wc -c)
+              sslIdentityDataLength=$(echo -n $sslIdentityData | wc -c)
               echo 'sslIdentityDataLength: $sslIdentityDataLength'
               
               # Generate deployment parameters
@@ -404,9 +409,7 @@ jobs:
             echo "🎉 Workflow succeeded with image: ${{ env.successful_image }}"
           fi
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+
   cleanup-github-resource:
     needs: deploy-weblogic-cluster
     if: always()
