@@ -256,7 +256,10 @@ jobs:
               else
                   echo 'identity.jks found!'        
               fi
-              export sslIdentityData=$(cat identity.jks | base64 -w 0)
+              export sslIdentityData=\$(cat identity.jks | base64 -w 0)
+              if [ -z "$sslIdentityData" ]; then
+                  echo 'Error: sslIdentityData is empty!'
+              fi
               echo 'sslIdentityData: $sslIdentityData'
               # get the length of sslIdentityData
               sslIdentityDataLength=$(echo -n $sslIdentityData | wc -c)
