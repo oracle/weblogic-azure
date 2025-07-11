@@ -244,11 +244,11 @@ jobs:
               bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
                 '${wlsPassword} ${wlsPassword} ${wlsPassword}'
               # echo current working directory
-              echo "Current working directory: $(pwd)"
+              echo 'Current working directory: $(pwd)'
               export sslIdentityData=$(cat identity.jks | base64 -w 0)
               # get the length of sslIdentityData
               sslIdentityDataLength=$(echo -n "$sslIdentityData" | wc -c)
-              echo "sslIdentityDataLength: $sslIdentityDataLength"
+              echo 'sslIdentityDataLength: $sslIdentityDataLength'
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
