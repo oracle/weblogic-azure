@@ -505,17 +505,27 @@
                                 "visible": true
                             },
                             {
+                                "name": "ocrSSOTokenInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Please use an Auth Token associated with an SSO user. Select the link to see more details.",
+                                    "uri": "https://aka.ms/wls-auth-token"
+                                }
+                            },
+                            {
                                 "name": "ocrSSOPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "Password for Oracle Single Sign-On authentication",
-                                    "confirmPassword": "Confirm password"
+                                    "password": "Auth token for Oracle Single Sign-On authentication",
+                                    "confirmPassword": "Confirm token"
                                 },
-                                "toolTip": "Password for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
+                                "toolTip": "Auth token for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d\\$\\&\\+\\,:\\=\\?@#|'.\\^\\*!\\-_~/'\\[\\]\\{\\}\"]{8,}$",
-                                    "validationMessage": "The password must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
+                                    "validationMessage": "The token must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
                                 },
                                 "options": {
                                     "hideConfirmation": false
