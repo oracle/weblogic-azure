@@ -165,7 +165,7 @@ param managedServerPrefix string = 'managed-server'
 @description('To mitigate ARM-TTK error: Control Named vnetForApplicationGateway must output the newOrExisting property when hideExisting is false')
 param newOrExistingVnetForApplicationGateway string = 'new'
 @secure()
-@description('Password of Oracle SSO account.')
+@description('Auth token of Oracle SSO account.')
 param ocrSSOPSW string = newGuid()
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string = 'null'

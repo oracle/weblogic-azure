@@ -35,7 +35,7 @@ export constFalse="false"
 export constTrue="true"
 export constIntrospectorJobActiveDeadlineSeconds=300  # for Guaranteed Qos
 export constPostgreDriverName="postgresql-42.7.5.jar"
-export constMSSQLDriverName="mssql-jdbc-11.2.3.jre17.jar"
+export constMSSQLDriverName="mssql-jdbc-11.2.3.jre8.jar"
 export constAzureCoreVersion="1.34.0"
 export constDbPodIdentitySelector="db-pod-identity" # do not change the value
 export constPreclassDirectoryName="preclassLibraries"
@@ -54,7 +54,7 @@ export gitUrl4CpuImages="https://raw.githubusercontent.com/oracle/weblogic-azure
 export gitUrl4AksWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_well_tested_version.json"
 export gitUrl4AksToolingWellTestedVersionJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/aks_tooling_well_tested_versions.json"
 export gitUrl4WLSToolingFamilyJsonFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/weblogic_tooling_family.json"
-export gitUrl4AzureIdentityExtensionsPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
+export gitUrl4AzureIdentityExtensionsPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/b67a5f95a6c2f590fe8ff938daa298fe7adf7a45/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml" # PR https://github.com/oracle/weblogic-azure/pull/352 "https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
 export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 
 export optUninstallMaxTry=5 # Max attempts to wait for the operator uninstalled
@@ -65,5 +65,5 @@ export retryInterval=10
 
 export wlsContainerName="weblogic-server"
 export wlsPostgresqlDriverUrl="https://jdbc.postgresql.org/download/postgresql-42.7.5.jar"
-export wlsMSSQLDriverUrl="https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.3.jre17/mssql-jdbc-11.2.3.jre17.jar"
+export wlsMSSQLDriverUrl="https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.3.jre8/mssql-jdbc-11.2.3.jre8.jar"
 export jdkArm64Url="https://aka.ms/download-jdk/microsoft-jdk-11.0.23-linux-aarch64.tar.gz"

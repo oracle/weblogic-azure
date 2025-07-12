@@ -505,17 +505,27 @@
                                 "visible": true
                             },
                             {
+                                "name": "ocrSSOTokenInfo",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": true,
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "Please use an Auth Token associated with an SSO user. Select the link to see more details.",
+                                    "uri": "https://aka.ms/wls-auth-token"
+                                }
+                            },
+                            {
                                 "name": "ocrSSOPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "Password for Oracle Single Sign-On authentication",
-                                    "confirmPassword": "Confirm password"
+                                    "password": "Auth token for Oracle Single Sign-On authentication",
+                                    "confirmPassword": "Confirm token"
                                 },
-                                "toolTip": "Password for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
+                                "toolTip": "Auth token for Oracle Single Sign-On authentication to login the Oracle Container Registry.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d\\$\\&\\+\\,:\\=\\?@#|'.\\^\\*!\\-_~/'\\[\\]\\{\\}\"]{8,}$",
-                                    "validationMessage": "The password must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
+                                    "validationMessage": "The token must contain at least 8 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters, but should not contain > < ( ) % ; \\."
                                 },
                                 "options": {
                                     "hideConfirmation": false
@@ -641,7 +651,7 @@
                             {
                                 "name": "unsupportedPlatformInfo1",
                                 "type": "Microsoft.Common.InfoBox",
-                                "visible": "[and(contains(steps('section_aks').clusterInfo.nodeVMSizeSelector,'p'), not(contains(parse('[\"14.1.1.0-11\", \"14.1.1.0-8\", \"14.1.1.0-slim-11\", \"14.1.1.0-slim-8\", \"12.2.1.4\", \"12.2.1.4-slim\"]'),if(equals(steps('section_aks').imageInfo.oracleImageSelector, 'others'), steps('section_aks').imageInfo.fromOracleImage, steps('section_aks').imageInfo.oracleImageSelector))))]",
+                                "visible": "[and(contains(steps('section_aks').clusterInfo.nodeVMSizeSelector,'p'), contains(parse('[\"14.1.1.0-11\", \"14.1.1.0-8\", \"14.1.1.0-slim-11\", \"14.1.1.0-slim-8\", \"12.2.1.4\", \"12.2.1.4-slim\"]'),if(equals(steps('section_aks').imageInfo.oracleImageSelector, 'others'), steps('section_aks').imageInfo.fromOracleImage, steps('section_aks').imageInfo.oracleImageSelector)))]",
                                 "options": {
                                     "icon": "Error",
                                     "text": "The selected image is not compatible with the ARM64 platform. Please choose a different image or select a different size from <b>AKS</b> -> <b>Azure Kubernetes Service</b> -> <b>Node size</b>. For more information, see <a href=https://learn.microsoft.com/azure/virtual-machines/vm-naming-conventions>the Azure documentation</a>."
