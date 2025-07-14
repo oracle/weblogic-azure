@@ -29,7 +29,7 @@ jobs:
         run: |
           case "${{ inputs.ci_plan || 'plan-vm-dynamic-cluster' }}" in
             plan-vm-dynamic-cluster)
-              CI_FILE=".github/ci/.validation-plan-vm-dynamic-cluster.json"
+              CI_FILE=".github/ci/validation-plan-vm-dynamic-cluster.json"
               ;;
             *)
               echo "Unknown plan option: ${{ inputs.ci_plan }}"
