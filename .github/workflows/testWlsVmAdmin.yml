@@ -295,16 +295,9 @@ jobs:
               
               ## generate parameter file 
               echo 'current working directory: $(pwd)'
-              # check if file exists
-              if [ ! -f '${{ env.adminOfferPath }}/src/test/scripts/parameters-deploy-template.json' ]; then
-                  echo 'Error: parameters-deploy-template.json not found!'
-                  # the whole file path is 
-                  echo '${{ env.adminOfferPath }}/src/test/scripts/parameters-deploy-template.json'
-                  exit 1
-              fi
-              parameter_template='${{ env.adminOfferPath }}/src/test/scripts/parameters-deploy-template.json'
+              parameter_template='${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
               echo 'Define the output parameter file path'
-              parameter_output='${{ env.adminOfferPath }}/src/test/parameters-deploy-${{ github.job }}.json'
+              parameter_output='${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
               envsubst < '$parameter_template' > '$parameter_output' 
               
               # Accept Image Terms
@@ -320,7 +313,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'${{ env.adminOfferPath }}/src/test/parameters-deploy-${{ github.job }}.json' \
+                --parameters @'${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
