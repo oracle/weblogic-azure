@@ -460,6 +460,11 @@ jobs:
         run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDependency }}
+      - name: Delete Resource Group
+        id: delete-resource-group
+        run: |
+          echo "delete resource group with prefix:" ${{ env.resourceGroupPrefix }}
+          az group list --query "[?starts_with(name, '${{ env.resourceGroupPrefix }}')].[name]" -o tsv | xargs -I {} az group delete --name {} --yes --no-wait
   
   summary:
     needs: deploy-weblogic-cluster
