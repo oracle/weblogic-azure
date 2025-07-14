@@ -13,10 +13,9 @@ on:
       databaseType:
         description: 'Database connection'
         required: true
-        default: 'none'
+        default: 'mssqlserver'
         type: choice
         options:
-          - none
           - mssqlserver
           - mssqlserver-passwordless
           - postgresql(flexible)
