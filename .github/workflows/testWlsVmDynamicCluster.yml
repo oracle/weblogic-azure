@@ -273,12 +273,6 @@ jobs:
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
-              # debug
-              echo wlsPassword=$wlsPassword
-              echo env_wlsPassword=${{ env.wlsPassword }}
-              echo wlsDomainName=$wlsDomainName
-              echo location=$location
-              echo wlsDomainName=$wlsDomainName
           
               bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< \
                 '${{ env.offerPath }}/test/scripts/parameters-test.json \
