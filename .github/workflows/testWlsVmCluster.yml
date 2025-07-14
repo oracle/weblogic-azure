@@ -215,7 +215,7 @@ jobs:
 
       - name: Provision database
         id: database-provision
-        uses: ./.github/actions/database-provision
+        uses: ./weblogic-azure/.github/actions/database-provision
         with:
           databaseType: ${{ inputs.databaseType }}
           resourceGroup: ${{ env.resourceGroupForDependency }}
@@ -227,7 +227,7 @@ jobs:
 
       - name: Get database parameters
         id: database-parameters
-        uses: ./.github/actions/database-parameters
+        uses: ./weblogic-azure/.github/actions/database-parameters
         with:
           databaseType: ${{ inputs.databaseType }}
           uamiId: ${{ steps.database-provision.outputs.uamiId }}
