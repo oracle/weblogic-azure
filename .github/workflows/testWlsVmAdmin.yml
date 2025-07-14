@@ -203,12 +203,9 @@ jobs:
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
           echo "artifactName=${{ needs.preflight.outputs.artifactName }}" >> $GITHUB_ENV
-      
-      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
-        uses: actions/checkout@v2
-        with:
-          repository: ${{env.repoOwner}}/${{env.repoName}}
-          path: ${{env.repoName}}
+
+      - name: Checkout weblogic-azure repository
+        uses: actions/checkout@v4
       
       - name: Download artifact for deployment
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
