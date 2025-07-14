@@ -28,7 +28,7 @@ jobs:
         id: set-plan-file
         run: |
           case "${{ inputs.ci_plan || 'plan-vm-dynamic-cluster' }}" in
-            build)
+            plan-vm-dynamic-cluster)
               CI_FILE=".github/ci/.validation-plan-vm-dynamic-cluster.json"
               ;;
             *)

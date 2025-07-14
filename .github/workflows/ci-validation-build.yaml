@@ -28,7 +28,7 @@ jobs:
         id: set-plan-file
         run: |
           case "${{ inputs.ci_plan || 'plan-build' }}" in
-            build)
+            plan-build)
               CI_FILE=".github/ci/validation-plan-build.json"
               ;;
             *)
