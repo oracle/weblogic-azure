@@ -57,7 +57,7 @@ jobs:
             location=${{ github.event.client_payload.location }}
           fi
 
-          
+
           echo "##[set-output name=location;]${location}"
           echo "location=${location}" >> $GITHUB_ENV
       - uses: actions/checkout@v2.3.4
