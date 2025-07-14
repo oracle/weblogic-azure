@@ -4,7 +4,10 @@
       "workflow": "buildWlsAksArtifact.yml",
       "scenarios": [
         {
-          "scenario": "Build WLS on AKS artifact"
+          "scenario": "Build WLS on AKS artifact",
+          "inputs": {
+          }
+
         }
       ]
     },
@@ -12,7 +15,9 @@
       "workflow": "buildWlsVm4AsArtifact.yml",
       "scenarios": [
         {
-          "scenario": "Build Admin Server VM artifact"
+          "scenario": "Build Admin Server VM artifact",
+          "inputs": {
+          }
         }
       ]
     },
@@ -20,7 +25,9 @@
       "workflow": "buildWlsVm4CcArtifact.yml",
       "scenarios": [
         {
-          "scenario": "Build Configured Cluster VM artifact"
+          "scenario": "Build Configured Cluster VM artifact",
+          "inputs": {
+          }
         }
       ]
     },
@@ -28,7 +35,9 @@
       "workflow": "buildWlsVm4DcArtifact.yml",
       "scenarios": [
         {
-          "scenario": "Build Dynamic Cluster VM artifact"
+          "scenario": "Build Dynamic Cluster VM artifact",
+          "inputs": {
+          }
         }
       ]
     },
@@ -36,7 +45,9 @@
       "workflow": "buildWlsVm4SnArtifact.yml",
       "scenarios": [
         {
-          "scenario": "Build Single Node VM artifact"
+          "scenario": "Build Single Node VM artifact",
+          "inputs": {
+          }
         }
       ]
     }
