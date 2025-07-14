@@ -242,6 +242,11 @@ jobs:
           serverHost: ${{ steps.database-provision.outputs.serverHost }}
           dbInstanceName: ${{ env.dbServerName }}
           databaseName: ${{ env.dbName }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
       
       - name: Try each image until one succeeds
         run: |
