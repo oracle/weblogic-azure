@@ -18,6 +18,8 @@ on:
         options:
           - mssqlserver
           - mssqlserver-passwordless
+          - postgresql(flexible)
+          - postgresql-passwordless(flexible)
 
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
@@ -66,7 +68,6 @@ jobs:
           else
             location=${{ github.event.client_payload.location }}
           fi
-
 
           echo "##[set-output name=location;]${location}"
           echo "location=${location}" >> $GITHUB_ENV
@@ -179,28 +180,6 @@ jobs:
             az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
       - uses: actions/checkout@v2.3.4
 
-      - name: Provision database
-        id: database-provision
-        uses: ./.github/actions/database-provision
-        with:
-          databaseType: ${{ inputs.databaseType }}
-          resourceGroup: ${{ env.resourceGroupForDependency }}
-          uamiName: ${{ env.uamiName }}
-          location: ${{ env.location }}
-          dbInstanceName: ${{ env.dbServerName }}
-          dbPassword: ${{ env.wlsPassword }}
-          databaseName: ${{ env.dbName }}
-
-      - name: Get database parameters
-        id: database-parameters
-        uses: ./.github/actions/database-parameters
-        with:
-          databaseType: ${{ inputs.databaseType }}
-          uamiId: ${{ steps.database-provision.outputs.uamiId }}
-          serverHost: ${{ steps.database-provision.outputs.serverHost }}
-          dbInstanceName: ${{ env.dbServerName }}
-          databaseName: ${{ env.dbName }}
-
   deploy-weblogic-admin:
     needs: [deploy-dependencies, preflight]
     runs-on: ubuntu-latest
@@ -241,6 +220,28 @@ jobs:
         id: azure-login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Provision database
+        id: database-provision
+        uses: ./.github/actions/database-provision
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          resourceGroup: ${{ env.resourceGroupForDependency }}
+          uamiName: ${{ env.uamiName }}
+          location: ${{ env.location }}
+          dbInstanceName: ${{ env.dbServerName }}
+          dbPassword: ${{ env.wlsPassword }}
+          databaseName: ${{ env.dbName }}
+
+      - name: Get database parameters
+        id: database-parameters
+        uses: ./.github/actions/database-parameters
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          uamiId: ${{ steps.database-provision.outputs.uamiId }}
+          serverHost: ${{ steps.database-provision.outputs.serverHost }}
+          dbInstanceName: ${{ env.dbServerName }}
+          databaseName: ${{ env.dbName }}
       
       - name: Try each image until one succeeds
         run: |
@@ -271,21 +272,26 @@ jobs:
               # Create Resource Group
               echo 'Creating resource group: $resourceGroup'
               az group create --verbose --name '$resourceGroup' --location '${location}'
+          
+              adminPasswordOrKey='$wlsPassword'
+              skuUrnVersion='$image'
+              wlsdomainname='$wlsDomainName'
+              adminVMName='${{ env.adminVMName }}'
+              databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+              dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+              dbPassword='${{ env.wlsPassword}}'
+              dbAdminUser='${{ env.dbAdminUser }}'
+              dbName='${{ env.dbName }}'
+              location='${{ env.location }}'
+              wlsusername='${{ env.wlsUserName }}'
+              wlspassword='${{ env.wlsPassword }}'
+              repoPath='${GITHUB_REPOSITORY}'
+              testbranchName='${{ env.testbranchName }}'
               
-              # Generate parameters for deployment
-              bash '${{ env.adminOfferPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.adminOfferPath }}/test/scripts/ \
-              $wlsPassword \
-              $image \
-              $wlsDomainName \
-              ${{ env.adminVMName }} \
-              ${{ env.wlsPassword}} \
-              ${{ env.dbAdminUser }} \
-              ${{ env.dbName }} \
-              ${{ env.location }} \
-              ${{ env.wlsUserName }} \
-              ${{ env.wlsPassword }} \
-              ${GITHUB_REPOSITORY} \
-              ${{ env.testbranchName }}'
+              ## generate parameter file 
+              parameter_template='./${{ env.adminOfferPath }}/src/test/scripts/parameters-deploy-template.json'
+              parameter_output='./${{ env.adminOfferPath }}/src/test/parameters-deploy-${{ github.job }}.json'
+              envsubst < "$parameter_template" > "$parameter_output" 
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
@@ -300,7 +306,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'${{ env.adminOfferPath }}/test/scripts/parameters-deploy.json' \
+                --parameters @'${{ env.adminOfferPath }}/src/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name

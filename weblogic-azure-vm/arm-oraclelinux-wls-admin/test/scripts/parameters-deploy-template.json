@@ -1,0 +1,47 @@
+{
+     "adminPasswordOrKey": {
+        "value": "${adminPasswordOrKey}"
+      },
+     "adminUsername": {
+        "value": "weblogic"
+      },
+     "adminVMName":{
+        "value": "${adminVMName}"
+      },
+      "databaseType": {
+        "value": "${databaseType}"
+      },
+      "dbPassword": {
+        "value": "${dbPassword}"
+      },
+      "dbUser": {
+        "value": "${dbAdminUser}"
+      },
+      "dsConnectionURL": {
+        "value": "${dsConnectionURL}"
+      },
+      "jdbcDataSourceName": {
+        "value": "jdbc/WebLogicDB"
+      },
+      "location": {
+        "value": "${location}"
+      },
+      "skuUrnVersion": {
+        "value": "${skuUrnVersion}"
+      },
+      "vmSize": {
+        "value": "Standard_B2ms"
+      },
+      "wlsDomainName": {
+        "value": "${wlsdomainname}"
+      },
+      "wlsPassword": {
+        "value": "${wlsPassword}"
+      },
+      "wlsUserName": {
+        "value": "${wlsUserName}"
+      },
+      "_artifactsLocation":{
+        "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-admin/src/main/arm/"
+      }
+    }

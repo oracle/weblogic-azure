@@ -47,7 +47,7 @@ runs:
       id: database-parameters
       run: |
         enableDB=false
-        databaseType=mssqlserver
+        databaseType=sqlserver
         dsConnectionURL=jdbc:postgresql://contoso.postgres.database:5432/${{ inputs.databaseName }}
         dbUser=contosoDbUser
         dbPassword=contosoDbPwd
@@ -57,13 +57,13 @@ runs:
         uamiId=${{ inputs.uamiId }}
         if ${{ inputs.databaseType == 'mssqlserver' }}; then
           enableDB=true
-          databaseType=mssqlserver
+          databaseType=sqlserver
           dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=testuser@${{ inputs.dbInstanceName }}
         elif ${{ inputs.databaseType == 'mssqlserver-passwordless' }}; then
           enableDB=true
           enablePswlessConnection=true
-          databaseType=mssqlserver
+          databaseType=sqlserver
           dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=testuser@${{ inputs.dbInstanceName }} 
           dbIdentity=$(jq -n \
