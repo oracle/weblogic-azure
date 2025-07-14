@@ -288,7 +288,7 @@ jobs:
               ## generate parameter file 
               parameter_template='./${{ env.adminOfferPath }}/src/test/scripts/parameters-deploy-template.json'
               parameter_output='./${{ env.adminOfferPath }}/src/test/parameters-deploy-${{ github.job }}.json'
-              envsubst < "$parameter_template" > "$parameter_output" 
+              envsubst < '$parameter_template' > '$parameter_output' 
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
