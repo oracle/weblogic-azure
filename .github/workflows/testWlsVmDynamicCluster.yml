@@ -10,6 +10,16 @@ on:
         description: 'Location of the resources'
         required: true
         default: 'centralus'
+      databaseType:
+        description: 'Database connection'
+        required: true
+        default: 'mssqlserver'
+        type: choice
+        options:
+          - mssqlserver
+          - mssqlserver-passwordless
+          - postgresql(flexible)
+          - postgresql-passwordless(flexible)
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
@@ -23,6 +33,7 @@ env:
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   dbServerName: weblogicdb
+  uamiName: uami${{ github.run_id }}${{ github.run_number }}
   dynamicClusterSize: 1
   gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}

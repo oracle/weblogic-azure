@@ -206,6 +206,8 @@ jobs:
 
       - name: Checkout weblogic-azure repository
         uses: actions/checkout@v4
+        with:
+          path: ${{env.repoName}}
       
       - name: Download artifact for deployment
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -286,6 +288,7 @@ jobs:
               testbranchName='${{ env.testbranchName }}'
               
               ## generate parameter file 
+              echo 'current working directory: $(pwd)'
               parameter_template='./${{ env.adminOfferPath }}/src/test/scripts/parameters-deploy-template.json'
               parameter_output='./${{ env.adminOfferPath }}/src/test/parameters-deploy-${{ github.job }}.json'
               envsubst < '$parameter_template' > '$parameter_output' 
