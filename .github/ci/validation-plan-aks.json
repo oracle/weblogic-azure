@@ -1,0 +1,15 @@
+{
+  "validation_scenarios": [
+    {
+      "workflow": "testWlsAksWithDependencyCreation.yml",
+      "scenarios": [
+        {
+          "scenario": "Test WLS on AKS with Dependency creation",
+          "inputs": {
+            "location": "centralus"
+          }
+        }
+      ]
+    }
+  ]
+}

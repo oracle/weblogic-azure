@@ -6,10 +6,6 @@ name: Test Configured Cluster on VM
 on:
   workflow_dispatch:
     inputs:
-      ref:
-        description: 'Specify Git Ref if needed.'
-        required: false
-        default: 'refs/heads/main'
       location:
         description: 'The location for the resources'
         required: true
@@ -17,7 +13,7 @@ on:
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
-  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-cluster", "client_payload": {"ref": "refs/heads/main"}}'
+  # curl --verbose -XPOST -u "mriccell:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "test-vm-cluster", "client_payload": {}}'
   repository_dispatch:
     types: [test-vm-cluster,integration-test-all]
 
@@ -42,6 +38,7 @@ env:
   wlsDomainName: wlsd
   wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
+  ref: ${{ github.ref_name }}
 
 jobs:
   preflight:
@@ -56,19 +53,14 @@ jobs:
           location=centralus # default value
 
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
-            ref=${{ github.event.inputs.ref }}
             location=${{ github.event.inputs.location }}
-          else
-            ref=${{ github.event.client_payload.ref }}
+          else  
             location=${{ github.event.client_payload.location }}
           fi
-          if [ -z "$ref" ]; then
-            ref='refs/heads/main'
-          fi
-          echo "##[set-output name=ref;]${ref}"
+          
           echo "##[set-output name=location;]${location}"
-          echo "ref=${ref}" >> $GITHUB_ENV
           echo "location=${location}" >> $GITHUB_ENV
+
       - uses: actions/checkout@v2.3.4
       - name: Set up Maven with GitHub token
         uses: ./.github/actions/setupmaven
@@ -90,7 +82,7 @@ jobs:
         with:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
-          ref: ${{ env.ref }}
+
       - name: Build and test ${{ env.offerName }}
         run: |
           mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }}
