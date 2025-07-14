@@ -164,16 +164,6 @@ jobs:
         run: |
             echo "create resource group" ${{ env.resourceGroupForDependency }}
             az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
-      - uses: actions/checkout@v2.3.4
-      - name: Set up PostgreSQL Flexible Server that allows access from Azure services
-        uses: ./.github/actions/createPostgresqlFlexibleServer
-        with:
-          dbAdminUser: ${{ env.dbAdminUser }}
-          dbName: ${{ env.dbName }}
-          dbPassword: ${{ env.wlsPassword }}
-          dbServerName: ${{ env.dbServerName }}
-          location: ${{ env.location }}
-          resourceGroupName: ${{ env.resourceGroupForDependency }}
 
   deploy-weblogic-cluster:
     needs: [preflight, deploy-dependencies]
@@ -197,11 +187,10 @@ jobs:
       - name: Initialize environment variables
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
-      
-      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
+
+      - name: Checkout weblogic-azure repository
         uses: actions/checkout@v4
         with:
-          repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
       
       - name: Download artifact for deployment
@@ -230,6 +219,28 @@ jobs:
         run: |
           echo "build the WebLogic Cafe web app"
           mvn -DskipTests clean install --file weblogic-on-azure/javaee/weblogic-cafe/pom.xml
+
+      - name: Provision database
+        id: database-provision
+        uses: ./weblogic-azure/.github/actions/database-provision
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          resourceGroup: ${{ env.resourceGroupForDependency }}
+          uamiName: ${{ env.uamiName }}
+          location: ${{ env.location }}
+          dbInstanceName: ${{ env.dbServerName }}
+          dbPassword: ${{ env.wlsPassword }}
+          databaseName: ${{ env.dbName }}
+
+      - name: Get database parameters
+        id: database-parameters
+        uses: ./weblogic-azure/.github/actions/database-parameters
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          uamiId: ${{ steps.database-provision.outputs.uamiId }}
+          serverHost: ${{ steps.database-provision.outputs.serverHost }}
+          dbInstanceName: ${{ env.dbServerName }}
+          databaseName: ${{ env.dbName }}
 
       - name: Try each image until one succeeds
         run: |
