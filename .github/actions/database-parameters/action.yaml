@@ -14,7 +14,10 @@ inputs:
   dbInstanceName:
     description: "dbInstanceName"
     required: true
-
+  databaseName:
+    description: "databaseName"
+    required: true
+    default: "testdb"
 
 outputs:
   enableDB:
@@ -45,7 +48,7 @@ runs:
       run: |
         enableDB=false
         databaseType=mssqlserver
-        dsConnectionURL=jdbc:postgresql://contoso.postgres.database:5432/testdb
+        dsConnectionURL=jdbc:postgresql://contoso.postgres.database:5432/${{ inputs.databaseName }}
         dbUser=contosoDbUser
         dbPassword=contosoDbPwd
         enablePswlessConnection=false
@@ -55,13 +58,13 @@ runs:
         if ${{ inputs.databaseType == 'mssqlserver' }}; then
           enableDB=true
           databaseType=mssqlserver
-          dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=testdb"
+          dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=testuser@${{ inputs.dbInstanceName }}
         elif ${{ inputs.databaseType == 'mssqlserver-passwordless' }}; then
           enableDB=true
           enablePswlessConnection=true
           databaseType=mssqlserver
-          dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=testdb"
+          dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=testuser@${{ inputs.dbInstanceName }} 
           dbIdentity=$(jq -n \
                           --arg uamiId "$uamiId" \
@@ -79,7 +82,7 @@ runs:
         elif ${{ inputs.databaseType == 'mysql(flexible)' }}; then
           enableDB=true
           databaseType=mysql
-          dsConnectionURL=jdbc:mysql://$serverHost:3306/testdb?sslMode=REQUIRED
+          dsConnectionURL=jdbc:mysql://$serverHost:3306/${{ inputs.databaseName }}?sslMode=REQUIRED
           dbUser=testuser
         elif ${{ inputs.databaseType == 'mysql-passwordless(flexible)' }}; then
           enableDB=true
@@ -94,11 +97,11 @@ runs:
                               }
                           }'| jq -c '.')
           databaseType=mysql
-          dsConnectionURL=jdbc:mysql://$serverHost:3306/testdb
+          dsConnectionURL=jdbc:mysql://$serverHost:3306/${{ inputs.databaseName }}
         elif ${{ inputs.databaseType == 'postgresql(flexible)' }}; then
           enableDB=true
           databaseType=postgresql
-          dsConnectionURL="jdbc:postgresql://$serverHost:5432/testdb"
+          dsConnectionURL="jdbc:postgresql://$serverHost:5432/${{ inputs.databaseName }}"
           dbUser=testuser
         elif ${{ inputs.databaseType == 'postgresql-passwordless(flexible)' }}; then
           enableDB=true
@@ -113,7 +116,7 @@ runs:
                               }
                           }'| jq -c '.')
           databaseType=postgresql
-          dsConnectionURL="jdbc:postgresql://$serverHost:5432/testdb"
+          dsConnectionURL="jdbc:postgresql://$serverHost:5432/${{ inputs.databaseName }}"
         fi
         
         echo "enableDB=$enableDB" >> "$GITHUB_OUTPUT"

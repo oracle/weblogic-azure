@@ -10,6 +10,15 @@ on:
         description: 'The location for the resources'
         required: true
         default: centralus
+      databaseType:
+        description: 'Database connection'
+        required: true
+        default: 'mssqlserver'
+        type: choice
+        options:
+          - mssqlserver
+          - mssqlserver-passwordless
+
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=mriccell/weblogic-azure
@@ -24,6 +33,7 @@ env:
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   dbServerName: weblogicdb
+  uamiName: uami${{ github.run_id }}${{ github.run_number }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   offerName: arm-oraclelinux-wls-admin
   adminOfferPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
@@ -168,15 +178,28 @@ jobs:
             echo "create resource group" ${{ env.resourceGroupForDependency }}
             az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
       - uses: actions/checkout@v2.3.4
-      - name: Set up PostgreSQL Flexible Server that allows access from Azure services
-        uses: ./.github/actions/createPostgresqlFlexibleServer
+
+      - name: Provision database
+        id: database-provision
+        uses: ./.github/actions/database-provision
         with:
-          dbAdminUser: ${{ env.dbAdminUser }}
-          dbName: ${{ env.dbName }}
-          dbPassword: ${{ env.wlsPassword }}
-          dbServerName: ${{ env.dbServerName }}
+          databaseType: ${{ inputs.databaseType }}
+          resourceGroup: ${{ env.resourceGroupForDependency }}
+          uamiName: ${{ env.uamiName }}
           location: ${{ env.location }}
-          resourceGroupName: ${{ env.resourceGroupForDependency }}
+          dbInstanceName: ${{ env.dbServerName }}
+          dbPassword: ${{ env.wlsPassword }}
+          databaseName: ${{ env.dbName }}
+
+      - name: Get database parameters
+        id: database-parameters
+        uses: ./.github/actions/database-parameters
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          uamiId: ${{ steps.database-provision.outputs.uamiId }}
+          serverHost: ${{ steps.database-provision.outputs.serverHost }}
+          dbInstanceName: ${{ env.dbServerName }}
+          databaseName: ${{ env.dbName }}
 
   deploy-weblogic-admin:
     needs: [deploy-dependencies, preflight]

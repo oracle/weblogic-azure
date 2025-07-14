@@ -20,6 +20,10 @@ inputs:
   dbPassword:
     description: "dbPassword"
     required: true
+  databaseName:
+    description: "databaseName"
+    required: true
+    default: "testdb"
 
 outputs:
   serverHost:
@@ -54,7 +58,7 @@ runs:
           --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
         az sql db create --resource-group ${{ inputs.resourceGroup }} \
                          --server ${{ inputs.dbInstanceName }} \
-                         --name testdb
+                         --name ${{ inputs.databaseName }}
         
         echo "serverHost=${host}" >> "$GITHUB_ENV"
 
@@ -90,7 +94,7 @@ runs:
           --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
         az sql db create --resource-group ${{ inputs.resourceGroup }} \
                          --server ${{ inputs.dbInstanceName }} \
-                         --name testdb
+                         --name ${{ inputs.databaseName }}
         
         echo "serverHost=${host}" >> "$GITHUB_ENV"
         echo "uamiId=${uamiId}" >> "$GITHUB_ENV"
@@ -132,9 +136,9 @@ runs:
         
         wget --no-check-certificate https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
         mysql -h $host -u myadmin -p${{ inputs.dbPassword }} --ssl-ca=DigiCertGlobalRootCA.crt.pem << EOF
-        CREATE DATABASE testdb;
+        CREATE DATABASE ${{ inputs.databaseName }};
         CREATE USER 'testuser'@'%' IDENTIFIED BY '${{ inputs.dbPassword }}';
-        GRANT ALL PRIVILEGES ON testdb . * TO 'testuser'@'%';
+        GRANT ALL PRIVILEGES ON ${{ inputs.databaseName }} . * TO 'testuser'@'%';
         FLUSH PRIVILEGES;
         EOF
         
@@ -177,9 +181,9 @@ runs:
 
         wget --no-check-certificate https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
         mysql -h $host -u myadmin -p${{ inputs.dbPassword }} --ssl-ca=DigiCertGlobalRootCA.crt.pem << EOF
-        CREATE DATABASE testdb;
+        CREATE DATABASE ${{ inputs.databaseName }};
         CREATE USER 'testuser'@'%' IDENTIFIED BY '${{ inputs.dbPassword }}';
-        GRANT ALL PRIVILEGES ON testdb . * TO 'testuser'@'%';
+        GRANT ALL PRIVILEGES ON ${{ inputs.databaseName }} . * TO 'testuser'@'%';
         FLUSH PRIVILEGES;
         EOF
 
@@ -217,7 +221,7 @@ runs:
           --query "fullyQualifiedDomainName" -o tsv)
         az postgres flexible-server db create --resource-group ${{ inputs.resourceGroup }} \
                                               --server-name ${{ inputs.dbInstanceName }} \
-                                              --database-name testdb
+                                              --database-name ${{ inputs.databaseName }}
 
         echo "serverHost=${host}" >> "$GITHUB_ENV"
     - name: Deploy an instance of Azure Database for PostgreSQL passwordless
@@ -253,7 +257,7 @@ runs:
           --query "fullyQualifiedDomainName" -o tsv)
         az postgres flexible-server db create --resource-group ${{ inputs.resourceGroup }} \
                                               --server-name ${{ inputs.dbInstanceName }} \
-                                              --database-name testdb
+                                              --database-name ${{ inputs.databaseName }}
 
         echo "serverHost=${host}" >> "$GITHUB_ENV"
         echo "uamiId=${uamiId}" >> "$GITHUB_ENV"
