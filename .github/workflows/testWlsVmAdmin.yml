@@ -13,7 +13,7 @@ on:
       databaseType:
         description: 'Database connection'
         required: true
-        default: 'mssqlserver'
+        default: 'none'
         type: choice
         options:
           - none
