@@ -1,0 +1,12 @@
+{
+  "validation_scenarios": [
+    {
+      "workflow": "buildWlsAksArtifact.yml",
+      "scenarios": [
+        {
+          "scenario": "build wls aks artifact"
+        }
+      ]
+    }
+  ]
+}

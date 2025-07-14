@@ -1,0 +1,46 @@
+name: CI Validation Build
+run-name: Running validation workflows with plan:${{ inputs.ci_plan }}
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Runs daily at 2:00 AM UTC
+  workflow_dispatch:
+    inputs:
+      ci_plan:
+        description: 'Path to the validation plan file'
+        required: true
+        type: choice
+        options:
+          - build
+        default: build
+
+jobs:
+  execute-validation:
+    runs-on: ubuntu-latest
+    outputs:
+      results: ${{ steps.ci-validation.outputs.results }}
+      report_url: ${{ steps.ci-validation.outputs.report_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set validation plan file
+        id: set-plan-file
+        run: |
+          case "${{ inputs.ci_plan || 'build' }}" in
+            build)
+              CI_FILE=".github/ci/validation-plan-build.json"
+              ;;
+            *)
+              echo "Unknown plan option: ${{ inputs.ci_plan }}"
+              exit 1
+              ;;
+          esac
+          echo "ci_file=$CI_FILE" >> $GITHUB_OUTPUT
+      
+      - name: Execute CI Validation
+        id: ci-validation
+        uses: ./.github/actions/ci
+        with:
+          ci_file: ${{ steps.set-plan-file.outputs.ci_file }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
