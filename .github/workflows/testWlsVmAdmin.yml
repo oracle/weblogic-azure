@@ -284,8 +284,11 @@ jobs:
 
               ## generate parameter file 
               echo 'current working directory: $(pwd)'
-              adminOfferPath='${{ env.adminOfferPath }}'
-              parameter_template='$adminOfferPath/test/scripts/parameters-deploy-template.json'
+              echo ${{ env.adminOfferPath }}
+              echo '/test/scripts/parameters-deploy-template.json'
+              echo ${{ env.adminOfferPath }}'/test/scripts/parameters-deploy-template.json'
+
+              parameter_template=${{ env.adminOfferPath }}'/test/scripts/parameters-deploy-template.json'
               echo 'parameter_template: $parameter_template'
               # check if file exists
           
