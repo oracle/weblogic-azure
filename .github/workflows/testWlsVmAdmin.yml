@@ -283,26 +283,9 @@ jobs:
               
 
               ## generate parameter file 
-              echo 'current working directory: $(pwd)'
-              echo ${{ env.adminOfferPath }}
-              echo '/test/scripts/parameters-deploy-template.json'
-              echo ${{ env.adminOfferPath }}'/test/scripts/parameters-deploy-template.json'
-
-              parameter_template=${{ env.adminOfferPath }}'/test/scripts/parameters-deploy-template.json'
-              echo 'parameter_template: $parameter_template'
-              # check if file exists
-          
-              if [ ! -f '$parameter_template' ]; then
-                  echo 'Error: Parameter template file not found: $parameter_template'
-              else
-                  echo 'Parameter template file found: $parameter_template'
-              fi
-          
-
-              parameter_output='./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
-              echo 'Define the output parameter file path'
-              echo 'parameter_output: $parameter_output'
-              envsubst < '$parameter_template' > '$parameter_output' 
+              echo 'current working directory: $(pwd)'             
+              echo './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
+              envsubst < './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' 
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
@@ -317,7 +300,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'./$adminOfferPath/test/parameters-deploy-${{ github.job }}.json' \
+                --parameters @'.'${{ env.adminOfferPath }}'/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
