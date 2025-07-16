@@ -300,7 +300,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'.'${{ env.adminOfferPath }}'/test/parameters-deploy-${{ github.job }}.json' \
+                --parameters @'./'${{ env.adminOfferPath }}'/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
