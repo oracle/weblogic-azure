@@ -296,8 +296,8 @@ jobs:
               echo 'parameter_template: $parameter_template'
               
               # debug
-              adminOfferPath=${{ env.adminOfferPath }}
-              job=${{ github.job }}
+              adminOfferPath='${{ env.adminOfferPath }}'
+              job='${{ github.job }}'
               echo 'adminOfferPath: $adminOfferPath'
               echo 'job: $job'
               parameter_output_01='./${{ env.adminOfferPath }}'
