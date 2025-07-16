@@ -280,13 +280,12 @@ jobs:
               wlspassword='${{ env.wlsPassword }}'
               repoPath='${GITHUB_REPOSITORY}'
               testbranchName='${{ env.testbranchName }}'
-              echo 'testbranchName: $testbranchName'
               
+
               ## generate parameter file 
               echo 'current working directory: $(pwd)'
               adminOfferPath='${{ env.adminOfferPath }}'
-              echo 'adminOfferPath: $adminOfferPath'
-              parameter_template='${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
+              parameter_template='$adminOfferPath/test/scripts/parameters-deploy-template.json'
               echo 'parameter_template: $parameter_template'
               # check if file exists
           
@@ -315,7 +314,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' \
+                --parameters @'./$adminOfferPath/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
