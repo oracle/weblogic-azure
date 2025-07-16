@@ -290,6 +290,7 @@ jobs:
               ## generate parameter file 
               echo 'current working directory: $(pwd)'
               parameter_template='./${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
+              echo 'parameter_template: $parameter_template'
               echo 'Define the output parameter file path'
               parameter_output='./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
               envsubst < '$parameter_template' > '$parameter_output' 
