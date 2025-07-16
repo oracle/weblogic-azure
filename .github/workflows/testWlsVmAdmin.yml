@@ -298,10 +298,10 @@ jobs:
               # debug
               adminOfferPath=${{ env.adminOfferPath }}
               job=${{ github.job }}
-              echo "adminOfferPath: $adminOfferPath"
-              echo "job: $job"
+              echo 'adminOfferPath: $adminOfferPath'
+              echo 'job: $job'
               parameter_output_01='./${{ env.adminOfferPath }}'
-              echo "parameter_output_01: $parameter_output_01"
+              echo'parameter_output_01: $parameter_output_01'
               
 
               parameter_output='./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
