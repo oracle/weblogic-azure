@@ -16,6 +16,7 @@ on:
         default: 'mssqlserver'
         type: choice
         options:
+          - none
           - mssqlserver
           - mssqlserver-passwordless
           - postgresql(flexible)
@@ -293,8 +294,18 @@ jobs:
               fi
           
               echo 'parameter_template: $parameter_template'
-              echo 'Define the output parameter file path'
+              
+              # debug
+              adminOfferPath=${{ env.adminOfferPath }}
+              job=${{ github.job }}
+              echo "adminOfferPath: $adminOfferPath"
+              echo "job: $job"
+              parameter_output_01='./${{ env.adminOfferPath }}'
+              echo "parameter_output_01: $parameter_output_01"
+              
+
               parameter_output='./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
+              echo 'Define the output parameter file path'
               echo 'parameter_output: $parameter_output'
               envsubst < '$parameter_template' > '$parameter_output' 
               
