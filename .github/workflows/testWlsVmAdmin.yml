@@ -267,7 +267,7 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
           
               adminPasswordOrKey='${{ env.wlsPassword }}'
-              skuUrnVersion="$image"
+              export skuUrnVersion="$image"
               wlsdomainname='${{ env.wlsDomainName }}
               adminVMName='${{ env.adminVMName }}'
               databaseType='${{ steps.database-parameters.outputs.databaseType }}'
