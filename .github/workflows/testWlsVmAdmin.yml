@@ -266,9 +266,9 @@ jobs:
               echo 'Creating resource group: $resourceGroup'
               az group create --verbose --name '$resourceGroup' --location '${location}'
           
-              adminPasswordOrKey='$wlsPassword'
-              skuUrnVersion='$image'
-              wlsdomainname='$wlsDomainName'
+              adminPasswordOrKey='${{ env.wlsPassword }}'
+              skuUrnVersion=$image
+              wlsdomainname='${{ env.wlsDomainName }}
               adminVMName='${{ env.adminVMName }}'
               databaseType='${{ steps.database-parameters.outputs.databaseType }}'
               dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
@@ -281,10 +281,8 @@ jobs:
               repoPath='${GITHUB_REPOSITORY}'
               testbranchName='${{ env.testbranchName }}'
               
-
               ## generate parameter file 
               echo 'current working directory: $(pwd)'             
-              echo './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
               envsubst < './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' 
               
               # Accept Image Terms
@@ -300,7 +298,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'./'${{ env.adminOfferPath }}'/test/parameters-deploy-${{ github.job }}.json' \
+                --parameters @'./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
