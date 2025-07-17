@@ -281,7 +281,7 @@ jobs:
               export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
           
               echo 'Generating parameter file...'
-              envsubst < './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
+              envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json'
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
