@@ -293,10 +293,12 @@ jobs:
               export repoPath='${GITHUB_REPOSITORY}'
               export testbranchName='${{ env.testbranchName }}'
               
-              ## generate parameter file 
-              echo 'current working directory: $(pwd)'             
-              envsubst < './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' 
-              
+                # Generate parameter file
+                echo 'Generating parameter file...'
+                INPUT_PARAM_FILE='./${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
+                OUTPUT_PARAM_FILE='./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
+                envsubst < "$INPUT_PARAM_FILE" > "$OUTPUT_PARAM_FILE"
+
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
               rawUrn='$image'
