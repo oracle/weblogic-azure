@@ -77,7 +77,7 @@ param location string
 @description('Name prefix of managed server.')
 param managedServerPrefix string = 'managed-server'
 @secure()
-@description('Password of Oracle SSO account.')
+@description('Auth token of Oracle SSO account.')
 param ocrSSOPSW string
 @description('User name of Oracle SSO account.')
 param ocrSSOUser string
