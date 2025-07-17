@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 name: Test Admin Server on VM
+run-name: Test Admin Server on VM with `db`:${{ inputs.databaseType }}
 
 on:
   workflow_dispatch:

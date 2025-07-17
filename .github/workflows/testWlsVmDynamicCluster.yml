@@ -3,6 +3,8 @@
 # https://oss.oracle.com/licenses/upl/
 
 name: Test Dynamic Cluster on VM
+run-name: Test Dynamic Cluster on VM with `db`:${{ inputs.databaseType }}
+
 on:
   workflow_dispatch:
     inputs:

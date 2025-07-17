@@ -1,4 +1,5 @@
 name: Test WLS on AKS with Dependency creation
+run-name: Test WLS on AKS with Dependency creation with `db`:${{ inputs.databaseType }}
 
 on:
   workflow_dispatch:
