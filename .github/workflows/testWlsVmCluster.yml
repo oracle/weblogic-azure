@@ -264,22 +264,27 @@ jobs:
               # Create Resource Group
               echo 'Creating resource group: $resourceGroup'
               az group create --verbose --name '$resourceGroup' --location '${location}'
-              
-              # Prepare deployed parameters and test script
-              
-              bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< '${{ env.offerPath }}/test/scripts/parameters-test.json \
-              $GITHUB_REPOSITORY \
-              ${{ env.testbranchName }} \
-              ${{ env.location }} \
-              ${{ env.wlsPassword }} \
-              ${{ env.wlsUserName }} \
-              ${{ env.wlsDomainName }} \
-              $image \
-              ${{ env.dbServerName }} \
-              ${{ env.dbName }} \
-              ${{ env.wlsPassword }} \
-              ${{ env.dbAdminUser }} \
-              ${{ env.wlsPassword }}'
+          
+              export repoPath='${GITHUB_REPOSITORY}'
+              export testbranchName='${{ env.testbranchName }}' 
+              export location='${{ env.location }}'
+              export adminPasswordOrKey='${{ env.wlsPassword }}'
+              export wlsusername='${{ env.wlsUserName }}'
+              export wlsdomainname='${{ env.wlsDomainName }}'
+              export skuUrnVersion='$image'
+              export dbName='${{ env.dbName }}'
+              export dbPassword='${{ env.wlsPassword}}'
+              export wlspassword='${{ env.wlsPassword }}'
+              export dbUser='${{ env.dbAdminUser }}'
+              export dbServerName='${{ env.dbServerName }}'
+              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+          
+              # Generate parameter file
+              echo 'Generating parameter file...'
+              INPUT_PARAM_FILE='./${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json'
+              OUTPUT_PARAM_FILE='./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
+              envsubst < '$INPUT_PARAM_FILE' > '$OUTPUT_PARAM_FILE'
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
@@ -294,7 +299,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-cluster-node \
-                --parameters @'${{ env.offerPath }}/test/scripts/parameters-test.json' \
+                --parameters @'./${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
