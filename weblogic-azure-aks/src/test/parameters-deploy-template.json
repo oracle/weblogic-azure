@@ -65,7 +65,7 @@
         "value": false
     },
     "enableDB": {
-        "value": true
+        "value": ${enableDB}
     },
     "enableDNSConfiguration": {
         "value": false

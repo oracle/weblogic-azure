@@ -30,6 +30,7 @@ on:
         default: 'mssqlserver'
         type: choice
         options:
+          - none
           - mssqlserver
           - mssqlserver-passwordless
           - postgresql(flexible)
@@ -154,6 +155,12 @@ jobs:
     deploy-db:
         needs: preflight
         runs-on: ubuntu-latest
+        outputs:
+          databaseType: ${{ steps.database-parameters.outputs.databaseType }}
+          enableDB: ${{ steps.database-parameters.outputs.enableDB }}
+          enablePswlessConnection: ${{ steps.database-parameters.outputs.enablePswlessConnection }}
+          dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
+          dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
         steps:
             - name: Get AZ CLI Version
               run: |
@@ -310,21 +317,27 @@ jobs:
             - name: Prepare parameter file
               run: |
                 echo "generate parameter file"
-                bash weblogic-azure/weblogic-azure-aks/src/test/genWlsAksParameters.sh \
-                  ${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} \
-                  ${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }} \
-                  "${cargoTrackerBlobUrl}" \
-                  ${dbPassword} \
-                  ${dbAdminUser} \
-                  jdbc:postgresql:\/\/${dbName}.postgres.database.azure.com:5432\/${{ env.dbServerName }} \
-                  ${location} \
-                  ${ocrSSOPSW} \
-                  ${ocrSSOUser} \
-                  ${wdtRuntimePassword} \
-                  ${wlsPassword} \
-                  ${wlsUserName} \
-                  ${{ needs.preflight.outputs.vmSize }} \
-                  weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.jsonc
+                export databaseType=${{ needs.deploy-db.outputs.databaseType }}
+                export enableDB=${{ needs.deploy-db.outputs.enableDB }} 
+                export dsConnectionURL='${{ needs.deploy-db.outputs.dsConnectionURL }}
+                export dbUser=${{ env.dbAdminUser }} 
+                export dbPassword=${{ env.dbPassword }}
+                
+                export gitUserName=${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} \
+                export testbranchName=${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}
+                export appPackageUrls="${cargoTrackerBlobUrl}"
+
+                export location=${location}
+                export ocrSSOPSW=${ocrSSOPSW}
+                export ocrSSOUser=${ocrSSOUser}
+                export wdtRuntimePassword=${wdtRuntimePassword}
+                export wlsPassword=${wlsPassword}
+                export wlsUserName=${wlsUserName}
+                export vmSize=${{ needs.preflight.outputs.vmSize }}
+
+                echo 'Generating parameter file...'
+                envsubst < './weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json' > './weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json'
+
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
               uses: azure/CLI@v1
@@ -336,7 +349,7 @@ jobs:
                     --verbose \
                     --resource-group ${{ env.resourceGroupForWlsAks }} \
                     --name wls-on-aks \
-                    --parameters @weblogic-azure/weblogic-azure-aks/src/test/setupWlsAksParameters.jsonc \
+                    --parameters @weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json \
                     --template-file ${artifactName}/mainTemplate.json
             - name: Query Application Gateway URL
               run: |
