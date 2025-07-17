@@ -325,13 +325,13 @@ jobs:
                 echo "generate parameter file"
                 export databaseType=${{ needs.deploy-db.outputs.databaseType }}
                 export enableDB=${{ needs.deploy-db.outputs.enableDB }} 
-                export dsConnectionURL='${{ needs.deploy-db.outputs.dsConnectionURL }}
+                export dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}
                 export dbUser=${{ env.dbAdminUser }} 
                 export dbPassword=${{ env.dbPassword }}
                 
-                export gitUserName=${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} \
+                export gitUserName=${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} 
                 export testbranchName=${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}
-                export appPackageUrls="${cargoTrackerBlobUrl}"
+                export appPackageUrls=${cargoTrackerBlobUrl}
 
                 export location=${location}
                 export ocrSSOPSW=${ocrSSOPSW}
@@ -341,8 +341,8 @@ jobs:
                 export wlsUserName=${wlsUserName}
                 export vmSize=${{ needs.preflight.outputs.vmSize }}
 
-                echo 'Generating parameter file...'
-                envsubst < './weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json' > './weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json'
+                echo "Generating parameter file..."
+                envsubst < "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json" > "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json"
 
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
