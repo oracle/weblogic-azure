@@ -18,6 +18,7 @@ on:
         default: 'mssqlserver'
         type: choice
         options:
+          - none
           - mssqlserver
           - mssqlserver-passwordless
           - postgresql(flexible)
@@ -273,6 +274,7 @@ jobs:
               export dbServerName='${{ env.dbServerName }}'
               export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
               export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+              export enableDB='${{ steps.database-parameters.outputs.enableDB }}'
           
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json'

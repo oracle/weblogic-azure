@@ -299,6 +299,7 @@ jobs:
               export uploadedKeyStoreData='$sslIdentityData'
               export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
               export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+              export enableDB='${{ steps.database-parameters.outputs.enableDB }}'
           
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' 

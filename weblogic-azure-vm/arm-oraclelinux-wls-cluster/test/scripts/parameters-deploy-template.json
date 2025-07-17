@@ -21,7 +21,7 @@
         "value": "password"
     },
     "enableDB": {
-        "value": true
+        "value": ${enableDB}
     },
     "databaseType": {
         "value": "${databaseType}"

@@ -54,7 +54,7 @@
     "value": true
   },
   "enableDB": {
-    "value": true
+    "value": ${enableDB}
   },
   "databaseType": {
     "value": "${databaseType}"
