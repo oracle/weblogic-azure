@@ -20,6 +20,15 @@
   "dsConnectionURL": {
     "value": "${dsConnectionURL}"
   },
+  "enablePswlessConnection": {
+    "value": ${enablePswlessConnection}
+  },
+  "enableDB": {
+    "value": ${enableDB}
+  },
+  "dbIdentity": {
+    "value": ${dbIdentity}
+  }
   "jdbcDataSourceName": {
     "value": "jdbc/WebLogicDB"
   },

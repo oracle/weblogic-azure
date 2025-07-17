@@ -277,15 +277,19 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
           
               # Export variables for envsubst
+              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+              export enableDB=${{ steps.database-parameters.outputs.enableDB }}
+              export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
+              export dbAdminUser='${{ env.dbAdminUser }}'
+              export dbPassword='${{ env.wlsPassword}}'
+              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+              export dbName='${{ env.dbName }}'
+              export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+          
               export adminPasswordOrKey='${{ env.wlsPassword }}'
               export skuUrnVersion='$image'
               export wlsdomainname='${{ env.wlsDomainName }}'
               export adminVMName='${{ env.adminVMName }}'
-              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
-              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
-              export dbPassword='${{ env.wlsPassword}}'
-              export dbAdminUser='${{ env.dbAdminUser }}'
-              export dbName='${{ env.dbName }}'
               export location='${{ env.location }}'
               export wlsusername='${{ env.wlsUserName }}'
               export wlspassword='${{ env.wlsPassword }}'
