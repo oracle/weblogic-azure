@@ -44,7 +44,7 @@ env:
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
-    dbServerName: weblogicdb
+    dbServerName: weblogicdb-${{ github.run_id }}-${{ github.run_number }}
     uamiName: uami${{ github.run_id }}${{ github.run_number }}
     ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
     ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
