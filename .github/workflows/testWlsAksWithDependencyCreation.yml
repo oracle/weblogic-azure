@@ -314,6 +314,12 @@ jobs:
               with:
                 repository: Azure-Samples/cargotracker-wls-aks
                 path: cargotracker
+
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              with:
+                detached: true
+
             - name: Prepare parameter file
               run: |
                 echo "generate parameter file"
