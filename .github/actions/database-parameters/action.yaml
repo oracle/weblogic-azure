@@ -14,6 +14,10 @@ inputs:
   dbInstanceName:
     description: "dbInstanceName"
     required: true
+  dbAdminUser:
+    description: "dbAdminUser"
+    required: false
+    default: "testuser"
   databaseName:
     description: "databaseName"
     required: true
@@ -59,13 +63,13 @@ runs:
           enableDB=true
           databaseType=sqlserver
           dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
-          dbUser=testuser@${{ inputs.dbInstanceName }}
+          dbUser=${{ inputs.dbAdminUser }}@${{ inputs.dbInstanceName }}
         elif ${{ inputs.databaseType == 'mssqlserver-passwordless' }}; then
           enableDB=true
           enablePswlessConnection=true
           databaseType=sqlserver
           dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
-          dbUser=testuser@${{ inputs.dbInstanceName }} 
+          dbUser=${{ inputs.dbAdminUser }}@${{ inputs.dbInstanceName }} 
           dbIdentity=$(jq -n \
                           --arg uamiId "$uamiId" \
                           '{
@@ -78,12 +82,12 @@ runs:
           enableDB=true
           databaseType=oracle
           dsConnectionURL=jdbc:oracle:thin:@${serverHost}:1521/oratest1
-          dbUser=testuser
+          dbUser=${{ inputs.dbAdminUser }}
         elif ${{ inputs.databaseType == 'mysql(flexible)' }}; then
           enableDB=true
           databaseType=mysql
           dsConnectionURL=jdbc:mysql://$serverHost:3306/${{ inputs.databaseName }}?sslMode=REQUIRED
-          dbUser=testuser
+          dbUser=${{ inputs.dbAdminUser }}
         elif ${{ inputs.databaseType == 'mysql-passwordless(flexible)' }}; then
           enableDB=true
           enablePswlessConnection=true
@@ -102,7 +106,7 @@ runs:
           enableDB=true
           databaseType=postgresql
           dsConnectionURL="jdbc:postgresql://$serverHost:5432/${{ inputs.databaseName }}"
-          dbUser=testuser
+          dbUser=${{ inputs.dbAdminUser }}
         elif ${{ inputs.databaseType == 'postgresql-passwordless(flexible)' }}; then
           enableDB=true
           enablePswlessConnection=true

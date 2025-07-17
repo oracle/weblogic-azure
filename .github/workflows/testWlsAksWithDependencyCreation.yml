@@ -172,15 +172,29 @@ jobs:
                     az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
 
             - uses: actions/checkout@v2.3.4
-            - name: Set up PostgreSQL Flexible Server that allows access from Azure services
-              uses: ./.github/actions/createPostgresqlFlexibleServer
+            - name: Provision database
+              id: database-provision
+              uses: ./weblogic-azure/.github/actions/database-provision
               with:
-                dbAdminUser: ${{ env.dbAdminUser }}
-                dbName: ${{ env.dbName }}
-                dbPassword: ${{ env.dbPassword }}
-                dbServerName: ${{ env.dbServerName }}
+                databaseType: ${{ inputs.databaseType }}
+                resourceGroup: ${{ env.resourceGroupForDB }}
+                uamiName: ${{ env.uamiName }}
                 location: $location
-                resourceGroupName: ${{ env.resourceGroupForDB }}     
+                dbInstanceName: ${{ env.dbServerName }}
+                dbPassword: ${{ env.dbPassword }}
+                databaseName: ${{ env.dbName }}
+                dbAdminUser: ${{ env.dbAdminUser }}
+
+            - name: Get database parameters
+              id: database-parameters
+              uses: ./weblogic-azure/.github/actions/database-parameters
+              with:
+                databaseType: ${{ inputs.databaseType }}
+                uamiId: ${{ steps.database-provision.outputs.uamiId }}
+                serverHost: ${{ steps.database-provision.outputs.serverHost }}
+                dbInstanceName: ${{ env.dbServerName }}
+                databaseName: ${{ env.dbName }}
+
             
     deploy-storage-account:
         needs: preflight

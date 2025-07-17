@@ -233,6 +233,7 @@ jobs:
           dbInstanceName: ${{ env.dbServerName }}
           dbPassword: ${{ env.wlsPassword }}
           databaseName: ${{ env.dbName }}
+          dbAdminUser: ${{ env.dbAdminUser }}
 
       - name: Get database parameters
         id: database-parameters
@@ -243,6 +244,7 @@ jobs:
           serverHost: ${{ steps.database-provision.outputs.serverHost }}
           dbInstanceName: ${{ env.dbServerName }}
           databaseName: ${{ env.dbName }}
+          dbAdminUser: ${{ env.dbAdminUser }}
 
       - name: Try each image until one succeeds
         run: |
