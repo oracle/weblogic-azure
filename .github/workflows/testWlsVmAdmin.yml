@@ -268,7 +268,7 @@ jobs:
           
               adminPasswordOrKey='${{ env.wlsPassword }}'
               skuUrnVersion='$image'
-              wlsdomainname='${{ env.wlsDomainName }}
+              wlsdomainname='${{ env.wlsDomainName }}'
               adminVMName='${{ env.adminVMName }}'
               databaseType='${{ steps.database-parameters.outputs.databaseType }}'
               dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
