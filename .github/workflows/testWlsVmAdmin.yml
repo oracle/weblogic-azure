@@ -39,7 +39,7 @@ env:
   uamiName: uami${{ github.run_id }}${{ github.run_number }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   offerName: arm-oraclelinux-wls-admin
-  adminOfferPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
+  offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-admin
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   repoName: weblogic-azure
   repoOwner: ${{ github.repository_owner }}
@@ -96,7 +96,7 @@ jobs:
       - name: Build and test ${{ env.offerName }}
         run: |
           ls
-          mvn -Ptemplate-validation-tests clean install -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }} --file ${adminOfferPath}/pom.xml
+          mvn -Ptemplate-validation-tests clean install -Dgit.repo.owner=${{ env.repoOwner }} -Dgit.tag=${{ env.ref }} --file ${offerPath}/pom.xml
 
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}} for test
         uses: actions/checkout@v2
@@ -115,7 +115,7 @@ jobs:
           echo "create branch $testbranchName"
           git checkout -b $testbranchName
           rm -r -f $current/${offerDevPath}/src/main/arm/nestedtemplates/*
-          cp -r -f $current/${{ env.adminOfferPath }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
+          cp -r -f $current/${{ env.offerPath }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
           git status
           git commit -a -m "hard code pids"
           git push https://$gitToken@github.com/${GITHUB_REPOSITORY}.git -f
@@ -127,10 +127,10 @@ jobs:
       - name: Validate deployment templates for different combinations of service integration
         id: validate-deployment-templates
         run: |
-          bash ${{ env.adminOfferPath }}/test/scripts/verify-deployments.sh \
+          bash ${{ env.offerPath }}/test/scripts/verify-deployments.sh \
            <<< "${{ github.run_id }}${{ github.run_number }} ${location} \
-            ${{ env.adminOfferPath }}/target/arm/mainTemplate.json \
-            ${GITHUB_REPOSITORY} ${testbranchName} ${{ env.adminOfferPath }}/test/scripts"
+            ${{ env.offerPath }}/target/arm/mainTemplate.json \
+            ${GITHUB_REPOSITORY} ${testbranchName} ${{ env.offerPath }}/test/scripts"
 
       - name: Get version information from pom.xml
         id: version
@@ -148,13 +148,13 @@ jobs:
         run: echo "##[set-output name=artifactName;]${{ env.offerName }}-$version-arm-assembly"
       - name: Generate zip package path
         id: artifact_path
-        run: echo "##[set-output name=artifactPath;]${{ env.adminOfferPath }}/target/$artifactName"
+        run: echo "##[set-output name=artifactPath;]${{ env.offerPath }}/target/$artifactName"
       - name: Output artifact path
         run: echo $artifactPath
         env:
           artifactPath: ${{steps.package.outputs.artifactPath}}
       - name: Unzip the package as upload action will zip again
-        run: unzip ${{ env.adminOfferPath }}/target/$artifactName.zip -d ${{ env.adminOfferPath }}/target/$artifactName
+        run: unzip ${{ env.offerPath }}/target/$artifactName.zip -d ${{ env.offerPath }}/target/$artifactName
 
       - name: Archive ${{ env.offerName }} template
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -294,7 +294,7 @@ jobs:
               export testbranchName='${{ env.testbranchName }}'
               
               echo 'Generating parameter file...'
-              envsubst < './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json'
+              envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json'
 
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
@@ -309,7 +309,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-admin-node \
-                --parameters @'./${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' \
+                --parameters @'./${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
@@ -324,7 +324,7 @@ jobs:
                 --resource-group '$resourceGroup' \
                 --name \$adminVMName \
                 --command-id RunShellScript \
-                --scripts @'${{ env.adminOfferPath }}/test/scripts/verify-services.sh' \
+                --scripts @'${{ env.offerPath }}/test/scripts/verify-services.sh' \
                 --query value[*].message)
               
               if [[ \$message == *'not in active (running) state'* ]]; then
@@ -353,7 +353,7 @@ jobs:
               
               # Verify WebLogic Server Access
               echo 'Verifying WebLogic Server Access...'
-              bash '${{ env.adminOfferPath }}/test/scripts/verify-wls-access.sh' <<< \"\${publicIP} ${adminConsolePort}\"
+              bash '${{ env.offerPath }}/test/scripts/verify-wls-access.sh' <<< \"\${publicIP} ${adminConsolePort}\"
               
               echo 'SUCCESS: All verification steps passed!'
               exit 0
