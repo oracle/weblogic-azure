@@ -1,5 +1,5 @@
 name: CI Validation for VM Cluster
-run-name: Running validation workflows with plan:${{ inputs.ci_plan }}
+run-name: Running validation workflows with plan:${{ github.event_name == 'schedule' && 'plan-vm-cluster' || inputs.ci_plan }}
 
 on:
   schedule:
