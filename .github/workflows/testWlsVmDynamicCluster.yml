@@ -276,7 +276,7 @@ jobs:
               echo 'Generate selfsigned certificate'
               bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
                 '${wlsPassword} ${wlsPassword} ${wlsPassword}'
-              # echo current working directory
+              
               echo 'Current working directory: $(pwd)'
               # check whether identity.jks exists
               if [ ! -f identity.jks ]; then
@@ -285,35 +285,30 @@ jobs:
                   echo 'identity.jks found!'        
               fi
               export sslIdentityData=\$(cat identity.jks | base64 -w 0)
-              if [ -z \"\$sslIdentityData\" ]; then
-                  echo 'Error: sslIdentityData is empty!'
-              fi
-              echo 'sslIdentityData: '\$sslIdentityData
-              # get the length of sslIdentityData
-              sslIdentityDataLength=\$(echo -n \"\$sslIdentityData\" | wc -c)
-              echo 'sslIdentityDataLength: '\$sslIdentityDataLength
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
+              export location='${{ env.location }}'
+              export adminPasswordOrKey='${{ env.wlsPassword }}'
+              export wlsdomainname='${{ env.wlsDomainName }}'
+              export wlsusername='${{ env.wlsUserName }}'
+              export wlspassword='${{ env.wlsPassword }}'
+              export managedserverprefix='${{ env.managedserverprefix }}'
+              export maxDynamicClusterSize='${{ env.maxDynamicClusterSize }}'
+              export dynamicClusterSize='${{ env.dynamicClusterSize }}'
+              export skuUrnVersion='$image'
+              export testbranchName='${{ env.testbranchName }}'
+              export repoPath='${GITHUB_REPOSITORY}'
+              export dbName='${{ env.dbName }}'
+              export dbServerName='${{ env.dbServerName }}'
+              export dbPassword='${{ env.wlsPassword}}'
+              export dbUser='${{ env.dbAdminUser }}'
+              export uploadedKeyStoreData='$sslIdentityData'
+              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
           
-              bash '${{ env.offerPath }}/test/scripts/gen-parameters-deploy.sh' <<< \
-                '${{ env.offerPath }}/test/scripts/parameters-test.json \
-                $location \
-                $wlsPassword \
-                $wlsDomainName \
-                $wlsUserName \
-                $wlsPassword \
-                $managedServerPrefix \
-                $maxDynamicClusterSize \
-                $dynamicClusterSize \
-                $image \
-                $testbranchName \
-                $GITHUB_REPOSITORY \
-                ${{ env.dbServerName }} \
-                ${{ env.dbName }} \
-                ${{ env.wlsPassword }} \
-                ${{ env.dbAdminUser }} \
-                '\"\$sslIdentityData\"
+              echo 'Generating parameter file...'
+              envsubst < './${{ env.adminOfferPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.adminOfferPath }}/test/parameters-deploy-${{ github.job }}.json' 
               
               # Accept Image Terms
               echo 'Accepting terms for image: $image'
@@ -328,7 +323,7 @@ jobs:
                 --verbose \
                 --resource-group '$resourceGroup' \
                 --name wls-dycluster-node \
-                --parameters @'${{ env.offerPath }}/test/scripts/parameters-test.json' \
+                --parameters @'${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
               # Get admin VM name
