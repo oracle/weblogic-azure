@@ -246,6 +246,11 @@ jobs:
           databaseName: ${{ env.dbName }}
           dbAdminUser: ${{ env.dbAdminUser }}
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
+
       - name: Try each image until one succeeds
         run: |
           # Convert multiline string to array
