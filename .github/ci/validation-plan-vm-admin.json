@@ -1,0 +1,15 @@
+{
+  "validation_scenarios": [
+    {
+      "workflow": "testWlsVmAdmin.yml",
+      "scenarios": [
+        {
+          "scenario": "Test Admin Server on VM",
+          "inputs": {
+            "location": "centralus"
+          }
+        }
+      ]
+    }
+  ]
+}

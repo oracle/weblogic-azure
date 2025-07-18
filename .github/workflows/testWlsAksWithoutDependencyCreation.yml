@@ -15,9 +15,6 @@ on:
         description: 'If set to true, resources will not be deleted'
         required: true
         default: 'false'
-      disambiguationSuffix:
-        description: 'Included in names to disambiguate. Get from another pipeline execution'
-        required: true
       storageAccountName:
         description: 'Specify storage account of uploading .war file'
         required: true
@@ -34,7 +31,7 @@ on:
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '<request_data>'
   # sample <request_data>
-  # {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false", "disambiguationSuffix": "1397121054", "storageAccountName": "wlsdsa13971210545", "storageContainerName": "wlsdcon13971210545", "dbName": "wlsdb13971210545"}}
+  # {"event_type": "aks-integration-test-without-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false", "storageAccountName": "wlsdsa13971210545", "storageContainerName": "wlsdcon13971210545", "dbName": "wlsdb13971210545"}}
   # the request data can be get from setupWlsAksDependency pipeline, please checkout the summary page and download the generated artifact name 'integration-test-data'
   repository_dispatch:
     types: [aks-integration-test-without-dependency-creation,integration-test-all]
@@ -86,7 +83,7 @@ jobs:
               id: setup-env-variables-based-on-dispatch-event
               run: |
                 if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
-                  resourceGroupForWlsAks=wlsd-aks-${{ github.event.inputs.disambiguationSuffix }}-${{ github.run_number }}
+                  resourceGroupForWlsAks=wlsd-aks-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
                   dbName=${{ github.event.inputs.dbName }}
                   storageAccountName=${{ github.event.inputs.storageAccountName }}
                   storageContainerName=${{ github.event.inputs.storageContainerName }}
@@ -95,7 +92,7 @@ jobs:
                   testBranchNameForArtifactsLocation=${{ github.event.inputs.testBranchNameForArtifactsLocation }}
                   vmSize=${{ github.event.inputs.vmSize }}
                 else
-                  resourceGroupForWlsAks=wlsd-aks-${{ github.event.client_payload.disambiguationSuffix }}-${{ github.run_number }}
+                  resourceGroupForWlsAks=wlsd-aks-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
                   dbName=${{ github.event.client_payload.dbName }}
                   storageAccountName=${{ github.event.client_payload.storageAccountName }}
                   storageContainerName=${{ github.event.client_payload.storageContainerName }}
