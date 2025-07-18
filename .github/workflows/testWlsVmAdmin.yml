@@ -280,6 +280,16 @@ jobs:
               export dbName='${{ env.dbName }}'
               export dbIdentity=\$(echo '${{ steps.database-parameters.outputs.dbIdentity }}' | jq -c .)
               echo 'dbIdentity: $dbIdentity'
+              # Handle dbIdentity with proper validation
+              dbIdentityRaw='${{ steps.database-parameters.outputs.dbIdentity }}'
+              echo \"Raw dbIdentity: \$dbIdentityRaw\"
+          
+              if [ \"\$dbIdentityRaw\" = \"{}\" ] || [ -z \"\$dbIdentityRaw\" ]; then
+                export dbIdentity='{}'
+              else
+                # Validate and format the JSON
+                export dbIdentity=\$(echo \"\$dbIdentityRaw\" | jq -c . 2>/dev/null || echo '{}')
+              fi
           
               export adminPasswordOrKey='${{ env.wlsPassword }}'
               export skuUrnVersion='$image'
