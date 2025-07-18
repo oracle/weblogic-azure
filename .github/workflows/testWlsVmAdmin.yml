@@ -247,6 +247,7 @@ jobs:
           
           success=false
           
+          DB_IDENTITY='${{ steps.database-parameters.outputs.dbIdentity }}'
           for image in "${image_array[@]}"; do
             if [ -z "$image" ]; then
               continue
@@ -278,16 +279,15 @@ jobs:
               export dbPassword='${{ env.wlsPassword}}'
               export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
               export dbName='${{ env.dbName }}'
-              export dbIdentity=\$(echo '${{ steps.database-parameters.outputs.dbIdentity }}' | jq -c .)
-              echo 'dbIdentity: $dbIdentity'
+              export dbIdentity=\"\$DB_IDENTITY\"
               # Handle dbIdentity with proper validation
-              dbIdentityRaw='${{ steps.database-parameters.outputs.dbIdentity }}'
+              # Use the variable from the parent shell
+              dbIdentityRaw=\"\$DB_IDENTITY\"
               echo \"Raw dbIdentity: \$dbIdentityRaw\"
-          
+              
               if [ \"\$dbIdentityRaw\" = \"{}\" ] || [ -z \"\$dbIdentityRaw\" ]; then
                 export dbIdentity='{}'
               else
-                # Validate and format the JSON
                 export dbIdentity=\$(echo \"\$dbIdentityRaw\" | jq -c . 2>/dev/null || echo '{}')
               fi
           
