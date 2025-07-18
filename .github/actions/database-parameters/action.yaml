@@ -77,7 +77,7 @@ runs:
                                 "userAssignedIdentities": {
                                     ($uamiId): {}
                                 }
-                            }'| jq -c '.')
+                            }'| jq -c '.' | sed 's/\"//g')
         elif ${{ inputs.databaseType == 'oracle' }}; then
           enableDB=true
           databaseType=oracle
@@ -99,7 +99,7 @@ runs:
                               "userAssignedIdentities": {
                                   ($uamiId): {}
                               }
-                          }'| jq -c '.')
+                          }'| jq -c '.' | sed 's/\"//g')
           databaseType=mysql
           dsConnectionURL=jdbc:mysql://$serverHost:3306/${{ inputs.databaseName }}
         elif ${{ inputs.databaseType == 'postgresql(flexible)' }}; then
@@ -118,7 +118,7 @@ runs:
                               "userAssignedIdentities": {
                                   ($uamiId): {}
                               }
-                          }'| jq -c '.')
+                          }'| jq -c '.'| sed 's/\"//g')
           databaseType=postgresql
           dsConnectionURL="jdbc:postgresql://$serverHost:5432/${{ inputs.databaseName }}"
         fi
@@ -128,4 +128,4 @@ runs:
         echo "databaseType=$databaseType" >> "$GITHUB_OUTPUT"
         echo "dsConnectionURL=$dsConnectionURL" >> "$GITHUB_OUTPUT"
         echo "dbUser=$dbUser" >> "$GITHUB_OUTPUT"
-        echo "dbIdentity=$(echo "$dbIdentity" | sed 's/"/\\"/g')" >> "$GITHUB_OUTPUT"
+        echo "dbIdentity=$dbIdentity" >> "$GITHUB_OUTPUT"
