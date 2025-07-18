@@ -278,8 +278,8 @@ jobs:
               export dbPassword='${{ env.wlsPassword}}'
               export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
               export dbName='${{ env.dbName }}'
-              echo 'dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}'
-              export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+              export dbIdentity=\$(echo '${{ steps.database-parameters.outputs.dbIdentity }}' | jq -c .)
+              echo 'dbIdentity: $dbIdentity'
           
               export adminPasswordOrKey='${{ env.wlsPassword }}'
               export skuUrnVersion='$image'
