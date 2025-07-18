@@ -51,6 +51,6 @@
     "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-admin/src/main/arm/"
   },
   "dbIdentity": {
-    "value": "${dbIdentity}"
+    "value": ${dbIdentity}
   }
 }
