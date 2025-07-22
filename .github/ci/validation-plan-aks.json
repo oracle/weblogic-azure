@@ -4,9 +4,13 @@
       "workflow": "testWlsAksWithDependencyCreation.yml",
       "scenarios": [
         {
-          "scenario": "Test WLS on AKS with Dependency creation",
+          "scenario": "Deploy with existing AKS clusters",
           "inputs": {
-            "location": "centralus"
+            "location": "centralus",
+            "configurations_for_ci": {
+              "createAKSCluster": "false",
+              "aksClusterName": "my-existing-aks-cluster"
+            }
           }
         }
       ]

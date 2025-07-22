@@ -29,7 +29,13 @@
         "value": true
     },
     "createAKSCluster": {
-        "value": true
+        "value": ${createAKSCluster}
+    },
+    "aksClusterName": {
+        "value": "${aksClusterName}"
+    },
+    "aksClusterRGName":{
+        "value": "${aksClusterRGName}"
     },
     "createDNSZone": {
         "value": true

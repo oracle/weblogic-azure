@@ -322,6 +322,19 @@ jobs:
 
             - name: Prepare parameter file
               run: |
+                if ${{ env.createAKSCluster == 'false' }}; then
+                  echo "Deploy with an existing AKS cluster"
+                  export createAKSCluster=false
+                  # the env aksClusterName is set in the `validation-plan-aks.json` file.
+                  export aksClusterName=${{ env.aksClusterName }}
+                  export aksClusterRGName=${{ env.resourceGroupForWlsAks }}
+                else
+                  echo "Deploy with a new AKS cluster"
+                  export createAKSCluster=true
+                  export aksClusterName="aks-cluster-${{ github.run_id }}-${{ github.run_number }}"
+                  export aksClusterRGName=${{ env.resourceGroupForWlsAks }}
+                fi
+                
                 echo "generate parameter file"
                 export databaseType=${{ needs.deploy-db.outputs.databaseType }}
                 export enableDB=${{ needs.deploy-db.outputs.enableDB }} 
@@ -343,6 +356,25 @@ jobs:
 
                 echo "Generating parameter file..."
                 envsubst < "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json" > "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json"
+
+            - name: Provision AKS Cluster as an existing cluster for deployment
+              if: ${{ env.createAKSCluster == 'false' }}
+              run: |
+                # the value of **createAKSCluster** is `false`, which means the offer won't create a new AKS cluster, but use an existing one.
+                # in order to simulate the same behavior as the offer, we need to create a new AKS cluster.
+                
+                az feature register \
+                  --namespace "Microsoft.ContainerService" \
+                  --name "AppGatewayWithOverlayPreview"
+                az provider register --namespace Microsoft.ContainerService          
+
+                az aks create \
+                  -n ${{ env.aksClusterName }} \
+                  -g ${{ env.resourceGroupForWlsAks }} \
+                  --enable-managed-identity \
+                  --network-plugin azure \
+                  --load-balancer-sku standard \
+                  --generate-ssh-keys
 
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
