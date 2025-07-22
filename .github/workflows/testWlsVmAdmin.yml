@@ -247,7 +247,6 @@ jobs:
           
           success=false
           
-          DB_IDENTITY='${{ steps.database-parameters.outputs.dbIdentity }}'
           for image in "${image_array[@]}"; do
             if [ -z "$image" ]; then
               continue
@@ -263,6 +262,16 @@ jobs:
             echo "Deploying with SKU: $sku"
             echo "Resource Group: $resourceGroup"
             
+            # Export db variables for envsubst
+            export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+            export enableDB=${{ steps.database-parameters.outputs.enableDB }}
+            export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
+            export dbAdminUser='${{ env.dbAdminUser }}'
+            export dbPassword='${{ env.wlsPassword}}'
+            export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+            export dbName='${{ env.dbName }}'
+            export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+          
             # Try deployment with this image
             if bash -c "
               set -e
@@ -272,25 +281,6 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
           
               # Export variables for envsubst
-              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
-              export enableDB=${{ steps.database-parameters.outputs.enableDB }}
-              export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
-              export dbAdminUser='${{ env.dbAdminUser }}'
-              export dbPassword='${{ env.wlsPassword}}'
-              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
-              export dbName='${{ env.dbName }}'
-              export dbIdentity=\"\$DB_IDENTITY\"
-              # Handle dbIdentity with proper validation
-              # Use the variable from the parent shell
-              dbIdentityRaw=\"\$DB_IDENTITY\"
-              echo \"Raw dbIdentity: \$dbIdentityRaw\"
-              
-              if [ \"\$dbIdentityRaw\" = \"{}\" ] || [ -z \"\$dbIdentityRaw\" ]; then
-                export dbIdentity='{}'
-              else
-                export dbIdentity=\$(echo \"\$dbIdentityRaw\" | jq -c . 2>/dev/null || echo '{}')
-              fi
-          
               export adminPasswordOrKey='${{ env.wlsPassword }}'
               export skuUrnVersion='$image'
               export wlsdomainname='${{ env.wlsDomainName }}'
