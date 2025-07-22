@@ -18,7 +18,6 @@ on:
         default: 'mssqlserver'
         type: choice
         options:
-          - none
           - mssqlserver
           - mssqlserver-passwordless
           - postgresql(flexible)
