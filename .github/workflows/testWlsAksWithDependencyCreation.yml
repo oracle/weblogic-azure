@@ -206,7 +206,18 @@ jobs:
                 dbInstanceName: ${{ env.dbServerName }}
                 databaseName: ${{ env.dbName }}
 
-            
+    get-value-of-deploy-db:
+      needs: deploy-db
+      runs-on: ubuntu-latest
+      steps:
+        - name: echo the outputs of deploy-db
+          run: |
+            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}"
+            echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
+            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}"
+            echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
+            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
+
     deploy-storage-account:
         needs: preflight
         runs-on: ubuntu-latest
