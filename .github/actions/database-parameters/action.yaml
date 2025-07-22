@@ -131,6 +131,8 @@ runs:
           dsConnectionURL="jdbc:postgresql://$serverHost:5432/${{ inputs.databaseName }}"
         fi
         
+        echo "dsConnectionURL=$dsConnectionURL"
+        
         echo "enableDB=$enableDB" >> "$GITHUB_OUTPUT"
         echo "enablePswlessConnection=$enablePswlessConnection" >> "$GITHUB_OUTPUT"
         echo "databaseType=$databaseType" >> "$GITHUB_OUTPUT"
