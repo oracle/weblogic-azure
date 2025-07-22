@@ -293,7 +293,6 @@ jobs:
               else
                   echo 'identity.jks found!'        
               fi
-              export sslIdentityData=\$(cat identity.jks | base64 -w 0)
               
               # Generate deployment parameters
               echo 'Generate deployment parameters...'
@@ -308,7 +307,7 @@ jobs:
               export skuUrnVersion='$image'
               export testbranchName='${{ env.testbranchName }}'
               export repoPath='${GITHUB_REPOSITORY}'
-              export uploadedKeyStoreData='$sslIdentityData'
+              export uploadedKeyStoreData=\$(cat identity.jks | base64 -w 0)
               
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' 
