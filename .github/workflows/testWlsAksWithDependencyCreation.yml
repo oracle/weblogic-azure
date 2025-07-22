@@ -35,6 +35,10 @@ on:
           - mssqlserver-passwordless
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
+      configurations_for_ci:
+        description: "JSON string of environment variables used for CI"
+        required: false
+        default: '{}'
   # sample cURL
   # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
   repository_dispatch:
@@ -264,6 +268,13 @@ jobs:
         needs: [deploy-storage-account, deploy-db, preflight]
         runs-on: ubuntu-latest
         steps:
+            - name: Set dynamic env from configurations_for_ci
+              run: |
+                echo "${{ inputs.configurations_for_ci }}" > config.json
+                for key in $(jq -r 'to_entries|map("\(.key)")|.[]' config.json); do
+                value=$(jq -r --arg k "$key" '.[$k]' config.json)
+                echo "$key=$value" >> $GITHUB_ENV
+                done
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
@@ -315,6 +326,18 @@ jobs:
                 repository: Azure-Samples/cargotracker-wls-aks
                 path: cargotracker
 
+            - name: Provision Azure Vnet
+              id: vnet-provision
+              if: ${{ env.newOrExistingVnetForApplicationGateway == 'existing' }}
+              run: |
+                echo "Provisioning Azure Vnet with subnet"
+                az network vnet create \
+                  --resource-group ${{ env.resourceGroupForWlsAks }} \
+                  --name ${{ env.vnetForApplicationGateway.name }} \
+                  --address-prefix 10.0.0.0/28 \
+                  --subnet-name ${{ env.vnetForApplicationGateway.subnets.gatewaySubnet.name }} \
+                  --subnet-prefix 10.0.0.0/29
+
             - name: Setup tmate session
               uses: mxschmitt/action-tmate@v3
               with:
@@ -334,6 +357,11 @@ jobs:
                   export aksClusterName="aks-cluster-${{ github.run_id }}-${{ github.run_number }}"
                   export aksClusterRGName=${{ env.resourceGroupForWlsAks }}
                 fi
+                
+                # prepare parameters for vnet and application gateway
+                export newOrExistingVnetForApplicationGateway=${{ env.newOrExistingVnetForApplicationGateway }}
+                export vnetForApplicationGateway=${{ env.vnetForApplicationGateway.name }}
+                export vnetRGNameForApplicationGateway=${{ env.resourceGroupForWlsAks }}
                 
                 echo "generate parameter file"
                 export databaseType=${{ needs.deploy-db.outputs.databaseType }}
