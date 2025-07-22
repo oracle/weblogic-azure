@@ -171,6 +171,17 @@ jobs:
     env:
       images: |
         owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
+        owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest
+        owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest
+        owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest
+        owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest
+        owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest
+        owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest
+        owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest
+        owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest
+        owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest
+        owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest
+        owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest
 
     steps:
       - name: Initialize environment variables
@@ -252,6 +263,16 @@ jobs:
             echo "Deploying with SKU: $sku"
             echo "Resource Group: $resourceGroup"
             
+            # Export db variables for envsubst
+            export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+            export enableDB=${{ steps.database-parameters.outputs.enableDB }}
+            export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
+            export dbUser='${{ env.dbAdminUser }}'
+            export dbPassword='${{ env.wlsPassword}}'
+            export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+            export dbName='${{ env.dbName }}'
+            export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+            
             # Try deployment with this image
             if bash -c "
               set -e
@@ -266,15 +287,8 @@ jobs:
               export adminPasswordOrKey='${{ env.wlsPassword }}'
               export wlsusername='${{ env.wlsUserName }}'
               export wlsdomainname='${{ env.wlsDomainName }}'
-              export skuUrnVersion='$image'
-              export dbName='${{ env.dbName }}'
-              export dbPassword='${{ env.wlsPassword}}'
+              export skuUrnVersion='$image'              
               export wlspassword='${{ env.wlsPassword }}'
-              export dbUser='${{ env.dbAdminUser }}'
-              export dbServerName='${{ env.dbServerName }}'
-              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
-              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
-              export enableDB='${{ steps.database-parameters.outputs.enableDB }}'
           
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json'

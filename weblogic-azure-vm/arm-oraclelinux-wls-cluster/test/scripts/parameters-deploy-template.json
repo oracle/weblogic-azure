@@ -54,7 +54,7 @@
         "value": false
     },
     "enablePswlessConnection": {
-        "value": false
+        "value": ${enablePswlessConnection}
     },
     "hasDNSZones": {
         "value": false
@@ -102,6 +102,9 @@
     },
     "enableCustomSSL": {
         "value": false
+    },
+    "dbIdentity": {
+      "value": ${dbIdentity}
     },
     "tagsByResource": {
         "value": {
