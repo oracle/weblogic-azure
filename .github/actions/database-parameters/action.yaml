@@ -128,8 +128,4 @@ runs:
         echo "databaseType=$databaseType" >> "$GITHUB_OUTPUT"
         echo "dsConnectionURL=$dsConnectionURL" >> "$GITHUB_OUTPUT"
         echo "dbUser=$dbUser" >> "$GITHUB_OUTPUT"
-        dbIdentityEscaped=$(echo "$dbIdentity" | sed 's/"/\\"/g')
-        echo "-------"
-        echo $dbIdentityEscaped
-        echo "-------"
-        echo "dbIdentity=$dbIdentityEscaped" >> "$GITHUB_OUTPUT"
+        echo "dbIdentity=$dbIdentity" >> "$GITHUB_OUTPUT"
