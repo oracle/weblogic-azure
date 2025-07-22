@@ -94,5 +94,11 @@
   },
   "uploadedKeyStoreType": {
     "value": "JKS"
+  },
+  "enablePswlessConnection": {
+    "value": ${enablePswlessConnection}
+  },
+  "dbIdentity": {
+    "value": ${dbIdentity}
   }
 }

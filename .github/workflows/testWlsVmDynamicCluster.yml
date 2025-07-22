@@ -268,6 +268,17 @@ jobs:
             echo "Deploying with SKU: $sku"
             echo "Resource Group: $resourceGroup"
             
+            # Export db variables for envsubst
+            export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+            export enableDB=${{ steps.database-parameters.outputs.enableDB }}
+            export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
+            export dbUser='${{ env.dbAdminUser }}'
+            export dbPassword='${{ env.wlsPassword}}'
+            export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+            export dbName='${{ env.dbName }}'
+            export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+            export dbServerName='${{ env.dbServerName }}'
+          
             # Try deployment with this image
             if bash -c "
               set -e
@@ -303,15 +314,8 @@ jobs:
               export skuUrnVersion='$image'
               export testbranchName='${{ env.testbranchName }}'
               export repoPath='${GITHUB_REPOSITORY}'
-              export dbName='${{ env.dbName }}'
-              export dbServerName='${{ env.dbServerName }}'
-              export dbPassword='${{ env.wlsPassword}}'
-              export dbUser='${{ env.dbAdminUser }}'
               export uploadedKeyStoreData='$sslIdentityData'
-              export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
-              export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
-              export enableDB='${{ steps.database-parameters.outputs.enableDB }}'
-          
+              
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' 
               
