@@ -293,23 +293,21 @@
         },
         "skuUrnVersion": {
             "type": "string",
-            "defaultValue": "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest",
+            "defaultValue": "owls-141200-jdk21-ol94;Oracle:weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94;latest",
             "allowedValues": [
+                "owls-141200-jdk21-ol94;Oracle:weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94;latest",
+                "owls-141200-jdk21-ol810;Oracle:weblogic-141200-jdk21-ol810:owls-141200-jdk21-ol810;latest",
+                "owls-141200-jdk17-ol94;Oracle:weblogic-141200-jdk17-ol94:owls-141200-jdk17-ol94;latest",
+                "owls-141200-jdk17-ol810;Oracle:weblogic-141200-jdk17-ol810:owls-141200-jdk17-ol810;latest",
                 "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest",
                 "owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest",
                 "owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest",
                 "owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest",
                 "owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest",
                 "owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest",
-                "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
-                "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
-                "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
                 "owls-141100-jdk11-rhel87;Oracle:weblogic-141100-jdk11-rhel87:owls-141100-jdk11-rhel87;latest",
                 "owls-141100-jdk8-rhel87;Oracle:weblogic-141100-jdk8-rhel87:owls-141100-jdk8-rhel87;latest",
-                "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest",
-                "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
-                "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
-                "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
+                "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest"
             ],
             "metadata": {
                 "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
@@ -732,6 +730,9 @@
                     },
                     "adminUsername": {
                         "value": "[parameters('adminUsername')]"
+                    },
+                    "adminVMNamePrefix": {
+                    	 "value": "[parameters('adminVMNamePrefix')]"
                     },
                     "adminVMName": {
                         "value": "[variables('name_adminVM')]"
@@ -1190,6 +1191,9 @@
                     },
                     "adminVMName": {
                         "value": "[variables('name_adminVM')]"
+                    },
+                    "adminVMNamePrefix": {
+                    	 "value": "[parameters('adminVMNamePrefix')]"
                     },
                     "authenticationType": {
                         "value": "[parameters('authenticationType')]"
