@@ -61,11 +61,13 @@ runs:
         uamiId=${{ inputs.uamiId }}
         echo "databaseType: ${{ inputs.databaseType }}" 
         if ${{ inputs.databaseType == 'mssqlserver' }}; then
+          echo "Using mssqlserver database type"
           enableDB=true
           databaseType=sqlserver
           dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=${{ inputs.dbAdminUser }}@${{ inputs.dbInstanceName }}
         elif ${{ inputs.databaseType == 'mssqlserver-passwordless' }}; then
+          echo "Using mssqlserver-passwordless database type"
           enableDB=true
           enablePswlessConnection=true
           databaseType=sqlserver
@@ -80,16 +82,19 @@ runs:
                                 }
                             }'| jq -c '.')
         elif ${{ inputs.databaseType == 'oracle' }}; then
+          echo "Using oracle database type"
           enableDB=true
           databaseType=oracle
           dsConnectionURL=jdbc:oracle:thin:@${serverHost}:1521/oratest1
           dbUser=${{ inputs.dbAdminUser }}
         elif ${{ inputs.databaseType == 'mysql(flexible)' }}; then
+          echo "Using mysql(flexible) database type"
           enableDB=true
           databaseType=mysql
           dsConnectionURL=jdbc:mysql://$serverHost:3306/${{ inputs.databaseName }}?sslMode=REQUIRED
           dbUser=${{ inputs.dbAdminUser }}
         elif ${{ inputs.databaseType == 'mysql-passwordless(flexible)' }}; then
+          echo "Using mysql-passwordless(flexible) database type"
           enableDB=true
           enablePswlessConnection=true
           dbUser=$(basename "$uamiId")
@@ -104,11 +109,13 @@ runs:
           databaseType=mysql
           dsConnectionURL=jdbc:mysql://$serverHost:3306/${{ inputs.databaseName }}
         elif ${{ inputs.databaseType == 'postgresql(flexible)' }}; then
+          echo "Using postgresql(flexible) database type"
           enableDB=true
           databaseType=postgresql
           dsConnectionURL="jdbc:postgresql://$serverHost:5432/${{ inputs.databaseName }}"
           dbUser=${{ inputs.dbAdminUser }}
         elif ${{ inputs.databaseType == 'postgresql-passwordless(flexible)' }}; then
+          echo "Using postgresql-passwordless(flexible) database type"
           enableDB=true
           enablePswlessConnection=true
           dbUser=$(basename "$uamiId")
