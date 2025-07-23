@@ -54,9 +54,7 @@ jobs:
               with:
                 detached: true
             - name: Create Resource Group
-              run:
-                  echo "create resource group" ${{ env.resourceGroupForDB }}
-                  echo "location is ${{ inputs.location }}"
+              run: |
                   az group create -n ${{ env.resourceGroupForDB }} -l ${{ inputs.location }}
             - name: Check the resource group
               run: |
