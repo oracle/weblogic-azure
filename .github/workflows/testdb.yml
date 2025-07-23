@@ -89,7 +89,6 @@ jobs:
                 echo "databaseType=${{ steps.database-parameters.outputs.databaseType }}"
                 echo "dsConnectionURL=${{ steps.database-parameters.outputs.dsConnectionURL }}"
                 echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}"
-                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
 
     get-value-of-deploy-db:
       needs: deploy-db

@@ -226,13 +226,9 @@ jobs:
             echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}" 
             echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}" 
             echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
-            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
+        - name: echo the dbIdentity
+          run: |
             echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
-
-        - name: Setup tmate session
-          uses: mxschmitt/action-tmate@v3
-          with:
-              detached: true
 
     deploy-storage-account:
         needs: preflight
