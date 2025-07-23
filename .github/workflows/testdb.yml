@@ -82,12 +82,9 @@ jobs:
               with:
                 creds: ${{ env.azureCredentials }}
             - name: Create Resource Group
-              uses: azure/CLI@v1
-              with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    echo "create resource group" ${{ env.resourceGroupForDB }}
-                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
+              run:
+                  echo "create resource group" ${{ env.resourceGroupForDB }}
+                  az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
 
             - uses: actions/checkout@v2.3.4
 
