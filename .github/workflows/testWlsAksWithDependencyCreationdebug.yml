@@ -120,10 +120,23 @@ jobs:
                 echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
                 echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}"
 
+            - name: echo the outputs to a file called a.txt
+              run: |
+                echo "enableDB=${{ steps.database-parameters.outputs.enableDB }}" >> a.txt
+                echo "enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}" >> a.txt
+                echo "databaseType=${{ steps.database-parameters.outputs.databaseType }}" >> a.txt
+                echo "dsConnectionURL=${{ steps.database-parameters.outputs.dsConnectionURL }}" >> a.txt
+                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}" >> a.txt
+                echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}" >> a.txt
+
     get-value-of-deploy-db:
       needs: deploy-db
       runs-on: ubuntu-latest
       steps:
+        - name: Setup tmate session
+          uses: mxschmitt/action-tmate@v3
+          with:
+            detached: true
         - name: echo the enableDB outputs of deploy-db
           run: |
             echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
@@ -141,7 +154,16 @@ jobs:
             echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
         - name: echo the dbUser outputs of deploy-db
           run: |
-            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"         
+            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
+
+        - name: echo the outputs to a file called b.txt
+          run: |
+            echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}" >> b.txt
+            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}" >> b.txt
+            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}" >> b.txt
+            echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}" >> b.txt
+            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}" >> b.txt
+            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}" >> b.txt
 
     cleanup:
       needs: [get-value-of-deploy-db]
