@@ -42,6 +42,7 @@ jobs:
           databaseType: ${{ steps.database-parameters.outputs.databaseType }}
           enableDB: ${{ steps.database-parameters.outputs.enableDB }}
           enablePswlessConnection: ${{ steps.database-parameters.outputs.enablePswlessConnection }}
+          dbUser: ${{ steps.database-parameters.outputs.dbUser }}
           dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
           dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
         steps:
