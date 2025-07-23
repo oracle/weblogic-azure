@@ -53,10 +53,6 @@ jobs:
           dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
           dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
         steps:
-            - name: Get AZ CLI Version
-              run: |
-                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -65,7 +61,7 @@ jobs:
               run:
                   echo "create resource group" ${{ env.resourceGroupForDB }}
                   echo "location is $location"
-                  az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
+                  az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{env.location}}
 
             - uses: actions/checkout@v2.3.4
 
@@ -76,7 +72,7 @@ jobs:
                 databaseType: ${{ inputs.databaseType }}
                 resourceGroup: ${{ env.resourceGroupForDB }}
                 uamiName: ${{ env.uamiName }}
-                location: $location
+                location: ${{env.location}}
                 dbInstanceName: ${{ env.dbServerName }}
                 dbPassword: ${{ env.dbPassword }}
                 databaseName: ${{ env.dbName }}
@@ -118,9 +114,7 @@ jobs:
       if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
-      - name: Get AZ CLI Version
-        run: |
-          echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+
       - uses: azure/login@v1
         id: azure-login
         with:
@@ -128,9 +122,6 @@ jobs:
 
       - name: Delete DB Resource Group
         id: delete-db-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
+        run:
             echo "delete... " ${{ env.resourceGroupForDB }}
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDB }}
