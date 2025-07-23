@@ -52,8 +52,8 @@ jobs:
             - name: Create Resource Group
               run:
                   echo "create resource group" ${{ env.resourceGroupForDB }}
-                  echo "location is $location"
-                  az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{env.location}}
+                  echo "location is ${{ inputs.location }}"
+                  az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{ inputs.location }}
 
             - uses: actions/checkout@v2.3.4
 
@@ -64,7 +64,7 @@ jobs:
                 databaseType: ${{ inputs.databaseType }}
                 resourceGroup: ${{ env.resourceGroupForDB }}
                 uamiName: ${{ env.uamiName }}
-                location: ${{env.location}}
+                location: ${{ inputs.location }}
                 dbInstanceName: ${{ env.dbServerName }}
                 dbPassword: ${{ env.dbPassword }}
                 databaseName: ${{ env.dbName }}
