@@ -92,8 +92,8 @@ jobs:
                 echo "enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}"
                 echo "databaseType=${{ steps.database-parameters.outputs.databaseType }}"
                 echo "dsConnectionURL=${{ steps.database-parameters.outputs.dsConnectionURL }}"
-                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
                 echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}"
+                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
 
     get-value-of-deploy-db:
       needs: deploy-db
@@ -120,7 +120,6 @@ jobs:
 
       - name: Delete DB Resource Group
         id: delete-db-resource-group
-        run:
-            sleep 60s
+        run: |
             echo "delete... " ${{ env.resourceGroupForDB }}
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDB }}
