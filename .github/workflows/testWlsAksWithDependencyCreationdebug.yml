@@ -133,10 +133,6 @@ jobs:
       needs: deploy-db
       runs-on: ubuntu-latest
       steps:
-        - name: Setup tmate session
-          uses: mxschmitt/action-tmate@v3
-          with:
-            detached: true
         - name: echo the enableDB outputs of deploy-db
           run: |
             echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
