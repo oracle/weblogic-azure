@@ -299,7 +299,7 @@ jobs:
                     az storage blob upload --account-name ${{ env.storageAccountName }} --container-name ${{ env.storageContainerName }} --file cargotracker/target/cargo-tracker.war --name cargo-tracker.war         
 
     cleanup:
-      needs: [preflight]
+      needs: [preflight, get-value-of-deploy-db]
       if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
