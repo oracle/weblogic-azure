@@ -359,11 +359,6 @@ jobs:
                   --subnet-name ${{ env.vnetForApplicationGateway.subnets.gatewaySubnet.name }} \
                   --subnet-prefix 10.0.0.0/29
 
-            - name: Setup tmate session
-              uses: mxschmitt/action-tmate@v3
-              with:
-                detached: true
-
             - name: Prepare parameter file
               run: |
                 if ${{ env.createAKSCluster == 'false' }}; then
