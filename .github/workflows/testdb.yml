@@ -4,10 +4,6 @@ run-name: testdb `db`:${{ inputs.databaseType }}
 on:
   workflow_dispatch:
     inputs:
-      isForDemo:
-        description: 'If set to true, resources will not be deleted'
-        required: true
-        default: 'false'
       location:
         description: 'The location for the resources'
         required: true
@@ -23,10 +19,6 @@ on:
           - mssqlserver-passwordless
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
-      configurations_for_ci:
-        description: "JSON string of environment variables used for CI"
-        required: false
-        default: '{}'
   # sample cURL
 
   repository_dispatch:
@@ -111,7 +103,7 @@ jobs:
             echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
 
     cleanup:
-      if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
+      if: always()
       runs-on: ubuntu-latest
       steps:
 
