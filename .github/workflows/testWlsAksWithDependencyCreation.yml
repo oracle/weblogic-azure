@@ -221,17 +221,24 @@ jobs:
       needs: deploy-db
       runs-on: ubuntu-latest
       steps:
-        - name: echo the outputs of deploy-db
+        - name: echo the enableDB outputs of deploy-db
           run: |
             echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
-            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}" 
-            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}" 
-        - name: echo the dsConnectionURL
+        - name: echo the enablePswlessConnection outputs of deploy-db
+          run: |
+            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}"
+        - name: echo the databaseType outputs of deploy-db
+          run: |
+            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}"
+        - name: echo the dsConnectionURL outputsof deploy-db
           run: |
             echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
-        - name: echo the dbIdentity
+        - name: echo the dbIdentity outputs of deploy-db
           run: |
             echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
+        - name: echo the dbUser outputs of deploy-db
+          run: |
+            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
 
     deploy-storage-account:
         needs: preflight
