@@ -132,7 +132,6 @@ runs:
         fi
         
         echo "dsConnectionURL=$dsConnectionURL"
-        
         echo "enableDB=$enableDB" >> "$GITHUB_OUTPUT"
         echo "enablePswlessConnection=$enablePswlessConnection" >> "$GITHUB_OUTPUT"
         echo "databaseType=$databaseType" >> "$GITHUB_OUTPUT"
