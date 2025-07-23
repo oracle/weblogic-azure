@@ -60,6 +60,7 @@ runs:
         serverHost=${{ inputs.serverHost }}
         uamiId=${{ inputs.uamiId }}
         echo "databaseType: ${{ inputs.databaseType }}" 
+        echo "serverHost : $serverHost"
         if ${{ inputs.databaseType == 'mssqlserver' }}; then
           echo "Using mssqlserver database type"
           enableDB=true
