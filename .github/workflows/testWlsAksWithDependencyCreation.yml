@@ -163,8 +163,9 @@ jobs:
           databaseType: ${{ steps.database-parameters.outputs.databaseType }}
           enableDB: ${{ steps.database-parameters.outputs.enableDB }}
           enablePswlessConnection: ${{ steps.database-parameters.outputs.enablePswlessConnection }}
-          dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
           dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
+          dbUser: ${{ steps.database-parameters.outputs.dbUser }}
+          dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
         steps:
             - name: Get AZ CLI Version
               run: |
@@ -225,6 +226,8 @@ jobs:
             echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
             echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}" 
             echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}" 
+        - name: echo the dsConnectionURL
+          run: |
             echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
         - name: echo the dbIdentity
           run: |
