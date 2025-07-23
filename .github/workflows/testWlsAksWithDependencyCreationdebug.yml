@@ -1,0 +1,336 @@
+name: Test WLS on AKS with Dependency creation
+run-name: Test WLS on AKS with Dependency creation with `db`:${{ inputs.databaseType }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      isForDemo:
+        description: 'If set to true, resources will not be deleted'
+        required: true
+        default: 'false'
+      gitUserNameForArtifactsLocation:
+        description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
+        required: true
+        default: oracle
+      testBranchNameForArtifactsLocation:
+        description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
+        required: true
+        default: main
+      vmSize:
+        description: 'The VM size for the AKS pool'
+        required: true
+        default: Standard_D2s_v3
+      location:
+        description: 'The location for the resources'
+        required: true
+        default: centralus
+      databaseType:
+        description: 'Database connection'
+        required: true
+        default: 'mssqlserver'
+        type: choice
+        options:
+          - none
+          - mssqlserver
+          - mssqlserver-passwordless
+          - postgresql(flexible)
+          - postgresql-passwordless(flexible)
+      configurations_for_ci:
+        description: "JSON string of environment variables used for CI"
+        required: false
+        default: '{}'
+  # sample cURL
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
+  repository_dispatch:
+    types: [aks-integration-test-with-dependency-creation,integration-test-all]
+
+env:
+    azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
+    resourceGroupForWlsAks: wlsd-aks-${{ github.run_id }}-${{ github.run_number }}
+    dbAdminUser: weblogic
+    dbPassword: ${{ secrets.DB_PASSWORD }}
+    dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
+    dbServerName: weblogicdb-${{ github.run_id }}-${{ github.run_number }}
+    uamiName: uami${{ github.run_id }}${{ github.run_number }}
+    ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
+    ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
+    wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
+    wlsUserName: ${{ secrets.WLS_USERNAME }}
+    wlsPassword: ${{ secrets.WLS_PSW }}
+    resourceGroupForDB: wlsd-db-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+    resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
+    storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
+    storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
+
+jobs:
+    preflight:
+        outputs: 
+          artifactName: ${{steps.artifact_file.outputs.artifactName}}
+          isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
+          gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
+          testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
+          azCliVersion: ${{steps.set-az-cli-version.outputs.azCliVersion}}
+          vmSize: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.vmSize }}
+          location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2.3.4
+            - name: Set AZ CLI Version and save in variable azCliVersion              
+              uses: ./.github/actions/setvars
+              with:
+                varFilePath: ./.github/variables/vm-dependencies.env
+            - name: Output Az CLi version
+              id: set-az-cli-version
+              run: |
+                echo "azCliVersion=${azCliVersion}" >> $GITHUB_OUTPUT
+            - name: Get versions of external dependencies
+              id: get-external-dependencies-version
+              run: |
+                curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
+                source external-deps-versions.properties
+                echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
+                echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
+            - name: Setup environment variables
+              id: setup-env-variables-based-on-dispatch-event
+              run: |
+                location=centralus # default value
+                if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+                  isForDemo=${{ github.event.inputs.isForDemo }}
+                  gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
+                  testBranchNameForArtifactsLocation=${{ github.event.inputs.testBranchNameForArtifactsLocation }}
+                  vmSize=${{ github.event.inputs.vmSize }}
+                  location=${{ github.event.inputs.location }}
+                else
+                  isForDemo=${{ github.event.client_payload.isForDemo }}
+                  gitUserNameForArtifactsLocation=${{ github.event.client_payload.gitUserNameForArtifactsLocation }}
+                  testBranchNameForArtifactsLocation=${{ github.event.client_payload.testBranchNameForArtifactsLocation }}
+                  vmSize=${{ github.event.client_payload.vmSize }}
+                  location=${{ github.event.client_payload.location }}
+                fi
+
+                echo "##[set-output name=isForDemo;]${isForDemo}"
+                echo "##[set-output name=gitUserNameForArtifactsLocation;]${gitUserNameForArtifactsLocation}"
+                echo "##[set-output name=testBranchNameForArtifactsLocation;]${testBranchNameForArtifactsLocation}"
+                echo "##[set-output name=vmSize;]${vmSize}"
+                echo "##[set-output name=location;]${location}"
+
+                echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
+                echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
+                echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
+                echo "vmSize=${vmSize}" >> $GITHUB_ENV
+                echo "location=${location}" >> $GITHUB_ENV
+            - uses: actions/checkout@v2.3.4
+            - name: Set up Maven with GitHub token
+              uses: ./.github/actions/setupmaven
+              with:
+                token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Set up bicep
+              run: |
+                curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
+                chmod +x ./bicep
+                sudo mv ./bicep /usr/local/bin/bicep
+                bicep --version
+            - name: Checkout arm-ttk
+              uses: actions/checkout@v2
+              with:
+                repository: Azure/arm-ttk
+                path: arm-ttk
+                ref: ${{ env.refArmttk }}
+            - name: Checkout weblogic-azure
+              uses: actions/checkout@v2
+              with:
+                path: weblogic-azure
+            - name: Build and test weblogic-azure/weblogic-azure-aks
+              run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
+            - name: Generate artifact file name and path
+              id: artifact_file
+              run: |
+                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
+                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
+                unzip weblogic-azure/weblogic-azure-aks/target/$artifactName.zip -d weblogic-azure/weblogic-azure-aks/target/$artifactName
+                echo "##[set-output name=artifactName;]${artifactName}"
+                echo "##[set-output name=artifactPath;]weblogic-azure/weblogic-azure-aks/target/$artifactName"
+            - name: Archive weblogic-azure/weblogic-azure-aks template
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+              if: success()
+              with:
+                name: ${{steps.artifact_file.outputs.artifactName}}
+                path: ${{steps.artifact_file.outputs.artifactPath}}
+    deploy-db:
+        needs: preflight
+        runs-on: ubuntu-latest
+        outputs:
+          databaseType: ${{ steps.database-parameters.outputs.databaseType }}
+          enableDB: ${{ steps.database-parameters.outputs.enableDB }}
+          enablePswlessConnection: ${{ steps.database-parameters.outputs.enablePswlessConnection }}
+          dbUser: ${{ steps.database-parameters.outputs.dbUser }}
+          dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
+          dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
+        steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
+            - uses: azure/login@v1
+              id: azure-login
+              with:
+                creds: ${{ env.azureCredentials }}
+            - name: Create Resource Group
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    echo "create resource group" ${{ env.resourceGroupForDB }}
+                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
+
+            - uses: actions/checkout@v2.3.4
+
+            - name: Provision database
+              id: database-provision
+              uses: ./.github/actions/database-provision
+              with:
+                databaseType: ${{ inputs.databaseType }}
+                resourceGroup: ${{ env.resourceGroupForDB }}
+                uamiName: ${{ env.uamiName }}
+                location: $location
+                dbInstanceName: ${{ env.dbServerName }}
+                dbPassword: ${{ env.dbPassword }}
+                databaseName: ${{ env.dbName }}
+                dbAdminUser: ${{ env.dbAdminUser }}
+
+            - name: Get database parameters
+              id: database-parameters
+              uses: ./.github/actions/database-parameters
+              with:
+                databaseType: ${{ inputs.databaseType }}
+                uamiId: ${{ steps.database-provision.outputs.uamiId }}
+                serverHost: ${{ steps.database-provision.outputs.serverHost }}
+                dbInstanceName: ${{ env.dbServerName }}
+                databaseName: ${{ env.dbName }}
+
+            - name: echo the outputs of database-parameters
+              run: |
+                echo "enableDB=${{ steps.database-parameters.outputs.enableDB }}"
+                echo "enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}"
+                echo "databaseType=${{ steps.database-parameters.outputs.databaseType }}"
+                echo "dsConnectionURL=${{ steps.database-parameters.outputs.dsConnectionURL }}"
+                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
+                echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}"
+
+    get-value-of-deploy-db:
+      needs: deploy-db
+      runs-on: ubuntu-latest
+      steps:
+        - name: echo the enableDB outputs of deploy-db
+          run: |
+            echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
+        - name: echo the enablePswlessConnection outputs of deploy-db
+          run: |
+            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}"
+        - name: echo the databaseType outputs of deploy-db
+          run: |
+            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}"
+        - name: echo the dsConnectionURL outputsof deploy-db
+          run: |
+            echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
+        - name: echo the dbIdentity outputs of deploy-db
+          run: |
+            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
+        - name: echo the dbUser outputs of deploy-db
+          run: |
+            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
+
+    deploy-storage-account:
+        needs: preflight
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get AZ CLI Version
+              run: |
+                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
+            - name: Checkout Azure-Samples/cargotracker-wls-aks
+              uses: actions/checkout@v2
+              with:
+                repository: Azure-Samples/cargotracker-wls-aks
+                path: cargotracker
+            - uses: actions/setup-java@v4
+              with:
+                distribution: 'microsoft'
+                java-version: '11'
+            - run: mvn clean install -PweblogicOnAks --file cargotracker/pom.xml
+            - name: Query version string for deployment verification
+              run: |
+                PROPERTY_FILE="cargotracker/target/cargo-tracker/WEB-INF/classes/org/eclipse/cargotracker/messages.properties"
+                PROP_KEY=versionString
+                deployVersion=$(cat $PROPERTY_FILE | grep "$PROP_KEY" | cut -d '=' -f 2)
+                echo "deployVersion=${deployVersion}" >> $GITHUB_ENV
+            - uses: azure/login@v1
+              id: azure-login
+              with:
+                creds: ${{ env.azureCredentials }}
+            - name: Create Resource Group
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    echo "create resource group" ${{ env.resourceGroupForStorageAccount }}
+                    az group create --verbose --name ${{ env.resourceGroupForStorageAccount }} --location $location
+            - name: Create Storage Account
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    az storage account create --name ${{ env.storageAccountName }} \
+                        --resource-group ${{ env.resourceGroupForStorageAccount }} \
+                        --location $location \
+                        --sku Standard_LRS \
+                        --kind StorageV2
+            - name: Create Storage Container
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    az storage container create -n ${{ env.storageContainerName }}  --account-name ${{ env.storageAccountName }}
+            - name: Upload built web app war file
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                    az storage blob upload --account-name ${{ env.storageAccountName }} --container-name ${{ env.storageContainerName }} --file cargotracker/target/cargo-tracker.war --name cargo-tracker.war         
+
+    cleanup:
+      needs: [preflight]
+      if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
+      runs-on: ubuntu-latest
+      steps:
+      - name: Get AZ CLI Version
+        run: |
+          echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
+      - uses: azure/login@v1
+        id: azure-login
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Delete Storage Account Resource Group
+        id: delete-sa-resource-group
+        uses: azure/CLI@v1
+        with:
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            echo "delete... " ${{ env.resourceGroupForStorageAccount }}
+            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForStorageAccount }}
+      - name: Delete DB Resource Group
+        id: delete-db-resource-group
+        uses: azure/CLI@v1
+        with:
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            echo "delete... " ${{ env.resourceGroupForDB }}
+            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDB }}
+      - name: Delete AKS Resource Group
+        id: delete-aks-resource-group
+        uses: azure/CLI@v1
+        with:
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            echo "delete... " ${{ env.resourceGroupForWlsAks }}
+            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForWlsAks }}
