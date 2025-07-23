@@ -182,6 +182,8 @@ jobs:
                     echo "create resource group" ${{ env.resourceGroupForDB }}
                     az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
 
+            - uses: actions/checkout@v2.3.4
+
             - name: Provision database
               id: database-provision
               uses: ./.github/actions/database-provision
