@@ -61,7 +61,7 @@ env:
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
     storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
-    azCliVersion: 2.40.0
+    azCliVersion: 2.72.0
 
 jobs:
     deploy-db:
