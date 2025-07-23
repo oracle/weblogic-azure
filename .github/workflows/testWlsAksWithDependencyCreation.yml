@@ -222,11 +222,12 @@ jobs:
       steps:
         - name: echo the outputs of deploy-db
           run: |
-            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}"
             echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
-            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}"
+            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}" 
+            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}" 
             echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
-            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
+            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
+            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}" 
 
     deploy-storage-account:
         needs: preflight
