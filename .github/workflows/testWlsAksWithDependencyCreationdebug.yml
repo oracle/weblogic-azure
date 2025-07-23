@@ -22,21 +22,12 @@ on:
 
 env:
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
-    resourceGroupForWlsAks: wlsd-aks-${{ github.run_id }}-${{ github.run_number }}
     dbAdminUser: weblogic
     dbPassword: ${{ secrets.DB_PASSWORD }}
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
     dbServerName: weblogicdb-${{ github.run_id }}-${{ github.run_number }}
     uamiName: uami${{ github.run_id }}${{ github.run_number }}
-    ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
-    ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
-    wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
-    wlsUserName: ${{ secrets.WLS_USERNAME }}
-    wlsPassword: ${{ secrets.WLS_PSW }}
     resourceGroupForDB: wlsd-db-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
-    resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
-    storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
-    storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
     azCliVersion: 2.72.0
 
 jobs:
