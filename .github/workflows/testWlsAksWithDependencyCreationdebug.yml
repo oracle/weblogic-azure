@@ -238,65 +238,7 @@ jobs:
             echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
         - name: echo the dbUser outputs of deploy-db
           run: |
-            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
-
-    deploy-storage-account:
-        needs: preflight
-        runs-on: ubuntu-latest
-        steps:
-            - name: Get AZ CLI Version
-              run: |
-                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
-            - name: Checkout Azure-Samples/cargotracker-wls-aks
-              uses: actions/checkout@v2
-              with:
-                repository: Azure-Samples/cargotracker-wls-aks
-                path: cargotracker
-            - uses: actions/setup-java@v4
-              with:
-                distribution: 'microsoft'
-                java-version: '11'
-            - run: mvn clean install -PweblogicOnAks --file cargotracker/pom.xml
-            - name: Query version string for deployment verification
-              run: |
-                PROPERTY_FILE="cargotracker/target/cargo-tracker/WEB-INF/classes/org/eclipse/cargotracker/messages.properties"
-                PROP_KEY=versionString
-                deployVersion=$(cat $PROPERTY_FILE | grep "$PROP_KEY" | cut -d '=' -f 2)
-                echo "deployVersion=${deployVersion}" >> $GITHUB_ENV
-            - uses: azure/login@v1
-              id: azure-login
-              with:
-                creds: ${{ env.azureCredentials }}
-            - name: Create Resource Group
-              uses: azure/CLI@v1
-              with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    echo "create resource group" ${{ env.resourceGroupForStorageAccount }}
-                    az group create --verbose --name ${{ env.resourceGroupForStorageAccount }} --location $location
-            - name: Create Storage Account
-              uses: azure/CLI@v1
-              with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    az storage account create --name ${{ env.storageAccountName }} \
-                        --resource-group ${{ env.resourceGroupForStorageAccount }} \
-                        --location $location \
-                        --sku Standard_LRS \
-                        --kind StorageV2
-            - name: Create Storage Container
-              uses: azure/CLI@v1
-              with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    az storage container create -n ${{ env.storageContainerName }}  --account-name ${{ env.storageAccountName }}
-            - name: Upload built web app war file
-              uses: azure/CLI@v1
-              with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    az storage blob upload --account-name ${{ env.storageAccountName }} --container-name ${{ env.storageContainerName }} --file cargotracker/target/cargo-tracker.war --name cargo-tracker.war         
+            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"         
 
     cleanup:
       needs: [preflight, get-value-of-deploy-db]
@@ -310,14 +252,7 @@ jobs:
         id: azure-login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Delete Storage Account Resource Group
-        id: delete-sa-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
-            echo "delete... " ${{ env.resourceGroupForStorageAccount }}
-            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForStorageAccount }}
+
       - name: Delete DB Resource Group
         id: delete-db-resource-group
         uses: azure/CLI@v1
@@ -326,11 +261,4 @@ jobs:
           inlineScript: |
             echo "delete... " ${{ env.resourceGroupForDB }}
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDB }}
-      - name: Delete AKS Resource Group
-        id: delete-aks-resource-group
-        uses: azure/CLI@v1
-        with:
-          azcliversion: ${{ env.azCliVersion }}
-          inlineScript: |
-            echo "delete... " ${{ env.resourceGroupForWlsAks }}
-            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForWlsAks }}
+      
