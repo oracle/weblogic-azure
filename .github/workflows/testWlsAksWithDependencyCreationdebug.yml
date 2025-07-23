@@ -63,101 +63,7 @@ env:
     storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
 
 jobs:
-    preflight:
-        outputs: 
-          artifactName: ${{steps.artifact_file.outputs.artifactName}}
-          isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
-          gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
-          testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
-          azCliVersion: ${{steps.set-az-cli-version.outputs.azCliVersion}}
-          vmSize: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.vmSize }}
-          location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2.3.4
-            - name: Set AZ CLI Version and save in variable azCliVersion              
-              uses: ./.github/actions/setvars
-              with:
-                varFilePath: ./.github/variables/vm-dependencies.env
-            - name: Output Az CLi version
-              id: set-az-cli-version
-              run: |
-                echo "azCliVersion=${azCliVersion}" >> $GITHUB_OUTPUT
-            - name: Get versions of external dependencies
-              id: get-external-dependencies-version
-              run: |
-                curl -Lo external-deps-versions.properties https://raw.githubusercontent.com/Azure/azure-javaee-iaas/main/external-deps-versions.properties
-                source external-deps-versions.properties
-                echo "bicepVersion=${BICEP_VERSION}" >> $GITHUB_ENV
-                echo "refArmttk=${ARM_TTK_REFERENCE}" >> $GITHUB_ENV
-            - name: Setup environment variables
-              id: setup-env-variables-based-on-dispatch-event
-              run: |
-                location=centralus # default value
-                if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
-                  isForDemo=${{ github.event.inputs.isForDemo }}
-                  gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
-                  testBranchNameForArtifactsLocation=${{ github.event.inputs.testBranchNameForArtifactsLocation }}
-                  vmSize=${{ github.event.inputs.vmSize }}
-                  location=${{ github.event.inputs.location }}
-                else
-                  isForDemo=${{ github.event.client_payload.isForDemo }}
-                  gitUserNameForArtifactsLocation=${{ github.event.client_payload.gitUserNameForArtifactsLocation }}
-                  testBranchNameForArtifactsLocation=${{ github.event.client_payload.testBranchNameForArtifactsLocation }}
-                  vmSize=${{ github.event.client_payload.vmSize }}
-                  location=${{ github.event.client_payload.location }}
-                fi
-
-                echo "##[set-output name=isForDemo;]${isForDemo}"
-                echo "##[set-output name=gitUserNameForArtifactsLocation;]${gitUserNameForArtifactsLocation}"
-                echo "##[set-output name=testBranchNameForArtifactsLocation;]${testBranchNameForArtifactsLocation}"
-                echo "##[set-output name=vmSize;]${vmSize}"
-                echo "##[set-output name=location;]${location}"
-
-                echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
-                echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
-                echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
-                echo "vmSize=${vmSize}" >> $GITHUB_ENV
-                echo "location=${location}" >> $GITHUB_ENV
-            - uses: actions/checkout@v2.3.4
-            - name: Set up Maven with GitHub token
-              uses: ./.github/actions/setupmaven
-              with:
-                token: ${{ secrets.GITHUB_TOKEN }}
-            - name: Set up bicep
-              run: |
-                curl -Lo bicep https://github.com/Azure/bicep/releases/download/${bicepVersion}/bicep-linux-x64
-                chmod +x ./bicep
-                sudo mv ./bicep /usr/local/bin/bicep
-                bicep --version
-            - name: Checkout arm-ttk
-              uses: actions/checkout@v2
-              with:
-                repository: Azure/arm-ttk
-                path: arm-ttk
-                ref: ${{ env.refArmttk }}
-            - name: Checkout weblogic-azure
-              uses: actions/checkout@v2
-              with:
-                path: weblogic-azure
-            - name: Build and test weblogic-azure/weblogic-azure-aks
-              run: mvn -Pbicep -Passembly clean install -Ptemplate-validation-tests --file weblogic-azure/weblogic-azure-aks/pom.xml
-            - name: Generate artifact file name and path
-              id: artifact_file
-              run: |
-                version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.wls-on-aks-azure-marketplace}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
-                artifactName=wls-on-aks-azure-marketplace-$version-arm-assembly
-                unzip weblogic-azure/weblogic-azure-aks/target/$artifactName.zip -d weblogic-azure/weblogic-azure-aks/target/$artifactName
-                echo "##[set-output name=artifactName;]${artifactName}"
-                echo "##[set-output name=artifactPath;]weblogic-azure/weblogic-azure-aks/target/$artifactName"
-            - name: Archive weblogic-azure/weblogic-azure-aks template
-              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-              if: success()
-              with:
-                name: ${{steps.artifact_file.outputs.artifactName}}
-                path: ${{steps.artifact_file.outputs.artifactPath}}
     deploy-db:
-        needs: preflight
         runs-on: ubuntu-latest
         outputs:
           databaseType: ${{ steps.database-parameters.outputs.databaseType }}
@@ -241,7 +147,7 @@ jobs:
             echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"         
 
     cleanup:
-      needs: [preflight, get-value-of-deploy-db]
+      needs: [get-value-of-deploy-db]
       if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
