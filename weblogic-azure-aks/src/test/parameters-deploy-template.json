@@ -35,7 +35,7 @@
         "value": "${newOrExistingVnetForApplicationGateway}"
     },
     "vnetForApplicationGateway":{
-        "value": ${vnetForApplicationGateway}
+        "value": "${vnetForApplicationGateway}"
     },
     "vnetRGNameForApplicationGateway":{
         "value": "${vnetRGNameForApplicationGateway}"
