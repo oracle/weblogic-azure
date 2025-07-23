@@ -139,3 +139,6 @@ runs:
         echo "dsConnectionURL=$dsConnectionURL" >> "$GITHUB_OUTPUT"
         echo "dbUser=$dbUser" >> "$GITHUB_OUTPUT"
         echo "dbIdentity=$dbIdentity" >> "$GITHUB_OUTPUT"
+        
+        ehco "Database parameters set successfully"
+        echo ${{env.dsConnectionURL}}
