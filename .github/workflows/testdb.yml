@@ -49,6 +49,10 @@ jobs:
               id: azure-login
               with:
                 creds: ${{ env.azureCredentials }}
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              with:
+                detached: true
             - name: Create Resource Group
               run:
                   echo "create resource group" ${{ env.resourceGroupForDB }}
