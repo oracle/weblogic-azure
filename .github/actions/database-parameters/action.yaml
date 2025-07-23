@@ -139,4 +139,4 @@ runs:
         echo "dbUser=$dbUser" >> "$GITHUB_OUTPUT"
         echo "dbIdentity=$dbIdentity" >> "$GITHUB_OUTPUT"
         echo "dsConnectionURL=$dsConnectionURL"
-        ehco "Database parameters set successfully"
+        echo "Database parameters set successfully"
