@@ -4,22 +4,6 @@ run-name: Debug Test WLS on AKS with Dependency creation with `db`:${{ inputs.da
 on:
   workflow_dispatch:
     inputs:
-      isForDemo:
-        description: 'If set to true, resources will not be deleted'
-        required: true
-        default: 'false'
-      gitUserNameForArtifactsLocation:
-        description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
-        required: true
-        default: oracle
-      testBranchNameForArtifactsLocation:
-        description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
-        required: true
-        default: main
-      vmSize:
-        description: 'The VM size for the AKS pool'
-        required: true
-        default: Standard_D2s_v3
       location:
         description: 'The location for the resources'
         required: true
@@ -35,14 +19,6 @@ on:
           - mssqlserver-passwordless
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
-      configurations_for_ci:
-        description: "JSON string of environment variables used for CI"
-        required: false
-        default: '{}'
-  # sample cURL
-  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
-  repository_dispatch:
-    types: [aks-integration-test-with-dependency-creation,integration-test-all]
 
 env:
     azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -52,15 +28,7 @@ env:
     dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
     dbServerName: weblogicdb-${{ github.run_id }}-${{ github.run_number }}
     uamiName: uami${{ github.run_id }}${{ github.run_number }}
-    ocrSSOUser: ${{ secrets.ORC_SSOUSER }}
-    ocrSSOPSW: ${{ secrets.ORC_SSOPSW }}
-    wdtRuntimePassword: ${{ secrets.WDT_RUNTIMEPSW}}
-    wlsUserName: ${{ secrets.WLS_USERNAME }}
-    wlsPassword: ${{ secrets.WLS_PSW }}
     resourceGroupForDB: wlsd-db-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
-    resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
-    storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
-    storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
     azCliVersion: 2.72.0
 
 jobs:
@@ -120,23 +88,10 @@ jobs:
                 echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
                 echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}"
 
-            - name: echo the outputs to a file called a.txt
-              run: |
-                echo "enableDB=${{ steps.database-parameters.outputs.enableDB }}" >> a.txt
-                echo "enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}" >> a.txt
-                echo "databaseType=${{ steps.database-parameters.outputs.databaseType }}" >> a.txt
-                echo "dsConnectionURL=${{ steps.database-parameters.outputs.dsConnectionURL }}" >> a.txt
-                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}" >> a.txt
-                echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}" >> a.txt
-
     get-value-of-deploy-db:
       needs: deploy-db
       runs-on: ubuntu-latest
       steps:
-        - name: Setup tmate session
-          uses: mxschmitt/action-tmate@v3
-          with:
-            detached: true
         - name: echo the enableDB outputs of deploy-db
           run: |
             echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
@@ -155,15 +110,6 @@ jobs:
         - name: echo the dbUser outputs of deploy-db
           run: |
             echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
-
-        - name: echo the outputs to a file called b.txt
-          run: |
-            echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}" >> b.txt
-            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}" >> b.txt
-            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}" >> b.txt
-            echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}" >> b.txt
-            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}" >> b.txt
-            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}" >> b.txt
 
     cleanup:
       needs: [get-value-of-deploy-db]
