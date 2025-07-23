@@ -74,10 +74,6 @@ jobs:
           dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
           dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
         steps:
-            - name: Get AZ CLI Version
-              run: |
-                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
             - uses: azure/login@v1
               id: azure-login
               with:
@@ -88,7 +84,7 @@ jobs:
                 azcliversion: ${{ env.azCliVersion }}
                 inlineScript: |
                     echo "create resource group" ${{ env.resourceGroupForDB }}
-                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
+                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location ${{ inputs.location }}
 
             - uses: actions/checkout@v2.3.4
 
@@ -99,7 +95,7 @@ jobs:
                 databaseType: ${{ inputs.databaseType }}
                 resourceGroup: ${{ env.resourceGroupForDB }}
                 uamiName: ${{ env.uamiName }}
-                location: $location
+                location: ${{ inputs.location }}
                 dbInstanceName: ${{ env.dbServerName }}
                 dbPassword: ${{ env.dbPassword }}
                 databaseName: ${{ env.dbName }}
@@ -152,9 +148,6 @@ jobs:
       if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
-      - name: Get AZ CLI Version
-        run: |
-          echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
       - uses: azure/login@v1
         id: azure-login
         with:
