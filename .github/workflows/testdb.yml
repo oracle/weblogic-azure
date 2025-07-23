@@ -105,8 +105,8 @@ jobs:
     cleanup:
       if: always()
       runs-on: ubuntu-latest
+      needs: get-value-of-deploy-db
       steps:
-
       - uses: azure/login@v1
         id: azure-login
         with:
