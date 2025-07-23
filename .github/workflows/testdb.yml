@@ -53,7 +53,7 @@ jobs:
               run:
                   echo "create resource group" ${{ env.resourceGroupForDB }}
                   echo "location is ${{ inputs.location }}"
-                  az group create -n ${{ env.resourceGroupForDB }} -l ${{ env.location }}
+                  az group create -n ${{ env.resourceGroupForDB }} -l ${{ inputs.location }}
             - name: Check the resource group
               run: |
                 echo "Check the resource group" ${{ env.resourceGroupForDB }}
