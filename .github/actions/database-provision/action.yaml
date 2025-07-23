@@ -41,6 +41,15 @@ runs:
   using: "composite"
   steps:
     # 01-Deploy an instance of Azure SQL Database
+    - name: Echo inputs
+      shell: bash
+      run: |
+        echo "resourceGroup=${{ inputs.resourceGroup }}"
+        echo "uamiName=${{ inputs.uamiName }}"
+        echo "location=${{ inputs.location }}"
+        echo "dbInstanceName=${{ inputs.dbInstanceName }}"
+        echo "dbAdminUser=${{ inputs.dbAdminUser }}"
+        echo "databaseName=${{ inputs.databaseName }}"
     - name: Deploy an instance of Azure SQL Database
       id: deploy-mssqlserver
       if: ${{ inputs.databaseType == 'mssqlserver' }}
