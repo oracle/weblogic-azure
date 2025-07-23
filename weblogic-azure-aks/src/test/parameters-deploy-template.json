@@ -33,13 +33,7 @@
     },
     "newOrExistingVnetForApplicationGateway":{
         "value": "${newOrExistingVnetForApplicationGateway}"
-    },
-    "vnetForApplicationGateway":{
-        "value": "${vnetForApplicationGateway}"
-    },
-    "vnetRGNameForApplicationGateway":{
-        "value": "${vnetRGNameForApplicationGateway}"
-    },
+    }
     "aksClusterName": {
         "value": "${aksClusterName}"
     },
