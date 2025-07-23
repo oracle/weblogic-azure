@@ -390,7 +390,7 @@ jobs:
                 echo "generate parameter file"
                 export databaseType=${{ needs.deploy-db.outputs.databaseType }}
                 export enableDB=${{ needs.deploy-db.outputs.enableDB }} 
-                export dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}
+                export dsConnectionURL='${{ needs.deploy-db.outputs.dsConnectionURL }}'
                 export dbUser=${{ env.dbAdminUser }} 
                 export dbPassword=${{ env.dbPassword }}
                 
