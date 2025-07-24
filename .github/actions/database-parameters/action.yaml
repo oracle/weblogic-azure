@@ -54,7 +54,6 @@ runs:
         databaseType=sqlserver
         dsConnectionURL=jdbc:postgresql://contoso.postgres.database:5432/${{ inputs.databaseName }}
         dbUser=contosoDbUser
-        dbPassword=contosoDbPwd
         enablePswlessConnection=false
         dbIdentity={}
         serverHost=${{ inputs.serverHost }}

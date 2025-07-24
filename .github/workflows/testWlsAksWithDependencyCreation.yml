@@ -30,7 +30,6 @@ on:
         default: 'mssqlserver'
         type: choice
         options:
-          - none
           - mssqlserver
           - mssqlserver-passwordless
           - postgresql(flexible)
@@ -364,7 +363,7 @@ jobs:
                 export databaseType=${{ needs.deploy-db.outputs.databaseType }}
                 export enableDB=${{ needs.deploy-db.outputs.enableDB }} 
                 export dsConnectionURL='${{ needs.deploy-db.outputs.dsConnectionURL }}'
-                export dbUser=${{ env.dbAdminUser }} 
+                export dbUser=${{ needs.deploy-db.outputs.dbUser }}
                 export dbPassword=${{ env.dbPassword }}
                 
                 export gitUserName=${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} 
