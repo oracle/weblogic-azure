@@ -403,6 +403,7 @@ jobs:
 
             - name: Setup tmate session
               uses: mxschmitt/action-tmate@v3
+              timeout-minutes: 60
               with:
                 detached: true
             - name: Deploy WebLogic Server Cluster Domain offer
