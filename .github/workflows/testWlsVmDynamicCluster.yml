@@ -34,7 +34,7 @@ env:
   adminPassword: ${{ secrets.WLS_PSW }}
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
-  dbServerName: weblogicdb-${{ github.run_id }}-${{ github.run_number }}
+  dbServerName: db${{ github.run_id }}${{ github.run_number }}
   uamiName: uami${{ github.run_id }}${{ github.run_number }}
   dynamicClusterSize: 1
   gitEmail: ${{ secrets.USER_EMAIL }}
