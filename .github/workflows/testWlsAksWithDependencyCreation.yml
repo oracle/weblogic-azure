@@ -208,37 +208,6 @@ jobs:
                 dbInstanceName: ${{ env.dbServerName }}
                 databaseName: ${{ env.dbName }}
 
-            - name: echo the outputs of database-parameters
-              run: |
-                echo "enableDB=${{ steps.database-parameters.outputs.enableDB }}"
-                echo "enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}"
-                echo "databaseType=${{ steps.database-parameters.outputs.databaseType }}"
-                echo "dsConnectionURL=${{ steps.database-parameters.outputs.dsConnectionURL }}"
-                echo "dbUser=${{ steps.database-parameters.outputs.dbUser }}"
-                echo "dbIdentity=${{ steps.database-parameters.outputs.dbIdentity }}"
-
-    get-value-of-deploy-db:
-      needs: deploy-db
-      runs-on: ubuntu-latest
-      steps:
-        - name: echo the enableDB outputs of deploy-db
-          run: |
-            echo "enableDB=${{ needs.deploy-db.outputs.enableDB }}"
-        - name: echo the enablePswlessConnection outputs of deploy-db
-          run: |
-            echo "enablePswlessConnection=${{ needs.deploy-db.outputs.enablePswlessConnection }}"
-        - name: echo the databaseType outputs of deploy-db
-          run: |
-            echo "databaseType=${{ needs.deploy-db.outputs.databaseType }}"
-        - name: echo the dsConnectionURL outputsof deploy-db
-          run: |
-            echo "dsConnectionURL=${{ needs.deploy-db.outputs.dsConnectionURL }}"
-        - name: echo the dbIdentity outputs of deploy-db
-          run: |
-            echo "dbIdentity=${{ needs.deploy-db.outputs.dbIdentity }}"
-        - name: echo the dbUser outputs of deploy-db
-          run: |
-            echo "dbUser=${{ needs.deploy-db.outputs.dbUser }}"
 
     deploy-storage-account:
         needs: preflight
@@ -432,6 +401,10 @@ jobs:
                   --load-balancer-sku standard \
                   --generate-ssh-keys
 
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              with:
+                detached: true
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
               uses: azure/CLI@v1
