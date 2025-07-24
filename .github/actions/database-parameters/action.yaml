@@ -65,14 +65,14 @@ runs:
           echo "Using mssqlserver database type"
           enableDB=true
           databaseType=sqlserver
-          dsConnectionURL="jdbc:sqlserver://$serverHost:1433\;database=${{ inputs.databaseName }}"
+          dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=${{ inputs.dbAdminUser }}@${{ inputs.dbInstanceName }}
         elif ${{ inputs.databaseType == 'mssqlserver-passwordless' }}; then
           echo "Using mssqlserver-passwordless database type"
           enableDB=true
           enablePswlessConnection=true
           databaseType=sqlserver
-          dsConnectionURL="jdbc:sqlserver://$serverHost:1433\;database=${{ inputs.databaseName }}"
+          dsConnectionURL="jdbc:sqlserver://$serverHost:1433;database=${{ inputs.databaseName }}"
           dbUser=${{ inputs.dbAdminUser }}@${{ inputs.dbInstanceName }} 
           dbIdentity=$(jq -n \
                           --arg uamiId "$uamiId" \
