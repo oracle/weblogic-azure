@@ -31,8 +31,11 @@
     "createAKSCluster": {
         "value": ${createAKSCluster}
     },
-    "newOrExistingVnetForApplicationGateway":{
+    "newOrExistingVnetForApplicationGateway": {
         "value": "${newOrExistingVnetForApplicationGateway}"
+    },
+    "vnetRGNameForApplicationGateway": {
+        "value": "${vnetRGNameForApplicationGateway}"
     },
     "aksClusterName": {
         "value": "${aksClusterName}"
