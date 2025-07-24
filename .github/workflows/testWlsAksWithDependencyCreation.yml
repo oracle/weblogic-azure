@@ -401,11 +401,6 @@ jobs:
                   --load-balancer-sku standard \
                   --generate-ssh-keys
 
-            - name: Setup tmate session
-              uses: mxschmitt/action-tmate@v3
-              timeout-minutes: 60
-              with:
-                detached: true
             - name: Deploy WebLogic Server Cluster Domain offer
               id: deploy-wls-cluster
               uses: azure/CLI@v1
@@ -419,6 +414,13 @@ jobs:
                     --name wls-on-aks \
                     --parameters @weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json \
                     --template-file ${artifactName}/mainTemplate.json
+
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              timeout-minutes: 60
+              with:
+                detached: true
+
             - name: Query Application Gateway URL
               run: |
                 appgatewayname=$(az resource list --resource-group ${{ env.resourceGroupForWlsAks }} --query "[?type=='Microsoft.Network/applicationGateways'].name|[0]" -o tsv)
