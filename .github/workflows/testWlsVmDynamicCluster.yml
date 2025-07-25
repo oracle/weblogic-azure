@@ -323,6 +323,8 @@ jobs:
               
               # Deploy WebLogic Server Dynamic Cluster
               echo 'Deploying WebLogic Server Dynamic Cluster...'
+              echo 'current path is: $(pwd)'
+              echo 'artifactName is: ${{ needs.preflight.outputs.artifactName }}'
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
