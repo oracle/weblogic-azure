@@ -104,7 +104,7 @@ function validateInput()
        dsPassword=""
    fi
 }
-
+# todo: debugging passwordless connection to remove password
 function createJDBCSource_model()
 {
 echo "Creating JDBC data source with name $jdbcDataSourceName"
