@@ -73,6 +73,8 @@ function validateInput()
    then
        echo _stderr "Please provide PostgreSQL Database user name"
        exit 1
+   else
+       echo  "dsUser=$dsUser"
    fi
 
    if [ -z "$dsPassword" ];
@@ -97,6 +99,8 @@ function validateInput()
    then
        echo _stderr "Please provide enablePswlessConnection to identity if enabling passwordless connection."
        exit 1
+   else
+       echo "enablePswlessConnection=$enablePswlessConnection"
    fi
 
    # reset password
@@ -104,7 +108,7 @@ function validateInput()
        dsPassword=""
    fi
 }
-# todo: debugging passwordless connection to remove password
+
 function createJDBCSource_model()
 {
 echo "Creating JDBC data source with name $jdbcDataSourceName"
@@ -124,6 +128,7 @@ try:
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName')
   cmo.setUrl('$dsConnectionURL')
   cmo.setDriverName('org.postgresql.Driver')
+  cmo.setPassword('$dsPassword')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCConnectionPoolParams/$jdbcDataSourceName')
   cmo.setTestTableName('SQL ISVALID\r\n\r\n\r\n\r\n')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName/Properties/$jdbcDataSourceName')
