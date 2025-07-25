@@ -70,6 +70,11 @@ jobs:
         run: |
           echo "managedserverprefix=${{ env.managedserverprefix }}"
           echo "managedserverprefixinenv=${managedserverprefix}"
+          echo "managedserverprefix03=$managedserverprefix"
+          
+          # echo printenv|grep managedserverprefix
+          echo "managedserverprefixinprintenv=$(printenv | grep managedserverprefix)"
+
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 120
