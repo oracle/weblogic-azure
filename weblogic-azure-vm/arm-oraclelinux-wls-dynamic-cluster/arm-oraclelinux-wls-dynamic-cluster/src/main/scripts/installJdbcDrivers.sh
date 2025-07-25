@@ -67,29 +67,11 @@ function validate_input() {
 }
 
 function install_maven() {
-    local mavenUrl=$(curl -Ls -o /dev/null -w %{url_effective} ${url4MavenInstaller})
-    if [ $? != 0 ]; then
-        echo_stderr "Failed to get maven download url."
-    fi
-    curl -m ${curlMaxTime} --retry ${retryMaxAttempt} -fksL "${mavenUrl}" -o ${mvnInstaller}
-    if [ $? != 0 ]; then
-        echo_stderr "Failed to download ${mavenUrl}."
-    fi
-
-    tar xzvf ${mvnInstaller} -C /u01/app
-    export MAVEN_HOME=$(find /u01/app -maxdepth 1 -type d -name "apache-maven*")
-    . $oracleHome/oracle_common/common/bin/setWlstEnv.sh # set JAVA_HOME
-    export PATH=${MAVEN_HOME}/bin:$PATH
-
-    rm ${mvnInstaller} -f
-    mvn --version
-    if [ $? != 0 ]; then
-        echo_stderr "Failed to install maven."
-    fi
+    sudo yum install maven -y
 }
 
 function uninstall_maven() {
-    sudo rm -f ${MAVEN_HOME} -R
+    sudo yum remove maven -y
 }
 
 function install_azure_identity_extension() {
@@ -244,15 +226,7 @@ export curlMaxTime=120 # seconds
 export gitUrl4AzureIdentityExtensionPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/azure-identity-extensions.xml"
 export gitUrl4MySQLDriverPomFile="https://raw.githubusercontent.com/oracle/weblogic-azure/main/weblogic-azure-aks/src/main/resources/mysql-connector-java.xml"
 export retryMaxAttempt=5 # retry attempt for curl command
-export mvnInstaller="apache-maven-bin.tar.gz"
 
-# 2024-09-11 https://github.com/oracle/weblogic-azure/pull/325
-# Increase maintainability by putting URL behind redirector. As of today
-# target is https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
-# A better solution would be if Oracle had an employee accessible URL redirector
-# service similar to Microsoft's aka.ms. 
-
-export url4MavenInstaller="https://aka.ms/wls-offer-maven-download-url"
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
 validate_input
