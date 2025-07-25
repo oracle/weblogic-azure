@@ -1,104 +1,110 @@
 {
-  "adminUsername": {
-    "value": "weblogic"
-  },
-  "adminPasswordOrKey": {
-    "value": "$adminPasswordOrKey"
-  },
-  "dnsLabelPrefix": {
-    "value": "wls"
-  },
-  "wlsDomainName": {
-    "value": "$wlsdomainname"
-  },
-  "wlsUserName": {
-    "value": "$wlsusername"
-  },
-  "wlsPassword": {
-    "value": "$wlspassword"
-  },
-  "managedServerPrefix":{
-    "value": "$managedserverprefix"
-  },
-  "maxDynamicClusterSize": {
-    "value": $maxDynamicClusterSize
-  },
-  "dynamicClusterSize": {
-    "value": $dynamicClusterSize
-  },
-  "vmSize": {
-    "value": "Standard_B2ms"
-  },
-  "location": {
-    "value": "$location"
-  },
-  "skuUrnVersion": {
-    "value": "$skuUrnVersion"
-  },
-  "_artifactsLocation": {
-
-    "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
-  },
-  "addressPrefixes": {
-    "value": [
-      "172.16.8.0/28"
-    ]
-  },
-  "subnetPrefix": {
-    "value": "172.16.8.0/28"
-  },
-  "enableCoherence": {
-    "value": true
-  },
-  "enableCoherenceWebLocalStorage": {
-    "value": true
-  },
-  "enableDB": {
-    "value": ${enableDB}
-  },
-  "databaseType": {
-    "value": "${databaseType}"
-  },
-  "dsConnectionURL": {
-    "value": "${dsConnectionURL}"
-  },
-  "dbGlobalTranPro": {
-    "value": "EmulateTwoPhaseCommit"
-  },
-  "dbPassword": {
-    "value": "${dbPassword}"
-  },
-  "dbUser": {
-    "value": "${dbUser}"
-  },
-  "jdbcDataSourceName": {
-    "value": "jdbc/WebLogicCafeDB"
-  },
-  "enableOHS": {
-    "value": true
-  },
-  "ohsNMUser": {
-    "value": "weblogic"
-  },
-  "ohsNMPassword": {
-    "value": "$wlspassword"
-  },
-  "oracleVaultPswd": {
-    "value": "$wlspassword"
-  },
-  "uploadedKeyStoreData": {
-    "value": "${uploadedKeyStoreData}"
-  },
-  "uploadedKeyStorePassword": {
-    "value": "$wlspassword"
-  },
-  "uploadedKeyStoreType": {
-    "value": "JKS"
-  },
-  "enablePswlessConnection": {
-    "value": ${enablePswlessConnection}
-  },
-  "dbIdentity": {
-    "value": ${dbIdentity}
-  }
+  "\$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "paramters": {
+        "adminUsername": {
+            "value": "weblogic"
+        },
+        "adminPasswordOrKey": {
+            "value": "$adminPasswordOrKey"
+        },
+        "dnsLabelPrefix": {
+            "value": "wls"
+        },
+        "wlsDomainName": {
+            "value": "$wlsdomainname"
+        },
+        "wlsUserName": {
+            "value": "$wlsusername"
+        },
+        "wlsPassword": {
+            "value": "$wlspassword"
+        },
+        "managedServerPrefix": {
+            "value": "$managedserverprefix"
+        },
+        "maxDynamicClusterSize": {
+            "value": $maxDynamicClusterSize
+        },
+        "dynamicClusterSize": {
+            "value": $dynamicClusterSize
+        },
+        "vmSize": {
+            "value": "Standard_B2ms"
+        },
+        "location": {
+            "value": "$location"
+        },
+        "skuUrnVersion": {
+            "value": "$skuUrnVersion"
+        },
+        "_artifactsLocation": {
+            "value": "https://raw.githubusercontent.com/${repoPath}/${testbranchName}/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster/arm-oraclelinux-wls-dynamic-cluster/src/main/arm/"
+        },
+        "addressPrefixes": {
+            "value": [
+                "172.16.8.0/28"
+            ]
+        },
+        "subnetPrefix": {
+            "value": "172.16.8.0/28"
+        },
+        "enableCoherence": {
+            "value": true
+        },
+        "enableCoherenceWebLocalStorage": {
+            "value": true
+        },
+        "enableDB": {
+            "value": ${enableDB
+            }
+        },
+        "databaseType": {
+            "value": "${databaseType}"
+        },
+        "dsConnectionURL": {
+            "value": "${dsConnectionURL}"
+        },
+        "dbGlobalTranPro": {
+            "value": "EmulateTwoPhaseCommit"
+        },
+        "dbPassword": {
+            "value": "${dbPassword}"
+        },
+        "dbUser": {
+            "value": "${dbUser}"
+        },
+        "jdbcDataSourceName": {
+            "value": "jdbc/WebLogicCafeDB"
+        },
+        "enableOHS": {
+            "value": true
+        },
+        "ohsNMUser": {
+            "value": "weblogic"
+        },
+        "ohsNMPassword": {
+            "value": "$wlspassword"
+        },
+        "oracleVaultPswd": {
+            "value": "$wlspassword"
+        },
+        "uploadedKeyStoreData": {
+            "value": "${uploadedKeyStoreData}"
+        },
+        "uploadedKeyStorePassword": {
+            "value": "$wlspassword"
+        },
+        "uploadedKeyStoreType": {
+            "value": "JKS"
+        },
+        "enablePswlessConnection": {
+            "value": ${enablePswlessConnection
+            }
+        },
+        "dbIdentity": {
+            "value": ${dbIdentity
+            }
+        }
+    }
 }
