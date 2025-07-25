@@ -206,7 +206,7 @@ jobs:
                 serverHost: ${{ steps.database-provision.outputs.serverHost }}
                 dbInstanceName: ${{ env.dbServerName }}
                 databaseName: ${{ env.dbName }}
-
+                dbAdminUser: ${{ env.dbAdminUser }}
 
     deploy-storage-account:
         needs: preflight
