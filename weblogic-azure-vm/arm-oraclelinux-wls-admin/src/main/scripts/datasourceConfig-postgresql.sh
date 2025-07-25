@@ -65,6 +65,8 @@ function validateInput()
    then
         echo _stderr "Please provide PostgreSQL Database URL in the format 'jdbc:oracle:thin:@<db host name>:<db port>/<database name>'"
         exit 1
+   else
+        echo  "dsConnectionURL=$dsConnectionURL"
    fi
 
    if [ -z "$dsUser" ];
@@ -122,7 +124,6 @@ try:
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName')
   cmo.setUrl('$dsConnectionURL')
   cmo.setDriverName('org.postgresql.Driver')
-  cmo.setPassword('$dsPassword')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCConnectionPoolParams/$jdbcDataSourceName')
   cmo.setTestTableName('SQL ISVALID\r\n\r\n\r\n\r\n')
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDriverParams/$jdbcDataSourceName/Properties/$jdbcDataSourceName')
