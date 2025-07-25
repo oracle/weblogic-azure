@@ -66,20 +66,6 @@ jobs:
       location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
     runs-on: ubuntu-latest
     steps:
-      - name: echo managedserverprefix in the env
-        run: |
-          echo "managedserverprefix=${{ env.managedserverprefix }}"
-          echo "managedserverprefixinenv=${managedserverprefix}"
-          echo "managedserverprefix03=$managedserverprefix"
-          
-          # echo printenv|grep managedserverprefix
-          echo "managedserverprefixinprintenv=$(printenv | grep managedserverprefix)"
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 120
-        with:
-          detached: true
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
@@ -187,9 +173,6 @@ jobs:
     needs: [preflight, deploy-dependencies]
     runs-on: ubuntu-latest
     steps:
-      - name: echo managedserverprefix in the env
-        run: |
-          echo "managedserverprefix=${{ env.managedserverprefix }}"
       - name: Initialize environment variables
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
@@ -283,8 +266,6 @@ jobs:
             export dbName='${{ env.dbName }}'
             export dbServerName='${{ env.dbServerName }}'
           
-            export managedserverprefix=${{ env.managedserverprefix }}
-          
             # Try deployment with this image
             if bash -c "
               set -e
@@ -317,6 +298,7 @@ jobs:
               export dynamicClusterSize='${{ env.dynamicClusterSize }}'
               export skuUrnVersion='$image'
               export testbranchName='${{ env.testbranchName }}'
+              export managedServerPrefix=${{ env.managedServerPrefix }}
               export repoPath='${GITHUB_REPOSITORY}'
               export uploadedKeyStoreData=\$(cat identity.jks | base64 -w 0)
               

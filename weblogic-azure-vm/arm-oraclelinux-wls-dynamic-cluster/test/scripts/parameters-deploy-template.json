@@ -18,7 +18,7 @@
         "value": "$wlspassword"
     },
     "managedServerPrefix": {
-        "value": "$managedserverprefix"
+        "value": "$managedServerPrefix"
     },
     "maxDynamicClusterSize": {
         "value": $maxDynamicClusterSize
