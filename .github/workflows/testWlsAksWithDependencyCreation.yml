@@ -346,7 +346,7 @@ jobs:
                 export vnetRGNameForApplicationGateway=${{ env.resourceGroupForWlsAks }}
                 
                 echo "generate parameter file"
-                export databaseType=${{ steps.database-parameters.outputs.databaseType }}
+                export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
                 export enableDB=${{ steps.database-parameters.outputs.enableDB }} 
                 export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
                 export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'

@@ -15,7 +15,7 @@
     "value": "${dbPassword}"
   },
   "dbUser": {
-    "value": "${dbAdminUser}"
+    "value": "${dbUser}"
   },
   "dsConnectionURL": {
     "value": "${dsConnectionURL}"

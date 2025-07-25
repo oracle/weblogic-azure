@@ -270,10 +270,10 @@ jobs:
             
             # Export db variables for envsubst
             export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
-            export enableDB=${{ steps.database-parameters.outputs.enableDB }}
+            export enableDB=${{ steps.database-parameters.outputs.enableDB }} 
             export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
-            export dbAdminUser='${{ steps.database-parameters.outputs.dbUser }}'
             export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+            export dbUser='${{ steps.database-parameters.outputs.dbUser }}'
             export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
             export dbPassword='${{ env.wlsPassword}}'
             export dbName='${{ env.dbName }}'
