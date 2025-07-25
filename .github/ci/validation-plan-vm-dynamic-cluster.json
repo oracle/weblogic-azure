@@ -1,0 +1,15 @@
+{
+  "validation_scenarios": [
+    {
+      "workflow": "testWlsVmDynamicCluster.yml",
+      "scenarios": [
+        {
+          "scenario": "Test Dynamic Cluster on VM",
+          "inputs": {
+            "location": "centralus"
+          }
+        }
+      ]
+    }
+  ]
+}

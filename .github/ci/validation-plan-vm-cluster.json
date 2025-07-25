@@ -1,0 +1,15 @@
+{
+  "validation_scenarios": [
+    {
+      "workflow": "testWlsVmCluster.yml",
+      "scenarios": [
+        {
+          "scenario": "Test Configured Cluster on VM",
+          "inputs": {
+            "location": "centralus"
+          }
+        }
+      ]
+    }
+  ]
+}

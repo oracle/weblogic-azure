@@ -65,12 +65,16 @@ function validateInput()
    then
         echo _stderr "Please provide PostgreSQL Database URL in the format 'jdbc:oracle:thin:@<db host name>:<db port>/<database name>'"
         exit 1
+   else
+        echo  "dsConnectionURL=$dsConnectionURL"
    fi
 
    if [ -z "$dsUser" ];
    then
        echo _stderr "Please provide PostgreSQL Database user name"
        exit 1
+   else
+       echo  "dsUser=$dsUser"
    fi
 
    if [ -z "$dsPassword" ];
@@ -95,6 +99,8 @@ function validateInput()
    then
        echo _stderr "Please provide enablePswlessConnection to identity if enabling passwordless connection."
        exit 1
+   else
+       echo "enablePswlessConnection=$enablePswlessConnection"
    fi
 
    # reset password
