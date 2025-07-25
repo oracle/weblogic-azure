@@ -42,7 +42,7 @@ env:
   gitUserName: ${{ secrets.USER_NAME }} 
   location: centralus
   nsg: wls-nsg
-  managedServerPrefix: managedServer
+  managedServerPrefix: "managedServer"
   managedServers: "managedServer1"
   managedServerVM: "managedServerVM1"
   maxDynamicClusterSize: 2
