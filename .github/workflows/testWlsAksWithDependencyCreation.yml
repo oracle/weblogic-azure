@@ -155,58 +155,6 @@ jobs:
               with:
                 name: ${{steps.artifact_file.outputs.artifactName}}
                 path: ${{steps.artifact_file.outputs.artifactPath}}
-    deploy-db:
-        needs: preflight
-        runs-on: ubuntu-latest
-        outputs:
-          databaseType: ${{ steps.database-parameters.outputs.databaseType }}
-          enableDB: ${{ steps.database-parameters.outputs.enableDB }}
-          enablePswlessConnection: ${{ steps.database-parameters.outputs.enablePswlessConnection }}
-          dbUser: ${{ steps.database-parameters.outputs.dbUser }}
-          dsConnectionURL: ${{ steps.database-parameters.outputs.dsConnectionURL }}
-          dbIdentity: ${{ steps.database-parameters.outputs.dbIdentity }}
-        steps:
-            - name: Get AZ CLI Version
-              run: |
-                echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
-                echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
-            - uses: azure/login@v1
-              id: azure-login
-              with:
-                creds: ${{ env.azureCredentials }}
-            - name: Create Resource Group
-              uses: azure/CLI@v1
-              with:
-                azcliversion: ${{ env.azCliVersion }}
-                inlineScript: |
-                    echo "create resource group" ${{ env.resourceGroupForDB }}
-                    az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
-
-            - uses: actions/checkout@v2.3.4
-
-            - name: Provision database
-              id: database-provision
-              uses: ./.github/actions/database-provision
-              with:
-                databaseType: ${{ inputs.databaseType }}
-                resourceGroup: ${{ env.resourceGroupForDB }}
-                uamiName: ${{ env.uamiName }}
-                location: $location
-                dbInstanceName: ${{ env.dbServerName }}
-                dbPassword: ${{ env.dbPassword }}
-                databaseName: ${{ env.dbName }}
-                dbAdminUser: ${{ env.dbAdminUser }}
-
-            - name: Get database parameters
-              id: database-parameters
-              uses: ./.github/actions/database-parameters
-              with:
-                databaseType: ${{ inputs.databaseType }}
-                uamiId: ${{ steps.database-provision.outputs.uamiId }}
-                serverHost: ${{ steps.database-provision.outputs.serverHost }}
-                dbInstanceName: ${{ env.dbServerName }}
-                databaseName: ${{ env.dbName }}
-                dbAdminUser: ${{ env.dbAdminUser }}
 
     deploy-storage-account:
         needs: preflight
@@ -266,7 +214,7 @@ jobs:
                 inlineScript: |
                     az storage blob upload --account-name ${{ env.storageAccountName }} --container-name ${{ env.storageContainerName }} --file cargotracker/target/cargo-tracker.war --name cargo-tracker.war         
     deploy-wls-on-aks:
-        needs: [deploy-storage-account, deploy-db, preflight]
+        needs: [deploy-storage-account, preflight]
         runs-on: ubuntu-latest
         steps:
             - name: Set dynamic env from configurations_for_ci
@@ -338,6 +286,39 @@ jobs:
                   --address-prefix 10.0.0.0/28 \
                   --subnet-name ${{ env.vnetForApplicationGateway.subnets.gatewaySubnet.name }} \
                   --subnet-prefix 10.0.0.0/29
+                
+            - uses: actions/checkout@v2.3.4
+            - name: Create Database Resource Group
+              uses: azure/CLI@v1
+              with:
+                azcliversion: ${{ env.azCliVersion }}
+                inlineScript: |
+                  echo "create database resource group" ${{ env.resourceGroupForDB }}
+                  az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
+
+            - name: Provision database
+              id: database-provision
+              uses: ./.github/actions/database-provision
+              with:
+                databaseType: ${{ inputs.databaseType }}
+                resourceGroup: ${{ env.resourceGroupForDB }}
+                uamiName: ${{ env.uamiName }}
+                location: $location
+                dbInstanceName: ${{ env.dbServerName }}
+                dbPassword: ${{ env.dbPassword }}
+                databaseName: ${{ env.dbName }}
+                dbAdminUser: ${{ env.dbAdminUser }}
+
+            - name: Get database parameters
+              id: database-parameters
+              uses: ./.github/actions/database-parameters
+              with:
+                databaseType: ${{ inputs.databaseType }}
+                uamiId: ${{ steps.database-provision.outputs.uamiId }}
+                serverHost: ${{ steps.database-provision.outputs.serverHost }}
+                dbInstanceName: ${{ env.dbServerName }}
+                databaseName: ${{ env.dbName }}
+                dbAdminUser: ${{ env.dbAdminUser }}
 
             - name: Prepare parameter file
               run: |
@@ -360,10 +341,12 @@ jobs:
                 export vnetRGNameForApplicationGateway=${{ env.resourceGroupForWlsAks }}
                 
                 echo "generate parameter file"
-                export databaseType=${{ needs.deploy-db.outputs.databaseType }}
-                export enableDB=${{ needs.deploy-db.outputs.enableDB }} 
-                export dsConnectionURL='${{ needs.deploy-db.outputs.dsConnectionURL }}'
-                export dbUser=${{ needs.deploy-db.outputs.dbUser }}
+                export databaseType=${{ steps.database-parameters.outputs.databaseType }}
+                export enableDB=${{ steps.database-parameters.outputs.enableDB }} 
+                export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
+                export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+                export dbUser='${{ steps.database-parameters.outputs.dbUser }}'
+                export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
                 # todo debug
                 echo "dbUser is set to ${dbUser}"
                 export dbPassword=${{ env.dbPassword }}
