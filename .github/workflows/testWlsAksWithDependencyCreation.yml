@@ -229,9 +229,7 @@ jobs:
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
                 echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
             - name: Checkout weblogic-azure
-              uses: actions/checkout@v2
-              with:
-                path: weblogic-azure
+              uses: actions/checkout@v4
             - name: Download artifact for deployment
               uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
               with:
@@ -286,8 +284,7 @@ jobs:
                   --address-prefix 10.0.0.0/28 \
                   --subnet-name ${{ env.vnetForApplicationGateway.subnets.gatewaySubnet.name }} \
                   --subnet-prefix 10.0.0.0/29
-                
-            - uses: actions/checkout@v2.3.4
+
             - name: Create Database Resource Group
               uses: azure/CLI@v1
               with:
@@ -295,6 +292,12 @@ jobs:
                 inlineScript: |
                   echo "create database resource group" ${{ env.resourceGroupForDB }}
                   az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
+
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              timeout-minutes: 120
+              with:
+                detached: true
 
             - name: Provision database
               id: database-provision
@@ -365,12 +368,6 @@ jobs:
 
                 echo "Generating parameter file..."
                 envsubst < "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json" > "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json"
-
-            - name: Setup tmate session
-              uses: mxschmitt/action-tmate@v3
-              timeout-minutes: 120
-              with:
-                detached: true
 
             - name: Provision AKS Cluster as an existing cluster for deployment
               if: ${{ env.createAKSCluster == 'false' }}
