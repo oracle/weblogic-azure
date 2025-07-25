@@ -56,6 +56,8 @@ env:
   wlsDomainName: dyClusterDomain
   wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
+  images: |
+    owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
 
 jobs:
   preflight:
@@ -170,11 +172,10 @@ jobs:
   deploy-weblogic-cluster:
     needs: [preflight, deploy-dependencies]
     runs-on: ubuntu-latest
-    env:
-      images: |
-        owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
-
     steps:
+      - name: echo managedserverprefix in the env
+        run: |
+          echo "managedserverprefix=${{ env.managedserverprefix }}"
       - name: Initialize environment variables
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
