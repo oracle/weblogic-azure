@@ -79,6 +79,9 @@ jobs:
 
           echo "##[set-output name=location;]${location}"
           echo "location=${location}" >> $GITHUB_ENV
+      - name: echo managedserverprefix in the env
+        run: |
+          echo "managedserverprefix=${{ env.managedserverprefix }}"
       - uses: actions/checkout@v2.3.4
       - name: Set up Maven with GitHub token
         uses: ./.github/actions/setupmaven
@@ -173,6 +176,11 @@ jobs:
     needs: [preflight, deploy-dependencies]
     runs-on: ubuntu-latest
     steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 120
+        with:
+          detached: true
       - name: echo managedserverprefix in the env
         run: |
           echo "managedserverprefix=${{ env.managedserverprefix }}"
@@ -235,12 +243,6 @@ jobs:
           dbInstanceName: ${{ env.dbServerName }}
           databaseName: ${{ env.dbName }}
           dbAdminUser: ${{ env.dbAdminUser }}
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 120
-        with:
-            detached: true
 
       - name: Try each image until one succeeds
         run: |
