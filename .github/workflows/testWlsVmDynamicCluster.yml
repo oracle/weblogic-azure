@@ -237,7 +237,7 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 60
+        timeout-minutes: 120
         with:
             detached: true
 
@@ -427,7 +427,8 @@ jobs:
               echo "❌ FAILED: WebLogic deployment failed with image: $image, trying next..."
               # Clean up failed deployment
               echo "Cleaning up failed resource group: $resourceGroup"
-              az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
+              # todo debug
+              # az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
             fi
             echo "::endgroup::"
           done
