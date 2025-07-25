@@ -540,9 +540,6 @@ jobs:
       if: ${{ always() && needs.preflight.outputs.isForDemo == 'false' }}
       runs-on: ubuntu-latest
       steps:
-      - name: Sleep 1h for debugging
-        run: |
-          sleep 1h
       - name: Get AZ CLI Version
         run: |
           echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
