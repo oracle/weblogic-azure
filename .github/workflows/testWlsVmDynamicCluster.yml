@@ -430,8 +430,7 @@ jobs:
               echo "❌ FAILED: WebLogic deployment failed with image: $image, trying next..."
               # Clean up failed deployment
               echo "Cleaning up failed resource group: $resourceGroup"
-              # todo debug
-              # az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
+              az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
             fi
             echo "::endgroup::"
           done
