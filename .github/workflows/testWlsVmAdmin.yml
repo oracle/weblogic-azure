@@ -273,10 +273,10 @@ jobs:
             export enableDB=${{ steps.database-parameters.outputs.enableDB }}
             export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
             export dbAdminUser='${{ steps.database-parameters.outputs.dbUser }}'
-            export dbPassword='${{ env.wlsPassword}}'
             export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
-            export dbName='${{ env.dbName }}'
             export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+            export dbPassword='${{ env.wlsPassword}}'
+            export dbName='${{ env.dbName }}'
           
             # Try deployment with this image
             if bash -c "
