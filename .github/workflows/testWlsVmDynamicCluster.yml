@@ -310,6 +310,7 @@ jobs:
               export repoPath='${GITHUB_REPOSITORY}'
               export uploadedKeyStoreData=\$(cat identity.jks | base64 -w 0)
               
+              export DOLLAR='$'
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' 
               
