@@ -45,8 +45,8 @@ env:
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
   repoName: weblogic-azure
   repoOwner: ${{ github.repository_owner }}
-  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
-  resourceGroupPrefix: ${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupForDependency: wlsd-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupPrefix: wls-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   wlsDomainName: wlsd
   wlsPassword: ${{ secrets.WLS_PSW }}
