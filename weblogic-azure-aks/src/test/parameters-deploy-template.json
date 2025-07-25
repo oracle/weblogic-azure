@@ -61,6 +61,9 @@
     "dsConnectionURL": {
         "value": "${dsConnectionURL}"
     },
+    "enablePswlessConnection": {
+        "value": ${enablePswlessConnection}
+    },
     "enableAppGWIngress": {
         "value": true
     },
@@ -111,5 +114,8 @@
     },
     "wlsUserName": {
         "value": "${wlsUserName}"
+    },
+    "dbIdentity": {
+        "value": ${dbIdentity}
     }
 }
