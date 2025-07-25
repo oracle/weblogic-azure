@@ -234,6 +234,7 @@ topology:
             MigrationBasis: 'database'
    Server:
         '$wlsServerName' :
+           ListenAddress: "$managedServerHost"
            ListenPort: $storageListenPort
            Notes: "$wlsServerName managed server"
            Cluster: "$storageClusterName"

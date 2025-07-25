@@ -287,6 +287,7 @@ topology:
              MigrationBasis: 'consensus'
    Server:
         '$wlsServerName' :
+           ListenAddress: "$managedServerHost"
            ListenPort: $wlsManagedPort
            Notes: "$wlsServerName managed server"
            Cluster: "$wlsClusterName"
