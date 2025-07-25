@@ -371,6 +371,13 @@ jobs:
                 echo "Generating parameter file..."
                 envsubst < "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json" > "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json"
 
+            - name: Archive parameters-deploy-${{ github.job }}.json
+              uses: actions/upload-artifact@v4.6.2
+              if: success()
+              with:
+                name: parameters-deploy-${{ github.job }}.json
+                path: ./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json
+
             - name: Provision AKS Cluster as an existing cluster for deployment
               if: ${{ env.createAKSCluster == 'false' }}
               run: |
