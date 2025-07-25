@@ -272,7 +272,7 @@ jobs:
             export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
             export enableDB=${{ steps.database-parameters.outputs.enableDB }}
             export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
-            export dbAdminUser='${{ env.dbAdminUser }}'
+            export dbAdminUser='${{ steps.database-parameters.outputs.dbUser }}'
             export dbPassword='${{ env.wlsPassword}}'
             export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
             export dbName='${{ env.dbName }}'
