@@ -56,8 +56,7 @@
             "value": true
         },
         "enableDB": {
-            "value": ${enableDB
-            }
+            "value": ${enableDB}
         },
         "databaseType": {
             "value": "${databaseType}"
@@ -99,12 +98,10 @@
             "value": "JKS"
         },
         "enablePswlessConnection": {
-            "value": ${enablePswlessConnection
-            }
+            "value": ${enablePswlessConnection}
         },
         "dbIdentity": {
-            "value": ${dbIdentity
-            }
+            "value": ${dbIdentity}
         }
     }
 }
