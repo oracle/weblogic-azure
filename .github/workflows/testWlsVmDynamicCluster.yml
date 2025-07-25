@@ -42,7 +42,7 @@ env:
   gitUserName: ${{ secrets.USER_NAME }} 
   location: centralus
   nsg: wls-nsg
-  managedServerPrefix: "managedServer"
+  managedServerPrefix: managedServer
   managedServers: "managedServer1"
   managedServerVM: "managedServerVM1"
   maxDynamicClusterSize: 2
@@ -274,6 +274,8 @@ jobs:
             export dbName='${{ env.dbName }}'
             export dbServerName='${{ env.dbServerName }}'
           
+            export managedserverprefix=${{ env.managedserverprefix }}
+          
             # Try deployment with this image
             if bash -c "
               set -e
@@ -302,7 +304,6 @@ jobs:
               export wlsdomainname='${{ env.wlsDomainName }}'
               export wlsusername='${{ env.wlsUserName }}'
               export wlspassword='${{ env.wlsPassword }}'
-              export managedserverprefix='${{ env.managedserverprefix }}'
               export maxDynamicClusterSize='${{ env.maxDynamicClusterSize }}'
               export dynamicClusterSize='${{ env.dynamicClusterSize }}'
               export skuUrnVersion='$image'
