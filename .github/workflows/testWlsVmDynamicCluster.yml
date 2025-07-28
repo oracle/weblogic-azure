@@ -56,6 +56,8 @@ env:
   wlsDomainName: dyClusterDomain
   wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
+  images: |
+    owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
 
 jobs:
   preflight:
@@ -170,10 +172,6 @@ jobs:
   deploy-weblogic-cluster:
     needs: [preflight, deploy-dependencies]
     runs-on: ubuntu-latest
-    env:
-      images: |
-        owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
-
     steps:
       - name: Initialize environment variables
         run: |
@@ -234,12 +232,6 @@ jobs:
           dbInstanceName: ${{ env.dbServerName }}
           databaseName: ${{ env.dbName }}
           dbAdminUser: ${{ env.dbAdminUser }}
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 120
-        with:
-            detached: true
 
       - name: Try each image until one succeeds
         run: |
@@ -302,14 +294,15 @@ jobs:
               export wlsdomainname='${{ env.wlsDomainName }}'
               export wlsusername='${{ env.wlsUserName }}'
               export wlspassword='${{ env.wlsPassword }}'
-              export managedserverprefix='${{ env.managedserverprefix }}'
               export maxDynamicClusterSize='${{ env.maxDynamicClusterSize }}'
               export dynamicClusterSize='${{ env.dynamicClusterSize }}'
               export skuUrnVersion='$image'
               export testbranchName='${{ env.testbranchName }}'
+              export managedServerPrefix=${{ env.managedServerPrefix }}
               export repoPath='${GITHUB_REPOSITORY}'
               export uploadedKeyStoreData=\$(cat identity.jks | base64 -w 0)
               
+              export DOLLAR='$'
               echo 'Generating parameter file...'
               envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' 
               
@@ -322,6 +315,8 @@ jobs:
               
               # Deploy WebLogic Server Dynamic Cluster
               echo 'Deploying WebLogic Server Dynamic Cluster...'
+              echo 'current path is: $(pwd)'
+              echo 'artifactName is: ${{ needs.preflight.outputs.artifactName }}'
               az deployment group create \
                 --verbose \
                 --resource-group '$resourceGroup' \
