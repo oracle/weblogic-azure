@@ -427,7 +427,7 @@ jobs:
               echo "❌ FAILED: WebLogic deployment failed with image: $image, trying next..."
               # Clean up failed deployment
               echo "Cleaning up failed resource group: $resourceGroup"
-              az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
+              # az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
             fi
             echo "::endgroup::"
           done
@@ -460,6 +460,9 @@ jobs:
     needs: deploy-weblogic-cluster
     runs-on: ubuntu-latest
     steps:
+      - name: Sleep for 60 minutes to ensure all resources are cleaned up
+        run: |
+          sleep 1h
       - uses: azure/login@v1
         id: azure-login
         with:
