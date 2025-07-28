@@ -455,6 +455,9 @@ jobs:
     needs: deploy-weblogic-cluster
     runs-on: ubuntu-latest
     steps:
+      - name: Sleep for 60 minutes to ensure all resources are cleaned up
+        run: |
+          sleep 1h
       - uses: azure/login@v1
         id: azure-login
         with:
