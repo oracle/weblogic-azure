@@ -249,4 +249,6 @@ if [ $wlsServerName == "admin" ]; then
     restart_admin_service
 else
     restart_managed_servers
+    echo "Waiting for managed server to start"
+    sleep 2m
 fi
