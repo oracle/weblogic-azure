@@ -60,6 +60,7 @@ env:
     resourceGroupForStorageAccount: wlsd-sa-${{ github.run_id }}-${{ github.run_number }}
     storageAccountName: wlsdsa${{ github.run_id }}${{ github.run_number }}
     storageContainerName: wlsdcon${{ github.run_id }}${{ github.run_number }}
+    wlsImageTag: "14.1.2.0-generic-jdk17-ol9"
 
 jobs:
     preflight:
@@ -352,9 +353,8 @@ jobs:
                 export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
                 export dbUser='${{ steps.database-parameters.outputs.dbUser }}'
                 export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
-                # todo debug
-                echo "dbUser is set to ${dbUser}"
                 export dbPassword=${{ env.dbPassword }}
+                export wlsImageTag=${{ env.wlsImageTag }}
                 
                 export gitUserName=${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} 
                 export testbranchName=${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}
