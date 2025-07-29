@@ -27,11 +27,9 @@ on:
       databaseType:
         description: 'Database connection'
         required: true
-        default: 'mssqlserver'
+        default: 'postgresql(flexible)'
         type: choice
         options:
-          - mssqlserver
-          - mssqlserver-passwordless
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
       configurations_for_ci:
