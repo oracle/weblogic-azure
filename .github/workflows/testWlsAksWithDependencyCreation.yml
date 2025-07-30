@@ -198,6 +198,11 @@ jobs:
         needs: [deploy-storage-account, preflight]
         runs-on: ubuntu-latest
         steps:
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              timeout-minutes: 120
+              with:
+                detached: true
             - name: Set dynamic env from configurations_for_ci
               run: |
                 echo createAKSCluster is: ${{ env.createAKSCluster }} 
@@ -283,12 +288,6 @@ jobs:
                 inlineScript: |
                   echo "create database resource group" ${{ env.resourceGroupForDB }}
                   az group create --verbose --name ${{ env.resourceGroupForDB }} --location $location
-
-            - name: Setup tmate session
-              uses: mxschmitt/action-tmate@v3
-              timeout-minutes: 120
-              with:
-                detached: true
 
             - name: Provision database
               id: database-provision
