@@ -200,11 +200,19 @@ jobs:
         steps:
             - name: Set dynamic env from configurations_for_ci
               run: |
+                echo createAKSCluster is: ${{ env.createAKSCluster }} 
                 echo "${{ inputs.configurations_for_ci }}" > config.json
                 for key in $(jq -r 'to_entries|map("\(.key)")|.[]' config.json); do
-                value=$(jq -r --arg k "$key" '.[$k]' config.json)
-                echo "$key=$value" >> $GITHUB_ENV
+                  value=$(jq -r --arg k "$key" '.[$k]' config.json)
+                  echo "$key=$value"
+                  echo "$key=$value" >> $GITHUB_ENV
                 done
+                # check if createAKSCluster variable is set, if not, exit the workflow
+                echo createAKSCluster is: ${{ env.createAKSCluster }}
+                if [ -z "${{ env.createAKSCluster }}" ]; then
+                  echo "createAKSCluster is not set, exiting..."
+                  exit 1
+                fi
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
