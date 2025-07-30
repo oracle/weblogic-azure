@@ -5,6 +5,13 @@
       "run_mode": "serial",
       "scenarios": [
         {
+          "scenario": "Deploy with passwordless postgresql",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "postgresql-passwordless(flexible)"
+          }
+        },
+        {
           "scenario": "Deploy with existing AKS clusters",
           "inputs": {
             "location": "centralus",
