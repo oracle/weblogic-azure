@@ -4,9 +4,16 @@
       "workflow": "testWlsVmAdmin.yml",
       "scenarios": [
         {
-          "scenario": "Test Admin Server on VM",
+          "scenario": "Test Admin Server on VM with mssqlserver",
           "inputs": {
             "location": "centralus"
+          }
+        },
+        {
+          "scenario": "Test Admin Server on VM with passwordless postgresql",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "postgresql-passwordless(flexible)"
           }
         }
       ]
