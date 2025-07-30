@@ -2,11 +2,20 @@
   "validation_scenarios": [
     {
       "workflow": "testWlsVmCluster.yml",
+      "run_mode": "serial",
       "scenarios": [
         {
-          "scenario": "Test Configured Cluster on VM",
+          "scenario": "Test Configured Cluster on VM with mssqlserver",
           "inputs": {
-            "location": "centralus"
+            "location": "centralus",
+            "databaseType": "mssqlserver"
+          }
+        },
+        {
+          "scenario": "Test Configured Cluster on VM with PostgreSQL passwordless",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "postgresql-passwordless(flexible)"
           }
         }
       ]
