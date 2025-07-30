@@ -52,6 +52,19 @@ env:
   wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
   ref: ${{ github.ref_name }}
+  images: |
+    owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
+    owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest
+    owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest
+    owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest
+    owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest
+    owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest
+    owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest
+    owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest
+    owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest
+    owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest
+    owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest
+    owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest
 
 jobs:
   preflight:
@@ -167,21 +180,6 @@ jobs:
   deploy-weblogic-cluster:
     needs: [deploy-dependencies, preflight]
     runs-on: ubuntu-latest
-    env:
-      images: |
-        owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
-        owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest
-        owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest
-        owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest
-        owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest
-        owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest
-        owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest
-        owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest
-        owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest
-        owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest
-        owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest
-        owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest
-
     steps:
       - name: Initialize environment variables
         run: |
@@ -455,9 +453,6 @@ jobs:
     needs: deploy-weblogic-cluster
     runs-on: ubuntu-latest
     steps:
-      - name: Sleep for 60 minutes to ensure all resources are cleaned up
-        run: |
-          sleep 1h
       - uses: azure/login@v1
         id: azure-login
         with:
