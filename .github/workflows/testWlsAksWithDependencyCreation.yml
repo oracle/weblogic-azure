@@ -8,14 +8,6 @@ on:
         description: 'If set to true, resources will not be deleted'
         required: true
         default: 'false'
-      gitUserNameForArtifactsLocation:
-        description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
-        required: true
-        default: oracle
-      testBranchNameForArtifactsLocation:
-        description: 'Replaced into https://raw.githubusercontent.com/#gitUserName#/weblogic-azure/#testbranchName#/weblogic-azure-aks/src/main/arm/'
-        required: true
-        default: main
       vmSize:
         description: 'The VM size for the AKS pool'
         required: true
@@ -37,7 +29,7 @@ on:
         required: false
         default: '{}'
   # sample cURL
-  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"gitUserNameForArtifactsLocation": "<github_user>", "testBranchNameForArtifactsLocation": "<branch_name>", "isForDemo": "false"}}'
+  # curl --verbose -X POST https://api.github.com/repos/<github_user>/weblogic-azure/dispatches -H 'Accept: application/vnd.github.everest-preview+json' -H 'Authorization: token <personal_access_token>' --data '{"event_type": "aks-integration-test-with-dependency-creation", "client_payload": {"isForDemo": "false"}}'
   repository_dispatch:
     types: [aks-integration-test-with-dependency-creation,integration-test-all]
 
@@ -65,8 +57,6 @@ jobs:
         outputs: 
           artifactName: ${{steps.artifact_file.outputs.artifactName}}
           isForDemo: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.isForDemo }}
-          gitUserNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.gitUserNameForArtifactsLocation }}
-          testBranchNameForArtifactsLocation: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.testBranchNameForArtifactsLocation }}
           azCliVersion: ${{steps.set-az-cli-version.outputs.azCliVersion}}
           vmSize: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.vmSize }}
           location: ${{ steps.setup-env-variables-based-on-dispatch-event.outputs.location }}
@@ -94,27 +84,19 @@ jobs:
                 location=centralus # default value
                 if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
                   isForDemo=${{ github.event.inputs.isForDemo }}
-                  gitUserNameForArtifactsLocation=${{ github.event.inputs.gitUserNameForArtifactsLocation }}
-                  testBranchNameForArtifactsLocation=${{ github.event.inputs.testBranchNameForArtifactsLocation }}
                   vmSize=${{ github.event.inputs.vmSize }}
                   location=${{ github.event.inputs.location }}
                 else
                   isForDemo=${{ github.event.client_payload.isForDemo }}
-                  gitUserNameForArtifactsLocation=${{ github.event.client_payload.gitUserNameForArtifactsLocation }}
-                  testBranchNameForArtifactsLocation=${{ github.event.client_payload.testBranchNameForArtifactsLocation }}
                   vmSize=${{ github.event.client_payload.vmSize }}
                   location=${{ github.event.client_payload.location }}
                 fi
 
                 echo "##[set-output name=isForDemo;]${isForDemo}"
-                echo "##[set-output name=gitUserNameForArtifactsLocation;]${gitUserNameForArtifactsLocation}"
-                echo "##[set-output name=testBranchNameForArtifactsLocation;]${testBranchNameForArtifactsLocation}"
                 echo "##[set-output name=vmSize;]${vmSize}"
                 echo "##[set-output name=location;]${location}"
 
                 echo "isForDemo=${isForDemo}" >> $GITHUB_ENV
-                echo "gitUserNameForArtifactsLocation=${gitUserNameForArtifactsLocation}" >> $GITHUB_ENV
-                echo "testBranchNameForArtifactsLocation=${testBranchNameForArtifactsLocation}" >> $GITHUB_ENV
                 echo "vmSize=${vmSize}" >> $GITHUB_ENV
                 echo "location=${location}" >> $GITHUB_ENV
             - uses: actions/checkout@v2.3.4
@@ -354,8 +336,8 @@ jobs:
                 export dbPassword=${{ env.dbPassword }}
                 export wlsImageTag=${{ env.wlsImageTag }}
                 
-                export gitUserName=${{ needs.preflight.outputs.gitUserNameForArtifactsLocation }} 
-                export testbranchName=${{ needs.preflight.outputs.testBranchNameForArtifactsLocation }}
+                export gitUserName=${{ github.repository_owner }} 
+                export testbranchName=${{ github.sha }}
                 export appPackageUrls=${cargoTrackerBlobUrl}
 
                 export location=${location}
@@ -369,11 +351,11 @@ jobs:
                 echo "Generating parameter file..."
                 envsubst < "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-template.json" > "./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json"
 
-            - name: Archive parameters-deploy-${{ github.job }}.json
+            - name: Archive parameters-deploy.json
               uses: actions/upload-artifact@v4.6.2
               if: success()
               with:
-                name: parameters-deploy-${{ github.job }}.json
+                name: parameters-deploy.json
                 path: ./weblogic-azure/weblogic-azure-aks/src/test/parameters-deploy-${{ github.job }}.json
 
             - name: Provision AKS Cluster as an existing cluster for deployment

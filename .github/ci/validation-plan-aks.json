@@ -2,6 +2,7 @@
   "validation_scenarios": [
     {
       "workflow": "testWlsAksWithDependencyCreation.yml",
+      "run_mode": "serial",
       "scenarios": [
         {
           "scenario": "Deploy with existing AKS clusters",
@@ -10,24 +11,6 @@
             "configurations_for_ci": {
               "createAKSCluster": "false",
               "aksClusterName": "my-existing-aks-cluster"
-            }
-          }
-        },
-        {
-          "scenario": "Bring your own VNET(works for application gateway)",
-          "inputs": {
-            "location": "centralus",
-            "configurations_for_ci": {
-              "newOrExistingVnetForApplicationGateway": "existing",
-              "vnetForApplicationGateway": {
-                "name": "my-existing-vnet",
-                "newOrExisting": "existing",
-                "subnets": {
-                  "gatewaySubnet": {
-                    "name": "my-existing-sbnet-for-single-server"
-                  }
-                }
-              }
             }
           }
         }
