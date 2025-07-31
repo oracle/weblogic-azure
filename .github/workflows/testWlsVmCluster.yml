@@ -251,16 +251,16 @@ jobs:
           az network vnet create \
                   --resource-group ${{ env.resourceGroupForDependency }} \
                   --name ${{ env.virtualNetworkName }} \
-                  --address-prefix 10.0.0.0/28 \
+                  --address-prefix 10.0.0.0/23 \
                   --subnet-name ${{ env.subnetForCluster }} \
-                  --subnet-prefix 10.0.0.0/29
+                  --subnet-prefix 10.0.0.0/26
 
           echo "Provisioning Azure Subnet for App Gateway"
           az network vnet subnet create \
             --resource-group ${{ env.resourceGroupForDependency }} \
             --name ${{ env.subnetForAppGateway }} \
             --vnet-name ${{ env.virtualNetworkName }} \
-            --address-prefix 10.0.0.8/29
+            --address-prefix 10.0.1.0/24
 
       - name: Try each image until one succeeds
         run: |
