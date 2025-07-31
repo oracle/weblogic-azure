@@ -249,11 +249,17 @@ jobs:
         run: |
           echo "Provisioning Azure Vnet with subnet"
           az network vnet create \
+                  --resource-group ${{ env.resourceGroupForDependency }} \
+                  --name ${{ env.virtualNetworkName }} \
+                  --address-prefix 10.0.0.0/28 \
+                  --subnet-name ${{ env.subnetForCluster }} \
+                  --subnet-prefix 10.0.0.0/29
+
+          az network vnet subnet create \
             --resource-group ${{ env.resourceGroupForDependency }} \
             --name ${{ env.virtualNetworkName }} \
-            --address-prefix 10.0.0.0/28 \
             --subnet-name ${{ env.subnetForAppGateway }} \
-            --subnet-prefix 10.0.0.0/29
+            --address-prefix 10.0.0.0/30
 
       - name: Try each image until one succeeds
         run: |
@@ -292,11 +298,13 @@ jobs:
               export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
               export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
               export virtualNetworkName=${{ env.virtualNetworkName }}
+              export subnetForCluster=${{ env.subnetForCluster }}
               export subnetForAppGateway=${{ env.subnetForAppGateway }}
             else
               export virtualNetworkNewOrExisting="new"
               export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
               export virtualNetworkName="wlscluster-vnet-cluster"
+              export subnetForCluster="jboss-subnet-for-cluster"
               export subnetForAppGateway="appgateway-subnet"
             fi
             

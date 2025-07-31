@@ -12,6 +12,7 @@
             "configurations_for_ci": {
               "virtualNetworkNewOrExisting": "existing",
               "virtualNetworkName": "my-existing-cluster-vnet",
+              "subnetForCluster": "my-existing-cluster-subnet-for-cluster",
               "subnetForAppGateway": "my-existing-cluster-subnet-for-app-gateway"
             }
           }

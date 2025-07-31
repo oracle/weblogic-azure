@@ -83,6 +83,9 @@
     "subnetName": {
         "value": "${subnetForCluster}"
     },
+    "subnetForAppGateway": {
+        "value": "${subnetForAppGateway}"
+    },
     "addressPrefixes": {
         "value": [
             "172.16.6.0/23"
