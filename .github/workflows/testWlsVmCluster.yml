@@ -345,6 +345,12 @@ jobs:
                 --parameters @'./${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' \
                 --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
               
+              if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+                 # If using existing VNet, there are some gaps to verify the deployment using following steps.
+                 echo 'skip following steps, only verify the deployment for existing vnet'
+                 exit 0
+              fi
+              
               # Get admin VM name
               echo 'Retrieving admin VM name...'
               adminVMName=\$(az deployment group show \

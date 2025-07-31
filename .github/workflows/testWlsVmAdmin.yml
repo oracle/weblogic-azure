@@ -365,7 +365,8 @@ jobs:
               fi
               
               if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
-                 # it will not contain public IP if the vnet is existing, skip current step
+                 # If using existing VNet, there are some gaps to verify the deployment using following steps.
+                 echo 'skip following steps, only verify the deployment for existing vnet'
                  exit 0
               fi
               
