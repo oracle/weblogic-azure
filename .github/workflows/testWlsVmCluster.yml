@@ -255,6 +255,7 @@ jobs:
                   --subnet-name ${{ env.subnetForCluster }} \
                   --subnet-prefix 10.0.0.0/29
 
+          echo "Provisioning Azure Subnet for App Gateway"
           az network vnet subnet create \
             --resource-group ${{ env.resourceGroupForDependency }} \
             --name ${{ env.virtualNetworkName }} \
