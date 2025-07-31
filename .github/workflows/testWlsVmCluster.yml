@@ -260,7 +260,7 @@ jobs:
             --resource-group ${{ env.resourceGroupForDependency }} \
             --name ${{ env.subnetForAppGateway }} \
             --vnet-name ${{ env.virtualNetworkName }} \
-            --address-prefix 10.0.0.0/30
+            --address-prefix 10.0.0.8/29
 
       - name: Try each image until one succeeds
         run: |
