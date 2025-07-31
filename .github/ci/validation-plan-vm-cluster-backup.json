@@ -5,6 +5,13 @@
       "run_mode": "serial",
       "scenarios": [
         {
+          "scenario": "Test Configured Cluster on VM with mssqlserver",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "mssqlserver"
+          }
+        },
+        {
           "scenario": "Bring your own VNET for Cluster on VM",
           "inputs": {
             "location": "centralus",
@@ -14,6 +21,13 @@
               "virtualNetworkName": "my-existing-cluster-vnet",
               "subnetForAppGateway": "my-existing-cluster-subnet-for-app-gateway"
             }
+          }
+        },
+        {
+          "scenario": "Test Configured Cluster on VM with PostgreSQL passwordless",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "postgresql-passwordless(flexible)"
           }
         }
       ]

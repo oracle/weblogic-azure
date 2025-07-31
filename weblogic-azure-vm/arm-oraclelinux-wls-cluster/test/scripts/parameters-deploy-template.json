@@ -72,7 +72,16 @@
         "value": "${skuUrnVersion}"
     },
     "virtualNetworkNewOrExisting": {
-        "value": "new"
+        "value": "${virtualNetworkNewOrExisting}"
+    },
+    "virtualNetworkResourceGroupName": {
+        "value": "${virtualNetworkResourceGroupName}"
+    },
+    "virtualNetworkName": {
+        "value": "${virtualNetworkName}"
+    },
+    "subnetName": {
+        "value": "${subnetForCluster}"
     },
     "addressPrefixes": {
         "value": [

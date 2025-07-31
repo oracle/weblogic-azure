@@ -22,6 +22,10 @@ on:
           - mssqlserver-passwordless
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
+      configurations_for_ci:
+        description: "JSON string of environment variables used for CI"
+        required: false
+        default: '{}'
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-cluster
@@ -180,6 +184,7 @@ jobs:
   deploy-weblogic-cluster:
     needs: [deploy-dependencies, preflight]
     runs-on: ubuntu-latest
+    env: ${{ fromJson(inputs.configurations_for_ci) }}
     steps:
       - name: Initialize environment variables
         run: |
@@ -237,7 +242,19 @@ jobs:
           dbInstanceName: ${{ env.dbServerName }}
           databaseName: ${{ env.dbName }}
           dbAdminUser: ${{ env.dbAdminUser }}
-      
+
+      - name: Provision Azure Vnet
+        id: vnet-provision
+        if: ${{ env.virtualNetworkNewOrExisting == 'existing' }}
+        run: |
+          echo "Provisioning Azure Vnet with subnet"
+          az network vnet create \
+            --resource-group ${{ env.resourceGroupForDependency }} \
+            --name ${{ env.virtualNetworkName }} \
+            --address-prefix 10.0.0.0/28 \
+            --subnet-name ${{ env.subnetForAppGateway }} \
+            --subnet-prefix 10.0.0.0/29
+
       - name: Try each image until one succeeds
         run: |
           # Convert multiline string to array
@@ -269,6 +286,19 @@ jobs:
             export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
             export dbPassword='${{ env.wlsPassword}}'
             export dbName='${{ env.dbName }}'
+          
+            ## Prepare parameters for Vnet
+            if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+              export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
+              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+              export virtualNetworkName=${{ env.virtualNetworkName }}
+              export subnetForAppGateway=${{ env.subnetForAppGateway }}
+            else
+              export virtualNetworkNewOrExisting="new"
+              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+              export virtualNetworkName="wlscluster-vnet-cluster"
+              export subnetForAppGateway="appgateway-subnet"
+            fi
             
             # Try deployment with this image
             if bash -c "
