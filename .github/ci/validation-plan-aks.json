@@ -5,12 +5,11 @@
       "run_mode": "serial",
       "scenarios": [
         {
-          "scenario": "Deploy with existing AKS clusters",
+          "scenario": "Disable the App Gateway Ingress Controller",
           "inputs": {
             "location": "centralus",
             "configurations_for_ci": {
-              "createAKSCluster": "false",
-              "aksClusterName": "my-existing-aks-cluster"
+              "enableAppGWIngress": "false"
             }
           }
         }

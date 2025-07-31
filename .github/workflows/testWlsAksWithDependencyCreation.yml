@@ -314,6 +314,14 @@ jobs:
                   export aksClusterRGName=${{ env.resourceGroupForWlsAks }}
                 fi
                 
+                if ${{ env.enableAppGWIngress == 'false' }}; then
+                  echo "Application Gateway Ingress Controller is disabled"
+                  export enableAppGWIngress=false
+                else
+                  echo "Application Gateway Ingress Controller is enabled"
+                  export enableAppGWIngress=true
+                fi
+                
                 # prepare parameters for vnet and application gateway
                 export newOrExistingVnetForApplicationGateway=${{ env.newOrExistingVnetForApplicationGateway }}
                 export vnetForApplicationGateway=${{ env.vnetForApplicationGateway.name }}
@@ -387,6 +395,11 @@ jobs:
 
             - name: Query Application Gateway URL
               run: |
+                if ${{ env.enableAppGWIngress == 'false' }}; then
+                 echo skipping current step as Application Gateway Ingress Controller is disabled
+                 exit 0
+                fi
+                
                 appgatewayname=$(az resource list --resource-group ${{ env.resourceGroupForWlsAks }} --query "[?type=='Microsoft.Network/applicationGateways'].name|[0]" -o tsv)
                 echo $appgatewayname
                 publicIpAddressId=$(az network application-gateway show --resource-group ${{ env.resourceGroupForWlsAks }} --name ${appgatewayname} --query frontendIPConfigurations[0].publicIPAddress.id -o tsv)
@@ -396,6 +409,11 @@ jobs:
                 echo "appGatewayURL=${appGatewayURL}" >> $GITHUB_ENV
             - name: Verify Cargo Tracker is deployed as expected
               run: |
+                if ${{ env.enableAppGWIngress == 'false' }}; then
+                 echo skipping current step as Application Gateway Ingress Controller is disabled
+                 exit 0
+                fi
+                
                 echo "Verifying Cargo Tracker is deployed as expected"
                 curl --verbose http://${{ env.appGatewayURL }}/cargo-tracker/
                 response=$(curl --write-out '%{http_code}' --silent --output /dev/null http://${{ env.appGatewayURL }}/cargo-tracker/)

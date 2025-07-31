@@ -12,7 +12,16 @@
           }
         },
         {
-          "scenario": "Deploy with existing AKS clusters",
+          "scenario": "Disable the App Gateway Ingress Controller",
+          "inputs": {
+            "location": "centralus",
+            "configurations_for_ci": {
+              "enableAppGWIngress": "false"
+            }
+          }
+        },
+        {
+          "scenario": "Bring you own AKS clusters and using postgresql",
           "inputs": {
             "location": "centralus",
             "configurations_for_ci": {

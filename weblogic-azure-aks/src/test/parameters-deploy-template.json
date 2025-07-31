@@ -65,7 +65,7 @@
         "value": ${enablePswlessConnection}
     },
     "enableAppGWIngress": {
-        "value": true
+        "value": ${enableAppGWIngress}
     },
     "enableAzureMonitoring": {
         "value": false
