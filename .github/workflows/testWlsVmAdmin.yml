@@ -198,6 +198,7 @@ jobs:
   deploy-weblogic-admin:
     needs: [deploy-dependencies, preflight]
     runs-on: ubuntu-latest
+    env: ${{ fromJson(inputs.configurations_for_ci) }}
     steps:
       - name: Initialize environment variables
         run: |
@@ -244,6 +245,18 @@ jobs:
           databaseName: ${{ env.dbName }}
           dbAdminUser: ${{ env.dbAdminUser }}
 
+      - name: Provision Azure Vnet
+        id: vnet-provision
+        if: ${{ env.virtualNetworkNewOrExisting == 'existing' }}
+        run: |
+          echo "Provisioning Azure Vnet with subnet"
+          az network vnet create \
+            --resource-group ${{ env.resourceGroupForDependency }} \
+            --name ${{ env.virtualNetworkName }} \
+            --address-prefix 10.0.0.0/28 \
+            --subnet-name ${{ env.subnetName }} \
+            --subnet-prefix 10.0.0.0/29
+
       - name: Try each image until one succeeds
         run: |
           # Convert multiline string to array
@@ -275,6 +288,19 @@ jobs:
             export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
             export dbPassword='${{ env.wlsPassword}}'
             export dbName='${{ env.dbName }}'
+          
+            ## Prepare Vnet parameters
+            if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+              export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
+              export virtualNetworkName=${{ env.virtualNetworkName }}
+              export subnetName=${{ env.subnetName }}
+            else
+              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+              export virtualNetworkNewOrExisting="new"
+              export virtualNetworkName="wls-vnet"
+              export subnetName="wls-subnet"
+            fi
           
             # Try deployment with this image
             if bash -c "
@@ -332,6 +358,11 @@ jobs:
               if [[ \$message == *'not in active (running) state'* ]]; then
                 echo 'Error: \$message'
                 exit 1
+              fi
+              
+              if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+                 # it will not contain public IP if the vnet is existing, skip current step
+                 exit 0
               fi
               
               # Configure network security group

@@ -8,6 +8,18 @@
   "adminVMName": {
     "value": "${adminVMName}"
   },
+  "virtualNetworkNewOrExisting": {
+    "value": "${virtualNetworkNewOrExisting}"
+  },
+  "virtualNetworkResourceGroupName": {
+    "value": "${virtualNetworkResourceGroupName}"
+  },
+  "virtualNetworkName": {
+    "value": "${virtualNetworkName}"
+  },
+  "subnetName": {
+    "value": "${subnetName}"
+  },
   "databaseType": {
     "value": "${databaseType}"
   },
