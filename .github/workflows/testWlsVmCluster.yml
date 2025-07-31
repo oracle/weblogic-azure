@@ -258,7 +258,7 @@ jobs:
           az network vnet subnet create \
             --resource-group ${{ env.resourceGroupForDependency }} \
             --name ${{ env.virtualNetworkName }} \
-            --subnet-name ${{ env.subnetForAppGateway }} \
+            --vnet-name ${{ env.subnetForAppGateway }} \
             --address-prefix 10.0.0.0/30
 
       - name: Try each image until one succeeds
