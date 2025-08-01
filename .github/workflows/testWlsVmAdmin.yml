@@ -293,19 +293,6 @@ jobs:
             export dbPassword='${{ env.wlsPassword}}'
             export dbName='${{ env.dbName }}'
           
-            ## Prepare Vnet parameters
-            if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
-              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
-              export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
-              export virtualNetworkName=${{ env.virtualNetworkName }}
-              export subnetName=${{ env.subnetName }}
-            else
-              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
-              export virtualNetworkNewOrExisting="new"
-              export virtualNetworkName="wls-vnet"
-              export subnetName="wls-subnet"
-            fi
-          
             # Try deployment with this image
             if bash -c "
               set -e
@@ -313,6 +300,19 @@ jobs:
               # Create Resource Group
               echo 'Creating resource group: $resourceGroup'
               az group create --verbose --name '$resourceGroup' --location '${location}'
+          
+              ## Prepare Vnet parameters
+              if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+                export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+                export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
+                export virtualNetworkName=${{ env.virtualNetworkName }}
+                export subnetName=${{ env.subnetName }}
+              else
+                export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+                export virtualNetworkNewOrExisting="new"
+                export virtualNetworkName="wls-vnet"
+                export subnetName="wls-subnet"
+              fi
           
               # Export variables for envsubst
               export adminPasswordOrKey='${{ env.wlsPassword }}'
