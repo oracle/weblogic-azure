@@ -308,7 +308,7 @@ jobs:
                 export virtualNetworkName=${{ env.virtualNetworkName }}
                 export subnetName=${{ env.subnetName }}
               else
-                export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+                export virtualNetworkResourceGroupName='$resourceGroup'
                 export virtualNetworkNewOrExisting="new"
                 export virtualNetworkName="wls-vnet"
                 export subnetName="wls-subnet"
