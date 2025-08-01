@@ -228,12 +228,6 @@ runs:
           --public-access 0.0.0.0 \
           --location ${{ inputs.location }} \
           --yes
-        az postgres flexible-server firewall-rule create \
-            --resource-group ${{ inputs.resourceGroup }} \
-            --name ${{ inputs.dbInstanceName }} \
-            -r "AllowAllAzureServices" \
-            --start-ip-address "0.0.0.0" \
-            --end-ip-address "0.0.0.0"
         host=$(az postgres flexible-server show \
           --resource-group ${{ inputs.resourceGroup }} \
           --name ${{ inputs.dbInstanceName }} \
@@ -262,12 +256,6 @@ runs:
           --public-access 0.0.0.0 \
           --location ${{ inputs.location }} \
           --yes
-        az postgres flexible-server firewall-rule create \
-            --resource-group ${{ inputs.resourceGroup }} \
-            --name ${{ inputs.dbInstanceName }} \
-            -r "AllowAllAzureServices" \
-            --start-ip-address "0.0.0.0" \
-            --end-ip-address "0.0.0.0"
         az postgres flexible-server microsoft-entra-admin  create \
           --resource-group ${{ inputs.resourceGroup }} \
           --server-name ${{ inputs.dbInstanceName }}  \
