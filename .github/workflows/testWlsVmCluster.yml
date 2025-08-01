@@ -293,21 +293,6 @@ jobs:
             export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
             export dbPassword='${{ env.wlsPassword}}'
             export dbName='${{ env.dbName }}'
-          
-            ## Prepare parameters for Vnet
-            if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
-              export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
-              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
-              export virtualNetworkName=${{ env.virtualNetworkName }}
-              export subnetForCluster=${{ env.subnetForCluster }}
-              export subnetForAppGateway=${{ env.subnetForAppGateway }}
-            else
-              export virtualNetworkNewOrExisting="new"
-              export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
-              export virtualNetworkName="wlscluster-vnet-cluster"
-              export subnetForCluster="jboss-subnet-for-cluster"
-              export subnetForAppGateway="appgateway-subnet"
-            fi
             
             # Try deployment with this image
             if bash -c "
@@ -316,6 +301,21 @@ jobs:
               # Create Resource Group
               echo 'Creating resource group: $resourceGroup'
               az group create --verbose --name '$resourceGroup' --location '${location}'
+          
+              ## Prepare parameters for Vnet
+              if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+                export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
+                export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
+                export virtualNetworkName=${{ env.virtualNetworkName }}
+                export subnetForCluster=${{ env.subnetForCluster }}
+                export subnetForAppGateway=${{ env.subnetForAppGateway }}
+              else
+                export virtualNetworkNewOrExisting='new'
+                export virtualNetworkResourceGroupName='$resourceGroup'
+                export virtualNetworkName='wlscluster-vnet-cluster'
+                export subnetForCluster='jboss-subnet-for-cluster'
+                export subnetForAppGateway='appgateway-subnet'
+              fi
           
               export repoPath='${GITHUB_REPOSITORY}'
               export testbranchName='${{ env.testbranchName }}' 
