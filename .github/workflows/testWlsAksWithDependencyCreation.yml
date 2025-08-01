@@ -199,11 +199,6 @@ jobs:
         runs-on: ubuntu-latest
         env: ${{ fromJson(inputs.configurations_for_ci) }}
         steps:
-            - name: Setup tmate session
-              uses: mxschmitt/action-tmate@v3
-              timeout-minutes: 120
-              with:
-                detached: true
             - name: Get AZ CLI Version
               run: |
                 echo "azCliVersion=${{needs.preflight.outputs.azCliVersion}}" >> $GITHUB_ENV
