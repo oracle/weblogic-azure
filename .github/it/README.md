@@ -1,7 +1,5 @@
 # IT Validation Configuration
 
-This directory contains JSON configuration files that define validation scenarios for the IT 7. **Workflow Triggering**: The action triggers the specified target workflows (such as `testWlsVmAdmin.yml`, `testWlsAksWithDependencyCreation.yml`, etc.) with the scenario inputsorkflow orchestrator. The validation system uses a reusable GitHub Action located at `.github/actions/it/action.yml` to execute these plans.
-
 ## Overview
 
 The IT validation system is a comprehensive integration testing framework designed to validate Oracle WebLogic Server deployments on Azure across multiple scenarios and configurations. It automates the execution of various deployment scenarios, monitors their progress, and generates detailed reports to ensure the reliability and quality of the Azure WebLogic templates.
