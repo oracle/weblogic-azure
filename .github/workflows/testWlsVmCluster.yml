@@ -502,6 +502,12 @@ jobs:
         id: azure-login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Delete existing Vnet
+        id: delete-vnet
+        if: ${{ env.virtualNetworkNewOrExisting == 'existing' }}
+        run: |
+          echo "delete vnet" ${{ env.virtualNetworkName }} "in resource group" ${{ env.resourceGroupForDependency }}
+          az network vnet delete --name ${{ env.virtualNetworkName }} --resource-group ${{ env.resourceGroupForDependency }}
       - name: Delete DB Resource Group
         id: delete-db-resource-group
         run: |
