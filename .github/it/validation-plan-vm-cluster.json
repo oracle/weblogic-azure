@@ -16,7 +16,7 @@
           "inputs": {
             "location": "centralus",
             "databaseType": "mssqlserver",
-            "configurations_for_ci": {
+            "configurations_for_it": {
               "virtualNetworkNewOrExisting": "existing",
               "virtualNetworkName": "my-existing-cluster-vnet",
               "subnetForCluster": "my-existing-cluster-subnet-for-cluster",

@@ -1,12 +1,12 @@
-name: CI Validation for AKS
-run-name: Running validation workflows with plan:${{ github.event_name == 'schedule' && 'plan-aks' || inputs.ci_plan }}
+name: IT Validation for AKS
+run-name: Running validation workflows with plan:${{ github.event_name == 'schedule' && 'plan-aks' || inputs.it_plan }}
 
 on:
   schedule:
     - cron: '0 6 1 * *'  # Runs on the 1st of every month at 6:00 AM UTC
   workflow_dispatch:
     inputs:
-      ci_plan:
+      it_plan:
         description: 'Path to the validation plan file'
         required: true
         type: choice
@@ -18,8 +18,8 @@ jobs:
   execute-validation:
     runs-on: ubuntu-latest
     outputs:
-      results: ${{ steps.ci-validation.outputs.results }}
-      report_url: ${{ steps.ci-validation.outputs.report_url }}
+      results: ${{ steps.it-validation.outputs.results }}
+      report_url: ${{ steps.it-validation.outputs.report_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,20 +27,20 @@ jobs:
       - name: Set validation plan file
         id: set-plan-file
         run: |
-          case "${{ inputs.ci_plan || 'plan-aks' }}" in
+          case "${{ inputs.it_plan || 'plan-aks' }}" in
             plan-aks)
-              CI_FILE=".github/ci/validation-plan-aks.json"
+              IT_FILE=".github/it/validation-plan-aks.json"
               ;;
             *)
-              echo "Unknown plan option: ${{ inputs.ci_plan }}"
+              echo "Unknown plan option: ${{ inputs.it_plan }}"
               exit 1
               ;;
           esac
-          echo "ci_file=$CI_FILE" >> $GITHUB_OUTPUT
+          echo "it_file=$IT_FILE" >> $GITHUB_OUTPUT
       
-      - name: Execute CI Validation
-        id: ci-validation
-        uses: ./.github/actions/ci
+      - name: Execute IT Validation
+        id: it-validation
+        uses: ./.github/actions/it
         with:
-          ci_file: ${{ steps.set-plan-file.outputs.ci_file }}
+          it_file: ${{ steps.set-plan-file.outputs.it_file }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

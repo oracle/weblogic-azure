@@ -1,7 +1,7 @@
-name: 'CI Validation Workflows'
+name: 'IT Validation Workflows'
 description: 'Execute validation workflows based on a validation plan'
 inputs:
-  ci_file:
+  it_file:
     description: 'Path to the validation plan file'
     required: true
   github_token:
@@ -27,7 +27,7 @@ runs:
       id: set-matrix
       shell: bash
       run: |
-        PLAN_FILE="${{ inputs.ci_file }}"
+        PLAN_FILE="${{ inputs.it_file }}"
         echo "Looking for plan file: $PLAN_FILE"
         
         if [ ! -f "$PLAN_FILE" ]; then
@@ -520,7 +520,7 @@ runs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
 
-    - name: Create/Update CI Branch
+    - name: Create/Update IT Branch
       shell: bash
       run: |
         # Debug information
@@ -542,40 +542,40 @@ runs:
         # Fetch all branches
         git fetch origin
 
-        # Check if ci branch exists remotely
-        if git ls-remote --exit-code --heads origin ci; then
-          echo "ci branch exists. Checking out..."
-          git checkout ci
-          git pull origin ci
+        # Check if it branch exists remotely
+        if git ls-remote --exit-code --heads origin it; then
+          echo "it branch exists. Checking out..."
+          git checkout it
+          git pull origin it
         else
-          echo "ci branch does not exist. Creating new ci branch from current HEAD..."
-          git checkout -b ci
+          echo "it branch does not exist. Creating new it branch from current HEAD..."
+          git checkout -b it
         fi
 
-        # Use existing ci-report directory if present, otherwise create it
-        if [ -d "ci-report" ]; then
-          echo "ci-report directory exists. Using existing directory."
+        # Use existing it-report directory if present, otherwise create it
+        if [ -d "it-report" ]; then
+          echo "it-report directory exists. Using existing directory."
         else
-          echo "ci-report directory does not exist. Creating it."
-          mkdir ci-report
+          echo "it-report directory does not exist. Creating it."
+          mkdir it-report
         fi
 
-        # Copy the report to ci-report directory
-        cp "$REPORT_FILE" ci-report/
+        # Copy the report to it-report directory
+        cp "$REPORT_FILE" it-report/
 
         # Add and commit the report
-        git add ci-report/${{ steps.generate-report.outputs.timestamp }}-report.md
+        git add it-report/${{ steps.generate-report.outputs.timestamp }}-report.md
         git commit -m "Add validation report ${{ steps.generate-report.outputs.timestamp }}" || echo "Nothing to commit."
 
-        # Push to the ci branch
-        git push origin ci
+        # Push to the it branch
+        git push origin it
 
     - name: Output Report URL
       id: output-urls
       shell: bash
       run: |
-        REPORT_URL="https://github.com/${{ github.repository }}/blob/ci/ci-report/${{ steps.generate-report.outputs.timestamp }}-report.md"
-        RAW_REPORT_URL="https://raw.githubusercontent.com/${{ github.repository }}/ci/ci-report/${{ steps.generate-report.outputs.timestamp }}-report.md"
+        REPORT_URL="https://github.com/${{ github.repository }}/blob/it/it-report/${{ steps.generate-report.outputs.timestamp }}-report.md"
+        RAW_REPORT_URL="https://raw.githubusercontent.com/${{ github.repository }}/it/it-report/${{ steps.generate-report.outputs.timestamp }}-report.md"
         
         echo "::notice::📊 Validation Report URL: $REPORT_URL"
         echo "::notice::📊 Raw Report URL: $RAW_REPORT_URL"
@@ -635,7 +635,7 @@ runs:
         echo "::notice::📊 Workflow Execution Summary:"
         echo "::notice::  Total: ${total}, Success: ${success}, Failed: ${failure}, Timeout: ${timeout}, Cancelled: ${cancelled}, Other Failed: ${other_failed}"
         
-        # If there are failed workflows, display them and fail the CI
+        # If there are failed workflows, display them and fail the IT
         if [ ${#failed_workflows[@]} -gt 0 ]; then
           echo "::error::❌ The following workflows failed:"
           for failed in "${failed_workflows[@]}"; do
@@ -643,7 +643,7 @@ runs:
           done
         fi
         
-        # If there are timeout workflows, display them and fail the CI
+        # If there are timeout workflows, display them and fail the IT
         if [ ${#timeout_workflows[@]} -gt 0 ]; then
           echo "::error::⏰ The following workflows timed out:"
           for timeout in "${timeout_workflows[@]}"; do
@@ -651,7 +651,7 @@ runs:
           done
         fi
         
-        # If there are cancelled workflows, display them and fail the CI
+        # If there are cancelled workflows, display them and fail the IT
         if [ ${#cancelled_workflows[@]} -gt 0 ]; then
           echo "::error::🚫 The following workflows were cancelled:"
           for cancelled in "${cancelled_workflows[@]}"; do
@@ -659,7 +659,7 @@ runs:
           done
         fi
         
-        # If there are other failed workflows, display them and fail the CI
+        # If there are other failed workflows, display them and fail the IT
         if [ ${#other_failed_workflows[@]} -gt 0 ]; then
           echo "::error::❌ The following workflows failed with other statuses:"
           for other_failed in "${other_failed_workflows[@]}"; do
@@ -667,9 +667,9 @@ runs:
           done
         fi
         
-        # Fail the CI workflow if any workflow failed, timed out, was cancelled, or had other failure statuses
+        # Fail the IT workflow if any workflow failed, timed out, was cancelled, or had other failure statuses
         if [ ${#failed_workflows[@]} -gt 0 ] || [ ${#timeout_workflows[@]} -gt 0 ] || [ ${#cancelled_workflows[@]} -gt 0 ] || [ ${#other_failed_workflows[@]} -gt 0 ]; then
-          echo "::error::❌ CI workflow failed because ${#failed_workflows[@]} workflow(s) failed, ${#timeout_workflows[@]} workflow(s) timed out, ${#cancelled_workflows[@]} workflow(s) were cancelled, and ${#other_failed_workflows[@]} workflow(s) had other failure statuses."
+          echo "::error::❌ IT workflow failed because ${#failed_workflows[@]} workflow(s) failed, ${#timeout_workflows[@]} workflow(s) timed out, ${#cancelled_workflows[@]} workflow(s) were cancelled, and ${#other_failed_workflows[@]} workflow(s) had other failure statuses."
           exit 1
         fi
         
