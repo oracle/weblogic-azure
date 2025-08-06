@@ -256,8 +256,10 @@ EOF
     
     if [ $? == 1 ];then
         echo_stderr "Failed to configure datasource ${JDBC_DATASOURCE_NAME}. Please make sure the input values are correct."
-        delete_datasource
         exit 1
+    else
+      echo "Data source ${JDBC_DATASOURCE_NAME} is configured successfully."
+      delete_datasource
     fi
 }
 
