@@ -260,7 +260,6 @@ EOF
         exit 1
     else
       echo "Data source ${JDBC_DATASOURCE_NAME} is configured successfully."
-      delete_datasource
     fi
 }
 
