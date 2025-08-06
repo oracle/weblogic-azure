@@ -24,8 +24,8 @@ on:
         options:
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
-      configurations_for_ci:
-        description: "JSON string of environment variables used for CI"
+      configurations_for_it:
+        description: "JSON string of environment variables used for IT"
         required: false
         default: '{}'
   # sample cURL
@@ -197,7 +197,7 @@ jobs:
     deploy-wls-on-aks:
         needs: [deploy-storage-account, preflight]
         runs-on: ubuntu-latest
-        env: ${{ fromJson(inputs.configurations_for_ci) }}
+        env: ${{ fromJson(inputs.configurations_for_it) }}
         steps:
             - name: Get AZ CLI Version
               run: |

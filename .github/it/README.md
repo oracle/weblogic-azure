@@ -1,10 +1,8 @@
-# CI Validation Configuration
-
-This directory contains JSON configuration files that define validation scenarios for the CI 7. **Workflow Triggering**: The action triggers the specified target workflows (such as `testWlsVmAdmin.yml`, `testWlsAksWithDependencyCreation.yml`, etc.) with the scenario inputsorkflow orchestrator. The validation system uses a reusable GitHub Action located at `.github/actions/ci/action.yml` to execute these plans.
+# IT Validation Configuration
 
 ## Overview
 
-The CI validation system is a comprehensive integration testing framework designed to validate Oracle WebLogic Server deployments on Azure across multiple scenarios and configurations. It automates the execution of various deployment scenarios, monitors their progress, and generates detailed reports to ensure the reliability and quality of the Azure WebLogic templates.
+The IT validation system is a comprehensive integration testing framework designed to validate Oracle WebLogic Server deployments on Azure across multiple scenarios and configurations. It automates the execution of various deployment scenarios, monitors their progress, and generates detailed reports to ensure the reliability and quality of the Azure WebLogic templates.
 
 ### Key Features
 
@@ -33,7 +31,7 @@ The CI validation system is a comprehensive integration testing framework design
 - [Getting Started](#getting-started)
   - [Quick Start Guide](#quick-start-guide)
   - [Prerequisites](#prerequisites)
-- [CI Action Usage](#ci-action-usage)
+- [IT Action Usage](#it-action-usage)
   - [Action Inputs](#action-inputs)
   - [Action Outputs](#action-outputs)
 - [Structure Requirements](#structure-requirements)
@@ -45,11 +43,11 @@ The CI validation system is a comprehensive integration testing framework design
 
 ## System Architecture
 
-The CI validation system consists of:
+The IT validation system consists of:
 
 1. **Validation Plan Files** (this directory): JSON files defining what to test
-2. **CI Action** (`/.github/actions/ci/action.yml`): Reusable composite action that executes the plans
-3. **CI Workflows** (`/.github/workflows/ci-validation-*.yaml`): Workflows that trigger the action with specific plans
+2. **IT Action** (`/.github/actions/it/action.yml`): Reusable composite action that executes the plans
+3. **IT Workflows** (`/.github/workflows/it-validation-*.yaml`): Workflows that trigger the action with specific plans
 3. **Target Workflows** (`/.github/workflows/testWls*.yml` and `buildWls*.yml`): The actual validation workflows that get executed
 
 ## Configuration Structure
@@ -114,11 +112,11 @@ You can control how scenarios within a workflow are executed by using the option
 
 ## How It Works
 
-1. **CI Workflows**: The `ci-validation-*.yaml` workflows are triggered (manually or scheduled)
+1. **IT Workflows**: The `it-validation-*.yaml` workflows are triggered (manually or scheduled)
 
-2. **Plan File Mapping**: Each CI workflow maps its input to a specific validation plan file in this directory
+2. **Plan File Mapping**: Each IT workflow maps its input to a specific validation plan file in this directory
 
-3. **Action Execution**: The workflow calls the CI action (`/.github/actions/ci/action.yml`) with the plan file path
+3. **Action Execution**: The workflow calls the IT action (`/.github/actions/it/action.yml`) with the plan file path
 
 4. **Plan Processing**: The action reads the validation plan and processes each scenario
 
@@ -128,7 +126,7 @@ You can control how scenarios within a workflow are executed by using the option
 
 7. **Monitoring**: The action monitors workflow execution and waits for completion
 
-8. **Reporting**: Results are compiled into comprehensive reports and stored in the `ci` branch
+8. **Reporting**: Results are compiled into comprehensive reports and stored in the `it` branch
 
 ## Available Files
 
@@ -157,38 +155,38 @@ Each validation plan targets specific WebLogic deployment scenarios:
    - For Dynamic Cluster on VM: `validation-plan-vm-dynamic-cluster.json`
    - For build validation only: `validation-plan-build.json`
 
-2. **Trigger CI Validation**: Use the GitHub Actions interface to manually trigger a CI validation workflow:
+2. **Trigger IT Validation**: Use the GitHub Actions interface to manually trigger a IT validation workflow:
    - Go to the "Actions" tab in the repository
-   - Select the appropriate `ci-validation-*` workflow:
-     - `CI Validation for AKS` - for AKS deployments
-     - `CI Validation for VM Admin` - for Admin Server on VM
-     - `CI Validation for VM Cluster` - for Configured Cluster on VM  
-     - `CI Validation for VM Dynamic Cluster` - for Dynamic Cluster on VM
-     - `CI Validation for Build` - for build-only validation
+   - Select the appropriate `it-validation-*` workflow:
+     - `IT Validation for AKS` - for AKS deployments
+     - `IT Validation for VM Admin` - for Admin Server on VM
+     - `IT Validation for VM Cluster` - for Configured Cluster on VM  
+     - `IT Validation for VM Dynamic Cluster` - for Dynamic Cluster on VM
+     - `IT Validation for Build` - for build-only validation
    - Click "Run workflow" and select your desired validation plan
 
 3. **Monitor Progress**: Track the execution progress in the Actions tab and view real-time logs
 
-4. **Review Results**: Check the generated reports in the `ci` branch under `ci-report/` directory
+4. **Review Results**: Check the generated reports in the `it` branch under `it-report/` directory
 
 ### Prerequisites
 
-Before using the CI validation system, ensure:
+Before using the IT validation system, ensure:
 
 - [ ] Azure subscription with appropriate permissions
 - [ ] GitHub repository with Actions enabled
 - [ ] Required secrets configured in repository settings
-- [ ] Access to the `ci` branch for report storage
+- [ ] Access to the `it` branch for report storage
 
-## CI Action Usage
+## IT Action Usage
 
-The validation plans are consumed by the CI action located at `/.github/actions/ci/action.yml`. 
+The validation plans are consumed by the IT action located at `/.github/actions/it/action.yml`. 
 
 ### Action Inputs
 
 | Input | Description | Required |
 |-------|-------------|----------|
-| `ci_file` | Path to the validation plan file | Yes |
+| `it_file` | Path to the validation plan file | Yes |
 
 ### Action Outputs
 
@@ -196,7 +194,7 @@ The validation plans are consumed by the CI action located at `/.github/actions/
 |--------|-------------|
 | `results` | JSON string containing the results of all workflow executions |
 | `report_timestamp` | Timestamp of the generated report |
-| `report_url` | URL to the generated report on the CI branch |
+| `report_url` | URL to the generated report on the IT branch |
 
 ## Structure Requirements
 
@@ -222,7 +220,7 @@ The validation plans are consumed by the CI action located at `/.github/actions/
 
 ## Report Generation
 
-The CI action generates comprehensive reports that include:
+The IT action generates comprehensive reports that include:
 
 - **Summary Statistics**: Total workflows, success/failure counts including cancelled and timeout scenarios
 - **Detailed Results**: Individual workflow results with duration and status  
@@ -231,8 +229,8 @@ The CI action generates comprehensive reports that include:
 
 Reports are:
 1. Uploaded as GitHub Actions artifacts
-2. Committed to the `ci` branch in the `ci-report/` directory
-3. Accessible via the repository's CI branch
+2. Committed to the `it` branch in the `it-report/` directory
+3. Accessible via the repository's IT branch
 
 ### Status Tracking
 
@@ -248,8 +246,8 @@ The system tracks all execution outcomes:
 Reports can be accessed in multiple ways:
 
 1. **GitHub Actions Artifacts**: Download reports directly from the workflow run artifacts
-2. **CI Branch**: Browse reports in the `ci` branch under `ci-report/` directory  
-3. **Direct Links**: Use the `report_url` output from the CI action
+2. **IT Branch**: Browse reports in the `it` branch under `it-report/` directory  
+3. **Direct Links**: Use the `report_url` output from the IT action
 4. **API Access**: Programmatically access reports via GitHub API
 
 #### Report File Naming Convention
@@ -260,6 +258,6 @@ Example: `report-20250804-103000.json` (August 4, 2025 at 10:30:00 UTC)
 
 ## Error Handling
 
-The CI action includes robust error handling:
+The IT action includes robust error handling:
 - **Timeout Protection**: 60-minute maximum wait time per workflow
-- **Failure Detection**: CI workflow fails if any triggered workflow fails, times out, or is cancelled
+- **Failure Detection**: IT workflow fails if any triggered workflow fails, times out, or is cancelled

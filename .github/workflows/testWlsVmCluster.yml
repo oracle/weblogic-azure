@@ -22,8 +22,8 @@ on:
           - mssqlserver-passwordless
           - postgresql(flexible)
           - postgresql-passwordless(flexible)
-      configurations_for_ci:
-        description: "JSON string of environment variables used for CI"
+      configurations_for_it:
+        description: "JSON string of environment variables used for IT"
         required: false
         default: '{}'
   # Allows you to run this workflow using GitHub APIs
@@ -184,7 +184,7 @@ jobs:
   deploy-weblogic-cluster:
     needs: [deploy-dependencies, preflight]
     runs-on: ubuntu-latest
-    env: ${{ fromJson(inputs.configurations_for_ci) }}
+    env: ${{ fromJson(inputs.configurations_for_it) }}
     steps:
       - name: Initialize environment variables
         run: |

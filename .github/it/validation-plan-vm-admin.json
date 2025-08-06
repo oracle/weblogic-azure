@@ -20,7 +20,7 @@
           "scenario": "Bring your own VNET for Admin Server on VM",
           "inputs": {
             "location": "centralus",
-            "configurations_for_ci": {
+            "configurations_for_it": {
               "virtualNetworkNewOrExisting": "existing",
               "virtualNetworkName": "myvirtualNetworkName-vm-admin",
               "subnetName": "mySubnet-vm-admin"
