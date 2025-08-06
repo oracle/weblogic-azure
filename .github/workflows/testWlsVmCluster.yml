@@ -497,6 +497,7 @@ jobs:
     if: always()
     needs: deploy-weblogic-cluster
     runs-on: ubuntu-latest
+    env: ${{ fromJson(inputs.configurations_for_it) }}
     steps:
       - uses: azure/login@v1
         id: azure-login
