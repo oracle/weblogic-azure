@@ -62,9 +62,15 @@ var name_jdbcPlugins = {
   postgresql: 'authenticationPluginClassName=com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin'
   sqlserver: 'authentication=ActiveDirectoryMSI'
 }
-var array_urlJoiner = {
+var array_paramJoiner = {
   mysql: '&'
   postgresql: '&'
+  sqlserver: ';'
+}
+
+var array_urlJoiner = {
+  mysql: '?'
+  postgresql: '?'
   sqlserver: ';'
 }
 var name_podIdentity = format('{0}-pod-identity-{1}', databaseType, toLower(utcValue))
@@ -136,7 +142,7 @@ module configDataSource '_deployment-scripts/_ds-datasource-connection.bicep' = 
     dbConfigurationType: dbConfigurationType
     dbGlobalTranPro: dbGlobalTranPro
     dbUser: dbUser
-    dsConnectionURL: format('{0}{4}{1}{4}{3}={2}', const_connectionString, name_jdbcPlugins[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId, array_msiClientId[databaseType], array_urlJoiner[databaseType])
+    dsConnectionURL: format('{0}{4}{1}{5}{2}={3}', const_connectionString, name_jdbcPlugins[databaseType], array_msiClientId[databaseType], reference(items(dbIdentity.userAssignedIdentities)[0].key, const_identityAPIVersion, 'full').properties.clientId, array_urlJoiner[databaseType], array_paramJoiner[databaseType])
     enablePswlessConnection: true
     identity: identity
     jdbcDataSourceName: jdbcDataSourceName
