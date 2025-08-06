@@ -228,10 +228,12 @@ runs:
           --public-access 0.0.0.0 \
           --location ${{ inputs.location }} \
           --yes
+        echo "Get the host name of the PostgreSQL server"
         host=$(az postgres flexible-server show \
           --resource-group ${{ inputs.resourceGroup }} \
           --name ${{ inputs.dbInstanceName }} \
           --query "fullyQualifiedDomainName" -o tsv)
+        echo "Create a database in the PostgreSQL server"
         az postgres flexible-server db create --resource-group ${{ inputs.resourceGroup }} \
                                               --server-name ${{ inputs.dbInstanceName }} \
                                               --database-name ${{ inputs.databaseName }}
@@ -256,17 +258,19 @@ runs:
           --public-access 0.0.0.0 \
           --location ${{ inputs.location }} \
           --yes
+        echo "Set the user-assigned managed identity as the Microsoft Entra admin for the PostgreSQL server"
         az postgres flexible-server microsoft-entra-admin  create \
           --resource-group ${{ inputs.resourceGroup }} \
           --server-name ${{ inputs.dbInstanceName }}  \
           --display-name ${{ inputs.uamiName }}  \
           --object-id $objectId \
           --type ServicePrincipal
-
+        echo "Get the host name of the PostgreSQL server"
         host=$(az postgres flexible-server show \
           --resource-group ${{ inputs.resourceGroup }} \
           --name ${{ inputs.dbInstanceName }} \
           --query "fullyQualifiedDomainName" -o tsv)
+        echo "Create a database in the PostgreSQL server"
         az postgres flexible-server db create --resource-group ${{ inputs.resourceGroup }} \
                                               --server-name ${{ inputs.dbInstanceName }} \
                                               --database-name ${{ inputs.databaseName }}
