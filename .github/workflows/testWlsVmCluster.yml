@@ -512,9 +512,15 @@ jobs:
         id: delete-vnet
         if: ${{ env.virtualNetworkNewOrExisting == 'existing' }}
         run: |
+          # Delete VMs first
+          az vm delete --ids $(az vm list -g ${{ env.resourceGroupForDependency }} --query "[].id" -o tsv) --force-deletion true --yes
+          
+          # Delete network interfaces
+          az network nic delete --ids $(az network nic list -g ${{ env.resourceGroupForDependency }} --query "[].id" -o tsv)
+          
+          # Delete network security groups
+          az network nsg delete --ids $(az network nsg list -g ${{ env.resourceGroupForDependency }} --query "[].id" -o tsv)
           echo "delete vnet" ${{ env.virtualNetworkName }} "in resource group" ${{ env.resourceGroupForDependency }}
-          # sleep 5 minutes to wait for the vnet ready to be deleted
-          sleep 300
           az network vnet delete --name ${{ env.virtualNetworkName }} --resource-group ${{ env.resourceGroupForDependency }}
       - name: Delete Resource Group
         id: delete-resource-group
