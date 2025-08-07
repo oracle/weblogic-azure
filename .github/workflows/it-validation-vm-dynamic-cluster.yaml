@@ -3,7 +3,7 @@ run-name: Running validation workflows with plan:${{ github.event_name == 'sched
 
 on:
   schedule:
-    - cron: '0 15 1 * *'  # Runs on the 1st of every month at 15:00 PM (noon) UTC
+    - cron: '0 15 * * 1' # Runs Every Monday at 15:00 UTC
   workflow_dispatch:
     inputs:
       it_plan:
