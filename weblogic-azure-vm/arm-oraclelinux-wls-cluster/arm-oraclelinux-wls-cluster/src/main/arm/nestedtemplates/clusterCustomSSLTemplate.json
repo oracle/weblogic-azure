@@ -1109,6 +1109,14 @@
             "type": "string",
             "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002/console/'),'')]"
         },
+        "adminRemoteConsoleURL": {
+            "type": "string",
+            "value": "[uri(concat('http://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7001'),'')]"
+        },
+        "adminRemoteConsoleSecuredURL": {
+            "type": "string",
+            "value": "[uri(concat('https://',if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),reference(variables('name_outputAdminHost_with_pub_ip'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn,reference(variables('name_outputAdminHost_without_pub_ip')).ipConfigurations[0].properties.privateIPAddress),':7002'),'')]"
+        },        
         "wlsDomainLocation": {
             "type": "string",
             "value": "[concat('/u01/domains/', parameters('wlsDomainName'))]"
