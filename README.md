@@ -3,11 +3,11 @@
 As part of a broad-ranging partnership between Oracle and Microsoft, this project offers support for running Oracle WebLogic Server in the Azure Virtual Machines and Azure Kubernetes Service (AKS). The partnership includes joint support for a range of Oracle software running on Azure, including Oracle WebLogic, Oracle Linux, and Oracle DB, as well as interoperability between Oracle Cloud Infrastructure (OCI) and Azure. 
 
 ## Integration tests report
-* [![CI Validation for Build](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-build.yaml/badge.svg)](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-build.yaml)
-* [![CI Validation for AKS](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-aks.yaml/badge.svg)](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-aks.yaml)
-* [![CI Validation for VM Admin](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-vm-admin.yaml/badge.svg)](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-vm-admin.yaml)
-* [![CI Validation for VM Cluster](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-vm-cluster.yaml/badge.svg)](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-vm-cluster.yaml)
-* [![CI Validation for VM Dynamic Cluster](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-vm-dynamic-cluster.yaml/badge.svg)](https://github.com/azure-javaee/weblogic-azure/actions/workflows/it-validation-vm-dynamic-cluster.yaml)
+* [![CI Validation for Build](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-build.yaml/badge.svg)](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-build.yaml)
+* [![CI Validation for AKS](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-aks.yaml/badge.svg)](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-aks.yaml)
+* [![CI Validation for VM Admin](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-vm-admin.yaml/badge.svg)](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-vm-admin.yaml)
+* [![CI Validation for VM Cluster](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-vm-cluster.yaml/badge.svg)](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-vm-cluster.yaml)
+* [![CI Validation for VM Dynamic Cluster](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-vm-dynamic-cluster.yaml/badge.svg)](https://github.com/oracle/weblogic-azure/actions/workflows/it-validation-vm-dynamic-cluster.yaml)
 
 ## Installation
 
