@@ -2,7 +2,7 @@
 
 function usage()
 {
-  echo "Usage: $0 <adminInternalHostName> <adminExternalHostName> <adminDnsZoneName> <dnsLabelPrefix> <wlsDomainName> <azureResourceGroupRegion> [<debugFlag>]"
+  echo "Usage: $0 <adminInternalHostName> <adminExternalHostName> <adminDnsZoneName> <dnsLabelPrefix> <wlsDomainName> <azureResourceGroupRegion> <adminVMNamePrefix> <globalResourceNameSuffix> [<debugFlag>]"
   exit 1
 }
 
@@ -22,10 +22,12 @@ function readArgs()
   dnsLabelPrefix="$4"
   wlsDomainName="$5"
   azureResourceGroupRegion="$6"
+  adminVMNamePrefix=$7
+  globalResourceNameSuffix="$8"
 
-  if [ $# -gt 6 ];
+  if [ $# -gt 8 ];
   then
-   debugFlag="$7"
+   debugFlag="$9"
   else
    debugFlag="false"
   fi
@@ -83,6 +85,9 @@ sed -i "s/adminDNSZoneName=.*/adminDNSZoneName=\"${adminDNSZoneName}\";/g" $SCRI
 sed -i "s/dnsLabelPrefix=.*/dnsLabelPrefix=\"${dnsLabelPrefix}\";/g" $SCRIPT_DIR/src/main/java/HostNameValues.java
 sed -i "s/wlsDomainName=.*/wlsDomainName=\"${wlsDomainName}\";/g" $SCRIPT_DIR/src/main/java/HostNameValues.java
 sed -i "s/azureResourceGroupRegion=.*/azureResourceGroupRegion=\"${azureResourceGroupRegion}\";/g" $SCRIPT_DIR/src/main/java/HostNameValues.java
+sed -i "s/globalResourceNameSuffix=.*/globalResourceNameSuffix=\"${globalResourceNameSuffix}\";/g" $SCRIPT_DIR/src/main/java/HostNameValues.java
+sed -i "s/adminVMNamePrefix=.*/adminVMNamePrefix=\"${adminVMNamePrefix}\";/g" $SCRIPT_DIR/src/main/java/HostNameValues.java
+
 
 cd $SCRIPT_DIR/src/main/java
 echo "Compiling modified HostNameValues.java ..."

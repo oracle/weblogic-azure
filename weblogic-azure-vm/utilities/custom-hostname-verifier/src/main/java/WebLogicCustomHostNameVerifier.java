@@ -18,11 +18,20 @@ public class WebLogicCustomHostNameVerifier implements weblogic.security.SSL.Hos
                                             .append(".")
                                             .append(HostNameValues.azureVMExternalDomainName.toLowerCase()).toString();
         
+		String vmNameSubString = new StringBuilder(HostNameValues.getGlobalResourceNameSuffix()).toString();
+        debug("vmNameSubString:"+vmNameSubString);        
+        
         if(commonName.equalsIgnoreCase(urlHostname))
         {
             debug("urlhostname matching certificate common name");
             return true;
         }
+        else
+        if(commonName.startsWith(HostNameValues.getAdminVMNamePrefix()) && urlHostname.contains(vmNameSubString))
+        {
+          	debug("matching with certificate common name and vmname");
+           	return true;
+        }        
         else
         if(commonName.equalsIgnoreCase(HostNameValues.getAdminInternalHostName()))
         {
