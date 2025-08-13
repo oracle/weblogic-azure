@@ -122,6 +122,26 @@
                     "commandToExecute": "[concat('sh',' ',variables('name_scriptInstallJdbcLibs'),' <<< \"',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ',parameters('managedServerPrefix'), copyIndex(1), ' ', parameters('adminVMName'), ' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',base64(parameters('wlsPassword')),' ',parameters('databaseType'),' ',parameters('enablePswlessConnection'), '\"')]"
                 }
             }
+        },
+        {
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('adminVMName'), '/newuserscript')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocationInstallJdbcLibsTemplate'), concat('../scripts/', variables('name_scriptInstallJdbcLibs'), parameters('_artifactsLocationSasToken')))]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptInstallJdbcLibs'),' <<< \"',variables('const_wlsHome'),' ',variables('const_wlsDomainPath'),' ','admin', ' ', parameters('adminVMName'), ' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',base64(parameters('wlsPassword')),' ',parameters('databaseType'),' ',parameters('enablePswlessConnection'), '\"')]"
+                }
+            }
         }
     ]
 }

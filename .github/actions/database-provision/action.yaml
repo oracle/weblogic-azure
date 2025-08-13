@@ -1,0 +1,287 @@
+name: Database provision
+description: Database provision
+
+inputs:
+  databaseType:
+    description: "databaseType"
+    required: true
+  resourceGroup:
+    description: "resourceGroup"
+    required: true
+  uamiName:
+    description: "uamiName"
+    required: true
+  location:
+    description: "location"
+    required: true
+  dbInstanceName:
+    description: "dbInstanceName"
+    required: true
+  dbPassword:
+    description: "dbPassword"
+    required: true
+  dbAdminUser:
+    description: "dbAdminUser"
+    required: false
+    default: "testuser"
+  databaseName:
+    description: "databaseName"
+    required: true
+    default: "testdb"
+
+outputs:
+  serverHost:
+    description: "serverHost"
+    value: ${{ steps.resource_outputs.outputs.serverHost }}
+  uamiId:
+    description: "uamiId"
+    value: ${{ steps.resource_outputs.outputs.uamiId }}
+
+runs:
+  using: "composite"
+  steps:
+    # 01-Deploy an instance of Azure SQL Database
+    - name: Echo inputs
+      shell: bash
+      run: |
+        echo "resourceGroup=${{ inputs.resourceGroup }}"
+        echo "uamiName=${{ inputs.uamiName }}"
+        echo "location=${{ inputs.location }}"
+        echo "dbInstanceName=${{ inputs.dbInstanceName }}"
+        echo "dbAdminUser=${{ inputs.dbAdminUser }}"
+        echo "databaseName=${{ inputs.databaseName }}"
+    - name: Deploy an instance of Azure SQL Database
+      id: deploy-mssqlserver
+      if: ${{ inputs.databaseType == 'mssqlserver' }}
+      shell: bash
+      run: |
+        az sql server create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --admin-user ${{ inputs.dbAdminUser }} --admin-password ${{ inputs.dbPassword }} \
+          --location ${{ inputs.location }}
+        host=$(az sql server show \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --query "fullyQualifiedDomainName" -o tsv)
+        # Allow Azure services to access
+        az sql server firewall-rule create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --server ${{ inputs.dbInstanceName }} \
+          --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+        az sql db create --resource-group ${{ inputs.resourceGroup }} \
+                         --server ${{ inputs.dbInstanceName }} \
+                         --name ${{ inputs.databaseName }}
+        
+        echo "serverHost=${host}" >> "$GITHUB_ENV"
+
+    - name: Deploy an instance of Azure SQL passwordless Database
+      id: deploy-mssqlserver-passwordless
+      if: ${{ inputs.databaseType == 'mssqlserver-passwordless' }}
+      shell: bash
+      run: |
+        # Create a user-assigned managed identity
+        az identity create --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }}
+        # Export the resource ID of the user-assigned managed identity as an environment variable
+        uamiId=$(az identity show --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }} --query id -o tsv)
+        objectId=$(az identity show --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }} --query principalId -o tsv)
+        
+        az sql server create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --admin-user ${{ inputs.dbAdminUser }} \
+          --admin-password ${{ inputs.dbPassword }} \
+          --assign-identity \
+          --external-admin-principal-type Application \
+          --external-admin-name ${{ inputs.uamiName }} \
+          --external-admin-sid $objectId \
+          --location ${{ inputs.location }}
+        host=$(az sql server show \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --query "fullyQualifiedDomainName" -o tsv)
+        # Allow Azure services to access
+        az sql server firewall-rule create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --server ${{ inputs.dbInstanceName }} \
+          --name "AllowAllAzureIps" --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+        az sql db create --resource-group ${{ inputs.resourceGroup }} \
+                         --server ${{ inputs.dbInstanceName }} \
+                         --name ${{ inputs.databaseName }}
+        
+        echo "serverHost=${host}" >> "$GITHUB_ENV"
+        echo "uamiId=${uamiId}" >> "$GITHUB_ENV"
+
+    - name: Deploy an instance of Azure Database for MySQL
+      id: deploy-mysql
+      if: ${{ inputs.databaseType == 'mysql(flexible)' }}
+      shell: bash
+      run: |
+        az mysql flexible-server create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --admin-user myadmin \
+          --admin-password ${{ inputs.dbPassword }} \
+          --sku-name Standard_B1ms \
+          --location ${{ inputs.location }} \
+          --version 8.0.21 \
+          --yes
+        
+        # Allow Azure services to access
+        az mysql flexible-server firewall-rule create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --rule-name "AllowAllAzureIps" \
+          --start-ip-address 0.0.0.0 \
+          --end-ip-address 0.0.0.0
+        # Allow current IP to access MySQL server
+        currentIp=$(curl -s https://icanhazip.com)
+        az mysql flexible-server firewall-rule create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --rule-name "AllowCurrentIp" \
+          --start-ip-address ${currentIp} \
+          --end-ip-address ${currentIp}
+        host=$(az mysql flexible-server show \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --query "fullyQualifiedDomainName" -o tsv)
+        
+        wget --no-check-certificate https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+        mysql -h $host -u myadmin -p${{ inputs.dbPassword }} --ssl-ca=DigiCertGlobalRootCA.crt.pem << EOF
+        CREATE DATABASE ${{ inputs.databaseName }};
+        CREATE USER '${{ inputs.dbAdminUser }}'@'%' IDENTIFIED BY '${{ inputs.dbPassword }}';
+        GRANT ALL PRIVILEGES ON ${{ inputs.databaseName }} . * TO '${{ inputs.dbAdminUser }}'@'%';
+        FLUSH PRIVILEGES;
+        EOF
+        
+        echo "serverHost=${host}" >> "$GITHUB_ENV"
+
+    - name: Deploy an instance of Azure Database for MySQL passwordless
+      id: deploy-mysql-passwordless
+      if: ${{ inputs.databaseType == 'mysql-passwordless(flexible)' }}
+      shell: bash
+      run: |
+        az mysql flexible-server create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --admin-user myadmin \
+          --admin-password ${{ inputs.dbPassword }} \
+          --sku-name Standard_B1ms \
+          --location ${{ inputs.location }} \
+          --version 8.0.21 \
+          --yes
+        
+        # Allow Azure services to access
+        az mysql flexible-server firewall-rule create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --rule-name "AllowAllAzureIps" \
+          --start-ip-address 0.0.0.0 \
+          --end-ip-address 0.0.0.0
+        # Allow current IP to access MySQL server
+        currentIp=$(curl -s https://icanhazip.com)
+        az mysql flexible-server firewall-rule create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --rule-name "AllowCurrentIp" \
+          --start-ip-address ${currentIp} \
+          --end-ip-address ${currentIp}
+        host=$(az mysql flexible-server show \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --query "fullyQualifiedDomainName" -o tsv)
+
+        wget --no-check-certificate https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+        mysql -h $host -u myadmin -p${{ inputs.dbPassword }} --ssl-ca=DigiCertGlobalRootCA.crt.pem << EOF
+        CREATE DATABASE ${{ inputs.databaseName }};
+        CREATE USER '${{ inputs.dbAdminUser }}'@'%' IDENTIFIED BY '${{ inputs.dbPassword }}';
+        GRANT ALL PRIVILEGES ON ${{ inputs.databaseName }} . * TO '${{ inputs.dbAdminUser }}'@'%';
+        FLUSH PRIVILEGES;
+        EOF
+
+        # Create a user-assigned managed identity
+        az identity create --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }}
+        # Export the resource ID of the user-assigned managed identity as an environment variable
+        uamiId=$(az identity show --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }} --query id -o tsv)
+        objectId=$(az identity show --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }} --query principalId -o tsv)
+
+        az mysql flexible-server ad-admin create \
+          --resource-group  ${{ inputs.resourceGroup }} \
+          --server-name ${{ inputs.dbInstanceName }} \
+          --display-name ${{ inputs.uamiName }} \
+          --object-id $objectId \
+          --identity $uamiId
+
+        echo "serverHost=${host}" >> "$GITHUB_ENV"   
+        echo "uamiId=${uamiId}" >> "$GITHUB_ENV"
+
+    - name: Deploy an instance of Azure Database for PostgreSQL
+      id: deploy-postgresql
+      if: ${{ inputs.databaseType == 'postgresql(flexible)' }}
+      shell: bash
+      run: |
+        az postgres flexible-server create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --admin-user ${{ inputs.dbAdminUser }} --admin-password ${{ inputs.dbPassword }} \
+          --public-access 0.0.0.0 \
+          --location ${{ inputs.location }} \
+          --yes
+        echo "Get the host name of the PostgreSQL server"
+        host=$(az postgres flexible-server show \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --query "fullyQualifiedDomainName" -o tsv)
+        echo "Create a database in the PostgreSQL server"
+        az postgres flexible-server db create --resource-group ${{ inputs.resourceGroup }} \
+                                              --server-name ${{ inputs.dbInstanceName }} \
+                                              --database-name ${{ inputs.databaseName }}
+
+        echo "serverHost=${host}" >> "$GITHUB_ENV"
+    - name: Deploy an instance of Azure Database for PostgreSQL passwordless
+      if: ${{ inputs.databaseType == 'postgresql-passwordless(flexible)' }}
+      id: deploy-postgresql-passwordless
+      shell: bash
+      run: |
+
+        # Create a user-assigned managed identity
+        az identity create --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }}
+        # Export the resource ID of the user-assigned managed identity as an environment variable
+        uamiId=$(az identity show --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }} --query id -o tsv)
+        objectId=$(az identity show --name ${{ inputs.uamiName }} --resource-group ${{ inputs.resourceGroup }} --query principalId -o tsv)
+
+        az postgres flexible-server create \
+          --microsoft-entra-auth Enabled \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --public-access 0.0.0.0 \
+          --location ${{ inputs.location }} \
+          --yes
+        echo "Set the user-assigned managed identity as the Microsoft Entra admin for the PostgreSQL server"
+        sleep 120 # Wait for the server to be ready
+        az postgres flexible-server microsoft-entra-admin  create \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --server-name ${{ inputs.dbInstanceName }}  \
+          --display-name ${{ inputs.uamiName }}  \
+          --object-id $objectId \
+          --type ServicePrincipal
+        echo "Get the host name of the PostgreSQL server"
+        host=$(az postgres flexible-server show \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.dbInstanceName }} \
+          --query "fullyQualifiedDomainName" -o tsv)
+        echo "Create a database in the PostgreSQL server"
+        az postgres flexible-server db create --resource-group ${{ inputs.resourceGroup }} \
+                                              --server-name ${{ inputs.dbInstanceName }} \
+                                              --database-name ${{ inputs.databaseName }}
+
+        echo "serverHost=${host}" >> "$GITHUB_ENV"
+        echo "uamiId=${uamiId}" >> "$GITHUB_ENV"
+
+    - name: Set outputs
+      id: resource_outputs
+      shell: bash
+      run: |  
+        echo "uamiId=${{ env.uamiId }}" >> "$GITHUB_OUTPUT"
+        echo "serverHost=${{ env.serverHost }}" >> "$GITHUB_OUTPUT"  

@@ -1,0 +1,121 @@
+{
+    "_artifactsLocation": {
+        "value": "https://raw.githubusercontent.com/${gitUserName}/weblogic-azure/${testbranchName}/weblogic-azure-aks/src/main/arm/"
+    },
+    "aksAgentPoolNodeCount": {
+        "value": 3
+    },
+    "vmSize": {
+        "value": "${vmSize}"
+    },
+    "appGatewayCertificateOption": {
+        "value": "generateCert"
+    },
+    "appgwForAdminServer": {
+        "value": true
+    },
+    "appgwForRemoteConsole": {
+        "value": true
+    },
+    "appPackageUrls": {
+        "value": [
+            "${appPackageUrls}"
+        ]
+    },
+    "appReplicas": {
+        "value": 2
+    },
+    "createACR": {
+        "value": true
+    },
+    "createAKSCluster": {
+        "value": ${createAKSCluster}
+    },
+    "newOrExistingVnetForApplicationGateway": {
+        "value": "${newOrExistingVnetForApplicationGateway}"
+    },
+    "vnetRGNameForApplicationGateway": {
+        "value": "${vnetRGNameForApplicationGateway}"
+    },
+    "aksClusterName": {
+        "value": "${aksClusterName}"
+    },
+    "aksClusterRGName":{
+        "value": "${aksClusterRGName}"
+    },
+    "createDNSZone": {
+        "value": true
+    },
+    "dbGlobalTranPro": {
+        "value": "EmulateTwoPhaseCommit"
+    },
+    "dbPassword": {
+        "value": "${dbPassword}"
+    },
+    "dbUser": {
+        "value": "${dbUser}"
+    },
+    "databaseType": {
+        "value": "${databaseType}"
+    },
+    "dsConnectionURL": {
+        "value": "${dsConnectionURL}"
+    },
+    "enablePswlessConnection": {
+        "value": ${enablePswlessConnection}
+    },
+    "enableAppGWIngress": {
+        "value": ${enableAppGWIngress}
+    },
+    "enableAzureMonitoring": {
+        "value": false
+    },
+    "enableAzureFileShare": {
+        "value": true
+    },
+    "enableCookieBasedAffinity": {
+        "value": true
+    },
+    "enableCustomSSL": {
+        "value": false
+    },
+    "enableDB": {
+        "value": ${enableDB}
+    },
+    "enableDNSConfiguration": {
+        "value": false
+    },
+    "jdbcDataSourceName": {
+        "value": "jdbc/CargoTrackerDB"
+    },
+    "location": {
+        "value": "${location}"
+    },
+    "ocrSSOPSW": {
+        "value": "${ocrSSOPSW}"
+    },
+    "ocrSSOUser": {
+        "value": "${ocrSSOUser}"
+    },
+    "useInternalLB": {
+        "value": false
+    },
+    "useOracleImage": {
+        "value": true
+    },
+    "wdtRuntimePassword": {
+        "value": "${wdtRuntimePassword}"
+    },
+    "wlsImageTag": {
+        "value": "${wlsImageTag}"
+    },
+    "wlsPassword": {
+        "value": "${wlsPassword}"
+    },
+    "wlsUserName": {
+        "value": "${wlsUserName}"
+    },
+    "dbIdentity": {
+        "value": ${dbIdentity}
+    }
+}

@@ -23,7 +23,7 @@ env:
   repoName: "weblogic-azure"
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
-  repoOwner: ${{ secrets.USER_NAME }}
+  repoOwner: ${{ github.repository_owner }}
 
 jobs:
   newtag:
