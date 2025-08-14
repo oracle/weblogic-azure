@@ -277,9 +277,9 @@ domainInfo:
 topology:
    Name: "$wlsDomainName"
    Machine:
-     '$nmHost':
+     '$managedServerHost':
          NodeManager:
-             ListenAddress: "$nmHost"
+             ListenAddress: "$managedServerHost"
              ListenPort: $nmPort
              NMType : ssl
    Cluster:
@@ -287,12 +287,13 @@ topology:
              MigrationBasis: 'consensus'
    Server:
         '$wlsServerName' :
+           ListenAddress: "$managedServerHost"
            ListenPort: $wlsManagedPort
            Notes: "$wlsServerName managed server"
            Cluster: "$wlsClusterName"
-           Machine: "$nmHost"
+           Machine: "$managedServerHost"
            ServerStart:
-               Arguments: '${SERVER_STARTUP_ARGS}'
+               Arguments: '${SERVER_STARTUP_ARGS} -Dweblogic.Name=$wlsServerName  -Dweblogic.management.server=${SERVER_START_URL}'
 EOF
     
 if [ "${isCustomSSLEnabled}" == "true" ];
@@ -478,6 +479,26 @@ do
 done
 }
 
+#This function to wait for packaged domain availability at ${mountpointPath} by checking ${wlsDomainName}-pack.complete
+function wait_for_packaged_template()
+{
+ #wait for packaged domain template to be available
+ count=1
+ echo "Waiting for packaged domain template availability ${mountpointPath}/${wlsDomainName}-template.jar"
+ while [ ! -f ${mountpointPath}/${wlsDomainName}-pack.complete ] 
+ do 
+ 	echo "."
+ 	count=$((count+1))
+ 	if [ $count -le 30 ];
+ 	then
+ 	  sleep 1m
+ 	else
+ 	  echo "Error : Maximum attempts exceeded for waiting packaged domain template ${mountpointPath}/${wlsDomainName}-template.jar"
+ 	  exit 1
+  	fi
+ done
+} 
+
 # Create systemctl service for nodemanager
 function create_nodemanager_service()
 {
@@ -599,33 +620,37 @@ function create_managedSetup(){
 
     echo "Creating managed server model files"
     create_managed_model
-    create_machine_model
-    create_ms_server_model
+    # Following are not requires as it is taken care by create_managed_model applied on existing domain
+    #create_machine_model
+    #create_ms_server_model
     
     echo "Completed managed server model files"
     sudo chown -R $username:$groupname $DOMAIN_PATH
-    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/createDomain.sh -oracle_home $oracleHome -domain_parent $DOMAIN_PATH  -domain_type WLS -model_file $DOMAIN_PATH/managed-domain.yaml"
+    # Updating managed-domain.yaml using updateDomain.sh on existing domain created by create_admin_model 
+    # wlsPassword is accepted from stdin to support old and new weblogic-deploy tool version
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/updateDomain.sh -admin_url $adminWlstURL -admin_user $wlsUserName -oracle_home $oracleHome -domain_home $DOMAIN_PATH/${wlsDomainName}  -domain_type WLS -model_file $DOMAIN_PATH/managed-domain.yaml <<< $wlsPassword"
     if [[ $? != 0 ]]; then
        echo "Error : Managed setup failed"
        exit 1
     fi
-    wait_for_admin
+	
+	# Following are not required as updateDomain.sh with managed-domain.yaml will take care of following
+    #wait_for_admin
+    ## For issue https://github.com/wls-eng/arm-oraclelinux-wls/issues/89
+    #getSerializedSystemIniFileFromShare
     
-    # For issue https://github.com/wls-eng/arm-oraclelinux-wls/issues/89
-    getSerializedSystemIniFileFromShare
-    
-    echo "Adding machine to managed server $wlsServerName"
-    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/add-machine.py"
-    if [[ $? != 0 ]]; then
-         echo "Error : Adding machine for managed server $wlsServerName failed"
-         exit 1
-    fi
-    echo "Adding managed server $wlsServerName"
-    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/add-server.py"
-    if [[ $? != 0 ]]; then
-         echo "Error : Adding server $wlsServerName failed"
-         exit 1
-    fi
+    #echo "Adding machine to managed server $wlsServerName"
+    #runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/add-machine.py"
+    #if [[ $? != 0 ]]; then
+         #echo "Error : Adding machine for managed server $wlsServerName failed"
+         #exit 1
+    #fi
+    #echo "Adding managed server $wlsServerName"
+    #runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $DOMAIN_PATH/add-server.py"
+    #if [[ $? != 0 ]]; then
+         #echo "Error : Adding server $wlsServerName failed"
+         #exit 1
+    #fi
 }
 
 function enabledAndStartNodeManagerService()
@@ -875,7 +900,7 @@ function generateCustomHostNameVerifier()
    chown -R $username:$groupname ${CUSTOM_HOSTNAME_VERIFIER_HOME}
    chmod +x ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh
 
-   runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh ${wlsAdminHost} ${customDNSNameForAdminServer} ${customDNSNameForAdminServer} ${dnsLabelPrefix} ${wlsDomainName} ${location}"
+   runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; ${CUSTOM_HOSTNAME_VERIFIER_HOME}/generateCustomHostNameVerifier.sh ${wlsAdminHost} ${customDNSNameForAdminServer} ${customDNSNameForAdminServer} ${dnsLabelPrefix} ${wlsDomainName} ${location} ${adminVMNamePrefix} ${globalResourceNameSuffix} false"
 }
 
 function copyCustomHostNameVerifierJarsToWebLogicClasspath()
@@ -930,6 +955,36 @@ function restartAdminServer()
    echo "Starting WebLogic Admin Server..."
 }
 
+function packDomain()
+{
+	echo "Stopping WebLogic nodemanager ..."
+	sudo systemctl stop wls_nodemanager
+	echo "Stopping WebLogic Admin Server..."
+	sudo systemctl stop wls_admin
+	sleep 2m
+	echo "Packing the cluster domain"
+	runuser -l oracle -c "$oracleHome/oracle_common/common/bin/pack.sh -domain=${DOMAIN_PATH}/${wlsDomainName} -template=${mountpointPath}/${wlsDomainName}-template.jar -template_name=\"${wlsDomainName} domain\" -template_desc=\"WebLogic cluster domain\" -managed=true"
+	if [[ $? != 0 ]]; then
+  		echo "Error : Failed to pack the domain $wlsDomainName"
+  		exit 1
+	fi
+	echo "Starting WebLogic nodemanager ..."
+	sudo systemctl start wls_nodemanager
+	echo "Starting WebLogic Admin Server..."
+	sudo systemctl start wls_admin
+	touch ${mountpointPath}/${wlsDomainName}-pack.complete
+}
+
+function unpackDomain()
+{
+	echo "Unpacking the domain"
+	runuser -l oracle -c "$oracleHome/oracle_common/common/bin/unpack.sh -template=${mountpointPath}/${wlsDomainName}-template.jar -domain=${DOMAIN_PATH}/${wlsDomainName}"
+	if [[ $? != 0 ]]; then
+  		echo "Error : Failed to unpack the domain $wlsDomainName"
+  		exit 1
+	fi
+}
+
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -942,7 +997,7 @@ CURRENT_DATE=`date +%s`
 MIN_CERT_VALIDITY="1"
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword wlsServerName wlsAdminHost oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsPassword wlsServerName wlsAdminHost adminVMNamePrefix globalResourceNameSuffix numberOfInstances managedVMPrefix managedServerPrefix oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
@@ -971,7 +1026,8 @@ SERVER_STARTUP_ARGS="-Dlog4j2.formatMsgNoLookups=true"
 wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
 SERVER_START_URL="http://$wlsAdminURL"
 
-KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
+# Unpack requires domain directory to be empty, hence creating outside the domain
+KEYSTORE_PATH="${DOMAIN_PATH}/keystores"
 
 if [ "${isCustomSSLEnabled}" == "true" ];
 then
@@ -1012,10 +1068,24 @@ then
   enableAndStartAdminServerService
   wait_for_admin
   configureCustomHostNameVerifier
+  # Create managed server configuration counting from 1 to number of instances
+  countManagedServer=1
+  while [ $countManagedServer -lt $numberOfInstances ]
+  do
+    managedServerHost=${managedVMPrefix}${countManagedServer}
+    wlsServerName=${managedServerPrefix}${countManagedServer}
+    echo "Configuring managed server ${wlsServerName} for host ${managedServerHost}"
+    create_managedSetup
+    countManagedServer=`expr $countManagedServer + 1`
+  done
+  # After domain is created pack the domain and keep it under mountFileShare location
+  packDomain
 else
-  wait_for_admin
+  # Wait for admin host pack the domain and place the template under mountFileShare location	
+  wait_for_packaged_template
   updateNetworkRules "managed"
-  create_managedSetup
+  # unpack the domain from the template under mountFileShare location	
+  unpackDomain
   generateCustomHostNameVerifier
   copyCustomHostNameVerifierJarsToWebLogicClasspath
   setUMaskForSecurityDir

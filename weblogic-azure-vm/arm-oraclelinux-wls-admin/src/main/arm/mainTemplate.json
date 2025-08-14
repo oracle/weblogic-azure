@@ -855,6 +855,14 @@
          "type": "string",
          "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminConsoleSecureURL.value)]"
       },
+      "adminRemoteConsoleURL": {
+         "type": "string",
+         "value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminRemoteConsoleURL.value)]"
+      },
+      "adminRemoteConsoleSecureURL": {
+         "type": "string",
+         "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminRemoteConsoleSecureURL.value)]"
+      },      
       "dnsZoneNameServers": {
          "type": "array",
          "condition": "[and(parameters('enableCustomDNS'), not(parameters('hasDNSZones')))]",
