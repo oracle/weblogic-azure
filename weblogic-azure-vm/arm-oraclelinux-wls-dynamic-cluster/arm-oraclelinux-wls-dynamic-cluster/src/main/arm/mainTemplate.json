@@ -845,6 +845,9 @@
 					"_artifactsLocation": {
 						"value": "[parameters('_artifactsLocation')]"
 					},
+					"wlsDomainName": {
+						"value": "[parameters('wlsDomainName')]"
+					},
 					"_artifactsLocationSasToken": {
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},

@@ -1,0 +1,46 @@
+name: IT Validation for Build
+run-name: Running validation workflows with plan:${{ github.event_name == 'schedule' && 'plan-build' || inputs.it_plan }}
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Runs daily at 2:00 AM UTC
+  workflow_dispatch:
+    inputs:
+      it_plan:
+        description: 'Path to the validation plan file'
+        required: true
+        type: choice
+        options:
+          - plan-build
+        default: plan-build
+
+jobs:
+  execute-validation:
+    runs-on: ubuntu-latest
+    outputs:
+      results: ${{ steps.it-validation.outputs.results }}
+      report_url: ${{ steps.it-validation.outputs.report_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set validation plan file
+        id: set-plan-file
+        run: |
+          case "${{ inputs.it_plan || 'plan-build' }}" in
+            plan-build)
+              IT_FILE=".github/it/validation-plan-build.json"
+              ;;
+            *)
+              echo "Unknown plan option: ${{ inputs.it_plan }}"
+              exit 1
+              ;;
+          esac
+          echo "it_file=$IT_FILE" >> $GITHUB_OUTPUT
+      
+      - name: Execute IT Validation
+        id: it-validation
+        uses: ./.github/actions/it
+        with:
+          it_file: ${{ steps.set-plan-file.outputs.it_file }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

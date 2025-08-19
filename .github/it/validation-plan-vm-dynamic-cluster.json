@@ -1,0 +1,24 @@
+{
+  "validation_scenarios": [
+    {
+      "workflow": "testWlsVmDynamicCluster.yml",
+      "run_mode": "serial",
+      "scenarios": [
+        {
+          "scenario": "Test Dynamic Cluster on VM with mssqlserver",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "mssqlserver"
+          }
+        },
+        {
+          "scenario": "Test Dynamic Cluster on VM with PostgreSQL passwordless",
+          "inputs": {
+            "location": "centralus",
+            "databaseType": "postgresql-passwordless(flexible)"
+          }
+        }
+      ]
+    }
+  ]
+}

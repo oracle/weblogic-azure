@@ -3,13 +3,25 @@
 # https://oss.oracle.com/licenses/upl/
 
 name: Test Dynamic Cluster on VM
+run-name: Test Dynamic Cluster on VM with `db`:${{ inputs.databaseType }}
+
 on:
   workflow_dispatch:
     inputs:
       location:
         description: 'Location of the resources'
         required: true
-        default: 'eastus'
+        default: 'centralus'
+      databaseType:
+        description: 'Database connection'
+        required: true
+        default: 'mssqlserver'
+        type: choice
+        options:
+          - mssqlserver
+          - mssqlserver-passwordless
+          - postgresql(flexible)
+          - postgresql-passwordless(flexible)
   # Allows you to run this workflow using GitHub APIs
   # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
   # REPO_NAME=oracle/weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
@@ -22,12 +34,13 @@ env:
   adminPassword: ${{ secrets.WLS_PSW }}
   dbAdminUser: weblogic
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
-  dbServerName: weblogicdb
+  dbServerName: db${{ github.run_id }}${{ github.run_number }}
+  uamiName: uami${{ github.run_id }}${{ github.run_number }}
   dynamicClusterSize: 1
   gitEmail: ${{ secrets.USER_EMAIL }}
   gitToken: ${{ secrets.GIT_TOKEN }}
   gitUserName: ${{ secrets.USER_NAME }} 
-  location: eastus
+  location: centralus
   nsg: wls-nsg
   managedServerPrefix: managedServer
   managedServers: "managedServer1"
@@ -36,13 +49,26 @@ env:
   offerName: arm-oraclelinux-wls-dynamic-cluster
   offerPath: weblogic-azure/weblogic-azure-vm/arm-oraclelinux-wls-dynamic-cluster
   repoName: weblogic-azure
-  repoOwner: ${{ secrets.USER_NAME }}
-  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
-  resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
+  repoOwner: ${{ github.repository_owner }}
+  resourceGroupForDependency: wlsd-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupPrefix: wls-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   wlsDomainName: dyClusterDomain
   wlsPassword: ${{ secrets.WLS_PSW }}
   wlsUserName: weblogic
+  images: |
+    owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest
+    owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest
+    owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest
+    owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest
+    owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest
+    owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest
+    owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest
+    owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest
+    owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest
+    owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest
+    owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest
+    owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest
 
 jobs:
   preflight:
@@ -54,7 +80,7 @@ jobs:
       - name: Setup environment variables
         id: setup-env-variables-based-on-dispatch-event
         run: |
-          location=eastus # default value
+          location=centralus # default value
 
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
             location=${{ github.event.inputs.location }}
@@ -86,7 +112,7 @@ jobs:
           repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
       - name: Built and test ${{env.offerName}}
-        run: mvn -Ptemplate-validation-tests clean install --file ${offerPath}/pom.xml
+        run: mvn -Ptemplate-validation-tests clean install --file ${{ env.offerPath }}/pom.xml
 
       - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
         uses: actions/checkout@v2
@@ -105,7 +131,7 @@ jobs:
           echo "create branch $testbranchName"
           git checkout -b $testbranchName
           rm -r -f $current/${offerDevPath}/src/main/arm/nestedtemplates/*
-          cp -r -f $current/${offerPath}/${{ env.offerName }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
+          cp -r -f $current/${{ env.offerPath }}/${{ env.offerName }}/target/arm/nestedtemplates/* $current/${offerDevPath}/src/main/arm/nestedtemplates/
           git status
           git commit -a -m "hard code pids"
           git push https://$gitToken@github.com/${GITHUB_REPOSITORY}.git -f
@@ -117,19 +143,19 @@ jobs:
       - name: Validate deployment templates for different combinations of service integration
         id: validate-deployment-templates
         run: |
-          bash ${offerPath}/test/scripts/verify-deployments.sh <<< \
+          bash ${{ env.offerPath }}/test/scripts/verify-deployments.sh <<< \
             "${{ github.run_id }}${{ github.run_number }} ${location} \
-            ${offerPath}/${offerName}/target/arm/mainTemplate.json \
-            ${GITHUB_REPOSITORY} ${testbranchName} ${offerPath}/test/scripts"
+            ${{ env.offerPath }}/${offerName}/target/arm/mainTemplate.json \
+            ${GITHUB_REPOSITORY} ${testbranchName} ${{ env.offerPath }}/test/scripts"
 
       - name: Generate artifact file name and path
         id: artifact_file
         run: |
           version=$(mvn -q -Dexec.executable=echo -Dexec.args='${version.${{ env.offerName }}}' --file weblogic-azure/pom.xml --non-recursive exec:exec)
           artifactName=${{ env.offerName }}-$version-arm-assembly
-          unzip ${offerPath}/${{ env.offerName }}/target/$artifactName.zip -d ${offerPath}/${{ env.offerName }}/target/$artifactName
+          unzip ${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName.zip -d ${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName
           echo "##[set-output name=artifactName;]${artifactName}"
-          echo "##[set-output name=artifactPath;]${offerPath}/${{ env.offerName }}/target/$artifactName"
+          echo "##[set-output name=artifactPath;]${{ env.offerPath }}/${{ env.offerName }}/target/$artifactName"
       - name: Archive ${{env.offerName}} template
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: success()
@@ -153,257 +179,272 @@ jobs:
         run: |
             echo "create resource group" ${{ env.resourceGroupForDependency }}
             az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
-      - uses: actions/checkout@v2.3.4
-      - name: Set up PostgreSQL Flexible Server that allows access from Azure services
-        uses: ./.github/actions/createPostgresqlFlexibleServer
-        with:
-          dbAdminUser: ${{ env.dbAdminUser }}
-          dbName: ${{ env.dbName }}
-          dbPassword: ${{ env.wlsPassword }}
-          dbServerName: ${{ env.dbServerName }}
-          location: ${{ env.location }}
-          resourceGroupName: ${{ env.resourceGroupForDependency }}
 
   deploy-weblogic-cluster:
     needs: [preflight, deploy-dependencies]
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1
-      fail-fast: false
-      matrix:
-        images:
-          [
-            "owls-141100-jdk11-ol91;Oracle:weblogic-141100-jdk11-ol91:owls-141100-jdk11-ol91;latest",
-            "owls-141100-jdk11-ol87;Oracle:weblogic-141100-jdk11-ol87:owls-141100-jdk11-ol87;latest",
-            "owls-141100-jdk8-ol91;Oracle:weblogic-141100-jdk8-ol91:owls-141100-jdk8-ol91;latest",
-            "owls-141100-jdk8-ol87;Oracle:weblogic-141100-jdk8-ol87:owls-141100-jdk8-ol87;latest",
-            "owls-122140-jdk8-ol91;Oracle:weblogic-122140-jdk8-ol91:owls-122140-jdk8-ol91;latest",
-            "owls-122140-jdk8-ol87;Oracle:weblogic-122140-jdk8-ol87:owls-122140-jdk8-ol87;latest",             
-            "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
-            "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
-            "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest",
-            "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
-            "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
-            "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
-          ]
     steps:
       - name: Initialize environment variables
         run: |
           echo "location=${{needs.preflight.outputs.location}}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'microsoft'
-          java-version: '11'
-      - name: Checkout ${{env.repoOwner}}/${{env.repoName}}
+
+      - name: Checkout weblogic-azure repository
         uses: actions/checkout@v4
         with:
-          repository: ${{env.repoOwner}}/${{env.repoName}}
           path: ${{env.repoName}}
+      
       - name: Download artifact for deployment
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
-          path: ${{needs.preflight.outputs.artifactName}}
           name: ${{ needs.preflight.outputs.artifactName }}
+          path: ${{needs.preflight.outputs.artifactName}}
+
       - uses: azure/login@v1
         id: azure-login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Get Image SKU
-        id: image-sku
-        run: |
-          imageUrn="${{ matrix.images }}"
-          sku=${imageUrn%%;*}
-          echo "sku=${sku}" >> $GITHUB_ENV
-          echo ${resourceGroupPrefix}
-          resourceGroup=$(echo "${resourceGroupPrefix}-${sku}" | sed "s/_//g")
-          echo "resourceGroup=${resourceGroup}" >> $GITHUB_ENV
-      - name: Create Resource Group
-        id: create-resource-group
-        run: |
-            echo "create resource group" $resourceGroup
-            az group create --verbose --name $resourceGroup --location ${location}
-
-      - name: Prepare deployed parameters and test script
-        id: prepare-deployed-parameters-and-test-script
-        run: |
-          imageUrn="${{ matrix.images }}"
-
-          echo "Generate selfsigned certificate"
-          echo $JAVA_HOME
-          bash ${offerPath}/test/scripts/generate-selfsigned-keystore.sh <<< \
-            "${wlsPassword} ${wlsPassword} ${wlsPassword}"
-          sslIdentityData=$(cat identity.jks | base64 -w 0)
-
-          echo "Generate deployment parameters..."
-          bash ${offerPath}/test/scripts/gen-parameters-deploy.sh <<< \
-            "${offerPath}/test/scripts/parameters-test.json \
-            $location \
-            $wlsPassword \
-            $wlsDomainName \
-            $wlsUserName \
-            $wlsPassword \
-            $managedServerPrefix \
-            $maxDynamicClusterSize \
-            $dynamicClusterSize \
-            $imageUrn \
-            $testbranchName \
-            $GITHUB_REPOSITORY \
-            ${{ env.dbServerName }} \
-            ${{ env.dbName }} \
-            ${{ env.wlsPassword }} \
-            ${{ env.dbAdminUser }} \
-            ${sslIdentityData}"
-
-      - name: Accept Image Terms
-        id: accept-terms
-        run: |
-            echo "accept terms for " "${{ matrix.images }}"
-            rawUrn="${{ matrix.images }}"
-            publisherAndName=$(echo ${rawUrn} | grep -o ";.*:" | sed "s/;//g")
-            imageVersion=${rawUrn##*;}
-            az vm image terms accept --urn ${publisherAndName}${sku}:${imageVersion}
-
-      - name: Deploy WebLogic Server Dynamic Cluster Domain offer
-        id: deploy-wls-dycluster
-        run: |
-            artifactName=${{ needs.preflight.outputs.artifactName }}
-            echo "artifactName=${{ needs.preflight.outputs.artifactName }}" >> $GITHUB_ENV
-            
-            az deployment group create \
-              --verbose \
-              --resource-group $resourceGroup \
-              --name wls-dycluster-node \
-              --parameters @${offerPath}/test/scripts/parameters-test.json \
-              --template-file ${artifactName}/mainTemplate.json
-
-            export adminVMName=$(az deployment group show \
-              --resource-group $resourceGroup \
-              --name wls-dycluster-node \
-              --query "properties.outputs.adminVMName.value" -o tsv)
-            echo "adminVMName=${adminVMName}" >> $GITHUB_ENV
-
-      - name: Verify wls admin services
-        id: veriy-admin-service
-        run: |
-          echo "Verifying WebLogic services at admin server"
-          message=$(az vm run-command invoke \
-            --resource-group $resourceGroup \
-            --name $adminVMName \
-            --command-id RunShellScript \
-            --scripts @${{ env.offerPath }}/test/scripts/verify-admin-services.sh \
-            --query value[*].message)
-          
-          if [[ $message == *"not in active (running) state"* ]]; then
-            echo "Error: $message"
-            exit 1
-          fi
-
-      - name: Verify wls managed server services
-        id: veriy-msservice
-        run: |
-          managedServerVMNamePrefix=$(az deployment group show \
-              --resource-group $resourceGroup \
-              --name wls-dycluster-node \
-              --query "properties.outputs.managedServerVMNamePrefix.value" -o tsv)
-          echo "managedServerVMNamePrefix=${managedServerVMNamePrefix}" >> $GITHUB_ENV
-          
-          managedServer1="${managedServerVMNamePrefix}1"          
-
-          echo "Verifying WebLogic services at admin server"
-          message=$(az vm run-command invoke \
-            --resource-group $resourceGroup \
-            --name $managedServer1 \
-            --command-id RunShellScript \
-            --scripts @${{ env.offerPath }}/test/scripts/verify-node-services.sh \
-            --query value[*].message)
-          
-          if [[ $message == *"not in active (running) state"* ]]; then
-            echo "Error: $message"
-            exit 1
-          fi
       
-      - name: Query public IP of AdminServer VM
-        id: query-wls-admin-ip
-        run: |
-            echo "query public ip"
-            publicIP=$(az vm show \
-              --resource-group $resourceGroup \
-              --name $adminVMName -d \
-              --query publicIps -o tsv)
-            # echo environment variable
-            echo "wlsPublicIP=${publicIP}" >> $GITHUB_ENV
-
-      - name: Verify WebLogic Server Access
-        id: verify-wls-access
-        run: |
-          echo "Verifying Weblogic Server Access"
-          bash ${offerPath}/test/scripts/verify-wls-access.sh <<< "$wlsPublicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers"
-
-      - name: Verify WebLogic Managed Server LifeCycle check
-        id: verify-server-lifecycle
-        run: |
-          echo "Verifying Weblogic managed server lifecycle"
-          bash ${offerPath}/test/scripts/verify-servers-lifecycle.sh <<< "$wlsUserName $wlsPassword ${wlsPublicIP} ${adminConsolePort} ${managedServers}"     
-
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '11'
+      
       - name: Checkout WebLogic-Cafe
-        id: checkout-webapp
         uses: actions/checkout@v2
         with:
           repository: azure-javaee/weblogic-on-azure
           path: weblogic-on-azure
 
       - name: Maven build the web app
-        id: maven-build-webapp
         run: |
           echo "build the WebLogic Cafe web app"
           mvn -DskipTests clean install --file weblogic-on-azure/javaee/weblogic-cafe/pom.xml
 
-      - name: Query adminVMsver DNS
-        id: query-adminvmdns
-        run: |
-            echo "query public ip id of $adminVMName"
-            adminNicId=$(az vm show \
-              --resource-group $resourceGroup \
-              --name $adminVMName \
-              --query networkProfile.networkInterfaces[0].id -o tsv)
-            adminPublicIPId=$(az network nic show --id ${adminNicId} --query ipConfigurations[0].publicIPAddress.id -o tsv)
-            echo "query adminVMsver DNS for $adminVMName"
-            adminVMDNS=$(az network public-ip show \
-              --id "${adminPublicIPId}" \
-              --query dnsSettings.fqdn -o tsv)
-            echo "save the adminVMDNS in environment variable"
-            echo "adminVMDNS=${adminVMDNS}" >> $GITHUB_ENV      
+      - name: Provision database
+        id: database-provision
+        uses: ./weblogic-azure/.github/actions/database-provision
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          resourceGroup: ${{ env.resourceGroupForDependency }}
+          uamiName: ${{ env.uamiName }}
+          location: ${{ env.location }}
+          dbInstanceName: ${{ env.dbServerName }}
+          dbPassword: ${{ env.wlsPassword }}
+          databaseName: ${{ env.dbName }}
+          dbAdminUser: ${{ env.dbAdminUser }}
 
-      - name: Deploy WebLogicCafe app using WebLogic Management Services
-        id: deploy-and-verify-webapp
-        run: |
-          echo "Deploy WebLogic Cafe to server"          
-          timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${adminVMDNS} ${adminConsolePort}
-          bash ${{ env.offerPath }}/test/scripts/deploy-webapp.sh <<< "$wlsUserName $wlsPassword ${adminVMDNS} ${adminConsolePort} "
+      - name: Get database parameters
+        id: database-parameters
+        uses: ./weblogic-azure/.github/actions/database-parameters
+        with:
+          databaseType: ${{ inputs.databaseType }}
+          uamiId: ${{ steps.database-provision.outputs.uamiId }}
+          serverHost: ${{ steps.database-provision.outputs.serverHost }}
+          dbInstanceName: ${{ env.dbServerName }}
+          databaseName: ${{ env.dbName }}
+          dbAdminUser: ${{ env.dbAdminUser }}
 
-      - name: Query ohsAccessURL from deployment output
-        id: query-ohsvmdns
+      - name: Try each image until one succeeds
         run: |
-            echo "query ohsAccessURL"
-            ohsAccessURL=$(az deployment group show \
-              --resource-group $resourceGroup \
-              --name wls-dycluster-node \
-              --query "properties.outputs.ohsAccessURL.value" -o tsv)
-            echo "ohsAccessURL=${ohsAccessURL}" >> $GITHUB_ENV
+          # Convert multiline string to array
+          IFS=$'\n' read -d '' -r -a image_array <<< "${{ env.images }}" || true
+          
+          success=false
+          
+          for image in "${image_array[@]}"; do
+            if [ -z "$image" ]; then
+              continue
+            fi
+            
+            echo "::group::Trying image: $image"
+            
+            # Set deployment variables for this image
+            imageUrn="$image"
+            sku=${imageUrn%%;*}
+            resourceGroup=$(echo "${resourceGroupPrefix}-${sku}" | sed "s/_//g")
+            
+            echo "Deploying with SKU: $sku"
+            echo "Resource Group: $resourceGroup"
+            
+            # Export db variables for envsubst
+            export databaseType='${{ steps.database-parameters.outputs.databaseType }}'
+            export enableDB=${{ steps.database-parameters.outputs.enableDB }} 
+            export enablePswlessConnection=${{ steps.database-parameters.outputs.enablePswlessConnection }}
+            export dsConnectionURL='${{ steps.database-parameters.outputs.dsConnectionURL }}'
+            export dbUser='${{ steps.database-parameters.outputs.dbUser }}'
+            export dbIdentity='${{ steps.database-parameters.outputs.dbIdentity }}'
+            export dbPassword='${{ env.wlsPassword}}'
+            export dbName='${{ env.dbName }}'
+            export dbServerName='${{ env.dbServerName }}'
+          
+            # Try deployment with this image
+            if bash -c "
+              set -e
+              
+              # Create Resource Group
+              echo 'Creating resource group: $resourceGroup'
+              az group create --verbose --name '$resourceGroup' --location '${location}'
+              
+              # Generate selfsigned certificate
+              echo 'Generate selfsigned certificate'
+              bash '${{ env.offerPath }}/test/scripts/generate-selfsigned-keystore.sh' <<< \
+                '${wlsPassword} ${wlsPassword} ${wlsPassword}'
+              
+              echo 'Current working directory: $(pwd)'
+              # check whether identity.jks exists
+              if [ ! -f identity.jks ]; then
+                  echo 'Error: identity.jks not found!'
+              else
+                  echo 'identity.jks found!'        
+              fi
+              
+              # Generate deployment parameters
+              echo 'Generate deployment parameters...'
+              export location='${{ env.location }}'
+              export adminPasswordOrKey='${{ env.wlsPassword }}'
+              export wlsdomainname='${{ env.wlsDomainName }}'
+              export wlsusername='${{ env.wlsUserName }}'
+              export wlspassword='${{ env.wlsPassword }}'
+              export maxDynamicClusterSize='${{ env.maxDynamicClusterSize }}'
+              export dynamicClusterSize='${{ env.dynamicClusterSize }}'
+              export skuUrnVersion='$image'
+              export testbranchName='${{ env.testbranchName }}'
+              export managedServerPrefix=${{ env.managedServerPrefix }}
+              export repoPath='${GITHUB_REPOSITORY}'
+              export uploadedKeyStoreData=\$(cat identity.jks | base64 -w 0)
+              
+              export DOLLAR='$'
+              echo 'Generating parameter file...'
+              envsubst < './${{ env.offerPath }}/test/scripts/parameters-deploy-template.json' > './${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' 
+              
+              # Accept Image Terms
+              echo 'Accepting terms for image: $image'
+              rawUrn='$image'
+              publisherAndName=\$(echo \${rawUrn} | grep -o ';.*:' | sed 's/;//g')
+              imageVersion=\${rawUrn##*;}
+              az vm image terms accept --urn \${publisherAndName}$sku:\${imageVersion}
+              
+              # Deploy WebLogic Server Dynamic Cluster
+              echo 'Deploying WebLogic Server Dynamic Cluster...'
+              echo 'current path is: $(pwd)'
+              echo 'artifactName is: ${{ needs.preflight.outputs.artifactName }}'
+              az deployment group create \
+                --verbose \
+                --resource-group '$resourceGroup' \
+                --name wls-dycluster-node \
+                --parameters @'${{ env.offerPath }}/test/parameters-deploy-${{ github.job }}.json' \
+                --template-file '${{needs.preflight.outputs.artifactName}}/mainTemplate.json'
+              
+              # Get admin VM name
+              adminVMName=\$(az deployment group show \
+                --resource-group '$resourceGroup' \
+                --name wls-dycluster-node \
+                --query 'properties.outputs.adminVMName.value' -o tsv)
+              
+              # Verify wls admin services
+              echo 'Verifying WebLogic admin services...'
+              message=\$(az vm run-command invoke \
+                --resource-group '$resourceGroup' \
+                --name \$adminVMName \
+                --command-id RunShellScript \
+                --scripts @'${{ env.offerPath }}/test/scripts/verify-admin-services.sh' \
+                --query value[*].message)
+              
+              if [[ \$message == *'not in active (running) state'* ]]; then
+                echo 'Error: \$message'
+                exit 1
+              fi
+              
+              # Verify wls managed server services
+              echo 'Verifying WebLogic managed server services...'
+              managedServerVMNamePrefix=\$(az deployment group show \
+                --resource-group '$resourceGroup' \
+                --name wls-dycluster-node \
+                --query 'properties.outputs.managedServerVMNamePrefix.value' -o tsv)
+              
+              managedServer1=\"\${managedServerVMNamePrefix}1\"
+              message=\$(az vm run-command invoke \
+                --resource-group '$resourceGroup' \
+                --name \$managedServer1 \
+                --command-id RunShellScript \
+                --scripts @'${{ env.offerPath }}/test/scripts/verify-node-services.sh' \
+                --query value[*].message)
+              
+              if [[ \$message == *'not in active (running) state'* ]]; then
+                echo 'Error: \$message'
+                exit 1
+              fi
+              
+              # Get public IP
+              publicIP=\$(az vm show \
+                --resource-group '$resourceGroup' \
+                --name \$adminVMName -d \
+                --query publicIps -o tsv)
+              
+              # Verify WebLogic Server Access
+              echo 'Verifying WebLogic Server Access...'
+              bash '${{ env.offerPath }}/test/scripts/verify-wls-access.sh' <<< \"\$publicIP ${adminConsolePort} $wlsUserName $wlsPassword $managedServers\"
+              
+              # Verify WebLogic Managed Server LifeCycle
+              echo 'Verifying WebLogic managed server lifecycle...'
+              bash '${{ env.offerPath }}/test/scripts/verify-servers-lifecycle.sh' <<< \"$wlsUserName $wlsPassword \$publicIP ${adminConsolePort} $managedServers\"
+              
+              # Query admin VM DNS
+              echo 'Querying admin VM DNS...'
+              adminNicId=\$(az vm show \
+                --resource-group '$resourceGroup' \
+                --name \$adminVMName \
+                --query networkProfile.networkInterfaces[0].id -o tsv)
+              adminPublicIPId=\$(az network nic show --id \${adminNicId} --query ipConfigurations[0].publicIPAddress.id -o tsv)
+              adminVMDNS=\$(az network public-ip show \
+                --id \"\${adminPublicIPId}\" \
+                --query dnsSettings.fqdn -o tsv)
+              
+              # Deploy WebLogicCafe app
+              echo 'Deploying WebLogicCafe app...'
+              timeout 6m sh -c 'until nc -zv \$0 \$1; do echo \"nc rc: \$?\"; sleep 5; done' \${adminVMDNS} ${adminConsolePort}
+              bash '${{ env.offerPath }}/test/scripts/deploy-webapp.sh' <<< \"$wlsUserName $wlsPassword \${adminVMDNS} ${adminConsolePort}\"
+              
+              # Query OHS Access URL
+              echo 'Querying OHS Access URL...'
+              ohsAccessURL=\$(az deployment group show \
+                --resource-group '$resourceGroup' \
+                --name wls-dycluster-node \
+                --query 'properties.outputs.ohsAccessURL.value' -o tsv)
+              
+              # Verify WebLogicCafe app deployment
+              echo 'Verifying WebLogicCafe app deployment...'
+              bash '${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh' <<< \"\${ohsAccessURL}\"
+              
+              echo 'SUCCESS: All verification steps passed!'
+              exit 0
+            "; then
+              echo "✅ SUCCESS: WebLogic deployment succeeded with image: $image"
+              echo "successful_image=$image" >> $GITHUB_ENV
+              echo "successful_resource_group=$resourceGroup" >> $GITHUB_ENV
+              success=true
+              
+              # Clean up successful deployment
+              echo "Cleaning up resource group: $resourceGroup"
+              az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
+              
+              break
+            else
+              echo "❌ FAILED: WebLogic deployment failed with image: $image, trying next..."
+              # Clean up failed deployment
+              echo "Cleaning up failed resource group: $resourceGroup"
+              # az group delete --yes --no-wait --verbose --name "$resourceGroup" || true
+            fi
+            echo "::endgroup::"
+          done
+          
+          if [ "$success" = "false" ]; then
+            echo "💥 All images failed!"
+            exit 1
+          else
+            echo "🎉 Workflow succeeded with image: ${{ env.successful_image }}"
+          fi
 
-      - name: Verify WebLogicCafe app is successfully deployed
-        id: verify-webapp-deployment
-        run: |
-          echo "Verify WebLogicCafe app is successfully deployed"
-          bash ${{ env.offerPath }}/test/scripts/verify-webapp-deployment.sh <<< "${ohsAccessURL}"
-      
-      - name: Delete Resource Group
-        id: delete-resource-group
-        if: always()
-        run: |
-            echo "delete... " $resourceGroup
-            az group delete --yes --no-wait --verbose --name $resourceGroup
 
   cleanup-github-resource:
     needs: deploy-weblogic-cluster
@@ -434,6 +475,11 @@ jobs:
         run: |
             echo "delete... " $resourceGroup
             az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDependency }}
+      - name: Delete Resource Group
+        id: delete-resource-group
+        run: |
+          echo "delete resource group with prefix:" ${{ env.resourceGroupPrefix }}
+          az group list --query "[?starts_with(name, '${{ env.resourceGroupPrefix }}')].[name]" -o tsv | xargs -I {} az group delete --name {} --yes --no-wait
   
   summary:
     needs: deploy-weblogic-cluster
