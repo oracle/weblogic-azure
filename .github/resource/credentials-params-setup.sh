@@ -28,7 +28,7 @@ check_parameters() {
         else
             echo "Name: $name, Value: $value"
         fi
-    done < <(yq eval -o=json '.[]' "$param_file" | jq -c '.')
+    done < <(yq '.[]' "$param_file" | jq -c '.')
 
     echo "return $has_empty_value"
     return $has_empty_value
@@ -37,7 +37,7 @@ check_parameters() {
 # Function to set values from YAML
 set_values() {
     echo "Setting values..."
-    yq eval -o=json '.[]' "$param_file" | jq -c '.' | while read -r line; do
+    yq '.[]' "$param_file" | jq -c '.' | while read -r line; do
         name=$(echo "$line" | jq -r '.name')
         value=$(echo "$line" | jq -r '.value')
         gh secret --repo $(gh repo set-default --view) set "$name" -b"${value}"

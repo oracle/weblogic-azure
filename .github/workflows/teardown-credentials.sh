@@ -33,6 +33,9 @@ if [[ ! -f "${param_file}" ]]; then
 fi
 
 # Remove all secrets set by setup-credentials.sh
+
+# Remove all secrets set by setup-credentials.sh
+# Ensure no jq command uses '-o=json' (jq outputs JSON by default)
 source "${RESOURCE_DIR}/credentials-params-teardown.sh"
 source "${RESOURCE_DIR}/azure-credential-teardown.sh"
 
