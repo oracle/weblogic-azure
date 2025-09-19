@@ -177,6 +177,10 @@
          "type": "string",
          "defaultValue": "[newGuid()]"
       },
+      "guidTag": {
+         "type": "string",
+         "defaultValue": "[newGuid()]"
+      },
       "location": {
          "type": "string",
          "defaultValue": "[resourceGroup().location]",
@@ -368,12 +372,16 @@
    },
    "variables": {
       "const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
+      "const_guidTag": "[uniqueString(parameters('guidTag'))]",
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_adminLinkedTemplateDeployment": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
+      "name_uamiForPostDeploymentScript" : "uamiForPostDeploymentScript",
       "name_adminLinkedTemplateName": "adminTemplate.json",
       "name_adminVM": "[concat(parameters('adminVMName'), variables('const_globalResourceNameSuffix'))]",
       "name_dbLinkedTemplate": "dbTemplate.json",
       "name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
+      "name_postDeploymentUAMIRolesTemplate" : "postDeploymentUAMIRolesTemplate.json",
+      "name_postDeploymentTemplate": "postDeploymentTemplate.json", 
       "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg', variables('const_globalResourceNameSuffix'))]",
       "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
       // If adding a new resource, add the resource identifier to the array below
@@ -455,6 +463,9 @@
                },
                "_globalResourceNameSuffix": {
                   "value": "[variables('const_globalResourceNameSuffix')]"
+               },
+               "const_guidTag":{
+                  "value": "[variables('const_guidTag')]"
                },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
@@ -555,6 +566,9 @@
                },
                "_globalResourceNameSuffix": {
                   "value": "[variables('const_globalResourceNameSuffix')]"
+               },
+               "const_guidTag":{
+                  "value": "[variables('const_guidTag')]"
                },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
@@ -807,7 +821,85 @@
 
             }
          }
-      },     
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "name": "[variables('name_uamiForPostDeploymentScript')]",
+         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
+            "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_postDeploymentUAMIRolesTemplate')))]",
+              "contentVersion": "1.0.0.0"
+             },
+            "parameters": {
+               "location": {
+                  "value": "[parameters('location')]"
+                },
+               "_globalResourceNameSuffix": {
+                  "value": "[variables('const_globalResourceNameSuffix')]"
+               },
+               "_artifactsLocation": {
+                  "value": "[parameters('_artifactsLocation')]"
+               },
+               "tagsByResource": {
+                  "value": "[variables('obj_tagsByResources')]"
+               }
+            }
+         }
+	  },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "name": "postDeplyment",
+         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
+            "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', variables('name_uamiForPostDeploymentScript'))]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_postDeploymentTemplate')))]",
+               "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+              "location": {
+               "value": "[parameters('location')]"
+            },
+            "_globalResourceNameSuffix": {
+               "value": "[variables('const_globalResourceNameSuffix')]"
+            },
+            "tagsByResource": {
+               "value": "[variables('obj_tagsByResources')]"
+            },
+            "const_guidTag":{
+               "value": "[variables('const_guidTag')]"
+            },
+            "_artifactsLocation": {
+               "value": "[parameters('_artifactsLocation')]"
+            },
+            "_artifactsLocationSasToken": {
+               "value": "[parameters('_artifactsLocationSasToken')]"
+            },
+            "userAssignedIdentityResourceId":{
+               "value": "[reference(variables('name_uamiForPostDeploymentScript'),'${azure.apiVersionForDeployment}').outputs.uamidForPostDeployment.value]"
+            }
+          }
+        }
+      },
       {
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersionForDeployment}",
@@ -817,7 +909,9 @@
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
             "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', variables('name_uamiForPostDeploymentScript'))]",
+            "[resourceId('Microsoft.Resources/deployments',  'postDeplyment')]"
          ],
          "properties": {
             "mode": "Incremental",

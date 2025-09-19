@@ -27,6 +27,12 @@
             "description": "A unique suffix that was specified during the deployment of the solution template."
          }
       },
+      "const_guidTag" :{
+         "type": "string",
+         "metadata": {
+            "description": "A unique tag for resources."
+         }
+      },
       "adminPasswordOrKey": {
          "type": "securestring",
          "metadata": {
@@ -490,6 +496,20 @@
          }
       },
       {
+         "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+         "type": "Microsoft.Network/publicIPAddresses",
+         "tags": "[if(empty(parameters('tagsByResource')['${identifier.publicIPAddresses}']),createObject(parameters('const_guidTag'),''),union(parameters('tagsByResource')['${identifier.publicIPAddresses}'],createObject(parameters('const_guidTag'),'')))]",
+         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+         "name": "[variables('name_publicIPAddress')]",
+         "location": "[parameters('location')]",
+         "properties": {
+            "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
+            "dnsSettings": {
+               "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',take(replace(parameters('guidValue'), '-', ''), 10),'-',toLower(parameters('wlsDomainName')))]"
+            }
+         }
+      },	  
+      {
          "apiVersion": "${azure.apiVersionForVirtualNetworks}",
          "type": "Microsoft.Network/virtualNetworks",
          "tags": "[parameters('tagsByResource')['${identifier.virtualNetworks}']]",
@@ -554,12 +574,19 @@
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
          "name": "[variables('name_nic_without_pub_ip')]",
          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses/', variables('name_publicIPAddress'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/', variables('name_virtualNetwork'))]"
+         ],
          "properties": {
             "ipConfigurations": [
                {
                   "name": "ipconfig1",
                   "properties": {
                      "privateIPAllocationMethod": "Dynamic",
+                     "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('name_publicIPAddress'))]"
+                     },
                      "subnet": {
                         "id": "[variables('ref_subnet')]"
                      }

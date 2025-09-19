@@ -1,0 +1,114 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+		"location": {
+		   	    "type": "string",
+			   "metadata": {
+			      "description": "Location for all resources."
+			   }
+		  },
+		  "_globalResourceNameSuffix": {
+		      "type": "string",
+		      "metadata": {
+		         "description": "A unique suffix that was specified during the deployment of the solution template."
+		    	}
+		   },
+		   "_artifactsLocation": {
+			     "type": "string",
+			     "metadata": {
+			        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+			     }
+		   },
+		   "tagsByResource": {
+		      "type": "object",
+		      "defaultValue": {},
+		      "metadata": {
+		         "description": "${label.tagsLabel}"
+		      }
+		   },
+		   "roleAssignmentNameSeed": {
+		       "type": "string",
+		       "defaultValue": "[guid(subscription().id, parameters('_globalResourceNameSuffix'))]",
+		       "metadata": {
+		           "description": "A unique string used to generate the role assignment name. Defaults to a unique GUID based on the deployment context."
+		       }
+		   }		   
+	},
+	"variables": {
+		"const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+		"name_postDeploymentScriptUserDefinedManagedIdentity": "[concat('post-deployment-user-defined-managed-identity', parameters('_globalResourceNameSuffix'))]",
+		"name_postDeploymentScriptRoleAssignment": "[concat('post-deployment-user-defined-role-assignment', parameters('_globalResourceNameSuffix'))]",
+		"name_postDeploymentScriptRoleAssignmentTemplate": "postDeploymentRoleAssignmentTemplate.json"
+	},
+	"resources": [
+		{		
+		    "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+		    "apiVersion": "${azure.apiVersionForIdentity}",
+		    "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]",
+		    "name": "[variables('name_postDeploymentScriptUserDefinedManagedIdentity')]",
+		    "location": "[parameters('location')]"
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "${azure.apiVersionForDeployment}",
+			"name": "[variables('name_postDeploymentScriptRoleAssignment')]",
+			"dependsOn": [
+			      "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
+			],
+			"properties": {
+			    "mode": "Incremental",
+				"expressionEvaluationOptions": {
+					"scope": "inner"
+				 },
+			    "template": {
+			        "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+			        "contentVersion": "1.0.0.0",
+			        "parameters": {
+			            "innerPrincipalId": {
+			                "type": "string"
+			            },
+			            "innerRoleDefinitionId": {
+			                "type": "string"
+			            },
+						"innerRoleAssignmentNameSeed": {
+							"type": "string"
+						}						
+					},
+					"variables": {
+					    "roleAssignmentGuid": "[guid(parameters('innerRoleAssignmentNameSeed'))]"
+					},					
+			        "resources": [
+			            {
+			                "type": "Microsoft.Authorization/roleAssignments",
+			                "apiVersion": "${azure.apiVersionForRoleAssignment}",
+			                "name": "[variables('roleAssignmentGuid')]",
+			                "properties": {
+			                    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', parameters('innerRoleDefinitionId'))]",
+			                    "principalId": "[parameters('innerPrincipalId')]",
+								"principalType": "ServicePrincipal"
+			                }
+			            }
+			        ]
+			    },
+			    "parameters": {
+			        "innerPrincipalId": {
+						"value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',variables('name_postDeploymentScriptUserDefinedManagedIdentity'))).principalId]"
+			        },
+			        "innerRoleDefinitionId": {
+			            "value": "[variables('const_roleDefinitionIdOfContributor')]"
+			        },
+					"innerRoleAssignmentNameSeed": {
+						"value": "[parameters('roleAssignmentNameSeed')]"
+					}				
+			    }
+			}		
+		}
+	],
+	"outputs": {
+		"uamidForPostDeployment": {
+		         "type": "string",
+		         "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
+		 }
+	}
+}
