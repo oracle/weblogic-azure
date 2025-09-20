@@ -14,12 +14,6 @@
 		         "description": "A unique suffix that was specified during the deployment of the solution template."
 		    	}
 		   },
-		   "_artifactsLocation": {
-			     "type": "string",
-			     "metadata": {
-			        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
-			     }
-		   },
 		   "tagsByResource": {
 		      "type": "object",
 		      "defaultValue": {},
@@ -38,8 +32,7 @@
 	"variables": {
 		"const_roleDefinitionIdOfContributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
 		"name_postDeploymentScriptUserDefinedManagedIdentity": "[concat('post-deployment-user-defined-managed-identity', parameters('_globalResourceNameSuffix'))]",
-		"name_postDeploymentScriptRoleAssignment": "[concat('post-deployment-user-defined-role-assignment', parameters('_globalResourceNameSuffix'))]",
-		"name_postDeploymentScriptRoleAssignmentTemplate": "postDeploymentRoleAssignmentTemplate.json"
+		"name_postDeploymentScriptRoleAssignment": "[concat('post-deployment-user-defined-role-assignment', parameters('_globalResourceNameSuffix'))]"
 	},
 	"resources": [
 		{		
@@ -53,6 +46,8 @@
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersionForDeployment}",
 			"name": "[variables('name_postDeploymentScriptRoleAssignment')]",
+			"location": "[parameters('location')]",
+			"subscriptionId": "[subscription().subscriptionId]",
 			"dependsOn": [
 			      "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
 			],

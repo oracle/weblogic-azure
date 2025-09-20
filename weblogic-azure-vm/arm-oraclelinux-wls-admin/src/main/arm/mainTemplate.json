@@ -847,9 +847,6 @@
                "_globalResourceNameSuffix": {
                   "value": "[variables('const_globalResourceNameSuffix')]"
                },
-               "_artifactsLocation": {
-                  "value": "[parameters('_artifactsLocation')]"
-               },
                "tagsByResource": {
                   "value": "[variables('obj_tagsByResources')]"
                }

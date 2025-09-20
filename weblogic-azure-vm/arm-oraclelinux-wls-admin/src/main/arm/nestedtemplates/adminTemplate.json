@@ -412,22 +412,7 @@
       {
          "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
          "type": "Microsoft.Network/publicIPAddresses",
-         "tags": "[parameters('tagsByResource')['${identifier.publicIPAddresses}']]",
-         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-         "name": "[variables('name_publicIPAddress')]",
-         "location": "[parameters('location')]",
-         "properties": {
-            "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
-            "dnsSettings": {
-               "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',take(replace(parameters('guidValue'), '-', ''), 10),'-',toLower(parameters('wlsDomainName')))]"
-            }
-         }
-      },
-      {
-         "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
-         "type": "Microsoft.Network/publicIPAddresses",
-         "tags": "[if(empty(parameters('tagsByResource')['${identifier.publicIPAddresses}']),createObject(parameters('const_guidTag'),''),union(parameters('tagsByResource')['${identifier.publicIPAddresses}'],createObject(parameters('const_guidTag'),'')))]",
-         "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+         "tags": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),parameters('tagsByResource')['${identifier.publicIPAddresses}'],if(empty(parameters('tagsByResource')['${identifier.publicIPAddresses}']),createObject(parameters('const_guidTag'),''),union(parameters('tagsByResource')['${identifier.publicIPAddresses}'],createObject(parameters('const_guidTag'),''))))]",
          "name": "[variables('name_publicIPAddress')]",
          "location": "[parameters('location')]",
          "properties": {
