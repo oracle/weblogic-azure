@@ -48,9 +48,9 @@ function validateInput()
         echo_stderr "wlsDomainName is required. "
     fi
 
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]
     then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+        echo_stderr "wlsUserName or wlsShibboleth is required. "
         exit 1
     fi
 
@@ -107,7 +107,7 @@ function configureSSL()
 
 isCustomSSLEnabled='${isCustomSSLEnabled}'
 
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit()
 cd('/Servers/$wlsServerName')
@@ -291,7 +291,7 @@ args=("$@")
 ELEMENTS=${#args[@]} 
 
 #read arguments from stdin
-read adminVMName wlsDomainName wlsUserName wlsPassword oracleHome wlsDomainPath enableAAD wlsADSSLCer isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
+read adminVMName wlsDomainName wlsUserName wlsShibboleth oracleHome wlsDomainPath enableAAD wlsADSSLCer isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
 
 
 enableAAD="${enableAAD,,}"
