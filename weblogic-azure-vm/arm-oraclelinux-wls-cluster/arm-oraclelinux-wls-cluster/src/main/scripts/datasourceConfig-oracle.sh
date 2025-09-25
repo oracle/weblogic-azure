@@ -18,7 +18,7 @@ function usage()
 function validateInput()
 {
    # parse base64 string
-   wlsPassword=$(echo "${wlsPassword}" | base64 -d)
+   wlsShibboleth=$(echo "${wlsShibboleth}" | base64 -d)
    jdbcDataSourceName=$(echo "${jdbcDataSourceName}" | base64 -d)
    dsConnectionURL=$(echo "${dsConnectionURL}" | base64 -d)
    dsPassword=$(echo "${dsPassword}" | base64 -d)
@@ -47,7 +47,7 @@ function validateInput()
        exit 1
    fi
 
-   if [ -z "$wlsPassword" ];
+   if [ -z "$wlsShibboleth" ];
    then
        echo _stderr "Please provide Weblogic password"
        exit 1
@@ -105,7 +105,7 @@ function createJDBCSource_model()
 {
 echo "Creating JDBC data source with name $jdbcDataSourceName"
 cat <<EOF >${scriptPath}/create_datasource.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$hostName")
 startEdit()
 cd('/')
@@ -157,7 +157,7 @@ function createTempFolder()
 #main
 
 #read arguments from stdin
-read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsPassword jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro enablePswlessConnection wlsClusterName
+read oracleHome wlsAdminHost wlsAdminPort wlsUserName wlsShibboleth jdbcDataSourceName dsConnectionURL dsUser dsPassword dbGlobalTranPro enablePswlessConnection wlsClusterName
 
 if [ -z "$wlsClusterName" ];
 then

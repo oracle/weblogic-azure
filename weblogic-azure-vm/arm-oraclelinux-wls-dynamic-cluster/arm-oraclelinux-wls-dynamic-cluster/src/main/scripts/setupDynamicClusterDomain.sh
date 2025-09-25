@@ -32,9 +32,9 @@ function validateInput()
     echo_stderr "wlsDomainName is required. "
   fi
 
-  if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+  if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]
   then
-    echo_stderr "wlsUserName or wlsPassword is required. "
+    echo_stderr "wlsUserName or wlsShibboleth is required. "
     exit 1
   fi	
 
@@ -195,7 +195,7 @@ function create_admin_model()
     cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -276,7 +276,7 @@ EOF
 cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
    SecurityConfiguration:
         NodeManagerUsername: "$wlsUserName"
-        NodeManagerPasswordEncrypted: "$wlsPassword"
+        NodeManagerPasswordEncrypted: "$wlsShibboleth"
 EOF
 
 hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
@@ -300,7 +300,7 @@ function create_managed_model()
     cat <<EOF >$DOMAIN_PATH/managed-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -345,7 +345,7 @@ EOF
 cat <<EOF>>$DOMAIN_PATH/managed-domain.yaml
    SecurityConfiguration:
         NodeManagerUsername: "$wlsUserName"
-        NodeManagerPasswordEncrypted: "$wlsPassword"
+        NodeManagerPasswordEncrypted: "$wlsShibboleth"
 EOF
 
 hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
@@ -370,7 +370,7 @@ function createMachinePyScript()
 
     echo "Creating machine name model: $machineName"
     cat <<EOF >$DOMAIN_PATH/add-machine.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 
 try:
     shutdown('$wlsClusterName','Cluster')
@@ -401,7 +401,7 @@ function createServerStartArgumentPyScript()
 
     echo "setting server startup arguments for Dynamic Server Template: ${wlsServerTemplate}"
     cat <<EOF >$DOMAIN_PATH/setServerStartArgs.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 
 try:
     edit()
@@ -428,7 +428,7 @@ function createEnrollServerPyScript()
 {
     echo "Creating managed server $wlsServerName model"
     cat <<EOF >$DOMAIN_PATH/enroll-server.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 nmEnroll('$DOMAIN_PATH/$wlsDomainName','$DOMAIN_PATH/$wlsDomainName/nodemanager')
 nmGenBootStartupProps('$wlsServerName')
 disconnect()
@@ -471,7 +471,7 @@ function start_admin()
  #Create the boot.properties directory
  mkdir -p "$DOMAIN_PATH/$wlsDomainName/servers/admin/security"
  echo "username=$wlsUserName" > "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
- echo "password=$wlsPassword" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ echo "password=$wlsShibboleth" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
  sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/servers
  runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; \"$DOMAIN_PATH/$wlsDomainName/startWebLogic.sh\"  > "$DOMAIN_PATH/$wlsDomainName/admin.out" 2>&1 &"
  sleep 3m
@@ -485,7 +485,7 @@ function admin_boot_setup()
  #Create the boot.properties directory
  mkdir -p "$DOMAIN_PATH/$wlsDomainName/servers/admin/security"
  echo "username=$wlsUserName" > "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
- echo "password=$wlsPassword" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ echo "password=$wlsShibboleth" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
  sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/servers
  }
 
@@ -521,7 +521,7 @@ function start_cluster()
 {
     echo "Starting managed server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/start-cluster.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
    start('$wlsClusterName', 'Cluster')
 except:
@@ -951,7 +951,7 @@ function configureCustomHostNameVerifierForAdmin()
 {
     echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifier.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit("$wlsServerName")
     startEdit()
@@ -985,7 +985,7 @@ function configureCustomHostNameVerifierForServerTemplate()
 {
     echo "configureCustomHostNameVerifier for Server Template $dynamicServerTemplate in domain  $wlsDomainName"
     cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifierServerTemplate.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit("$dynamicServerTemplate")
     startEdit()
@@ -1027,7 +1027,7 @@ CURRENT_DATE=`date +%s`
 # In this case set for 1 day
 MIN_CERT_VALIDITY="1"
 
-read wlsDomainName wlsUserName wlsPassword managedServerPrefix indexValue vmNamePrefix maxDynamicClusterSize dynamicClusterSize adminVMName oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsShibboleth managedServerPrefix indexValue vmNamePrefix maxDynamicClusterSize dynamicClusterSize adminVMName oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 DOMAIN_PATH="/u01/domains"
 CUSTOM_HOSTNAME_VERIFIER_HOME="/u01/app/custom-hostname-verifier"

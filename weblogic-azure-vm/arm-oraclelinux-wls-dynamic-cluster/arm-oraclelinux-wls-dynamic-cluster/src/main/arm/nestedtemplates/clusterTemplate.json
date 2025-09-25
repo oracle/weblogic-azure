@@ -28,6 +28,12 @@
                 "description": "A suffix to be appended to all resources created by this template."
             }
         },
+        "const_guidTag" :{
+            "type": "string",
+            "metadata": {
+                "description": "A unique tag for resources."
+            }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -422,7 +428,7 @@
         {
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+			"tags": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'existing'),createObject(parameters('const_guidTag'),''),createObject())]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -507,7 +513,8 @@
                 "count": "[add(parameters('dynamicClusterSize'),1)]"
             },
             "dependsOn": [
-                "[variables('name_virtualNetwork')]"
+                "[variables('name_virtualNetwork')]",
+                "publicIPLoop"				
             ],
             "properties": {
                 "ipConfigurations": [
@@ -515,12 +522,18 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress'))))]"
+                            },
                             "subnet": {
                                 "id": "[variables('ref_subnet')]"
                             }
                         }
                     }
-                ]
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('const_managedVMPrefix'), copyIndex()))]"
+                }
             }
         },
         {

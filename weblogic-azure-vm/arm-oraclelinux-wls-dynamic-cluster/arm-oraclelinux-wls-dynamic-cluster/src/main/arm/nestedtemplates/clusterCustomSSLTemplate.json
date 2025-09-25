@@ -28,6 +28,12 @@
                 "description": "A suffix to be appended to all resources created by this template."
             }
         },
+        "const_guidTag" :{
+            "type": "string",
+            "metadata": {
+                "description": "A unique tag for resources."
+            }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -128,7 +134,7 @@
                 "owls-122140-jdk8-rhel87;Oracle:weblogic-122140-jdk8-rhel87:owls-122140-jdk8-rhel87;latest",
                 "owls-122140-jdk8-rhel76;Oracle:weblogic-122140-jdk8-rhel76:owls-122140-jdk8-rhel76;latest",
                 "owls-141100-jdk8-rhel76;Oracle:weblogic-141100-jdk8-rhel76:owls-141100-jdk8-rhel76;latest",
-                "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest",
+                "owls-141100-jdk11-rhel76;Oracle:weblogic-141100-jdk11-rhel76:owls-141100-jdk11-rhel76;latest"
             ],
             "metadata": {
                 "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
@@ -493,7 +499,7 @@
         {
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+            "tags": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'existing'),createObject(parameters('const_guidTag'),''),createObject())]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -578,7 +584,8 @@
                 "count": "[add(parameters('dynamicClusterSize'),1)]"
             },
             "dependsOn": [
-                "[variables('name_virtualNetwork')]"
+                "[variables('name_virtualNetwork')]",
+				"publicIPLoop"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -586,12 +593,18 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress'))))]"
+                            },
                             "subnet": {
                                 "id": "[variables('ref_subnet')]"
                             }
                         }
                     }
-                ]
+                ],
+                "dnsSettings": {
+                    "internalDnsNameLabel": "[if(equals(copyIndex(),0),parameters('adminVMName'),concat(variables('const_managedVMPrefix'), copyIndex()))]"
+                }
             }
         },
         {

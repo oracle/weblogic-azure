@@ -1,0 +1,107 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+		"location": {
+		   "type": "string",
+		   "metadata": {
+		      "description": "Location for all resources."
+		   }
+		},
+		"_globalResourceNameSuffix": {
+		   "type": "string",
+		   "metadata": {
+		      "description": "A unique suffix that was specified during the deployment of the solution template."
+		   }
+		},
+		"tagsByResource": {
+		    "type": "object",
+		    "defaultValue": {},
+		    "metadata": {
+		        "description": "${label.tagsLabel}"
+		    }
+		},
+		"const_guidTag" :{
+			"type": "string",
+			"metadata": {
+			   "description": "A unique tag for resources."
+			}
+		},
+		"_artifactsLocation": {
+		   "type": "string",
+		   "metadata": {
+		      "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+		   }
+		},
+		"_artifactsLocationAdminTemplate": {
+		   "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
+		   "type": "string",
+		   "metadata": {
+		      "description": "If we are deploying from the command line, use the passed in _artifactsLocation, otherwise use the default."
+		   }
+		},
+		"_artifactsLocationSasToken": {
+		   "type": "securestring",
+		   "metadata": {
+		      "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+		   }
+		},
+		"userAssignedIdentityResourceId":{
+			"type": "string",
+			"metadata": { 
+				"Description": "UserAssigned Identity"
+			}
+		},
+		"utcValue": {
+		  "type": "string",
+		  "defaultValue": "[utcNow()]"
+		}		
+    },
+    "variables": {
+		"name_postDeploymentscriptFile": "postDeploymentScript.sh"
+    },
+    "resources": [
+		{
+		    "type": "${identifier.deploymentScripts}",
+		    "apiVersion": "${azure.apiVersionForDeploymentScript}",
+			"tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
+			"name": "[concat('postdeployscript-', parameters('_globalResourceNameSuffix'))]",
+			"kind": "AzureCLI",
+			"location": "[parameters('location')]",
+			"identity": {
+			       "type": "UserAssigned",
+			       "userAssignedIdentities": {
+			        "[parameters('userAssignedIdentityResourceId')]": {}
+					}
+			 },
+			"properties": {
+				"forceUpdateTag": "[parameters('utcValue')]",
+				"azCliVersion": "2.9.1",
+				"timeout": "PT30M",
+				"cleanupPreference": "OnSuccess",
+				"retentionInterval": "P1D",
+				"primaryScriptUri": "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_postDeploymentscriptFile'), parameters('_artifactsLocationSasToken')))]",
+				"environmentVariables": [
+					{
+						"name": "MANAGED_IDENTITY_ID",
+						"value": "[parameters('userAssignedIdentityResourceId')]"
+					},
+					{
+					    "name": "RESOURCE_GROUP_NAME",
+					    "value": "[resourceGroup().name]"	
+					},
+					{
+						"name": "GUID_TAG",
+						"value": "[parameters('const_guidTag')]"
+					}
+				]
+			}
+		}
+    ],
+    "outputs": {
+		"userAssignedIdentityResource": {
+		         "type": "string",
+		         "value": "[parameters('userAssignedIdentityResourceId')]"
+		 }
+    }
+}

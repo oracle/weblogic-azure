@@ -19,9 +19,9 @@ function usage()
 
 function validateInput()
 {
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]
     then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+        echo_stderr "Weblogic username or password is required. "
         exit 1
     fi	
 
@@ -69,7 +69,7 @@ function delete_machine_model()
 {
     echo "Deleting managed server name model for $managedServerNames"
     cat <<EOF >${scriptPath}/delete-server.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit()
     startEdit()
@@ -109,7 +109,7 @@ function delete_ms_server_model()
 {
     echo "Deleting managed server machine name model for $managedVMNames"
     cat <<EOF >${scriptPath}/delete-machine.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit()
     startEdit()
@@ -195,7 +195,7 @@ function createTempFolder()
 #main script starts here
 
 #read arguments from stdin
-read wlsUserName wlsPassword managedServerNames managedVMNames wlsForceShutDown wlsAdminHost wlsAdminPort oracleHome
+read wlsUserName wlsShibboleth managedServerNames managedVMNames wlsForceShutDown wlsAdminHost wlsAdminPort oracleHome
 
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 hostName=`hostname`
