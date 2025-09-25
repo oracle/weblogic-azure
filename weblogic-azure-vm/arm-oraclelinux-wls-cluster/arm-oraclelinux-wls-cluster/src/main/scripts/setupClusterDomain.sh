@@ -47,9 +47,9 @@ function validateInput()
         echo_stderr "wlsDomainName is required. "
     fi
 
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]
     then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+        echo_stderr "Weblogic username or password is required. "
         exit 1
     fi
 
@@ -190,7 +190,7 @@ cat /dev/null > $DOMAIN_PATH/admin-domain.yaml
     cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -249,7 +249,7 @@ EOF
 cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
-       NodeManagerPasswordEncrypted: "$wlsPassword"
+       NodeManagerPasswordEncrypted: "$wlsShibboleth"
 EOF
 
 hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
@@ -272,7 +272,7 @@ function create_managed_model()
     cat <<EOF >$DOMAIN_PATH/managed-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -321,7 +321,7 @@ EOF
     cat <<EOF >>$DOMAIN_PATH/managed-domain.yaml
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
-       NodeManagerPasswordEncrypted: "$wlsPassword"
+       NodeManagerPasswordEncrypted: "$wlsShibboleth"
 EOF
 
 hasRemoteAnonymousAttribs="$(containsRemoteAnonymousT3RMIIAttribs)"
@@ -344,7 +344,7 @@ function create_machine_model()
 {
     echo "Creating machine name model for managed server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/add-machine.py
-connect('$wlsUserName','$wlsPassword','$adminWlstURL')
+connect('$wlsUserName','$wlsShibboleth','$adminWlstURL')
 edit("$wlsServerName")
 startEdit()
 cd('/')
@@ -368,7 +368,7 @@ function create_ms_server_model()
     cat <<EOF >$DOMAIN_PATH/add-server.py
 
 isCustomSSLEnabled='${isCustomSSLEnabled}'
-connect('$wlsUserName','$wlsPassword','$adminWlstURL')
+connect('$wlsUserName','$wlsShibboleth','$adminWlstURL')
 edit("$wlsServerName")
 startEdit()
 cd('/')
@@ -447,7 +447,7 @@ function admin_boot_setup()
  #Create the boot.properties directory
  mkdir -p "$DOMAIN_PATH/$wlsDomainName/servers/admin/security"
  echo "username=$wlsUserName" > "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
- echo "password=$wlsPassword" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ echo "password=$wlsShibboleth" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
  sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/servers
  }
 
@@ -587,7 +587,7 @@ function start_managed()
 {
     echo "Starting managed server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/start-server.py
-connect('$wlsUserName','$wlsPassword','$adminWlstURL')
+connect('$wlsUserName','$wlsShibboleth','$adminWlstURL')
 try:
    start('$wlsServerName', 'Server')
 except:
@@ -627,8 +627,8 @@ function create_managedSetup(){
     echo "Completed managed server model files"
     sudo chown -R $username:$groupname $DOMAIN_PATH
     # Updating managed-domain.yaml using updateDomain.sh on existing domain created by create_admin_model 
-    # wlsPassword is accepted from stdin to support old and new weblogic-deploy tool version
-    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/updateDomain.sh -admin_url $adminWlstURL -admin_user $wlsUserName -oracle_home $oracleHome -domain_home $DOMAIN_PATH/${wlsDomainName}  -domain_type WLS -model_file $DOMAIN_PATH/managed-domain.yaml <<< $wlsPassword"
+    # wlsShibboleth is accepted from stdin to support old and new weblogic-deploy tool version
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/updateDomain.sh -admin_url $adminWlstURL -admin_user $wlsUserName -oracle_home $oracleHome -domain_home $DOMAIN_PATH/${wlsDomainName}  -domain_type WLS -model_file $DOMAIN_PATH/managed-domain.yaml <<< $wlsShibboleth"
     if [[ $? != 0 ]]; then
        echo "Error : Managed setup failed"
        exit 1
@@ -917,7 +917,7 @@ function configureCustomHostNameVerifier()
 {
     echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifier.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit("$wlsServerName")
     startEdit()
@@ -997,7 +997,7 @@ CURRENT_DATE=`date +%s`
 MIN_CERT_VALIDITY="1"
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword wlsServerName wlsAdminHost adminVMNamePrefix globalResourceNameSuffix numberOfInstances managedVMPrefix managedServerPrefix oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsShibboleth wlsServerName wlsAdminHost adminVMNamePrefix globalResourceNameSuffix numberOfInstances managedVMPrefix managedServerPrefix oracleHome storageAccountName storageAccountKey mountpointPath isHTTPAdminListenPortEnabled isCustomSSLEnabled customDNSNameForAdminServer dnsLabelPrefix location virtualNetworkNewOrExisting storageAccountPrivateIp customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}"
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"

@@ -28,6 +28,12 @@
                 "description": "The suffix to be appended to the globally unique resource name"
             }
         },
+        "const_guidTag" :{
+            "type": "string",
+            "metadata": {
+                "description": "A unique tag for resources."
+         }
+        },
         "adminPasswordOrKey": {
             "type": "securestring",
             "metadata": {
@@ -163,7 +169,7 @@
                 "description": "Select appropriate VM Size as per requirement"
             }
         },
-                "virtualNetworkNewOrExisting": {
+        "virtualNetworkNewOrExisting": {
             "type": "string",
             "defaultValue": "new",
             "allowedValues": [
@@ -582,8 +588,7 @@
         {
             "apiVersion": "${azure.apiVersionForPublicIPAddresses}",
             "type": "Microsoft.Network/publicIPAddresses",
-            "tags": "[parameters('tagsByResource')['${identifier.publicIPAddresses}']]",
-            "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+            "tags": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'new'),parameters('tagsByResource')['${identifier.publicIPAddresses}'],if(empty(parameters('tagsByResource')['${identifier.publicIPAddresses}']),createObject(parameters('const_guidTag'),''),union(parameters('tagsByResource')['${identifier.publicIPAddresses}'],createObject(parameters('const_guidTag'),''))))]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -664,7 +669,8 @@
                 "count": "[parameters('numberOfInstances')]"
             },
             "dependsOn": [
-                "[variables('name_virtualNetwork')]"
+                "[variables('name_virtualNetwork')]",
+                "publicIPLoop"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -672,6 +678,9 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('${identifier.publicIPAddresses}',if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress'))))]"
+                            },
                             "subnet": {
                                 "id": "[variables('ref_subnet')]"
                             }

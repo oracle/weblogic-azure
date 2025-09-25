@@ -46,9 +46,9 @@ function validateInput()
         echo_stderr "wlsDomainName is required. "
     fi
 
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]
     then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+        echo_stderr "Weblogic username or password is required. "
         exit 1
     fi
 
@@ -176,7 +176,7 @@ function create_managed_model()
     cat <<EOF >$wlsDomainPath/managed-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -199,7 +199,7 @@ topology:
                Arguments: '${SERVER_STARTUP_ARGS}'
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
-       NodeManagerPasswordEncrypted: "$wlsPassword" 
+       NodeManagerPasswordEncrypted: "$wlsShibboleth"
 EOF
 }
 
@@ -208,7 +208,7 @@ function create_machine_model()
 {
     echo "Creating machine name model for managed server $wlsServerName"
     cat <<EOF >$wlsDomainPath/add-machine.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit()
 cd('/')
@@ -234,7 +234,7 @@ function create_ms_server_model()
 
 isCustomSSLEnabled='${isCustomSSLEnabled}'
 
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit()
 cd('/')
@@ -438,7 +438,7 @@ function start_managed()
 {
     echo "Starting managed server $wlsServerName"
     cat <<EOF >$wlsDomainPath/start-server.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
    start('$wlsServerName', 'Server')
 except:
@@ -751,7 +751,7 @@ function configureCustomHostNameVerifier()
 {
     echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
     cat <<EOF >${wlsDomainPath}/configureCustomHostNameVerifier.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit("$wlsServerName")
     startEdit()
@@ -787,7 +787,7 @@ CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR="$(readlink -f ${CURR_DIR})"
 
 #read arguments from stdin
-read wlsDomainName wlsUserName wlsPassword managedServerPrefix serverIndex wlsAdminURL wlsAdminHost oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath wlsADSSLCer wlsLDAPPublicIP adServerHost appGWHostName enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex enableCoherence customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
+read wlsDomainName wlsUserName wlsShibboleth managedServerPrefix serverIndex wlsAdminURL wlsAdminHost oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath wlsADSSLCer wlsLDAPPublicIP adServerHost appGWHostName enableELK elasticURI elasticUserName elasticPassword logsToIntegrate logIndex enableCoherence customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreBase64String customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreBase64String customTrustKeyStorePassPhrase customTrustKeyStoreType privateKeyAlias privateKeyPassPhrase
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
@@ -845,7 +845,7 @@ if [[ "${enableELK,,}" == "true" ]];then
         ${oracleHome} \
         ${wlsAdminURL} \
         ${wlsUserName} \
-        ${wlsPassword} \
+        ${wlsShibboleth} \
         "admin" \
         ${elasticURI} \
         ${elasticUserName} \

@@ -23,9 +23,9 @@ function validateInput()
         echo_stderr "wlsAdminServerName is required. "
     fi
 
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]
     then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+        echo_stderr "Weblogic username or password is required. "
         exit 1
     fi
 
@@ -51,7 +51,7 @@ function validateInput()
 function setupApplicationGateway()
 {
     cat <<EOF >$SCRIPT_PWD/setup-app-gateway.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 
 edit("$wlsAdminServerName")
 startEdit()
@@ -107,7 +107,7 @@ function restartManagedServers()
 {
     echo "Restart managed servers"
     cat <<EOF >${SCRIPT_PWD}/restart-managedServer.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 servers=cmo.getServers()
 domainRuntime()
 print "Restart the servers which are in RUNNING status"
@@ -140,7 +140,7 @@ EOF
 SCRIPT_PWD=`pwd`
 
 #read arguments from stdin
-read wlsAdminServerName wlsUserName wlsPassword wlsAdminHost wlsAdminPort AppGWHostName oracleHome
+read wlsAdminServerName wlsUserName wlsShibboleth wlsAdminHost wlsAdminPort AppGWHostName oracleHome
 
 wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 

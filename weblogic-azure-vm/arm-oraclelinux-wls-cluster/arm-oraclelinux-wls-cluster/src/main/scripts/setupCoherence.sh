@@ -40,8 +40,8 @@ function validateInput() {
         echo_stderr "wlsDomainName is required. "
     fi
 
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]; then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]; then
+        echo_stderr "Weblogic username or password is required. "
         exit 1
     fi
 
@@ -160,7 +160,7 @@ function verifyCertValidity()
 #associate storage1 with the coherence cluster
 function createCoherenceCluster() {
     cat <<EOF >$wlsDomainPath/configure-coherence-cluster.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit()
     startEdit(60000,60000,'true')
@@ -219,7 +219,7 @@ function create_managed_model() {
     cat <<EOF >$wlsDomainPath/managed-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -273,7 +273,7 @@ EOF
 cat <<EOF >>$wlsDomainPath/managed-domain.yaml
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
-       NodeManagerPasswordEncrypted: "$wlsPassword" 
+       NodeManagerPasswordEncrypted: "$wlsShibboleth"
 EOF
 }
 
@@ -281,7 +281,7 @@ EOF
 function create_machine_model() {
     echo "Creating machine name model for managed server $wlsServerName"
     cat <<EOF >$wlsDomainPath/add-machine.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit(60000,60000,'true')
 cd('/')
@@ -305,7 +305,7 @@ function create_ms_server_model() {
     cat <<EOF >$wlsDomainPath/add-server.py
 
 isCustomSSLEnabled='${isCustomSSLEnabled}'
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit(60000,60000,'true')
 cd('/')
@@ -429,7 +429,7 @@ EOF
 function startManagedServer() {
     echo "Starting managed server $wlsServerName"
     cat <<EOF >$wlsDomainPath/start-server.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
    start('$wlsServerName', 'Server')
 except:
@@ -448,7 +448,7 @@ EOF
 function restartManagedServers() {
     echo "Restart managed servers"
     cat <<EOF >$wlsDomainPath/restart-managedServer.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 servers=cmo.getServers()
 try:
     edit("$managedServerHost")
@@ -516,8 +516,8 @@ function createManagedSetup() {
     sudo chown -R $username:$groupname $wlsDomainPath
     adminWlstURL="t3://$wlsAdminURL"
     # Updating managed-domain.yaml using updateDomain.sh on existing domain created by create_admin_model 
-    # wlsPassword is accepted from stdin to support old and new weblogic-deploy tool version
-    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $wlsDomainPath/weblogic-deploy/bin/updateDomain.sh -admin_url $adminWlstURL -admin_user $wlsUserName -oracle_home $oracleHome -domain_home $DOMAIN_PATH/${wlsDomainName}  -domain_type WLS -model_file $wlsDomainPath/managed-domain.yaml <<< $wlsPassword"
+    # wlsShibboleth is accepted from stdin to support old and new weblogic-deploy tool version
+    runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $wlsDomainPath/weblogic-deploy/bin/updateDomain.sh -admin_url $adminWlstURL -admin_user $wlsUserName -oracle_home $oracleHome -domain_home $DOMAIN_PATH/${wlsDomainName}  -domain_type WLS -model_file $wlsDomainPath/managed-domain.yaml <<< $wlsShibboleth"
     if [[ $? != 0 ]]; then
         echo "Error : Managed setup failed"
         exit 1
@@ -779,7 +779,7 @@ function configureCustomHostNameVerifier()
 {
     echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifier.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit("$wlsServerName")
     startEdit()
@@ -819,7 +819,7 @@ CURRENT_DATE=`date +%s`
 # Supplied certificate to have minimum days validity for the deployment
 MIN_CERT_VALIDITY="1"
 
-read wlsDomainName wlsUserName wlsPassword adminVMName adminVMNamePrefix globalResourceNameSuffix numberOfCoherenceCacheInstances managedVMPrefix oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location addnodeFlag isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsShibboleth adminVMName adminVMNamePrefix globalResourceNameSuffix numberOfCoherenceCacheInstances managedVMPrefix oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location addnodeFlag isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 
