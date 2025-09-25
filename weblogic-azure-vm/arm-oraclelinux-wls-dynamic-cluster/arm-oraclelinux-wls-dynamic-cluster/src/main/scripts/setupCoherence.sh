@@ -36,8 +36,8 @@ function validateInput() {
         echo_stderr "wlsDomainName is required. "
     fi
 
-    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]; then
-        echo_stderr "wlsUserName or wlsPassword is required. "
+    if [[ -z "$wlsUserName" || -z "$wlsShibboleth" ]]; then
+        echo_stderr "wlsUserName or wlsShibboleth is required. "
         exit 1
     fi
 
@@ -157,7 +157,7 @@ function verifyCertValidity()
 #associate storage1 with the coherence cluster
 function createCoherenceClusterModel() {
     cat <<EOF >$wlsDomainPath/configure-coherence-cluster.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     shutdown('$clientClusterName','Cluster')
 except Exception, e:
@@ -235,7 +235,7 @@ function create_managed_model() {
     cat <<EOF >$wlsDomainPath/managed-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
-   AdminPassword: "$wlsPassword"
+   AdminPassword: "$wlsShibboleth"
    ServerStartMode: prod
 topology:
    Name: "$wlsDomainName"
@@ -288,7 +288,7 @@ EOF
 cat <<EOF >>$wlsDomainPath/managed-domain.yaml
    SecurityConfiguration:
        NodeManagerUsername: "$wlsUserName"
-       NodeManagerPasswordEncrypted: "$wlsPassword" 
+       NodeManagerPasswordEncrypted: "$wlsShibboleth" 
 EOF
 
 }
@@ -297,7 +297,7 @@ EOF
 function create_machine_model() {
     echo "Creating machine name model for managed server $wlsServerName"
     cat <<EOF >$wlsDomainPath/add-machine.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit(60000,60000,'true')
 cd('/')
@@ -321,7 +321,7 @@ function create_ms_server_model() {
     cat <<EOF >$wlsDomainPath/add-server.py
 
 isCustomSSLEnabled='${isCustomSSLEnabled}'
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit(60000,60000,'true')
 cd('/')
@@ -445,7 +445,7 @@ EOF
 function startManagedServer() {
     echo "Starting managed server $wlsServerName"
     cat <<EOF >$wlsDomainPath/start-server.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
    start('$wlsServerName', 'Server')
 except:
@@ -678,7 +678,7 @@ function configureCustomHostNameVerifier()
 {
     echo "configureCustomHostNameVerifier for domain  $wlsDomainName for server $wlsServerName"
     cat <<EOF >$DOMAIN_PATH/configureCustomHostNameVerifier.py
-connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+connect('$wlsUserName','$wlsShibboleth','t3://$wlsAdminURL')
 try:
     edit("$wlsServerName")
     startEdit()
@@ -730,7 +730,7 @@ MIN_CERT_VALIDITY="1"
 #    echo "ARG[${args[${i}]}]"
 #done
 
-read wlsDomainName wlsUserName wlsPassword adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
+read wlsDomainName wlsUserName wlsShibboleth adminVMName oracleHome wlsDomainPath storageAccountName storageAccountKey mountpointPath enableWebLocalStorage managedServerPrefix serverIndex customDNSNameForAdminServer dnsLabelPrefix location isCustomSSLEnabled customIdentityKeyStoreData customIdentityKeyStorePassPhrase customIdentityKeyStoreType customTrustKeyStoreData customTrustKeyStorePassPhrase customTrustKeyStoreType serverPrivateKeyAlias serverPrivateKeyPassPhrase
 
 isCustomSSLEnabled="${isCustomSSLEnabled,,}"
 

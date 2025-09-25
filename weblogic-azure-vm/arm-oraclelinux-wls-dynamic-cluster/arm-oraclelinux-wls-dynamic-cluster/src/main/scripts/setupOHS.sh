@@ -51,9 +51,9 @@ function validateInput()
        exit 1
     fi	
     
-    if [[ -z "$OHS_NM_USER" || -z "$OHS_NM_PSWD" ]]
+    if [[ -z "$OHS_NM_USER" || -z "$OHS_NM_SHIBBOLETH" ]]
     then
-       echo_stderr "OHS nodemanager username and password is required. "
+       echo_stderr "OHS OHS_NM_USER and OHS_NM_SHIBBOLETH is required. "
        exit 1
     fi	
     
@@ -74,14 +74,14 @@ function validateInput()
        echo_stderr "One of the required values for enabling Custom SSL (ohsKeyStoreData,ohsKeyStorePassPhrase) is not provided"
     fi
     
-    if [ -z "$ORACLE_VAULT_PASSWORD" ]
+    if [ -z "$ORACLE_VAULT_SHIBBOLETH" ]
     then
-       echo_stderr "Oracle vault password is required to add custom ssl to OHS server"
+       echo_stderr "ORACLE_VAULT_SHIBBOLETH is required to add custom ssl to OHS server"
     fi
     
-    if [ -z "${WLS_USER}" ] || [ -z "${WLS_PASSWORD}" ]
+    if [ -z "${WLS_USER}" ] || [ -z "${WLS_SHIBBOLETH}" ]
     then
-       echo_stderr "Either weblogic username or weblogic password is required"
+       echo_stderr "Either WLS_USER or WLS_SHIBBOLETH is required"
     fi
     
     if [ -z "$OHS_KEY_TYPE" ] 
@@ -172,7 +172,7 @@ cd('/')
 create('sc', 'SecurityConfiguration')
 cd('SecurityConfiguration/sc')
 set('NodeManagerUsername', "${OHS_NM_USER}")
-set('NodeManagerPasswordEncrypted', "${OHS_NM_PSWD}")
+set('NodeManagerPasswordEncrypted', "${OHS_NM_SHIBBOLETH}")
 setOption('NodeManagerType','PerDomainNodeManager')
 setOption('OverwriteDomain', 'true')
 writeDomain("${OHS_DOMAIN_PATH}")
@@ -276,7 +276,7 @@ function createStartComponent()
 {
     cat <<EOF > $OHS_DOMAIN_PATH/startComponent.py 
 import os, sys
-nmConnect(username='${OHS_NM_USER}',password='${OHS_NM_PSWD}',domainName='${OHS_DOMAIN_NAME}')
+nmConnect(username='${OHS_NM_USER}',password='${OHS_NM_SHIBBOLETH}',domainName='${OHS_DOMAIN_NAME}')
 status=nmServerStatus(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
 if status != "RUNNING":
   nmStart(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
@@ -293,7 +293,7 @@ function createStopComponent()
 {
     cat <<EOF > $OHS_DOMAIN_PATH/stopComponent.py 
 import os, sys
-nmConnect(username='${OHS_NM_USER}',password='${OHS_NM_PSWD}',domainName='${OHS_DOMAIN_NAME}')
+nmConnect(username='${OHS_NM_USER}',password='${OHS_NM_SHIBBOLETH}',domainName='${OHS_DOMAIN_NAME}')
 status=nmServerStatus(serverName='${OHS_COMPONENT_NAME}',serverType='OHS')
 if status != "SHUTDOWN":
   nmKill(serverName='$OHS_COMPONENT_NAME',serverType='OHS')
@@ -359,7 +359,7 @@ function enableAndStartOHSServerService()
 # Query the WLS and form WLS cluster address
 function getWLSClusterAddress()
 {
-    restArgs=" -v --user ${WLS_USER}:${WLS_PASSWORD} -H X-Requested-By:MyClient -H Accept:application/json -H Content-Type:application/json"
+    restArgs=" -v --user ${WLS_USER}:${WLS_SHIBBOLETH} -H X-Requested-By:MyClient -H Accept:application/json -H Content-Type:application/json"
     curl $restArgs -X GET ${WLS_REST_URL}/domainRuntime/serverRuntimes?fields=defaultURL > out
     if [[ $? != 0 ]];
     then
@@ -442,7 +442,7 @@ function updateNetworkRules()
 function createOracleVault()
 {
     runuser -l oracle -c "mkdir -p ${OHS_VAULT_PATH}"
-    runuser -l oracle -c  "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet create -wallet ${OHS_VAULT_PATH} -pwd ${ORACLE_VAULT_PASSWORD} -auto_login"
+    runuser -l oracle -c  "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet create -wallet ${OHS_VAULT_PATH} -pwd ${ORACLE_VAULT_SHIBBOLETH} -auto_login"
     if [[ $? == 0 ]]; 
     then
         echo "Successfully oracle vault is created"
@@ -468,7 +468,7 @@ function addCertficateToOracleVault()
           
           KEY_TYPE=`$JAVA_HOME/bin/keytool -list -v -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -storepass ${ohsKeyStorePassPhrase} | grep 'Keystore type:'`
           if [[ $KEY_TYPE == *"jks"* ]]; then
-              runuser -l oracle -c  "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet  jks_to_pkcs12  -wallet ${OHS_VAULT_PATH}  -pwd ${ORACLE_VAULT_PASSWORD} -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -jkspwd ${ohsKeyStorePassPhrase}"
+              runuser -l oracle -c  "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet  jks_to_pkcs12  -wallet ${OHS_VAULT_PATH}  -pwd ${ORACLE_VAULT_SHIBBOLETH} -keystore ${OHS_VAULT_PATH}/ohsKeystore.jks -jkspwd ${ohsKeyStorePassPhrase}"
               if [[ $? == 0 ]]; then
                  echo "Successfully added JKS keystore to Oracle Wallet"
               else
@@ -487,7 +487,7 @@ function addCertficateToOracleVault()
           # Validate PKCS12 file
           verifyCertValidity ${OHS_VAULT_PATH}/ohsCert.p12 $ohsKeyStorePassPhrase $CURRENT_DATE $MIN_CERT_VALIDITY "PKCS12"
           
-          runuser -l oracle -c "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet import_pkcs12 -wallet ${OHS_VAULT_PATH} -pwd ${ORACLE_VAULT_PASSWORD} -pkcs12file ${OHS_VAULT_PATH}/ohsCert.p12  -pkcs12pwd ${ohsKeyStorePassPhrase}"
+          runuser -l oracle -c "${INSTALL_PATH}/oracle/middleware/oracle_home/oracle_common/bin/orapki wallet import_pkcs12 -wallet ${OHS_VAULT_PATH} -pwd ${ORACLE_VAULT_SHIBBOLETH} -pkcs12file ${OHS_VAULT_PATH}/ohsCert.p12  -pkcs12pwd ${ohsKeyStorePassPhrase}"
           if [[ $? == 0 ]]; then
               echo "Successfully added certificate to Oracle Wallet"
           else
@@ -534,7 +534,7 @@ CURRENT_DATE=`date +%s`
 # In this case set for 1 day
 MIN_CERT_VALIDITY="1"
 
-read OHS_DOMAIN_NAME OHS_COMPONENT_NAME OHS_NM_USER OHS_NM_PSWD OHS_HTTP_PORT OHS_HTTPS_PORT WLS_REST_URL WLS_USER WLS_PASSWORD OHS_KEY_STORE_DATA OHS_KEY_STORE_PASSPHRASE ORACLE_VAULT_PASSWORD OHS_KEY_TYPE
+read OHS_DOMAIN_NAME OHS_COMPONENT_NAME OHS_NM_USER OHS_NM_SHIBBOLETH OHS_HTTP_PORT OHS_HTTPS_PORT WLS_REST_URL WLS_USER WLS_SHIBBOLETH OHS_KEY_STORE_DATA OHS_KEY_STORE_PASSPHRASE ORACLE_VAULT_SHIBBOLETH OHS_KEY_TYPE
 
 JDK_PATH="/u01/app/jdk"
 JDK_VERSION="jdk1.8.0_291"

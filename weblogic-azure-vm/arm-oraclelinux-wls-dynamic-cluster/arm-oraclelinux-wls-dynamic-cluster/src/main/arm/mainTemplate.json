@@ -191,6 +191,10 @@
 				"description": "A unique value to ensure the generated names are unique."
 			}
 		},
+		"guidTag": {
+			"type": "string",
+			"defaultValue": "[newGuid()]"
+		},		
 		"hasDNSZones": {
 			"type": "bool",
 			"defaultValue": false,
@@ -524,14 +528,18 @@
 	},
 	"variables": {
 		"const_globalResourceNameSuffix": "[uniqueString(parameters('guidValue'))]",
+		"const_guidTag": "[uniqueString(parameters('guidTag'))]",
 		"name_adminVM": "[concat(parameters('adminVMNamePrefix'), variables('const_globalResourceNameSuffix'), 'VM')]",
 		"name_clusterCustomSSLTemplate": "clusterCustomSSLLinkedTemplate",
 		"name_clusterCustomSSLLinkedTemplateName": "clusterCustomSSLTemplate.json",
 		"name_clusterLinkedTemplateName": "clusterTemplate.json",
 		"name_clusterTemplate": "clusterLinkedTemplate",
+		"name_uamiForPostDeploymentScript" : "uamiForPostDeploymentScript",
 		"name_coherenceTemplateName": "coherenceTemplate.json",
 		"name_dbLinkedTemplateName": "dbTemplate.json",
 		"name_dnszonesLinkedTemplateName": "dnszonesTemplate.json",
+		"name_postDeploymentUAMIRolesTemplate" : "postDeploymentUAMIRolesTemplate.json",
+		"name_postDeploymentTemplate": "postDeploymentTemplate.json",
 		"name_managedVMNamePrefix": "[concat(parameters('managedServerPrefix'), variables('const_globalResourceNameSuffix'))]",
 		"name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg-', variables('const_globalResourceNameSuffix'))]",
 		"name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
@@ -573,6 +581,9 @@
 					},
 					"_globalResourceNameSuffix": {
 						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
+					"const_guidTag":{
+						"value": "[variables('const_guidTag')]"
 					},
 					"adminPasswordOrKey": {
 						"value": "[parameters('adminPasswordOrKey')]"
@@ -681,6 +692,9 @@
 					},
 					"_globalResourceNameSuffix": {
 						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
+					"const_guidTag":{
+						"value": "[variables('const_guidTag')]"
 					},
 					"adminPasswordOrKey": {
 						"value": "[parameters('adminPasswordOrKey')]"
@@ -1270,7 +1284,8 @@
 		{
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "${azure.apiVersionForDeployment}",
-			"name": "${dynamic.end}",
+			"name": "[variables('name_uamiForPostDeploymentScript')]",
+			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
 				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
@@ -1279,6 +1294,80 @@
 				"[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_postDeploymentUAMIRolesTemplate')))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"location": {
+						"value": "[parameters('location')]"
+					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "${azure.apiVersionForDeployment}",
+			"name": "postDeplyment",
+			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
+				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
+				"[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', variables('name_uamiForPostDeploymentScript'))]"
+			],
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+		         "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_postDeploymentTemplate')))]",
+		         "contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"location": {
+						"value": "[parameters('location')]"
+					},
+					"_globalResourceNameSuffix": {
+						"value": "[variables('const_globalResourceNameSuffix')]"
+					},
+					"const_guidTag":{
+						"value": "[variables('const_guidTag')]"
+					},
+					"_artifactsLocation": {
+						"value": "[parameters('_artifactsLocation')]"
+					},
+					"_artifactsLocationSasToken": {
+						"value": "[parameters('_artifactsLocationSasToken')]"
+					},
+					"userAssignedIdentityResourceId":{
+						"value": "[reference(variables('name_uamiForPostDeploymentScript'),'${azure.apiVersionForDeployment}').outputs.uamidForPostDeployment.value]"
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "${azure.apiVersionForDeployment}",
+			"name": "${dynamic.end}",
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
+				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]",
+				"[resourceId('Microsoft.Resources/deployments', 'ohsLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
+				"[resourceId('Microsoft.Resources/deployments', variables('name_uamiForPostDeploymentScript'))]",
+				"[resourceId('Microsoft.Resources/deployments','postDeplyment')]"
 			],
 			"properties": {
 				"mode": "Incremental",
