@@ -550,8 +550,8 @@
 	"resources": [
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"name": "${dynamic.start}",
+			"apiVersion": "2023-07-01",
+			"name": "pid-89d7f595-f164-4cbd-abbb-e46cd0b342e8-partnercenter",
 			"properties": {
 				"mode": "Incremental",
 				"template": {
@@ -563,7 +563,7 @@
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "[variables('name_clusterTemplate')]",
 			"condition": "[not(parameters('enableCustomSSL'))]",
 			"properties": {
@@ -674,7 +674,7 @@
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "[variables('name_clusterCustomSSLTemplate')]",
 			"condition": "[parameters('enableCustomSSL')]",
 			"properties": {
@@ -812,7 +812,7 @@
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
 			"name": "networkSecurityLinkedTemplate",
 			"properties": {
@@ -843,7 +843,7 @@
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "dbLinkedTemplate",
 			"condition": "[parameters('enableDB')]",
 			"dependsOn": [
@@ -919,7 +919,7 @@
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
 			],
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"condition": "[and(parameters('enableCoherence'),not(parameters('enableCustomSSL')))]",
 			"properties": {
 				"mode": "Incremental",
@@ -974,7 +974,7 @@
 						"value": "[parameters('subnetName')]"
 					},
 					"storageAccountName": {
-						"value": "[reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'), '2023-07-01').outputs.storageAccountName.value]"
 					},
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
@@ -1015,7 +1015,7 @@
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
 			],
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"condition": "[and(parameters('enableCoherence'),parameters('enableCustomSSL'))]",
 			"properties": {
 				"mode": "Incremental",
@@ -1067,7 +1067,7 @@
 						"value": "[parameters('skuUrnVersion')]"
 					},
 					"storageAccountName": {
-						"value": "[reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'), '2023-07-01').outputs.storageAccountName.value]"
 					},
 					"usePreviewImage": {
 						"value": "[parameters('usePreviewImage')]"
@@ -1137,7 +1137,7 @@
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplate')]",
 				"[resourceId('Microsoft.Resources/deployments', 'coherenceTemplateWithCustomSSL')]"
 			],
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"condition": "[parameters('enableOHS')]",
 			"properties": {
 				"mode": "Incremental",
@@ -1165,7 +1165,7 @@
 						"value": "[parameters('dnsLabelPrefix')]"
 					},
 					"storageAccountName": {
-						"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.storageAccountName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.storageAccountName.value]"
 					},
 					"subnetName": {
 						"value": "[parameters('subnetName')]"
@@ -1216,13 +1216,13 @@
 						"value": "[parameters('virtualNetworkResourceGroupName')]"
 					},
 					"virtualNetworkName": {
-						"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.virtualNetworkName.value]"
+						"value": "[reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.virtualNetworkName.value]"
 					},
 					"vmSize": {
 						"value": "[parameters('vmSize')]"
 					},
 					"adminRestMgmtURL": {
-						"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminRestMgmtURL.value]"
+						"value": "[reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.adminRestMgmtURL.value]"
 					},
 					"wlsPassword": {
 						"value": "[parameters('wlsPassword')]"
@@ -1238,7 +1238,7 @@
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "dnszonesLinkedTemplate",
 			"condition": "[parameters('enableCustomDNS')]",
 			"dependsOn": [
@@ -1276,14 +1276,14 @@
 						"value": "[parameters('dnszoneResourceGroup')]"
 					},
 					"targetResources": {
-						"value": "[if(parameters('enableOHS'), createArray(reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value, reference('ohsLinkedTemplate', '${azure.apiVersionForDeployment}').outputs._ohsPublicIP.value), createArray(reference(variables('ref_clusterTemplate'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value))]"
+						"value": "[if(parameters('enableOHS'), createArray(reference(variables('ref_clusterTemplate'), '2023-07-01').outputs._adminPublicIPId.value, reference('ohsLinkedTemplate', '2023-07-01').outputs._ohsPublicIP.value), createArray(reference(variables('ref_clusterTemplate'), '2023-07-01').outputs._adminPublicIPId.value))]"
 					}
 				}
 			}
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "[variables('name_uamiForPostDeploymentScript')]",
 			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
 			"dependsOn": [
@@ -1313,7 +1313,7 @@
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "postDeplyment",
 			"condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
 			"dependsOn": [
@@ -1349,15 +1349,15 @@
 						"value": "[parameters('_artifactsLocationSasToken')]"
 					},
 					"userAssignedIdentityResourceId":{
-						"value": "[reference(variables('name_uamiForPostDeploymentScript'),'${azure.apiVersionForDeployment}').outputs.uamidForPostDeployment.value]"
+						"value": "[reference(variables('name_uamiForPostDeploymentScript'),'2023-07-01').outputs.uamidForPostDeployment.value]"
 					}
 				}
 			}
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"name": "${dynamic.end}",
+			"apiVersion": "2023-07-01",
+			"name": "93da13bf-11f6-5bfb-9b51-7deb152a21c3",
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', variables('ref_clusterTemplate'))]",
 				"[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
@@ -1390,19 +1390,19 @@
 		},
 		"wlsDomainLocation": {
 			"type": "string",
-			"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.wlsDomainLocation.value]"
+			"value": "[reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.wlsDomainLocation.value]"
 		},
 		"adminHostName": {
 			"type": "string",
-			"value": "[reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminHostName.value]"
+			"value": "[reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.adminHostName.value]"
 		},
 		"adminConsole": {
 			"type": "string",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminConsole.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.adminConsole.value)]"
 		},
 		"adminSecuredConsole": {
 			"type": "string",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'${azure.apiVersionForDeployment}').outputs.adminSecuredConsole.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('ref_clusterTemplate'),'2023-07-01').outputs.adminSecuredConsole.value)]"
 		},
 		"ohsVMName": {
 			"type": "string",
@@ -1411,12 +1411,12 @@
 		"ohsAccessURL": {
 			"type": "string",
 			"condition": "[parameters('enableOHS')]",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'), parameters('ohshttpPort')),''),reference('ohsLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.ohsAccessURL.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'), parameters('ohshttpPort')),''),reference('ohsLinkedTemplate', '2023-07-01').outputs.ohsAccessURL.value)]"
 		},
 		"ohsSecureAccessURL": {
 			"type": "string",
 			"condition": "[parameters('enableOHS')]",
-			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'),parameters('ohshttpsPort')),''), reference('ohsLinkedTemplate', '${azure.apiVersionForDeployment}').outputs.ohsSecureAccessURL.value)]"
+			"value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:{2}',parameters('dnszoneLoadBalancerLabel'),parameters('dnszoneName'),parameters('ohshttpsPort')),''), reference('ohsLinkedTemplate', '2023-07-01').outputs.ohsSecureAccessURL.value)]"
 		}
 	}
 }

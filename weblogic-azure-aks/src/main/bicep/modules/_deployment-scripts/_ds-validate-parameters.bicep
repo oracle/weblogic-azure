@@ -42,7 +42,7 @@ param sslUploadedCustomTrustKeyStoreType string
 param sslUploadedPrivateKeyAlias string
 @secure()
 param sslUploadedPrivateKeyPassPhrase string
-@description('${label.tagsLabel}')
+@description('Tags for the resources.')
 param tagsByResource object
 param useAksWellTestedVersion bool = true
 param userProvidedAcr string
@@ -61,12 +61,12 @@ var const_arguments = '${location} ${createAKSCluster} ${aksAgentPoolVMSize} ${a
 var const_checkDNSZone = enableDNSConfiguration && !createDNSZone
 var const_deploymentName = 'ds-validate-parameters-and-fail-fast-${_globalResourceNameSuffix}'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['${identifier.deploymentScripts}']
+  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
   properties: {
     azCliVersion: azCliVersion
     arguments: const_arguments

@@ -59,7 +59,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "utcValue": {
@@ -75,14 +75,14 @@
     "resources": [
         {
             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-            "apiVersion": "${azure.apiVersionForIdentity}",
-            "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]",
+            "apiVersion": "2023-01-31",
+            "tags": "[parameters('tagsByResource')['Microsoft.ManagedIdentity/userAssignedIdentities']]",
             "name": "[variables('name_deploymentScriptUserDefinedManagedIdentity')]",
             "location": "[parameters('location')]"
         },
         {
             "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "${azure.apiVersionForRoleAssignment}",
+            "apiVersion": "2022-04-01",
             "name": "[variables('name_roleAssignmentName')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_deploymentScriptUserDefinedManagedIdentity'))]"
@@ -96,8 +96,8 @@
         },
         {
             "type": "Microsoft.KeyVault/vaults",
-            "apiVersion": "${azure.apiVersionForKeyVault}",
-            "tags": "[parameters('tagsByResource')['${identifier.vaults}']]",
+            "apiVersion": "2024-11-01",
+            "tags": "[parameters('tagsByResource')['Microsoft.KeyVault/vaults']]",
             "name": "[parameters('keyvaultName')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Authorization/roleAssignments', variables('name_roleAssignmentName'))]"
@@ -125,8 +125,8 @@
         },
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
-            "tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
+            "apiVersion": "2023-08-01",
+            "tags": "[parameters('tagsByResource')['Microsoft.Resources/deploymentScripts']]",
             "name": "[concat('script-generate-certificate-', parameters('_globalResourceNameSuffix'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -141,7 +141,7 @@
             "kind": "AzurePowerShell",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
-                "azPowerShellVersion": "${azure.powershell.version}",
+                "azPowerShellVersion": "11.5",
                 "timeout": "PT30M",
                 "arguments": "[format(' -vaultName {0} -certificateName {1} -subjectName {2}', parameters('keyvaultName'), parameters('secretName'), parameters('subjectName'))]",
                 "environmentVariables": [

@@ -85,7 +85,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "wlsPassword": {
@@ -113,9 +113,9 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-            "name": "${admin.database.start}",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "name": "6b253477-1753-5eb1-9448-506ab47494d7",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -127,11 +127,11 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2024-11-01",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
-            "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
+            "tags": "[parameters('tagsByResource')['Virtual machine extension']]",
             "properties": {
                 "publisher": "Microsoft.Azure.Extensions",
                 "type": "CustomScript",
@@ -152,9 +152,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-            "name": "${admin.database.end}",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "name": "e4549cf7-1f1e-5add-a543-0dfcc627976b",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],
@@ -170,9 +170,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-            "name": "${database.oracle}",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "name": "692b2d84-72f5-5992-a15d-0d5bcfef040d",
             "condition": "[if(contains(parameters('databaseType'), 'oracle'), bool('true'), bool('false'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -189,9 +189,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-            "name": "${database.postgresql}",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "name": "935df06e-a5d5-5bf1-af66-4c1eb71dac7a",
             "condition": "[if(contains(parameters('databaseType'), 'postgresql'), bool('true'), bool('false'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -208,9 +208,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-            "name": "${database.sqlserver}",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "name": "3569588c-b89d-5567-84ee-a2c633c7204c",
             "condition": "[if(contains(parameters('databaseType'), 'sqlserver'), bool('true'), bool('false'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -227,9 +227,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-            "name": "${database.mysql}",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "name": "41c353ae-6f7b-442f-b903-996cb42c1bbe",
             "condition": "[if(contains(parameters('databaseType'), 'mysql'), bool('true'), bool('false'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"

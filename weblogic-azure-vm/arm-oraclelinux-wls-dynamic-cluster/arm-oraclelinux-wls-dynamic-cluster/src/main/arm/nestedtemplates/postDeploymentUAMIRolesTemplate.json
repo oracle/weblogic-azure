@@ -30,13 +30,13 @@
 	"resources": [
 		{		
 		    "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-		    "apiVersion": "${azure.apiVersionForIdentity}",
+		    "apiVersion": "2023-01-31",
 		    "name": "[variables('name_postDeploymentScriptUserDefinedManagedIdentity')]",
 		    "location": "[parameters('location')]"
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
+			"apiVersion": "2023-07-01",
 			"name": "[variables('name_postDeploymentScriptRoleAssignment')]",
 			"location": "[parameters('location')]",
 			"subscriptionId": "[subscription().subscriptionId]",
@@ -68,7 +68,7 @@
 			        "resources": [
 			            {
 			                "type": "Microsoft.Authorization/roleAssignments",
-			                "apiVersion": "${azure.apiVersionForRoleAssignment}",
+			                "apiVersion": "2022-04-01",
 			                "name": "[variables('roleAssignmentGuid')]",
 			                "properties": {
 			                    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', parameters('innerRoleDefinitionId'))]",

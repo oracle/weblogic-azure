@@ -18,7 +18,7 @@
 		    "type": "object",
 		    "defaultValue": {},
 		    "metadata": {
-		        "description": "${label.tagsLabel}"
+		        "description": "Tags for the resources."
 		    }
 		},
 		"const_guidTag" :{
@@ -63,8 +63,8 @@
     "resources": [
 		{
 		    "type": "Microsoft.Resources/deploymentScripts",
-		    "apiVersion": "${azure.apiVersionForDeploymentScript}",
-			"tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
+		    "apiVersion": "2023-08-01",
+			"tags": "[parameters('tagsByResource')['Microsoft.Resources/deploymentScripts']]",
 			"name": "[concat('postdeployscript-', parameters('_globalResourceNameSuffix'))]",
 			"kind": "AzureCLI",
 			"location": "[parameters('location')]",

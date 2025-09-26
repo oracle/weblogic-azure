@@ -12,7 +12,7 @@ param azCliVersion string
 param hpaScaleType string = 'cpu'
 param identity object = {}
 param location string
-@description('${label.tagsLabel}')
+@description('Tags for the resources.')
 param tagsByResource object
 param utcValue string = utcNow()
 param utilizationPercentage int
@@ -25,12 +25,12 @@ var base64_enableHpa = loadFileAsBase64('../../../arm/scripts/inline-scripts/ena
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var const_deploymentName='ds-enable-hpa-${_globalResourceNameSuffix}'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['${identifier.deploymentScripts}']
+  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
   properties: {
     azCliVersion: azCliVersion
     scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableHpa))

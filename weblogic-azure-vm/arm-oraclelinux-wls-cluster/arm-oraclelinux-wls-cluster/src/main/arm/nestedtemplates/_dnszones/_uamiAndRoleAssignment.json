@@ -12,7 +12,7 @@
       "type": "object",
       "defaultValue": {},
       "metadata": {
-        "description": "${label.tagsLabel}"
+        "description": "Tags for the resources."
       }
     }
   },
@@ -24,15 +24,15 @@
   "resources": [
     {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "apiVersion": "${azure.apiVersionForIdentity}",
-      "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]",
+      "apiVersion": "2023-01-31",
+      "tags": "[parameters('tagsByResource')['Microsoft.ManagedIdentity/userAssignedIdentities']]",
       "name": "[parameters('uamiName')]",
       "location": "[parameters('location')]"
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "${azure.apiVersionForDeployment}",
-      "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+      "apiVersion": "2023-07-01",
+      "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
       "name": "[variables('name_deploymentScriptContributorRoleAssignmentName')]",
       "subscriptionId": "[subscription().subscriptionId]",
       "location": "[parameters('location')]",
@@ -69,7 +69,7 @@
           "resources": [
             {
               "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "${azure.apiVersionForRoleAssignment}",
+              "apiVersion": "2022-04-01",
               "name": "[variables('name_roleAssignmentName')]",
               "properties": {
                 "description": "Assign subscription scope role to User Assigned Managed Identity ",

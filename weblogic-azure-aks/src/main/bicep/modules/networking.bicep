@@ -49,7 +49,7 @@ param location string
 param lbSvcValues array = []
 param newOrExistingVnetForApplicationGateway string
 param vnetRGNameForApplicationGateway string
-@description('${label.tagsLabel}')
+@description('Tags for the resources.')
 param tagsByResource object
 @description('True to set up internal load balancer service.')
 param useInternalLB bool = false

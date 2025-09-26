@@ -74,7 +74,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "ttl": {
@@ -120,8 +120,8 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "uamiDeployment",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -146,8 +146,8 @@
         },
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "${azure.apiVersionForDeploymentScript}",
-            "tags": "[parameters('tagsByResource')['${identifier.deploymentScripts}']]",
+            "apiVersion": "2023-08-01",
+            "tags": "[parameters('tagsByResource')['Microsoft.Resources/deploymentScripts']]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'uamiDeployment')]"
             ],
@@ -162,7 +162,7 @@
             "kind": "AzureCLI",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
-                "AzCliVersion": "${azure.cli.version}",
+                "AzCliVersion": "2.53.0",
                 "timeout": "PT30M",
                 "environmentVariables": [
                     {

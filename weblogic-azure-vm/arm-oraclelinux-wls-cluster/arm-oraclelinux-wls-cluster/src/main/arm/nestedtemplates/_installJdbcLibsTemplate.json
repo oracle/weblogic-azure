@@ -75,7 +75,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "wlsDomainName": {
@@ -107,9 +107,9 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForVirtualMachines}",
+            "apiVersion": "2024-11-01",
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
+            "tags": "[parameters('tagsByResource')['Virtual machine extension']]",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
             "copy": {

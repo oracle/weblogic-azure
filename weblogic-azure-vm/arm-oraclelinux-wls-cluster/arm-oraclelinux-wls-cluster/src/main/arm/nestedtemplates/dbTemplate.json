@@ -110,7 +110,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "wlsDomainName": {
@@ -141,8 +141,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "apiVersion": "2023-07-01",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "name": "pswlessDbTemplate",
             "condition": "[parameters('enablePswlessConnection')]",
             "properties": {
@@ -208,9 +208,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2023-07-01",
             "name": "upgradeMySQLJdbcDriverTemplate",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "condition": "[and(not(parameters('enablePswlessConnection')), equals(parameters('databaseType'),'mysql'))]",
             "properties": {
                 "mode": "Incremental",
@@ -263,9 +263,9 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2023-07-01",
             "name": "passwordDatasourceDeployment",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "condition": "[not(parameters('enablePswlessConnection'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'upgradeMySQLJdbcDriverTemplate')]"

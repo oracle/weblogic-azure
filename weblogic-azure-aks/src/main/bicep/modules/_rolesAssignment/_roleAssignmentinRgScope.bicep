@@ -25,12 +25,12 @@ var const_identityAPIVersion = '2022-01-31-PREVIEW'
 var name_roleAssignmentName = guid('${subscription().id}${_globalResourceNameSuffix}Role assignment in resource group scope')
 
 // Get role resource id
-resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = {
+resource roleResourceDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: roleDefinitionId
 }
 
 // Assign role
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = {
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: name_roleAssignmentName
   properties: {
     description: 'Assign resource group scope role to User Assigned Managed Identity '

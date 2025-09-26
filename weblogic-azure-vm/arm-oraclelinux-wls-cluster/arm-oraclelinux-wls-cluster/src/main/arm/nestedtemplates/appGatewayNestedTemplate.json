@@ -112,7 +112,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "virtualNetworkNewOrExisting": {
@@ -238,9 +238,9 @@
 	"resources": [
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-			"name": "${cluster.appgateway.start}",
+			"apiVersion": "2023-07-01",
+			"tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+			"name": "4f85ce49-6de4-5925-b77c-3eb15ba97921",
 			"properties": {
 				"mode": "Incremental",
 				"template": {
@@ -252,9 +252,9 @@
 			}
 		},
 		{
-			"apiVersion": "${azure.apiVersionForPublicIPAddresses}",
+			"apiVersion": "2023-06-01",
 			"type": "Microsoft.Network/publicIPAddresses",
-			"tags": "[parameters('tagsByResource')['${identifier.publicIPAddresses}']]",
+			"tags": "[parameters('tagsByResource')['Microsoft.Network/publicIPAddresses']]",
 			"name": "[parameters('gatewayPublicIPAddressName')]",
 			"sku": {
 				"name": "Standard"
@@ -269,8 +269,8 @@
 		},
 		{
 			"type": "Microsoft.Network/applicationGateways",
-			"apiVersion": "${azure.apiVersionForApplicationGateways}",
-			"tags": "[parameters('tagsByResource')['${identifier.applicationGateways}']]",
+			"apiVersion": "2023-06-01",
+			"tags": "[parameters('tagsByResource')['Microsoft.Network/applicationGateways']]",
 			"name": "[parameters('appGatewayName')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -338,7 +338,7 @@
 									"name": "BackendAddresses",
 									"count": "[sub(int(parameters('numberOfInstances')),1)]",
 									"input": {
-										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('name_managedVMNamePrefix'), copyIndex('BackendAddresses',1), if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), variables('name_nic_with_pub_ip'), variables('name_nic_without_pub_ip')))),'${azure.apiVersionForNetworkInterfaces}').ipConfigurations[0].properties.privateIPAddress]"
+										"ipAddress": "[reference(resourceId('Microsoft.Network/networkInterfaces', concat(variables('name_managedVMNamePrefix'), copyIndex('BackendAddresses',1), if(equals(parameters('virtualNetworkNewOrExisting'), 'new'), variables('name_nic_with_pub_ip'), variables('name_nic_without_pub_ip')))),'2023-06-01').ipConfigurations[0].properties.privateIPAddress]"
 									}
 								}
 							]
@@ -458,9 +458,9 @@
 			}
 		},
 		{
-			"apiVersion": "${azure.apiVersionForVirtualMachines}",
+			"apiVersion": "2024-11-01",
 			"type": "Microsoft.Compute/virtualMachines/extensions",
-			"tags": "[parameters('tagsByResource')['${identifier.virtualMachinesExtensions}']]",
+			"tags": "[parameters('tagsByResource')['Virtual machine extension']]",
 			"name": "[concat(parameters('adminVMName'),'/newuserscript')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
@@ -477,15 +477,15 @@
 					]
 				},
 				"protectedSettings": {
-					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
+					"commandToExecute": "[concat('sh',' ',variables('name_scriptAGWConfiguration'),'  <<< \"', variables('const_adminServerName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ', if(parameters('overrideHostName'), parameters('customDomainName'), reference(variables('ref_appGatewayPublicIP'), '2023-06-01').dnsSettings.fqdn), ' ',variables('const_wlsHome'),'\"')]"
 				}
 			}
 		},
 		{
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "${azure.apiVersionForDeployment}",
-			"tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
-			"name": "${cluster.appgateway.end}",
+			"apiVersion": "2023-07-01",
+			"tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+			"name": "b626bee4-b322-5418-990f-6463a799be3c",
 			"dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],
@@ -503,15 +503,15 @@
 	"outputs": {
 		"appGatewayAlias": {
 			"type": "string",
-			"value": "[reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn]"
+			"value": "[reference(variables('ref_appGatewayPublicIP'), '2023-06-01').dnsSettings.fqdn]"
 		},
 		"appGatewayURL": {
 			"type": "string",
-			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn),'')]"
+			"value": "[uri(format('http://{0}',reference(variables('ref_appGatewayPublicIP'), '2023-06-01').dnsSettings.fqdn),'')]"
 		},
 		"appGatewaySecuredURL": {
 			"type": "string",
-			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '${azure.apiVersionForPublicIPAddresses}').dnsSettings.fqdn),'')]"
+			"value": "[uri(format('https://{0}',reference(variables('ref_appGatewayPublicIP'), '2023-06-01').dnsSettings.fqdn),'')]"
 		}
 	}
 }

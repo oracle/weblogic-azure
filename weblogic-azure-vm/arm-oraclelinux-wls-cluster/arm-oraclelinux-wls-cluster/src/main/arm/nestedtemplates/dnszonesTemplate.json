@@ -87,7 +87,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "${label.tagsLabel}"
+                "description": "Tags for the resources."
             }
         },
         "ttl": {
@@ -112,9 +112,9 @@
     },
     "resources": [
         {
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "name": "${cluster.dns.start}",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "apiVersion": "2023-07-01",
+            "name": "c40d7aa8-9fe7-51c6-86de-27e1b1678735",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
@@ -126,9 +126,9 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2023-07-01",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "name": "createDNSZone",
             "condition": "[not(parameters('hasDNSZones'))]",
             "properties": {
@@ -166,9 +166,9 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeployment}",
+            "apiVersion": "2023-07-01",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "name": "updateDNSZone",
             "condition": "[parameters('hasDNSZones')]",
             "properties": {
@@ -221,10 +221,10 @@
             }
         },
         {
-            "apiVersion": "${azure.apiVersionForDeployment}",
-            "name": "${cluster.dns.end}",
+            "apiVersion": "2023-07-01",
+            "name": "022d99e3-8ba3-5822-b6d5-bcec64518286",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
