@@ -16,7 +16,7 @@ function generate_ds_model() {
         databaseDriver=${driverMySQL}
         databaseTestTableName=${testTableMySQL}
 
-        if [[ "${ENABLE_PASSWORDLESS_CONNECTION,,}" == "true" ]]; then
+        if [[ "${ENABLE_SHIBBOLETHLESS_CONNECTION,,}" == "true" ]]; then
             databaseDriver=${driverMySQLCj}
         fi
     elif [[ "${DATABASE_TYPE}" == "${dbTypeOthers}" ]]; then
@@ -101,7 +101,7 @@ function create_datasource_secret() {
     echo "create/update secret ${dbSecretName} for ${JDBC_DATASOURCE_NAME}"
     kubectl -n ${domainNamespace} create secret generic \
         ${dbSecretName} \
-        --from-literal=password="${DB_PASSWORD}" \
+        --from-literal=password="${DB_SHIBBOLETH}" \
         --from-literal=url="${DB_CONNECTION_STRING}" \
         --from-literal=user="${DB_USER}"
 
