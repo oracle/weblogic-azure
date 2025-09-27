@@ -4,21 +4,21 @@
 #
 # env inputs:
 # ORACLE_ACCOUNT_NAME
-# ORACLE_ACCOUNT_PASSWORD
+# ORACLE_ACCOUNT_SHIBBOLETH
 # ACR_NAME
 # AKS_CLUSTER_NAME
 # AKS_CLUSTER_RESOURCEGROUP_NAME
 # BASE64_FOR_SERVICE_PRINCIPAL
 # WLS_SSL_IDENTITY_DATA
-# WLS_SSL_IDENTITY_PASSWORD
+# WLS_SSL_IDENTITY_SHIBBOLETH
 # WLS_SSL_IDENTITY_TYPE
 # WLS_SSL_TRUST_DATA
-# WLS_SSL_TRUST_PASSWORD
+# WLS_SSL_TRUST_SHIBBOLETH
 # WLS_SSL_TRUST_TYPE
 # WLS_SSL_PRIVATE_KEY_ALIAS
-# WLS_SSL_PRIVATE_KEY_PASSWORD
+# WLS_SSL_PRIVATE_KEY_SHIBBOLETH
 # APPLICATION_GATEWAY_SSL_FRONTEND_CERT_DATA
-# APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD
+# APPLICATION_GATEWAY_SSL_FRONTEND_CERT_SHIBBOLETH
 # DNS_ZONE_NAME
 # DNS_ZONE_RESOURCEGROUP_NAME
 # AKS_VERSION
@@ -137,9 +137,9 @@ function validate_memory_resources() {
 
 function validate_ocr_account() {
   # ORACLE_ACCOUNT_NAME
-  # ORACLE_ACCOUNT_PASSWORD
+  # ORACLE_ACCOUNT_SHIBBOLETH
   docker logout
-  echo "${ORACLE_ACCOUNT_PASSWORD}" | docker login ${ocrLoginServer} -u ${ORACLE_ACCOUNT_NAME} --password-stdin
+  echo "${ORACLE_ACCOUNT_SHIBBOLETH}" | docker login ${ocrLoginServer} -u ${ORACLE_ACCOUNT_NAME} --password-stdin
   validate_status "login OCR with user ${ORACLE_ACCOUNT_NAME}"
 
   echo_stdout "Check OCR account: passed!"
@@ -184,10 +184,10 @@ function obtain_image_architecture() {
       # Use the docker manifest inspect command to get the architecture.
       # https://learn.microsoft.com/en-us/azure/container-registry/push-multi-architecture-images
       local acrUserName=$(az acr credential show -n ${acrName} --query "username" | tr -d "\"")
-      local acrPassword=$(az acr credential show -n ${acrName} --query "passwords[0].value" | tr -d "\"")
+      local acrShibboleth=$(az acr credential show -n ${acrName} --query "passwords[0].value" | tr -d "\"")
       local acrServer="${acrName}.azurecr.io"
 
-      docker login ${acrServer} -u ${acrUserName} -p ${acrPassword}
+      docker login ${acrServer} -u ${acrUserName} -p ${acrShibboleth}
       local ret=$(docker manifest inspect ${imageUri} | jq '.manifests[] | .platform.architecture')
 
       if [[ $ret == *"${constX86Platform}"* && $ret == *"${constARM64Platform}"* ]]; then
@@ -239,7 +239,7 @@ function validate_ocr_image() {
     --resource-group ${ACR_RESOURCE_GROUP} \
     --source ${ocrImageFullPath} \
     -u ${ORACLE_ACCOUNT_NAME} \
-    -p ${ORACLE_ACCOUNT_PASSWORD} \
+    -p ${ORACLE_ACCOUNT_SHIBBOLETH} \
     --image ${tmpImagePath} \
     --only-show-errors
 
@@ -354,7 +354,7 @@ function validate_wls_ssl_certificates() {
   #validate if identity keystore has entry
   ${JAVA_HOME}/bin/keytool -list -v \
       -keystore $wlsIdentityKeyStoreFileName \
-      -storepass $WLS_SSL_IDENTITY_PASSWORD \
+      -storepass $WLS_SSL_IDENTITY_SHIBBOLETH \
       -storetype $WLS_SSL_IDENTITY_TYPE |
       grep 'Entry type:' |
       grep 'PrivateKeyEntry'
@@ -364,7 +364,7 @@ function validate_wls_ssl_certificates() {
   #validate if trust keystore has entry
   ${JAVA_HOME}/bin/keytool -list -v \
       -keystore ${wlsTrustKeyStoreFileName} \
-      -storepass $WLS_SSL_TRUST_PASSWORD \
+      -storepass $WLS_SSL_TRUST_SHIBBOLETH \
       -storetype $WLS_SSL_TRUST_TYPE |
       grep 'Entry type:' |
       grep 'trustedCertEntry'
@@ -386,8 +386,8 @@ function validate_gateway_frontend_certificates() {
     -in $appgwFrontCertFileName \
     -nocerts \
     -out ${AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY}/cert.key \
-    -passin pass:${APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD} \
-    -passout pass:${APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD}
+    -passin pass:${APPLICATION_GATEWAY_SSL_FRONTEND_CERT_SHIBBOLETH} \
+    -passout pass:${APPLICATION_GATEWAY_SSL_FRONTEND_CERT_SHIBBOLETH}
   
   validate_status "access application gateway frontend key." "Make sure the Application Gateway frontend certificate is correct."
 }

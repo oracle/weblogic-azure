@@ -8,14 +8,14 @@ function echo_stderr() {
     echo "$@" >&2
 }
 
-# read <azureACRPassword> and <ocrSSOPSW> from stdin
+# read <azureACRShibboleth> and <ocrSSOShibboleth> from stdin
 function read_sensitive_parameters_from_stdin() {
-    read azureACRPassword ocrSSOPSW
+    read azureACRShibboleth ocrSSOShibboleth
 }
 
 #Function to display usage message
 function usage() {
-    echo "<azureACRPassword> <ocrSSOPSW> | ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableAdminT3Tunneling> <enableClusterT3Tunneling> <dbDriversUrls>"
+    echo "<azureACRShibboleth> <ocrSSOShibboleth> | ./buildWLSDockerImage.sh <wlsImagePath> <azureACRServer> <azureACRUserName> <imageTag> <appPackageUrls> <ocrSSOUser> <wlsClusterSize> <enableSSL> <enableAdminT3Tunneling> <enableClusterT3Tunneling> <dbDriversUrls>"
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -51,8 +51,8 @@ function validate_inputs() {
         usage 1
     fi
 
-    if [ -z "$azureACRPassword" ]; then
-        echo_stderr "azureACRPassword is required. "
+    if [ -z "$azureACRShibboleth" ]; then
+        echo_stderr "azureACRShibboleth is required. "
         usage 1
     fi
 
@@ -71,8 +71,8 @@ function validate_inputs() {
         usage 1
     fi
 
-    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [ -z "$ocrSSOPSW" ]; then
-        echo_stderr "ocrSSOPSW is required. "
+    if [[ "${useOracleImage,,}" == "${constTrue}" ]] && [ -z "$ocrSSOShibboleth" ]; then
+        echo_stderr "ocrSSOShibboleth is required. "
         usage 1
     fi
 
@@ -334,8 +334,8 @@ function install_db_drivers() {
 # Pull weblogic image
 function get_wls_image_from_ocr() {
     sudo docker logout
-    sudo docker login ${ocrLoginServer} -u ${ocrSSOUser} -p ${ocrSSOPSW}
-    echo "Start to pull oracle image ${wlsImagePath}  ${ocrLoginServer} ${ocrSSOUser} ${ocrSSOPSW}"
+    sudo docker login ${ocrLoginServer} -u ${ocrSSOUser} -p ${ocrSSOShibboleth}
+    echo "Start to pull oracle image ${wlsImagePath}  ${ocrLoginServer} ${ocrSSOUser} ${ocrSSOShibboleth}"
     sudo docker pull -q ${wlsImagePath}
     validate_status "Finish pulling image from OCR."
 }
@@ -343,8 +343,8 @@ function get_wls_image_from_ocr() {
 # Get user provided image
 function get_user_provided_wls_image_from_acr() {
     sudo docker logout
-    sudo docker login ${azureACRServer} -u ${azureACRUserName} -p ${azureACRPassword}
-    echo "Start to pull user provided image ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRPassword}"
+    sudo docker login ${azureACRServer} -u ${azureACRUserName} -p ${azureACRShibboleth}
+    echo "Start to pull user provided image ${wlsImagePath} ${azureACRServer} ${azureACRUserName} ${azureACRShibboleth}"
     sudo docker pull -q ${wlsImagePath}
     validate_status "Finish pulling image from OCR."
 }
@@ -426,7 +426,7 @@ function build_wls_image() {
 
     # Push image to ACR
     sudo docker logout
-    sudo docker login $azureACRServer -u ${azureACRUserName} -p ${azureACRPassword}
+    sudo docker login $azureACRServer -u ${azureACRUserName} -p ${azureACRShibboleth}
     echo "Start pushing image ${acrImagePath} to $azureACRServer."
     sudo docker push -q ${acrImagePath}
     validate_status "Check status of pushing WLS domain image."

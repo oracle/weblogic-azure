@@ -141,7 +141,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: string(enableCustomSSL)
       }
       {
-        name: 'ENABLE_PASSWORDLESS_DB_CONNECTION'
+        name: 'ENABLE_SHIBBOLETHLESS_DB_CONNECTION'
         value: string(enablePswlessConnection)
       }
       {
@@ -157,7 +157,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: ocrSSOUser
       }
       {
-        name: 'ORACLE_ACCOUNT_PASSWORD'
+        name: 'ORACLE_ACCOUNT_SHIBBOLETH'
         secureValue: ocrSSOPSW
       }
       {
@@ -189,7 +189,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: userProvidedImagePath
       }
       {
-        name: 'WLS_ADMIN_PASSWORD'
+        name: 'WLS_ADMIN_SHIBBOLETH'
         secureValue: wlsPassword
       }
       {
@@ -241,7 +241,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         secureValue: wlsIdentityKeyStoreData
       }
       {
-        name: 'WLS_SSL_IDENTITY_PASSWORD'
+        name: 'WLS_SSL_IDENTITY_SHIBBOLETH'
         secureValue: wlsIdentityKeyStorePassphrase
       }
       {
@@ -253,7 +253,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         secureValue: wlsTrustKeyStoreData
       }
       {
-        name: 'WLS_SSL_TRUST_PASSWORD'
+        name: 'WLS_SSL_TRUST_SHIBBOLETH'
         secureValue: wlsTrustKeyStorePassPhrase
       }
       {
@@ -265,7 +265,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         secureValue: wlsPrivateKeyAlias
       }
       {
-        name: 'WLS_SSL_PRIVATE_KEY_PASSWORD'
+        name: 'WLS_SSL_PRIVATE_KEY_SHIBBOLETH'
         secureValue: wlsPrivateKeyPassPhrase
       }
       {

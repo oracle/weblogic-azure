@@ -12,7 +12,7 @@ function validate_app() {
         ${wlsDomainNS} \
         ${wlsAdminSvcName} \
         ${WLS_DOMAIN_USER} \
-        ${WLS_DOMAIN_PASSWORD} \
+        ${WLS_DOMAIN_SHIBBOLETH} \
         ${scriptCheckAppStatus}
 }
 

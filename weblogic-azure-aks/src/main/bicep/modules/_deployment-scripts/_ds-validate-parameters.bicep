@@ -76,7 +76,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: ocrSSOUser
       }
       {
-        name: 'ORACLE_ACCOUNT_PASSWORD'
+        name: 'ORACLE_ACCOUNT_SHIBBOLETH'
         secureValue: ocrSSOPSW
       }
       {
@@ -120,7 +120,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         secureValue: sslUploadedCustomIdentityKeyStoreData
       }
       {
-        name: 'WLS_SSL_IDENTITY_PASSWORD'
+        name: 'WLS_SSL_IDENTITY_SHIBBOLETH'
         secureValue: sslUploadedCustomIdentityKeyStorePassphrase
       }
       {
@@ -132,7 +132,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         secureValue: sslUploadedCustomTrustKeyStoreData
       }
       {
-        name: 'WLS_SSL_TRUST_PASSWORD'
+        name: 'WLS_SSL_TRUST_SHIBBOLETH'
         secureValue: sslUploadedCustomTrustKeyStorePassPhrase
       }
       {
@@ -144,7 +144,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         secureValue: sslUploadedPrivateKeyAlias
       }
       {
-        name: 'WLS_SSL_PRIVATE_KEY_PASSWORD'
+        name: 'WLS_SSL_PRIVATE_KEY_SHIBBOLETH'
         secureValue: sslUploadedPrivateKeyPassPhrase
       }
       {
@@ -152,7 +152,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: appGatewaySSLCertData
       }
       {
-        name: 'APPLICATION_GATEWAY_SSL_FRONTEND_CERT_PASSWORD'
+        name: 'APPLICATION_GATEWAY_SSL_FRONTEND_CERT_SHIBBOLETH'
         value: appGatewaySSLCertPassword
       }
       {
