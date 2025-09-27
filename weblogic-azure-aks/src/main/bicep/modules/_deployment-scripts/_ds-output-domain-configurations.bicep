@@ -7,7 +7,7 @@ param aksClusterName string = ''
 param azCliVersion string = ''
 param identity object = {}
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 param wlsClusterName string = 'cluster-1'
@@ -18,12 +18,12 @@ var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_queryDomainConfigurations = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryDomainConfigurations.sh')
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-query-wls-configurations-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [

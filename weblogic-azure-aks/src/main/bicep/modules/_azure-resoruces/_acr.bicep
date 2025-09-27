@@ -3,10 +3,10 @@
 
 param acrName string
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 
-resource registries 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
+resource registries 'Microsoft.ContainerRegistry/registries@${azure.apiVersionForContainerRegistries}' = {
   name: acrName
   location: location
   sku: {
@@ -37,7 +37,7 @@ resource registries 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
     zoneRedundancy: 'Disabled'
     anonymousPullEnabled: false
   }
-  tags: tagsByResource['Microsoft.ContainerRegistry/registries']
+  tags: tagsByResource['${identifier.registries}']
 }
 
 output acrName string = acrName

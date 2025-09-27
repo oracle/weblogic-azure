@@ -42,7 +42,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "Tags for the resources."
+                "description": "${label.tagsLabel}"
             }
         },
         "ttl": {
@@ -67,8 +67,8 @@
     "resources": [
         {
             "type": "Microsoft.Network/dnszones",
-            "apiVersion": "2023-07-01-preview",
-            "tags": "[parameters('tagsByResource')['Microsoft.Network/dnszones']]",
+            "apiVersion": "${azure.apiVersionForDNSZone}",
+            "tags": "[parameters('tagsByResource')['${identifier.dnszones}']]",
             "name": "[parameters('dnszoneName')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -77,7 +77,7 @@
         },
         {
             "type": "Microsoft.Network/dnszones/A",
-            "apiVersion": "2023-07-01-preview",
+            "apiVersion": "${azure.apiVersionForDNSZone}",
             "condition": "[variables('const_hasARecords')]",
             "name": "[concat(parameters('dnszoneName'), '/', variables('const_dnszonesARecordSetNames')[copyIndex()])]",
             "copy": {
@@ -96,7 +96,7 @@
         },
         {
             "type": "Microsoft.Network/dnszones/CNAME",
-            "apiVersion": "2023-07-01-preview",
+            "apiVersion": "${azure.apiVersionForDNSZone}",
             "condition": "[variables('const_hasCNAMERecords')]",
             "name": "[concat(parameters('dnszoneName'),'/', variables('const_dnszonesCNAMERecordSetNames')[copyIndex()])]",
             "location": "[parameters('location')]",

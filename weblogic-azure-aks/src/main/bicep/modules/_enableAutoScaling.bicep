@@ -21,7 +21,7 @@ param azCliVersion string
 param hpaScaleType string = 'cpu'
 param identity object = {}
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param useHpa bool 
 param utilizationPercentage int

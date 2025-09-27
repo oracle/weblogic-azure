@@ -11,7 +11,7 @@ param aksClusterName string = ''
 param azCliVersion string = ''
 param identity object = {}
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 param wlsDomainUID string = 'sample-domain1'
@@ -27,12 +27,12 @@ var const_utilityScript= 'utility.sh'
 var const_commonScript= 'common.sh'
 
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-wls-validate-applications-${_globalResourceNameSuffix}'
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     environmentVariables: [

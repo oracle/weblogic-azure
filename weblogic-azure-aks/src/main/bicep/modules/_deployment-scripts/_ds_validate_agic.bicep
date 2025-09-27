@@ -7,7 +7,7 @@ param aksClusterRGName string
 param azCliVersion string = ''
 param identity object = {}
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 
@@ -17,12 +17,12 @@ var base64_enableAgic = loadFileAsBase64('../../../arm/scripts/inline-scripts/va
 var base64_utility = loadFileAsBase64('../../../arm/scripts/utility.sh')
 var const_deploymentName='ds-validate-agic-${_globalResourceNameSuffix}'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     scriptContent: format('{0}\r\n\r\n{1}\r\n\r\n{2}',base64ToString(base64_common), base64ToString(base64_utility), base64ToString(base64_enableAgic))

@@ -87,7 +87,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "Tags for the resources."
+                "description": "${label.tagsLabel}"
             }
         },
         "ttl": {
@@ -112,10 +112,10 @@
     },
     "resources": [
         {
-            "apiVersion": "2023-07-01",
-            "name": "c40d7aa8-9fe7-51c6-86de-27e1b1678735",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "name": "${cluster.dns.start}",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -126,9 +126,9 @@
             }
         },
         {
-            "apiVersion": "2023-07-01",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "createDNSZone",
             "condition": "[not(parameters('hasDNSZones'))]",
             "properties": {
@@ -166,9 +166,9 @@
             }
         },
         {
-            "apiVersion": "2023-07-01",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "updateDNSZone",
             "condition": "[parameters('hasDNSZones')]",
             "properties": {
@@ -221,10 +221,10 @@
             }
         },
         {
-            "apiVersion": "2023-07-01",
-            "name": "022d99e3-8ba3-5822-b6d5-bcec64518286",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "name": "${cluster.dns.end}",
             "type": "Microsoft.Resources/deployments",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -239,7 +239,7 @@
         "dnsZoneNameServers": {
             "type": "array",
             "condition": "[not(parameters('hasDNSZones'))]",
-            "value": "[reference('createDNSZone', '2023-07-01').outputs.dnsZoneNameServers.value]"
+            "value": "[reference('createDNSZone', '${azure.apiVersionForDeployment}').outputs.dnsZoneNameServers.value]"
         }
     }
 }

@@ -113,7 +113,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "uamiDeployment",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "${azure.apiVersionForDeployment}",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -132,7 +132,7 @@
         },
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "2023-08-01",
+            "apiVersion": "${azure.apiVersionForDeploymentScript}",
             "name": "[concat('script-create-dns-records-', parameters('_globalResourceNameSuffix'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'uamiDeployment')]"
@@ -147,7 +147,7 @@
             "kind": "AzureCLI",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
-                "AzCliVersion": "2.53.0",
+                "AzCliVersion": "${azure.cli.version}",
                 "timeout": "PT30M",
                 "environmentVariables": [
                     {

@@ -101,8 +101,8 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
-            "name": "931c2901-224a-5cc6-b235-41fa162b7532",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "name": "${dynamic.deletenode.start}",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -114,7 +114,7 @@
             }
         },
         {
-            "apiVersion": "2024-11-01",
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
             "location": "[parameters('location')]",
@@ -135,8 +135,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
-            "name": "3eb27f94-d1c3-572c-a7da-0d7f26f6a20e",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "name": "${dynamic.deletenode.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],

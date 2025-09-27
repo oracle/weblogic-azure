@@ -4,7 +4,7 @@
 param fileShareName string
 param location string
 param storageAccountName string = 'stg-contoso'
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 
@@ -14,11 +14,11 @@ var obj_extraTag = {
   'created-by-azure-weblogic': utcValue
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@${azure.apiVersionForStorage}' = {
   name: storageAccountName
   location: location
   kind: 'StorageV2'
-  tags: union(tagsByResource['Microsoft.Storage/storageAccounts'], obj_extraTag)
+  tags: union(tagsByResource['${identifier.storageAccounts}'], obj_extraTag)
   sku: {
     name: const_sku
     tier: 'Standard'
@@ -42,7 +42,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
   }  
 }
 
-resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@2025-01-01' = {
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices/shares@${azure.apiVersionForStorageFileService}' = {
   name: '${storageAccount.name}/default/${fileShareName}'
   properties: {
     accessTier: 'TransactionOptimized'

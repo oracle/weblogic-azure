@@ -35,7 +35,7 @@ var const_scriptLocation = uri(_artifactsLocation, 'scripts/')
 var const_updateAppScript= 'updateApplications.sh'
 var const_utilityScript= 'utility.sh'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: 'ds-wls-update-applications-${uniqueString(utcValue)}'
   location: location
   kind: 'AzureCLI'

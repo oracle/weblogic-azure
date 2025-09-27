@@ -137,7 +137,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-                "description": "Tags for the resources."
+                "description": "${label.tagsLabel}"
             }
         },
         "virtualNetworkNewOrExisting": {
@@ -201,9 +201,9 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
-            "name": "d7c730b9-494c-5cc2-9695-cc1057da3e0b",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
+            "name": "${cluster.appgateway.custom.certificate}",
             "condition": "[not(equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionGenerateCert')))]",
             "properties": {
                 "mode": "Incremental",
@@ -217,8 +217,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "appGatewaywithExistingSSLCertTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionHaveCert'))]",
             "properties": {
@@ -305,8 +305,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
-            "tags": "[parameters('tagsByResource')['Microsoft resources deployment']]",
+            "apiVersion": "${azure.apiVersionForDeployment}",
+            "tags": "[parameters('tagsByResource')['${identifier.resourcesDeployment}']]",
             "name": "appGatewaywithSelfSignedSSLCertTemplate",
             "condition": "[equals(parameters('appGatewayCertificateOption'), variables('const_appGatewaySSLCertOptionGenerateCert'))]",
             "properties": {
@@ -401,16 +401,16 @@
         "appGatewayAlias": {
             "type": "string",
             "value": "[if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),
-                reference('appGatewaywithExistingSSLCertTemplate', '2023-07-01').outputs.appGatewayAlias.value,
-                reference('appGatewaywithSelfSignedSSLCertTemplate', '2023-07-01').outputs.appGatewayAlias.value)]"
+                reference('appGatewaywithExistingSSLCertTemplate', '${azure.apiVersionForDeployment}').outputs.appGatewayAlias.value,
+                reference('appGatewaywithSelfSignedSSLCertTemplate', '${azure.apiVersionForDeployment}').outputs.appGatewayAlias.value)]"
         },
         "appGatewayURL": {
             "type": "string",
-            "value": "[if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '2023-07-01').outputs.appGatewayURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '2023-07-01').outputs.appGatewayURL.value)]"
+            "value": "[if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '${azure.apiVersionForDeployment}').outputs.appGatewayURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '${azure.apiVersionForDeployment}').outputs.appGatewayURL.value)]"
         },
         "appGatewaySecuredURL": {
             "type": "string",
-            "value": "[if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '2023-07-01').outputs.appGatewaySecuredURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '2023-07-01').outputs.appGatewaySecuredURL.value)]"
+            "value": "[if(equals(parameters('appGatewayCertificateOption'),variables('const_appGatewaySSLCertOptionHaveCert')),reference('appGatewaywithExistingSSLCertTemplate', '${azure.apiVersionForDeployment}').outputs.appGatewaySecuredURL.value, reference('appGatewaywithSelfSignedSSLCertTemplate', '${azure.apiVersionForDeployment}').outputs.appGatewaySecuredURL.value)]"
         }
     }
 }

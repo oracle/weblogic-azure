@@ -25,7 +25,7 @@ param aksVersion string = 'default'
 @description('In addition to the CPU and memory metrics included in AKS by default, you can enable Container Insights for more comprehensive data on the overall performance and health of your cluster. Billing is based on data ingestion and retention settings.')
 param enableAzureMonitoring bool = false
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 
@@ -42,10 +42,10 @@ var obj_aciEnableOmsAgent = {
   }
 }
 
-resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = if (enableAzureMonitoring) {
+resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@${azure.apiVersionForInsightsWorkspaces}' = if (enableAzureMonitoring) {
   name: name_aciWorkspace
   location: location
-  tags: tagsByResource['Microsoft.OperationalInsights/workspaces']
+  tags: tagsByResource['${identifier.workspaces}']
   properties: {
     sku: {
       name: aciWorkspaceSku
@@ -59,10 +59,10 @@ resource azureMonitoringWorkspace 'Microsoft.OperationalInsights/workspaces@2022
   }
 }
 
-resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' = {
+resource aksCluster 'Microsoft.ContainerService/managedClusters@${azure.apiVersionForManagedClusters}' = {
   name: aksClusterName
   location: location
-  tags: tagsByResource['Microsoft.ContainerService/managedClusters']
+  tags: tagsByResource['${identifier.managedClusters}']
   properties: {
     kubernetesVersion: aksVersion
     dnsPrefix: '${aksClusterName}-dns'
@@ -81,7 +81,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-08-01' = {
         availabilityZones: agentAvailabilityZones
         mode: 'System'
         osType: 'Linux'
-        tags: tagsByResource['Microsoft.ContainerService/managedClusters']
+        tags: tagsByResource['${identifier.managedClusters}']
       }
     ]
     addonProfiles: {

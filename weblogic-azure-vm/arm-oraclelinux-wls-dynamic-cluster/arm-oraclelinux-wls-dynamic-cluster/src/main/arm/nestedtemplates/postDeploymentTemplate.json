@@ -56,7 +56,7 @@
     "resources": [
 		{
 		    "type": "Microsoft.Resources/deploymentScripts",
-		    "apiVersion": "2023-08-01",
+		    "apiVersion": "${azure.apiVersionForDeploymentScript}",
 			"name": "[concat('postdeployscript-', parameters('_globalResourceNameSuffix'))]",
 			"kind": "AzureCLI",
 			"location": "[parameters('location')]",

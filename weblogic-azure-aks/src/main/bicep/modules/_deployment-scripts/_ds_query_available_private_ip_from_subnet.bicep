@@ -7,7 +7,7 @@ param knownIP string = '10.0.0.1'
 
 param identity object = {}
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 
@@ -16,12 +16,12 @@ var base64_common = loadFileAsBase64('../../../arm/scripts/common.sh')
 var base64_queryPrivateIPForAppGateway = loadFileAsBase64('../../../arm/scripts/inline-scripts/queryPrivateIPForAppGateway.sh')
 var const_deploymentName = 'ds-query-private-ip-${uniqueString(utcValue)}'
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVersionForDeploymentScript}' = {
   name: const_deploymentName
   location: location
   kind: 'AzureCLI'
   identity: identity
-  tags: tagsByResource['Microsoft.Resources/deploymentScripts']
+  tags: tagsByResource['${identifier.deploymentScripts}']
   properties: {
     azCliVersion: azCliVersion
     scriptContent: format('{0}\r\n\r\n{1}', base64ToString(base64_common), base64ToString(base64_queryPrivateIPForAppGateway))

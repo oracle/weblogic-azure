@@ -17,13 +17,13 @@
     "resources": [
       {
         "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-        "apiVersion": "2023-01-31",
+        "apiVersion": "${azure.apiVersionForIdentity}",
         "name": "[parameters('uamiName')]",
         "location": "[parameters('location')]"
       },
       {
         "type": "Microsoft.Resources/deployments",
-        "apiVersion": "2023-07-01",
+        "apiVersion": "${azure.apiVersionForDeployment}",
         "name": "[variables('name_deploymentScriptContributorRoleAssignmentName')]",
         "subscriptionId": "[subscription().subscriptionId]",
         "location": "[parameters('location')]",
@@ -60,7 +60,7 @@
             "resources": [
               {
                 "type": "Microsoft.Authorization/roleAssignments",
-                "apiVersion": "2022-04-01",
+                "apiVersion": "${azure.apiVersionForRoleAssignment}",
                 "name": "[variables('name_roleAssignmentName')]",
                 "properties": {
                   "description": "Assign subscription scope role to User Assigned Managed Identity ",

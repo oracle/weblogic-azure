@@ -100,7 +100,7 @@
     },
     "resources": [
         {
-            "apiVersion": "2024-11-01",
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1),'/newuserscript')]",
             "location": "[parameters('location')]",
@@ -124,7 +124,7 @@
             }
         },
         {
-            "apiVersion": "2024-11-01",
+            "apiVersion": "${azure.apiVersionForVirtualMachines}",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('adminVMName'), '/newuserscript')]",
             "location": "[parameters('location')]",

@@ -8,7 +8,7 @@ param aksClusterRGName string
 param azCliVersion string
 param identity object = {}
 param location string
-@description('Tags for the resources.')
+@description('${label.tagsLabel}')
 param tagsByResource object
 param utcValue string = utcNow()
 param wlsClusterSize int
@@ -24,32 +24,32 @@ var name_azureMonitorAccountName = 'ama${_globalResourceNameSuffix}'
 var name_kedaUserDefinedManagedIdentity = 'kedauami${_globalResourceNameSuffix}'
 var name_kedaMonitorDataReaderRoleAssignmentName = guid('${resourceGroup().id}${name_kedaUserDefinedManagedIdentity}${_globalResourceNameSuffix}')
 
-resource monitorAccount 'Microsoft.Monitor/accounts@2023-04-03' = {
+resource monitorAccount 'Microsoft.Monitor/accounts@${azure.apiVersionForMonitorAccount}' = {
   name: name_azureMonitorAccountName
   location: location
   properties: {}
-  tags: tagsByResource['Microsoft.Monitor/accounts']
+  tags: tagsByResource['${identifier.accounts}']
 }
 
 // UAMI for KEDA
-resource uamiForKeda 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+resource uamiForKeda 'Microsoft.ManagedIdentity/userAssignedIdentities@${azure.apiVersionForIdentity}' = {
   name: name_kedaUserDefinedManagedIdentity
   location: location
-  tags: tagsByResource['Microsoft.ManagedIdentity/userAssignedIdentities']
+  tags: tagsByResource['${identifier.userAssignedIdentities}']
 }
 
 // Get role resource id
-resource monitorDataReaderResourceDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource monitorDataReaderResourceDefinition 'Microsoft.Authorization/roleDefinitions@${azure.apiVersionForRoleDefinitions}' existing = {
   name: const_roleDefinitionIdOfMonitorDataReader
 }
 
 // Assign Monitor Data Reader role we need the permission to read data.
-resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource kedaUamiRoleAssignment 'Microsoft.Authorization/roleAssignments@${azure.apiVersionForRoleAssignment}' = {
   name: name_kedaMonitorDataReaderRoleAssignmentName
   scope: monitorAccount
   properties: {
     description: 'Assign Monitor Data Reader role role to KEDA Identity '
-    principalId: reference(uamiForKeda.id, '2023-01-31', 'full').properties.principalId
+    principalId: reference(uamiForKeda.id, '${azure.apiVersionForIdentity}', 'full').properties.principalId
     principalType: 'ServicePrincipal'
     roleDefinitionId: monitorDataReaderResourceDefinition.id
   }

@@ -346,7 +346,7 @@
          "type": "object",
          "defaultValue": {},
          "metadata": {
-            "description": "Tags for the resources."
+            "description": "${label.tagsLabel}"
          }
       },
       "wlsDomainName": {
@@ -387,18 +387,18 @@
       // If adding a new resource, add the resource identifier to the array below
       // Also modify createUIDefinition.json to include the new resource
       "obj_tagsByResources":{
-         "Microsoft.Network/dnszones": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Network/dnszones')]",
-         "Microsoft.Network/networkInterfaces": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces')]",
-         "Microsoft.Network/networkSecurityGroups": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups')]",
-         "Microsoft.Network/publicIPAddresses": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses')]",
-         "Microsoft.Network/privateEndpoints": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Network/privateEndpoints')]",
-         "Microsoft.Storage/storageAccounts": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts')]",
-         "Microsoft.Network/virtualNetworks": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks')]",
-         "Microsoft.Compute/virtualMachines": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines')]",
-         "Virtual machine extension": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Virtual machine extension')]",
-         "Microsoft.Resources/deploymentScripts": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.Resources/deploymentScripts')]",
-         "Microsoft.ManagedIdentity/userAssignedIdentities": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft.ManagedIdentity/userAssignedIdentities')]",
-         "Microsoft resources deployment": "[funcTags.tagsFilter(parameters('tagsByResource'), 'Microsoft resources deployment')]"
+         "${identifier.dnszones}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.dnszones}')]",
+         "${identifier.networkInterfaces}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.networkInterfaces}')]",
+         "${identifier.networkSecurityGroups}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.networkSecurityGroups}')]",
+         "${identifier.publicIPAddresses}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.publicIPAddresses}')]",
+         "${identifier.privateEndpoints}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.privateEndpoints}')]",
+         "${identifier.storageAccounts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.storageAccounts}')]",
+         "${identifier.virtualNetworks}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualNetworks}')]",
+         "${identifier.virtualMachines}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachines}')]",
+         "${identifier.virtualMachinesExtensions}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.virtualMachinesExtensions}')]",
+         "${identifier.deploymentScripts}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.deploymentScripts}')]",
+         "${identifier.userAssignedIdentities}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.userAssignedIdentities}')]",
+         "${identifier.resourcesDeployment}": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.resourcesDeployment}')]"
       }
    },
    "functions": [
@@ -429,9 +429,9 @@
    "resources": [
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
-         "name": "pid-7e52c2b6-1acb-416f-af55-5837ff783eb7-partnercenter",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
+         "name": "${admin.start}",
          "properties": {
             "mode": "Incremental",
             "template": {
@@ -445,8 +445,8 @@
       {
          "name": "adminLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
-         "apiVersion": "2023-07-01",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[not(parameters('enableCustomSSL'))]",
          "properties": {
             "mode": "Incremental",
@@ -548,8 +548,8 @@
       {
          "name": "adminCustomSSLLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[parameters('enableCustomSSL')]",
          "properties": {
             "mode": "Incremental",
@@ -677,8 +677,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
          "name": "networkSecurityLinkedTemplate",
          "properties": {
@@ -703,9 +703,9 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "dnszonesLinkedTemplate",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "condition": "[and(parameters('enableCustomDNS'), equals(parameters('virtualNetworkNewOrExisting'), 'new'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]"
@@ -745,7 +745,7 @@
                },
                "targetResources": {
                   "value": [
-                     "[reference(variables('name_adminLinkedTemplateDeployment'), '2023-07-01').outputs._adminPublicIPId.value]"
+                     "[reference(variables('name_adminLinkedTemplateDeployment'), '${azure.apiVersionForDeployment}').outputs._adminPublicIPId.value]"
                   ]
                },
                "tagsByResource": {
@@ -760,8 +760,8 @@
             "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
-         "apiVersion": "2023-07-01",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "condition": "[parameters('enableDB')]",
          "properties": {
             "mode": "Incremental",
@@ -824,10 +824,10 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "[variables('name_uamiForPostDeploymentScript')]",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
@@ -855,10 +855,10 @@
 	  },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "postDeplyment",
          "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'existing')]",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
@@ -892,16 +892,16 @@
                "value": "[parameters('_artifactsLocationSasToken')]"
             },
             "userAssignedIdentityResourceId":{
-               "value": "[reference(variables('name_uamiForPostDeploymentScript'),'2023-07-01').outputs.uamidForPostDeployment.value]"
+               "value": "[reference(variables('name_uamiForPostDeploymentScript'),'${azure.apiVersionForDeployment}').outputs.uamidForPostDeployment.value]"
             }
           }
         }
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
-         "tags": "[variables('obj_tagsByResources')['Microsoft resources deployment']]",
-         "name": "057f09cd-6f90-5c1c-b655-3aba168aef35",
+         "apiVersion": "${azure.apiVersionForDeployment}",
+         "tags": "[variables('obj_tagsByResources')['${identifier.resourcesDeployment}']]",
+         "name": "${admin.end}",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
@@ -928,36 +928,36 @@
       },
       "hostname": {
          "type": "string",
-         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.hostname.value]"
+         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.hostname.value]"
       },
       "sshCommand": {
          "type": "string",
-         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.hostname.value)]"
+         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.hostname.value)]"
       },
       "wlsDomainLocation": {
          "type": "string",
-         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.wlsDomainLocation.value]"
+         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.wlsDomainLocation.value]"
       },
       "adminConsoleURL": {
          "type": "string",
-         "value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.adminConsoleURL.value)]"
+         "value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminConsoleURL.value)]"
       },
       "adminConsoleSecureURL": {
          "type": "string",
-         "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.adminConsoleSecureURL.value)]"
+         "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002/console/',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminConsoleSecureURL.value)]"
       },
       "adminRemoteConsoleURL": {
          "type": "string",
-         "value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.adminRemoteConsoleURL.value)]"
+         "value": "[if(parameters('enableCustomDNS'), uri(format('http://{0}.{1}:7001',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminRemoteConsoleURL.value)]"
       },
       "adminRemoteConsoleSecureURL": {
          "type": "string",
-         "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'2023-07-01').outputs.adminRemoteConsoleSecureURL.value)]"
+         "value": "[if(parameters('enableCustomDNS'), uri(format('https://{0}.{1}:7002',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')), ''),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersionForDeployment}').outputs.adminRemoteConsoleSecureURL.value)]"
       },      
       "dnsZoneNameServers": {
          "type": "array",
          "condition": "[and(parameters('enableCustomDNS'), not(parameters('hasDNSZones')))]",
-         "value": "[reference('dnszonesLinkedTemplate','2023-07-01').outputs.dnsZoneNameServers.value]"
+         "value": "[reference('dnszonesLinkedTemplate','${azure.apiVersionForDeployment}').outputs.dnsZoneNameServers.value]"
       }
    }
 }

@@ -92,7 +92,7 @@
    "resources": [
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "${post.deploy.ssl.config.start}",
          "properties": {
             "mode": "Incremental",
@@ -106,7 +106,7 @@
       {
          "type": "Microsoft.Compute/virtualMachines/extensions",
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
-         "apiVersion": "2024-11-01",
+         "apiVersion": "${azure.apiVersionForVirtualMachines}",
          "location": "[parameters('location')]",
          "properties": {
             "publisher": "Microsoft.Azure.Extensions",
@@ -126,7 +126,7 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "${post.deploy.ssl.config.end}",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"

@@ -18,7 +18,7 @@
             "type": "object",
             "defaultValue": {},
             "metadata": {
-               "description": "Tags for the resources."
+               "description": "${label.tagsLabel}"
             }
        },
        "roleAssignmentNameSeed": {
@@ -36,20 +36,20 @@
    },
    "resources": [
       {     
-          "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-          "apiVersion": "2023-01-31",
-          "tags": "[parameters('tagsByResource')['Microsoft.ManagedIdentity/userAssignedIdentities']]",
+          "type": "${identifier.userAssignedIdentities}",
+          "apiVersion": "${azure.apiVersionForIdentity}",
+          "tags": "[parameters('tagsByResource')['${identifier.userAssignedIdentities}']]",
           "name": "[variables('name_postDeploymentScriptUserDefinedManagedIdentity')]",
           "location": "[parameters('location')]"
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2023-07-01",
+         "apiVersion": "${azure.apiVersionForDeployment}",
          "name": "[variables('name_postDeploymentScriptRoleAssignment')]",
          "location": "[parameters('location')]",
          "subscriptionId": "[subscription().subscriptionId]",
          "dependsOn": [
-               "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
+               "[resourceId('${identifier.userAssignedIdentities}', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
          ],
          "properties": {
              "mode": "Incremental",
@@ -76,7 +76,7 @@
                  "resources": [
                      {
                          "type": "Microsoft.Authorization/roleAssignments",
-                         "apiVersion": "2022-04-01",
+                         "apiVersion": "${azure.apiVersionForRoleAssignment}",
                          "name": "[variables('roleAssignmentGuid')]",
                          "properties": {
                              "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', parameters('innerRoleDefinitionId'))]",
@@ -88,7 +88,7 @@
              },
              "parameters": {
                  "innerPrincipalId": {
-                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',variables('name_postDeploymentScriptUserDefinedManagedIdentity'))).principalId]"
+                  "value": "[reference(resourceId('${identifier.userAssignedIdentities}',variables('name_postDeploymentScriptUserDefinedManagedIdentity'))).principalId]"
                  },
                  "innerRoleDefinitionId": {
                      "value": "[variables('const_roleDefinitionIdOfContributor')]"
@@ -103,7 +103,7 @@
    "outputs": {
       "uamidForPostDeployment": {
                "type": "string",
-               "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
+               "value": "[resourceId('${identifier.userAssignedIdentities}', variables('name_postDeploymentScriptUserDefinedManagedIdentity'))]"
        }
    }
 }
