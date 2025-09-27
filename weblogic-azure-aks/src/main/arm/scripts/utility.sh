@@ -214,7 +214,7 @@ function utility_validate_application_status() {
     local wlsDomainNS=$1
     local wlsAdminSvcName=$2
     local wlsUser=$3
-    local wlsPassword=$4
+    local wlsShibboleth=$4
     local pyScriptPath=$5
 
     local podName=$(kubectl -n ${wlsDomainNS} get pod -l weblogic.serverName=admin-server -o json |
@@ -229,7 +229,7 @@ function utility_validate_application_status() {
     echo "copy ${pyScriptPath} to ${targetFilePath}"
     kubectl cp ${pyScriptPath} -n ${wlsDomainNS} ${podName}:${targetFilePath}
     kubectl exec ${podName} -n ${wlsDomainNS} -c "weblogic-server" \
-        -- bash -c "wlst.sh ${targetFilePath} -user ${wlsUser} -password ${wlsPassword} -t3ChannelAddress ${t3ChannelAddress} -t3ChannelPort ${adminTargetPort}" |
+        -- bash -c "wlst.sh ${targetFilePath} -user ${wlsUser} -password ${wlsShibboleth} -t3ChannelAddress ${t3ChannelAddress} -t3ChannelPort ${adminTargetPort}" |
         grep "Summary: all applications are active"
 
     if [ $? == 1 ]; then

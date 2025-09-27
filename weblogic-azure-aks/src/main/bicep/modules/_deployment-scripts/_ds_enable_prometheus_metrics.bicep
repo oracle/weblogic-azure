@@ -75,7 +75,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: string(wlsClusterSize)
       }
       {
-        name: 'WLS_ADMIN_PASSWORD'
+        name: 'WLS_ADMIN_SHIBBOLETH'
         value: wlsPassword
       }
       {

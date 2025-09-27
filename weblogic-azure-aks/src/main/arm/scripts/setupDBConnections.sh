@@ -12,17 +12,17 @@ AKS_RESOURCE_GROUP_NAME: the name of resource group that runs the AKS cluster.
 AKS_NAME: the name of the AKS cluster.
 DATABASE_TYPE: one of the supported database types.
 DB_CONFIGURATION_TYPE: createOrUpdate: create a new data source connection, or update an existing data source connection. delete: delete an existing data source connection.
-DB_PASSWORD: password for Database.
+DB_SHIBBOLETH: password for Database.
 DB_USER: user id of Database.
 DB_CONNECTION_STRING: JDBC Connection String.
 DB_DRIVER_NAME: datasource driver name, must be specified if database type is otherdb.
-ENABLE_PASSWORDLESS_CONNECTION: true to enable passwordless connection
+ENABLE_SHIBBOLETHLESS_CONNECTION: true to enable passwordless connection
 GLOBAL_TRANSATION_PROTOCOL: Determines the transaction protocol (global transaction processing behavior) for the data source.
 JDBC_DATASOURCE_NAME: JNDI Name for JDBC Datasource.
 TEST_TABLE_NAME: the name of the database table to use when testing physical database connections. This name is required when you specify a Test Frequency and enable Test Reserved Connections.
 WLS_DOMAIN_UID: UID of WebLogic domain, used in WebLogic Operator.
 WLS_DOMAIN_USER: user name for WebLogic Administrator.
-WLS_DOMAIN_PASSWORD: passowrd for WebLogic Administrator.
+WLS_DOMAIN_SHIBBOLETH: passowrd for WebLogic Administrator.
 END
 )
 
@@ -45,8 +45,8 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ -z "${DB_PASSWORD}" || -z "${DB_USER}" ]]; then
-        echo_stderr "DB_PASSWORD and DB_USER are required. "
+    if [[ -z "${DB_SHIBBOLETH}" || -z "${DB_USER}" ]]; then
+        echo_stderr "DB_SHIBBOLETH and DB_USER are required. "
         usage 1
     fi
 
@@ -65,14 +65,14 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ -z "$WLS_DOMAIN_USER" || -z "${WLS_DOMAIN_PASSWORD}" ]]; then
-        echo_stderr "WLS_DOMAIN_USER and WLS_DOMAIN_PASSWORD are required. "
+    if [[ -z "$WLS_DOMAIN_USER" || -z "${WLS_DOMAIN_SHIBBOLETH}" ]]; then
+        echo_stderr "WLS_DOMAIN_USER and WLS_DOMAIN_SHIBBOLETH are required. "
         usage 1
     fi
 
-    # reset password
-    if [[ "${ENABLE_PASSWORDLESS_CONNECTION,,}" == "true" ]]; then
-        DB_PASSWORD=""
+    # reset shibboleth
+    if [[ "${ENABLE_SHIBBOLETHLESS_CONNECTION,,}" == "true" ]]; then
+        DB_SHIBBOLETH=""
 
         if [[ "${DATABASE_TYPE}" == "${constDBTypeSqlServer}" ]]; then
             DB_USER=""
@@ -238,7 +238,7 @@ function validate_datasource() {
     clusterTargetPort=$(kubectl get svc ${wlsClusterSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
     t3ConnectionString="t3://${wlsClusterSvcName}.${wlsDomainNS}.svc.cluster.local:${clusterTargetPort}"
     cat <<EOF >${testDatasourceScript}
-connect('${WLS_DOMAIN_USER}', '${WLS_DOMAIN_PASSWORD}', '${t3ConnectionString}')
+connect('${WLS_DOMAIN_USER}', '${WLS_DOMAIN_SHIBBOLETH}', '${t3ConnectionString}')
 serverRuntime()
 print 'start to query data source jndi bean'
 dsMBeans = cmo.getJDBCServiceRuntime().getJDBCDataSourceRuntimeMBeans()

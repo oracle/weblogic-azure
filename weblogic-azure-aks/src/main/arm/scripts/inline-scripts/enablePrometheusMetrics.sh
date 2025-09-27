@@ -29,7 +29,7 @@ function enable_promethues_metrics(){
 # https://learn.microsoft.com/en-us/azure/azure-monitor/containers/prometheus-metrics-scrape-configuration
 function deploy_customize_scraping(){
     # https://learn.microsoft.com/en-us/azure/azure-monitor/containers/prometheus-metrics-scrape-configuration?tabs=CRDConfig%2CCRDScrapeConfig#basic-authentication
-    local wlsPswBase64=$(echo -n "${WLS_ADMIN_PASSWORD}" | base64)
+    local wlsShibbolethBase64=$(echo -n "${WLS_ADMIN_SHIBBOLETH}" | base64)
     cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
@@ -38,7 +38,7 @@ metadata:
   namespace: kube-system
 type: Opaque
 data:
-  password1: ${wlsPswBase64}
+  password1: ${wlsShibbolethBase64}
 EOF
 
     #create scrape config file

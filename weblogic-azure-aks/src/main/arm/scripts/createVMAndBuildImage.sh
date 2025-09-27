@@ -6,9 +6,9 @@
 
 echo "Script  ${0} starts"
 
-# read <acrPassword> from stdin
+# read <acrShibboleth> from stdin
 function read_sensitive_parameters_from_stdin() {
-    read acrPassword
+    read acrShibboleth
 }
 
 function cleanup_vm() {
@@ -153,7 +153,7 @@ function build_docker_image() {
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
         --settings "{ \"fileUris\": [\"${SCRIPT_LOCATION}model.properties\",\"${SCRIPT_LOCATION}genImageModel.sh\",\"${SCRIPT_LOCATION}buildWLSDockerImage.sh\",\"${SCRIPT_LOCATION}common.sh\"]}" \
-        --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_PASSWORDLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
+        --protected-settings "{\"commandToExecute\":\"echo ${acrShibboleth} ${ORACLE_ACCOUNT_SHIBBOLETH} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_SHIBBOLETHLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
 
     cleanup_vm
 }

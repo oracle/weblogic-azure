@@ -794,18 +794,18 @@ module queryWLSDomainConfig 'modules/_deployment-scripts/_ds-output-domain-confi
 }
 
 output aksClusterName string = ref_wlsDomainDeployment.outputs.aksClusterName
-output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerEndpoint
+output adminConsoleInternalUrl string = ref_wlsDomainDeployment.outputs.adminServerEndPoint
 output adminConsoleExternalUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalEndpoint : ''
 output adminConsoleExternalSecuredUrl string = const_showAdminConsoleExUrl ? networkingDeployment.outputs.adminConsoleExternalSecuredEndpoint : ''
 // If TLS/SSL enabled, only secured url is working, will not output HTTP url.
 output adminRemoteConsoleUrl string = const_showRemoteAdminConsoleExUrl ? networkingDeployment.outputs.adminRemoteConsoleEndpoint : ''
 output adminRemoteConsoleSecuredUrl string = const_showRemoteAdminConsoleSecuredExUrl ? networkingDeployment.outputs.adminRemoteConsoleSecuredEndpoint : ''
-output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalEndpoint
+output adminServerT3InternalUrl string = ref_wlsDomainDeployment.outputs.adminServerT3InternalEndPoint
 output adminServerT3ExternalUrl string = enableAdminT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.adminServerT3ChannelEndpoint : ''
-output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterEndpoint
+output clusterInternalUrl string = ref_wlsDomainDeployment.outputs.clusterEndPoint
 output clusterExternalUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalEndpoint : ''
 output clusterExternalSecuredUrl string = const_enableNetworking ? networkingDeployment.outputs.clusterExternalSecuredEndpoint : ''
-output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalEndpoint
+output clusterT3InternalUrl string = ref_wlsDomainDeployment.outputs.clusterT3InternalEndPoint
 output clusterT3ExternalEndpoint string = enableClusterT3Tunneling && const_enableNetworking ? networkingDeployment.outputs.clusterT3ChannelEndpoint : ''
 output kedaScalerServerAddress string = enableAutoscaling ? horizontalAutoscaling.outputs.kedaScalerServerAddress : ''
 output shellCmdtoConnectAks string = format('az account set --subscription {0}; az aks get-credentials --resource-group {1} --name {2}', split(subscription().id, '/')[2], ref_wlsDomainDeployment.outputs.aksClusterRGName, ref_wlsDomainDeployment.outputs.aksClusterName)

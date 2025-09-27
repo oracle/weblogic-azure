@@ -11,7 +11,7 @@ AKS_CLUSTER_NAME
 AKS_CLUSTER_RESOURCEGROUP_NAME
 CURRENT_RESOURCEGROUP_NAME
 ORACLE_ACCOUNT_NAME
-ORACLE_ACCOUNT_PASSWORD
+ORACLE_ACCOUNT_SHIBBOLETH
 STORAGE_ACCOUNT_NAME
 STORAGE_ACCOUNT_CONTAINER_NAME
 SCRIPT_LOCATION
@@ -37,7 +37,7 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]] && [[ -z "$ORACLE_ACCOUNT_NAME" || -z "${ORACLE_ACCOUNT_PASSWORD}" ]]; then
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]] && [[ -z "$ORACLE_ACCOUNT_NAME" || -z "${ORACLE_ACCOUNT_SHIBBOLETH}" ]]; then
         echo_stderr "Oracle SSO account is required. "
         usage 1
     fi
@@ -116,7 +116,7 @@ function query_acr_credentials() {
     echo "query credentials of ACR ${ACR_NAME}"
     ACR_LOGIN_SERVER=$(az acr show -n $ACR_NAME --query 'loginServer' -o tsv)
     ACR_USER_NAME=$(az acr credential show -n $ACR_NAME --query 'username' -o tsv)
-    ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query 'passwords[0].value' -o tsv)
+    ACR_SHIBBOLETH=$(az acr credential show -n $ACR_NAME --query 'passwords[0].value' -o tsv)
 }
 
 function get_app_sas_url() {
@@ -197,7 +197,7 @@ function build_docker_image() {
     export WLS_APP_PACKAGE_URLS=$(echo $WLS_APP_PACKAGE_URLS | base64 -w0)
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    echo ${ACR_PASSWORD} \
+    echo ${ACR_SHIBBOLETH} \
         | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
 
     az acr repository show -n ${ACR_NAME} --image aks-wls-images:${newImageTag}

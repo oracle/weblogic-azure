@@ -64,7 +64,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: dbConfigurationType
       }
       {
-        name: 'DB_PASSWORD'
+        name: 'DB_SHIBBOLETH'
         secureValue: dbPassword
       }
       {
@@ -80,7 +80,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value:  dbDriverName
       }
       {
-        name: 'ENABLE_PASSWORDLESS_CONNECTION'
+        name: 'ENABLE_SHIBBOLETHLESS_CONNECTION'
         value: string(enablePswlessConnection)
       }
       {
@@ -104,7 +104,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: wlsUserName
       }
       {
-        name: 'WLS_DOMAIN_PASSWORD'
+        name: 'WLS_DOMAIN_SHIBBOLETH'
         secureValue: wlsPassword
       }
     ]
