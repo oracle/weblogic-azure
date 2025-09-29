@@ -6,9 +6,9 @@
 
 echo "Script  ${0} starts"
 
-# read <acrPassword> from stdin
+# read <acrShibboleth> from stdin
 function read_sensitive_parameters_from_stdin() {
-    read acrPassword
+    read acrShibboleth
 }
 
 function cleanup_vm() {
@@ -53,11 +53,20 @@ function cleanup_vm() {
 | where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | project nsgId = id" --query "data[0].nsgId" -o tsv)
 
+    #query public ip id
+    publicIpId=$(az graph query -q "Resources \
+| where type =~ 'Microsoft.Network/publicIPAddresses' \
+| where name =~ '${vmName}PublicIP' \
+| where resourceGroup =~ '${CURRENT_RESOURCEGROUP_NAME}' \
+| project publicIpId = id" --query "data[0].publicIpId" -o tsv)
+
     # Delete VM NIC IP VNET NSG resoruces
     echo "deleting vm ${vmId}"
     az vm delete --ids $vmId --yes
     echo "deleting nic ${nicId}"
     az network nic delete --ids ${nicId}
+    echo "deleting public ip ${publicIpId}"
+    az network public-ip delete --ids $publicIpId
     echo "deleting disk ${osDiskId}"
     az disk delete --yes --ids ${osDiskId}
     echo "deleting vnet ${vnetId}"
@@ -119,6 +128,8 @@ function build_docker_image() {
     export TAG_VM=$(echo "${TAG_VM}" \
         | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
 
+    publicIPName="${vmName}PublicIP"
+
     # MICROSOFT_INTERNAL
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
     # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which causes vm-redeployed issue
@@ -132,7 +143,7 @@ function build_docker_image() {
     --enable-agent true \
     --vnet-name ${vmName}VNET \
     --enable-auto-update false \
-    --public-ip-address "" \
+    --public-ip-address ${publicIPName} \
     --size ${vmSize} \
     --tags ${TAG_VM} SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
@@ -153,7 +164,7 @@ function build_docker_image() {
         --publisher Microsoft.Azure.Extensions \
         --version 2.0 \
         --settings "{ \"fileUris\": [\"${SCRIPT_LOCATION}model.properties\",\"${SCRIPT_LOCATION}genImageModel.sh\",\"${SCRIPT_LOCATION}buildWLSDockerImage.sh\",\"${SCRIPT_LOCATION}common.sh\"]}" \
-        --protected-settings "{\"commandToExecute\":\"echo ${acrPassword} ${ORACLE_ACCOUNT_PASSWORD} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_PASSWORDLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
+        --protected-settings "{\"commandToExecute\":\"echo ${acrShibboleth} ${ORACLE_ACCOUNT_SHIBBOLETH} | bash buildWLSDockerImage.sh ${wlsImagePath} ${acrLoginServer} ${acrUser} ${newImageTag} ${WLS_APP_PACKAGE_URLS} ${ORACLE_ACCOUNT_NAME} ${WLS_CLUSTER_SIZE} ${ENABLE_CUSTOM_SSL} ${ENABLE_ADMIN_CUSTOM_T3} ${ENABLE_CLUSTER_CUSTOM_T3} ${USE_ORACLE_IMAGE} ${URL_3RD_DATASOURCE} ${ENABLE_SHIBBOLETHLESS_DB_CONNECTION} ${DB_TYPE} ${CPU_PLATFORM} \"}"
 
     cleanup_vm
 }

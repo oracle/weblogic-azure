@@ -21,7 +21,7 @@ ENABLE_CLUSTER_CUSTOM_T3
 ENABLE_CUSTOM_SSL
 ENABLE_PV
 ORACLE_ACCOUNT_NAME
-ORACLE_ACCOUNT_PASSWORD
+ORACLE_ACCOUNT_SHIBBOLETH
 ORACLE_ACCOUNT_ENTITLED
 SCRIPT_LOCATION
 STORAGE_ACCOUNT_NAME
@@ -30,7 +30,7 @@ USE_ORACLE_IMAGE
 USER_PROVIDED_IMAGE_PATH
 WLS_DOMAIN_NAME
 WLS_DOMAIN_UID
-WLS_ADMIN_PASSWORD
+WLS_ADMIN_SHIBBOLETH
 WLS_ADMIN_USER_NAME
 WLS_APP_PACKAGE_URLS
 WLS_APP_REPLICAS
@@ -41,13 +41,13 @@ WLS_MANAGED_SERVER_PREFIX
 WLS_RESOURCE_REQUEST_CPU
 WLS_RESOURCE_REQUEST_MEMORY
 WLS_SSL_IDENTITY_DATA
-WLS_SSL_IDENTITY_PASSWORD
+WLS_SSL_IDENTITY_SHIBBOLETH
 WLS_SSL_IDENTITY_TYPE
 WLS_SSL_TRUST_DATA
-WLS_SSL_TRUST_PASSWORD
+WLS_SSL_TRUST_SHIBBOLETH
 WLS_SSL_TRUST_TYPE
 WLS_SSL_PRIVATE_KEY_ALIAS
-WLS_SSL_PRIVATE_KEY_PASSWORD
+WLS_SSL_PRIVATE_KEY_SHIBBOLETH
 WLS_T3_ADMIN_PORT
 WLS_T3_CLUSTER_PORT
 WLS_WDT_RUNTIME_PSW
@@ -67,7 +67,7 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]] && [[ -z "$ORACLE_ACCOUNT_NAME" || -z "${ORACLE_ACCOUNT_PASSWORD}" ]]; then
+    if [[ "${USE_ORACLE_IMAGE,,}" == "${constTrue}" ]] && [[ -z "$ORACLE_ACCOUNT_NAME" || -z "${ORACLE_ACCOUNT_SHIBBOLETH}" ]]; then
         echo_stderr "Oracle SSO account is required. "
         usage 1
     fi
@@ -102,8 +102,8 @@ function validate_input() {
         usage 1
     fi
 
-    if [ -z "$WLS_ADMIN_PASSWORD" ]; then
-        echo_stderr "WLS_ADMIN_PASSWORD is required. "
+    if [ -z "$WLS_ADMIN_SHIBBOLETH" ]; then
+        echo_stderr "WLS_ADMIN_SHIBBOLETH is required. "
         usage 1
     fi
 
@@ -162,8 +162,8 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ -z "$WLS_SSL_IDENTITY_DATA" || -z "${WLS_SSL_IDENTITY_PASSWORD}" ]]; then
-        echo_stderr "WLS_SSL_IDENTITY_PASSWORD and WLS_SSL_IDENTITY_DATA are required. "
+    if [[ -z "$WLS_SSL_IDENTITY_DATA" || -z "${WLS_SSL_IDENTITY_SHIBBOLETH}" ]]; then
+        echo_stderr "WLS_SSL_IDENTITY_SHIBBOLETH and WLS_SSL_IDENTITY_DATA are required. "
         usage 1
     fi
 
@@ -172,13 +172,13 @@ function validate_input() {
         usage 1
     fi
 
-    if [[ -z "$WLS_SSL_PRIVATE_KEY_ALIAS" || -z "${WLS_SSL_PRIVATE_KEY_PASSWORD}" ]]; then
-        echo_stderr "WLS_SSL_PRIVATE_KEY_ALIAS and WLS_SSL_PRIVATE_KEY_PASSWORD are required. "
+    if [[ -z "$WLS_SSL_PRIVATE_KEY_ALIAS" || -z "${WLS_SSL_PRIVATE_KEY_SHIBBOLETH}" ]]; then
+        echo_stderr "WLS_SSL_PRIVATE_KEY_ALIAS and WLS_SSL_PRIVATE_KEY_SHIBBOLETH are required. "
         usage 1
     fi
 
-    if [[ -z "$WLS_SSL_TRUST_DATA" || -z "${WLS_SSL_TRUST_PASSWORD}" ]]; then
-        echo_stderr "WLS_SSL_TRUST_DATA and WLS_SSL_TRUST_PASSWORD are required. "
+    if [[ -z "$WLS_SSL_TRUST_DATA" || -z "${WLS_SSL_TRUST_SHIBBOLETH}" ]]; then
+        echo_stderr "WLS_SSL_TRUST_DATA and WLS_SSL_TRUST_SHIBBOLETH are required. "
         usage 1
     fi
 
@@ -384,7 +384,7 @@ function query_acr_credentials() {
     ACR_USER_NAME=$(az acr credential show -n $ACR_NAME -g ${ACR_RESOURCEGROUP_NAME} --query 'username' -o tsv)
     validate_status "Query ACR credentials."
 
-    ACR_PASSWORD=$(az acr credential show -n $ACR_NAME -g ${ACR_RESOURCEGROUP_NAME} --query 'passwords[0].value' -o tsv)
+    ACR_SHIBBOLETH=$(az acr credential show -n $ACR_NAME -g ${ACR_RESOURCEGROUP_NAME} --query 'passwords[0].value' -o tsv)
     validate_status "Query ACR credentials."
 }
 
@@ -396,7 +396,7 @@ function query_acr_credentials() {
 function build_docker_image() {
     echo "build a new image including the new applications"
     chmod ugo+x $scriptDir/createVMAndBuildImage.sh
-    echo ${ACR_PASSWORD} | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
+    echo ${ACR_SHIBBOLETH} | bash $scriptDir/createVMAndBuildImage.sh $newImageTag ${ACR_LOGIN_SERVER} ${ACR_USER_NAME}
 
     # to mitigate error in https://learn.microsoft.com/en-us/answers/questions/1188413/the-resource-with-name-name-and-type-microsoft-con
     az provider register -n Microsoft.ContainerRegistry
@@ -429,7 +429,7 @@ function validate_ssl_keystores() {
     #validate if trust keystore has entry
     ${JAVA_HOME}/bin/keytool -list -v \
         -keystore ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
-        -storepass $WLS_SSL_TRUST_PASSWORD \
+        -storepass $WLS_SSL_TRUST_SHIBBOLETH \
         -storetype jks |
         grep 'Entry type:' |
         grep 'trustedCertEntry'
@@ -495,10 +495,10 @@ function output_ssl_keystore() {
         ${JAVA_HOME}/bin/keytool -importkeystore \
             -srckeystore ${mntPath}/${wlsTrustKeyStoreFileName} \
             -srcstoretype ${WLS_SSL_TRUST_TYPE} \
-            -srcstorepass ${WLS_SSL_TRUST_PASSWORD} \
+            -srcstorepass ${WLS_SSL_TRUST_SHIBBOLETH} \
             -destkeystore ${mntPath}/${wlsTrustKeyStoreJKSFileName} \
             -deststoretype jks \
-            -deststorepass ${WLS_SSL_TRUST_PASSWORD}
+            -deststorepass ${WLS_SSL_TRUST_SHIBBOLETH}
 
         validate_status "Export trust JKS file."
     else
@@ -613,7 +613,7 @@ function create_domain_namespace() {
     kubectl -n ${wlsDomainNS} create secret generic \
         ${kubectlWLSCredentialName} \
         --from-literal=username=${WLS_ADMIN_USER_NAME} \
-        --from-literal=password=${WLS_ADMIN_PASSWORD}
+        --from-literal=password=${WLS_ADMIN_SHIBBOLETH}
 
     kubectl -n ${wlsDomainNS} label secret ${kubectlWLSCredentialName} weblogic.domainUID=${WLS_DOMAIN_UID}
 
@@ -624,7 +624,7 @@ function create_domain_namespace() {
     kubectl create secret docker-registry ${kubectlSecretForACR} \
         --docker-server=${ACR_LOGIN_SERVER} \
         --docker-username=${ACR_USER_NAME} \
-        --docker-password=${ACR_PASSWORD} \
+        --docker-password=${ACR_SHIBBOLETH} \
         -n ${wlsDomainNS}
 
     kubectl -n ${wlsDomainNS} label secret ${kubectlSecretForACR} weblogic.domainUID=${WLS_DOMAIN_UID}
@@ -654,16 +654,16 @@ function parsing_ssl_certs_and_create_ssl_secret() {
         echo "create secret  ${kubectlWLSSSLCredentialsName}"
         kubectl -n ${wlsDomainNS} create secret generic ${kubectlWLSSSLCredentialsName} \
             --from-literal=sslidentitykeyalias=${WLS_SSL_PRIVATE_KEY_ALIAS} \
-            --from-literal=sslidentitykeypassword=${WLS_SSL_PRIVATE_KEY_PASSWORD} \
+            --from-literal=sslidentitykeypassword=${WLS_SSL_PRIVATE_KEY_SHIBBOLETH} \
             --from-literal=sslidentitystorepath=${sharedPath}/$wlsIdentityKeyStoreFileName \
-            --from-literal=sslidentitystorepassword=${WLS_SSL_IDENTITY_PASSWORD} \
+            --from-literal=sslidentitystorepassword=${WLS_SSL_IDENTITY_SHIBBOLETH} \
             --from-literal=sslidentitystoretype=${WLS_SSL_IDENTITY_TYPE} \
             --from-literal=ssltruststorepath=${sharedPath}/${wlsTrustKeyStoreFileName} \
             --from-literal=ssltruststoretype=${WLS_SSL_TRUST_TYPE} \
-            --from-literal=ssltruststorepassword=${WLS_SSL_TRUST_PASSWORD}
+            --from-literal=ssltruststorepassword=${WLS_SSL_TRUST_SHIBBOLETH}
 
         kubectl -n ${wlsDomainNS} label secret ${kubectlWLSSSLCredentialsName} weblogic.domainUID=${WLS_DOMAIN_UID}
-        javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} -Dweblogic.security.SSL.trustedCAKeyStorePassPhrase=${WLS_SSL_TRUST_PASSWORD} ${javaOptions}"
+        javaOptions=" -Dweblogic.security.SSL.ignoreHostnameVerification=true -Dweblogic.security.SSL.trustedCAKeyStore=${sharedPath}/${wlsTrustKeyStoreJKSFileName} -Dweblogic.security.SSL.trustedCAKeyStorePassPhrase=${WLS_SSL_TRUST_SHIBBOLETH} ${javaOptions}"
     fi
 }
 

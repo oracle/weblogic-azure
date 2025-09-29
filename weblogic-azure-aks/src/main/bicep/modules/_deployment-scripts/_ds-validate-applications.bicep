@@ -53,7 +53,7 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@${azure.apiVers
         value: wlsUserName
       }
       {
-        name: 'WLS_DOMAIN_PASSWORD'
+        name: 'WLS_DOMAIN_SHIBBOLETH'
         secureValue: wlsPassword
       }
     ]
