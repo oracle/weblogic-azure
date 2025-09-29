@@ -53,11 +53,20 @@ function cleanup_vm() {
 | where resourceGroup  =~ '${CURRENT_RESOURCEGROUP_NAME}' \
 | project nsgId = id" --query "data[0].nsgId" -o tsv)
 
+    #query public ip id
+    publicIpId=$(az graph query -q "Resources \
+| where type =~ 'Microsoft.Network/publicIPAddresses' \
+| where name =~ '${vmName}PublicIP' \
+| where resourceGroup =~ '${CURRENT_RESOURCEGROUP_NAME}' \
+| project publicIpId = id" --query "data[0].publicIpId" -o tsv)
+
     # Delete VM NIC IP VNET NSG resoruces
     echo "deleting vm ${vmId}"
     az vm delete --ids $vmId --yes
     echo "deleting nic ${nicId}"
     az network nic delete --ids ${nicId}
+    echo "deleting public ip ${publicIpId}"
+    az network public-ip delete --ids $publicIpId
     echo "deleting disk ${osDiskId}"
     az disk delete --yes --ids ${osDiskId}
     echo "deleting vnet ${vnetId}"
@@ -119,6 +128,8 @@ function build_docker_image() {
     export TAG_VM=$(echo "${TAG_VM}" \
         | jq -r 'to_entries | map("\"" + .key + "\"=" + (if .value|type == "string" then "\"\(.value)\"" else "\(.value)" end)) | join(" ")')
 
+    publicIPName="${vmName}PublicIP"
+
     # MICROSOFT_INTERNAL
     # Specify tag 'SkipASMAzSecPack' to skip policy 'linuxazuresecuritypackautodeployiaas_1.6'
     # Specify tag 'SkipNRMS*' to skip Microsoft internal NRMS policy, which causes vm-redeployed issue
@@ -132,7 +143,7 @@ function build_docker_image() {
     --enable-agent true \
     --vnet-name ${vmName}VNET \
     --enable-auto-update false \
-    --public-ip-address "" \
+    --public-ip-address ${publicIPName} \
     --size ${vmSize} \
     --tags ${TAG_VM} SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
