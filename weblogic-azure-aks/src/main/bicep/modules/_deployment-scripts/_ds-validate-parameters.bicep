@@ -10,6 +10,7 @@ param aksClusterRGName string
 param aksClusterName string
 param aksVersion string = 'default'
 param appGatewayCertificateOption string
+@secure()
 param appGatewaySSLCertData string
 @secure()
 param appGatewaySSLCertPassword string

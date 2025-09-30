@@ -59,8 +59,10 @@ param appGatewayCertificateOption string = 'haveCert'
 @description('Public IP Name for the Application Gateway')
 param appGatewayPublicIPAddressName string = 'gwip'
 @description('The one-line, base64 string of the backend SSL root certificate data.')
+@secure()
 param appGatewaySSLBackendRootCertData string = newGuid()
 @description('The one-line, base64 string of the SSL certificate data.')
+@secure()
 param appGatewaySSLCertData string = newGuid()
 @secure()
 @description('The value of the password for the SSL Certificate')
