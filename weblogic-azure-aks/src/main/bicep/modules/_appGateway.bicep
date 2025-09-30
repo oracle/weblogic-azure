@@ -29,7 +29,6 @@ param sslCertificateDeploymentName string
 @secure()
 param sslCertPswData string
 param trustedRootCertificateDeploymentName string
-@secure()
 param vnetForApplicationGateway object
 param vnetRGNameForApplicationGateway string
 @description('${label.tagsLabel}')

@@ -21,7 +21,6 @@ param vnetForApplicationGateway object = {
 }
 @description('${label.tagsLabel}')
 param tagsByResource object
-param utcValue string = utcNow()
 
 var const_subnetAddressPrefixes = vnetForApplicationGateway.subnets.gatewaySubnet.addressPrefix
 var const_vnetAddressPrefixes = vnetForApplicationGateway.addressPrefixes
