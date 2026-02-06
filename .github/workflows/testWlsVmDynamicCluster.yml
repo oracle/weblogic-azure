@@ -82,7 +82,7 @@ jobs:
         run: |
           location=centralus # default value
 
-          if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
             location=${{ github.event.inputs.location }}
           else
             location=${{ github.event.client_payload.location }}

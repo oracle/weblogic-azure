@@ -100,10 +100,10 @@ cat <<EOF > ${parametersPath}
             "value": "172.16.6.0/24"
         },
         "vmSize": {
-            "value": "Standard_B1ms"
+            "value": "Standard_D2s_v3"
         },
         "vmSizeSelectForCoherence": {
-            "value": "Standard_B1ms"
+            "value": "Standard_D2s_v3"
         },
         "wlsDomainName": {
             "value": "${wlsDomainName}"

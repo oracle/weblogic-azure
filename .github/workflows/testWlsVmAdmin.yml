@@ -82,7 +82,7 @@ jobs:
         run: |
           location=eastus # default value
 
-          if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
             location=${{ github.event.inputs.location }}
           else
             location=${{ github.event.client_payload.location }}
@@ -302,7 +302,7 @@ jobs:
               az group create --verbose --name '$resourceGroup' --location '${location}'
           
               ## Prepare Vnet parameters
-              if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+              if [ \"${{ env.virtualNetworkNewOrExisting }}\" == \"existing\" ]; then
                 export virtualNetworkResourceGroupName=${{ env.resourceGroupForDependency }}
                 export virtualNetworkNewOrExisting=${{ env.virtualNetworkNewOrExisting }}
                 export virtualNetworkName=${{ env.virtualNetworkName }}
@@ -364,7 +364,7 @@ jobs:
                 exit 1
               fi
               
-              if [ "${{ env.virtualNetworkNewOrExisting }}" == "existing" ]; then
+              if [ \"${{ env.virtualNetworkNewOrExisting }}\" == \"existing\" ]; then
                  # If using existing VNet, there are some gaps to verify the deployment using following steps.
                  echo 'skip following steps, only verify the deployment for existing vnet'
                  exit 0

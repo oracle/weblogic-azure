@@ -8,12 +8,11 @@ for provider in \
   "Microsoft.DBforPostgreSQL"
 do
   echo "Registering provider: $provider"
-  az provider register --namespace "$provider"
+  az provider register --namespace "$provider" --wait
 done
 
 echo ""
-echo "Waiting for registration to complete..."
-sleep 30
+echo "Verifying provider registration status..."
 
 for provider in \
   "Microsoft.Sql" \
@@ -26,4 +25,10 @@ for provider in \
 do
   state=$(az provider show --namespace "$provider" --query "registrationState" -o tsv)
   echo "$provider: $state"
+  if [ "$state" != "Registered" ]; then
+    echo "WARNING: $provider is not fully registered yet (state: $state)"
+  fi
 done
+
+echo ""
+echo "Provider registration complete!"

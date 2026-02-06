@@ -122,7 +122,7 @@ runs:
           --name ${{ inputs.dbInstanceName }} \
           --admin-user myadmin \
           --admin-password ${{ inputs.dbPassword }} \
-          --sku-name Standard_B1ms \
+          --sku-name Standard_D2s_v3 \
           --location ${{ inputs.location }} \
           --version 8.0.21 \
           --yes
@@ -167,7 +167,7 @@ runs:
           --name ${{ inputs.dbInstanceName }} \
           --admin-user myadmin \
           --admin-password ${{ inputs.dbPassword }} \
-          --sku-name Standard_B1ms \
+          --sku-name Standard_D2s_v3 \
           --location ${{ inputs.location }} \
           --version 8.0.21 \
           --yes
