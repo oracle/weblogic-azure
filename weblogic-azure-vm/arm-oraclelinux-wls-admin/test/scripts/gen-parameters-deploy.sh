@@ -40,7 +40,7 @@ cat <<EOF > ${parametersPath}/parameters-deploy.json
         "value": "${skuUrnVersion}"
       },
       "vmSize": {
-        "value": "Standard_B2ms"
+        "value": "Standard_D2s_v3"
       },
       "wlsDomainName": {
         "value": "${wlsdomainname}"

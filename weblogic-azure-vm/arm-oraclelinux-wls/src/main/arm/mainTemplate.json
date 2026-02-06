@@ -125,7 +125,7 @@
             ]
          }
       },
-      "const_publicIPAddressType": "Dynamic",
+      "const_publicIPAddressType": "Static",
       "const_requiredPortrange": ",65200-65535,5556",
       "const_storageAccountType": "Standard_LRS",
       "const_subnetPrefix": "10.0.0.0/24",
@@ -224,6 +224,9 @@
          "tags": "[funcTags.tagsFilter(parameters('tagsByResource'), '${identifier.publicIPAddresses}')]",
          "name": "[variables('name_publicIPAddress')]",
          "location": "[parameters('location')]",
+         "sku": {
+            "name": "Standard"
+         },
          "properties": {
             "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
             "dnsSettings": {

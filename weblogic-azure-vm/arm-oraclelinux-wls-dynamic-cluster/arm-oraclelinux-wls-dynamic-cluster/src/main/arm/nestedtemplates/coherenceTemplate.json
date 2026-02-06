@@ -280,7 +280,7 @@
             }
         },
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
-        "const_publicIPAddressType": "Dynamic",
+        "const_publicIPAddressType": "Static",
         "const_vmSize": "[parameters('vmSizeSelectForCoherence')]",
         "const_wlsDomainPath": "/u01/domains",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
@@ -340,6 +340,9 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[concat(variables('name_vmPrefix'),copyIndex(1),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
             "copy": {
                 "name": "publicIPLoop",
                 "count": "[parameters('numberOfCoherenceCacheInstances')]"

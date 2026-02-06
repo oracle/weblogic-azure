@@ -39,7 +39,7 @@ cat <<EOF >${parametersPath}
       "value": $dynamicClusterSize
     },
     "vmSize": {
-      "value": "Standard_B2ms"
+      "value": "Standard_D2s_v3"
     },
     "location": {
       "value": "$location"

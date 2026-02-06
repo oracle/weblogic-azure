@@ -38,7 +38,7 @@ cat <<EOF > ${parametersPath}
         "value": "${wlsDomainName}"
       },
       "vmSize": {
-        "value": "Standard_B2ms"
+        "value": "Standard_D2s_v3"
       },
       "wlsPassword": {
         "value": "${wlsPassword}"

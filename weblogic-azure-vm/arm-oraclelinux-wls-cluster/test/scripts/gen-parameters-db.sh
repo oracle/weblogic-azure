@@ -50,7 +50,7 @@ cat <<EOF > ${parametersPath}
             "value": 4
         },
         "vmSize": {
-            "value": "Standard_B2ms"
+            "value": "Standard_D2s_v3"
         },
         "wlsPassword": {
             "value": "GEN-UNIQUE"

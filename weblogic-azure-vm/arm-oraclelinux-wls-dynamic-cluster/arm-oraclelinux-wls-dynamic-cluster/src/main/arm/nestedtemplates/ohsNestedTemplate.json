@@ -227,7 +227,7 @@
                 ]
             }
         },
-        "const_publicIPAddressType": "Dynamic",
+        "const_publicIPAddressType": "Static",
         "const_vmSize": "[parameters('vmSize')]",
         "name_linuxImageOfferSKU": "[variables('name_ohsSkuUrnVersion')[1]]",
         "name_linuxImageVersion": "[variables('name_ohsSkuUrnVersion')[2]]",
@@ -261,6 +261,9 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[concat(parameters('ohsVMName'),variables('name_publicIPAddress'))]",
             "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
             "properties": {
                 "publicIPAllocationMethod": "[variables('const_publicIPAddressType')]",
                 "dnsSettings": {
