@@ -267,7 +267,7 @@
         },
         "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'),'VM')]",
         "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
-        "const_publicIPAddressType": "Dynamic",
+        "const_publicIPAddressType": "Static",
         "const_requiredPortrange": ",65200-65535,5556",
         "const_storageAccountType": "Standard_LRS",
         "const_subnetPrefix": "[parameters('subnetPrefix')]",
@@ -431,6 +431,9 @@
 			"tags": "[if(equals(parameters('virtualNetworkNewOrExisting'), 'existing'),createObject(parameters('const_guidTag'),''),createObject())]",
             "name": "[if(equals(copyIndex(),0),concat(parameters('adminVMName'),variables('name_publicIPAddress')),concat(variables('const_managedVMPrefix'), copyIndex(),variables('name_publicIPAddress')))]",
             "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
             "copy": {
                 "name": "publicIPLoop",
                 "count": "[add(parameters('dynamicClusterSize'),1)]"

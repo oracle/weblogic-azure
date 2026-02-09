@@ -29,7 +29,7 @@ cat <<EOF >${parametersPath}
             "value": true
         },
         "vmSize": {
-            "value": "Standard_B2ms"
+            "value": "Standard_D2s_v3"
         },
         "wlsPassword": {
             "value": "GEN-UNIQUE"
