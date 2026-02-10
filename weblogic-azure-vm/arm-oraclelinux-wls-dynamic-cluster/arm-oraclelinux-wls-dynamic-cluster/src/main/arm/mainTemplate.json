@@ -430,14 +430,14 @@
 			}
 		},
 		"vmSize": {
-			"defaultValue": "Standard_A2_v2",
+			"defaultValue": "Standard_D2s_v3",
 			"type": "string",
 			"metadata": {
 				"description": "Select appropriate VM Size as per requirement"
 			}
 		},
 		"vmSizeSelectForCoherence": {
-			"defaultValue": "Standard_A2_v2",
+			"defaultValue": "Standard_D2s_v3",
 			"type": "string",
 			"metadata": {
 				"description": "Select appropriate VM Size for Coherence"

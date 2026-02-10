@@ -1,4 +1,7 @@
 for img in \
+  "ohs-122140-jdk8-ol76:ohs-122140-jdk8-ol76" \
+  "ohs-122140-jdk8-ol74:ohs-122140-jdk8-ol74" \
+  "ohs-122140-jdk8-ol73:ohs-122140-jdk8-ol73" \
   "weblogic-141200-jdk21-ol94:owls-141200-jdk21-ol94" \
   "weblogic-141200-jdk21-ol810:owls-141200-jdk21-ol810" \
   "weblogic-141200-jdk17-ol94:owls-141200-jdk17-ol94" \

@@ -174,7 +174,7 @@
       },
       "vmSize": {
          "type": "string",
-         "defaultValue": "Standard_A3",
+         "defaultValue": "Standard_D2s_v3",
          "metadata": {
             "description": "Select appropriate VM Size as per requirement"
          }
