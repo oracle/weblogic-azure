@@ -82,7 +82,7 @@ jobs:
             - name: Setup environment variables
               id: setup-env-variables-based-on-dispatch-event
               run: |
-                if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+                if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
                   resourceGroupForWlsAks=wlsd-aks-${{ github.repository_owner }}-${{ github.run_id }}-${{ github.run_number }}
                   dbName=${{ github.event.inputs.dbName }}
                   storageAccountName=${{ github.event.inputs.storageAccountName }}

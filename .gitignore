@@ -31,3 +31,5 @@ dependency-reduced-pom.xml
 *.iws
 .git/logs
 credentials-params-wls-vm-local.yaml
+plan.md
+progress.md

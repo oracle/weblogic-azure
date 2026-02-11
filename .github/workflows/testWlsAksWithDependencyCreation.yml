@@ -82,7 +82,7 @@ jobs:
               id: setup-env-variables-based-on-dispatch-event
               run: |
                 location=centralus # default value
-                if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+                if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
                   isForDemo=${{ github.event.inputs.isForDemo }}
                   vmSize=${{ github.event.inputs.vmSize }}
                   location=${{ github.event.inputs.location }}
