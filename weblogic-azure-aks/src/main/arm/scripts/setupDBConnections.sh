@@ -235,7 +235,7 @@ function validate_datasource() {
         | tr -d "\"")
 
     # get non-ssl port
-    clusterTargetPort=$(kubectl get svc ${wlsClusterSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports[] | select(.name=="default") | .port')
+    clusterTargetPort=$(kubectl get svc ${wlsClusterSvcName} -n ${wlsDomainNS} -o json | jq '.spec.ports // [] | .[] | select(.name=="default") | .port')
     t3ConnectionString="t3://${wlsClusterSvcName}.${wlsDomainNS}.svc.cluster.local:${clusterTargetPort}"
     cat <<EOF >${testDatasourceScript}
 connect('${WLS_DOMAIN_USER}', '${WLS_DOMAIN_SHIBBOLETH}', '${t3ConnectionString}')

@@ -144,6 +144,7 @@ function build_docker_image() {
     --vnet-name ${vmName}VNET \
     --enable-auto-update false \
     --public-ip-address ${publicIPName} \
+    --public-ip-sku Standard \
     --size ${vmSize} \
     --tags ${TAG_VM} SkipASMAzSecPack=true SkipNRMSCorp=true SkipNRMSDatabricks=true SkipNRMSDB=true SkipNRMSHigh=true SkipNRMSMedium=true SkipNRMSRDPSSH=true SkipNRMSSAW=true SkipNRMSMgmt=true --verbose
 
