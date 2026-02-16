@@ -31,4 +31,21 @@ do
 done
 
 echo ""
+echo "Registering preview feature: EnablePodIdentityPreview..."
+az feature register --namespace Microsoft.ContainerService --name EnablePodIdentityPreview
+
+# Wait for the feature to be registered
+while true; do
+  state=$(az feature show --namespace Microsoft.ContainerService --name EnablePodIdentityPreview --query "properties.state" -o tsv)
+  echo "EnablePodIdentityPreview: $state"
+  if [ "$state" = "Registered" ]; then
+    break
+  fi
+  sleep 10
+done
+
+# Propagate the feature registration
+az provider register -n Microsoft.ContainerService
+
+echo ""
 echo "Provider registration complete!"

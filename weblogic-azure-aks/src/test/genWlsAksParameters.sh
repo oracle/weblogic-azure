@@ -117,7 +117,7 @@ cat <<EOF > ${parametersPath}
             "value": "${wdtRuntimePassword}"
         },
         "wlsImageTag": {
-            "value": "14.1.1.0-11"
+            "value": "14.1.2.0-generic-jdk17-ol9"
         },
         "wlsPassword": {
             "value": "${wlsPassword}"

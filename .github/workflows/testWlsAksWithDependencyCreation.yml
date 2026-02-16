@@ -318,7 +318,12 @@ jobs:
                 fi
                 
                 # prepare parameters for vnet and application gateway
-                export newOrExistingVnetForApplicationGateway=${{ env.newOrExistingVnetForApplicationGateway }}
+                # Default to 'new' if not specified in configurations_for_it
+                if [ -z "${{ env.newOrExistingVnetForApplicationGateway }}" ]; then
+                  export newOrExistingVnetForApplicationGateway=new
+                else
+                  export newOrExistingVnetForApplicationGateway=${{ env.newOrExistingVnetForApplicationGateway }}
+                fi
                 export vnetForApplicationGateway=${{ env.vnetForApplicationGateway.name }}
                 export vnetRGNameForApplicationGateway=${{ env.resourceGroupForWlsAks }}
                 

@@ -33,3 +33,4 @@ dependency-reduced-pom.xml
 credentials-params-wls-vm-local.yaml
 plan.md
 progress.md
+credentials-params-wls-aks-local.yaml

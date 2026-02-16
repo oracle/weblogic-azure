@@ -349,7 +349,7 @@ function utility_wait_for_pod_restarted() {
     while [ ${updatedPodNum} -le ${appReplicas} ] && [ $attempt -le ${checkPodStatusMaxAttemps} ]; do
         echo "attempts ${attempt}"
         ret=$(kubectl get pods -n ${wlsDomainNS} -l weblogic.domainUID=${wlsDomainUID} -o json |
-            jq '.items[] | select(all(.status.containerStatuses[]; .ready == true)) | .metadata.creationTimestamp' | tr -d "\"")
+            jq '.items[] | select(.status.containerStatuses != null) | select(all(.status.containerStatuses[]; .ready == true)) | .metadata.creationTimestamp' | tr -d "\"")
 
         counter=0
         for item in $ret; do
