@@ -209,6 +209,8 @@ Before using the IT validation system, ensure:
       ```
 
    Both scripts require that you have already run `az login`, `gh auth login`, and have `yq` 4.x installed. The scripts will set the required GitHub repository secrets automatically.
+   
+- [ ] If you are setting up a new Azure subscription to run the tests, see [Trouble Shooting](#some-notes-on-preparing-a-new-azure-subscription-to-run-the-tests).
 
 - [ ] Access to the `it` branch for report storage
 
