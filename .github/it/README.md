@@ -41,6 +41,8 @@ The IT validation system is a comprehensive integration testing framework design
   - [Accessing Reports](#accessing-reports)
 - [Error Handling](#error-handling)
 - [Trouble Shooting](#trouble-shooting)
+  - [Debugging with tmate](#debugging-with-tmate)
+  - [Some notes on preparing a new Azure subscription to run the tests](#some-notes-on-preparing-a-new-azure-subscription-to-run-the-tests)
 
 
 ## System Architecture
@@ -150,6 +152,8 @@ Each validation plan targets specific WebLogic deployment scenarios:
 
 ### Quick Start Guide
 
+This section assumes the prerequisites are already satisfied. See [Prerequisites](#prerequisites).
+
 1. **Choose a Validation Plan**: Select the appropriate validation plan file based on your testing needs:
    - For AKS deployments: `validation-plan-aks.json`
    - For Admin Server on VM: `validation-plan-vm-admin.json`
@@ -176,8 +180,36 @@ Each validation plan targets specific WebLogic deployment scenarios:
 Before using the IT validation system, ensure:
 
 - [ ] Azure subscription with appropriate permissions
+   - Microsoft Entra permissions
+      - Global Administrator
+   - Azure RBAC
+      - Contributor
+      - User Access Administrator
+      - or
+      - Owner
 - [ ] GitHub repository with Actions enabled
-- [ ] Required secrets configured in repository settings. The repository secrets set by the [setup-credentials.sh](../workflows/setup-credentials.sh) script must be set with current and valid values before any of these workflows will run.
+- [ ] Required secrets configured in repository settings. There are two separate setup scripts, one for VM workflows and one for AKS workflows. You must run the appropriate script(s) depending on which validation plans you intend to execute.
+
+   **For VM workflows** (`validation-plan-vm-admin.json`, `validation-plan-vm-cluster.json`, `validation-plan-vm-dynamic-cluster.json`):
+
+   1. Edit [credentials-params-wls-vm.yaml](../resource/credentials-params-wls-vm.yaml) and fill in the required parameter values (e.g., `OTN_USERID`, `OTN_PASSWORD`, `WLS_PSW`, `USER_EMAIL`, `USER_NAME`, `GIT_TOKEN`). Parameters with default values can be left as-is unless you need to override them.
+   2. Run the [setup-for-wls-vm.sh](../workflows/setup-for-wls-vm.sh) script:
+      ```bash
+      cd .github/workflows
+      bash setup-for-wls-vm.sh
+      ```
+
+   **For AKS workflows** (`validation-plan-aks.json`):
+
+   1. Edit [credentials-params-wls-aks.yaml](../resource/credentials-params-wls-aks.yaml) and fill in the required parameter values (e.g., `ORC_SSOUSER`, `ORC_SSOPSW`, `WDT_RUNTIMEPSW`). Parameters with default values can be left as-is unless you need to override them.
+   2. Run the [setup-for-wls-aks.sh](../workflows/setup-for-wls-aks.sh) script:
+      ```bash
+      cd .github/workflows
+      bash setup-for-wls-aks.sh
+      ```
+
+   Both scripts require that you have already run `az login`, `gh auth login`, and have `yq` 4.x installed. The scripts will set the required GitHub repository secrets automatically.
+
 - [ ] Access to the `it` branch for report storage
 
 ## IT Action Usage
@@ -283,4 +315,72 @@ this [action](https://github.com/mxschmitt/action-tmate) uses the ssh public key
 So if you have multiple private keys in your local machine, you may need to specify the private key used for `*.tmate.io` in your `~/.ssh/config` file.
 
 ![tmate-sshkey.png](tmate-sshkey.png)
+
+### Some notes on preparing a new Azure subscription to run the tests
+
+The following lessons were learned while bringing up the CI/CD pipelines on a net-new Azure subscription. If you are configuring a fresh subscription for the first time, these are essential to know.
+
+#### 1. Register required Azure resource providers
+
+A new subscription may not have all the necessary resource providers registered. Run the [register-providers.sh](../resource/register-providers.sh) script to register them:
+
+```bash
+cd .github/resource
+bash register-providers.sh
+```
+
+This registers:
+- `Microsoft.Sql`, `Microsoft.Compute`, `Microsoft.Network`, `Microsoft.Storage`, `Microsoft.KeyVault`, `Microsoft.DBforMySQL`, `Microsoft.DBforPostgreSQL`
+- The `EnablePodIdentityPreview` feature for `Microsoft.ContainerService` (required by AKS workflows)
+
+The script uses `--wait` so it blocks until each provider is fully registered. It also verifies registration status at the end. If any provider shows a state other than `Registered`, investigate before proceeding.
+
+#### 2. Accept VM image terms for Oracle WebLogic and OHS images
+
+Azure Marketplace VM images require explicit license acceptance per subscription. Run the [vm-terms-accept.sh](../resource/vm-terms-accept.sh) script:
+
+```bash
+cd .github/resource
+bash vm-terms-accept.sh
+```
+
+This accepts the legal terms for all Oracle WebLogic Server and Oracle HTTP Server (OHS) VM images used by the test workflows. Without this step, VM deployments will fail with a `MarketplacePurchaseEligibilityFailed` error.
+
+#### 3. VM size availability varies by region
+
+The default test region is `eastus` (set in the credential params YAML files), but some VM SKUs may not be available in every region. During initial bring-up with `centralus`:
+
+- `Standard_B2ms` was not available, so all VM test parameters and the database provisioning action were changed to use `Standard_D2s_v3` instead.
+- `Standard_B1ms` for MySQL/PostgreSQL flexible servers was similarly changed to `Standard_D2s_v3`.
+
+If you choose a non-default region, verify VM SKU availability with:
+
+```bash
+az vm list-skus --location <your-region> --size Standard_D2s --output table
+```
+
+If your chosen SKU is not available, update the `LOCATION` value in the appropriate credential params YAML file and ensure the VM size is available there.
+
+#### 4. Basic SKU public IP addresses have been deprecated
+
+Azure has deprecated Basic SKU public IP addresses (see [Basic public IP upgrade guidance](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-basic-upgrade-guidance)). The ARM templates and AKS scripts were updated to use **Standard** SKU public IPs with **Static** allocation. If you see deployment errors related to public IP SKU validation, ensure you are running the latest version of the templates.
+
+#### 5. Azure API versions may not be available in all subscriptions
+
+Some API versions (e.g., `2025-01-01` for Storage) may not yet be available in a new or region-restricted subscription. The API versions in [resources/azure-common.properties](../../resources/azure-common.properties) were updated to use widely available versions (generally `2024-03-01` or `2024-01-01`).
+
+Two helper scripts were created to diagnose API version issues:
+
+- [check-azure-api-versions.sh](../resource/check-azure-api-versions.sh) — queries your subscription for available (non-preview, 2024+) API versions for the resource types used by the templates.
+- [test-api-versions-locally.sh](../resource/test-api-versions-locally.sh) — builds the templates with Maven, then runs `az deployment group validate` against your subscription to catch API version errors before pushing to CI/CD.
+
+Run these if you encounter `InvalidApiVersionForResource` or similar errors.
+
+#### 6. The AKS service principal needs the User Access Administrator role
+
+The AKS setup script ([setup-for-wls-aks.sh](../workflows/setup-for-wls-aks.sh)) creates a service principal with both `Contributor` and `User Access Administrator` roles. The latter is required because AKS deployments need to create role assignments (e.g., for managed identities and pod identity). If you see authorization errors during AKS workflows, verify the service principal has both roles.
+
+#### 7. arm-ttk version matters
+
+The ARM Template Toolkit (arm-ttk) version used for template validation is specified in [.github/variables/vm-dependencies.env](../variables/vm-dependencies.env). It was updated to version `0.25` to match current template requirements. If template validation fails with unexpected errors, check that this version is current.
 

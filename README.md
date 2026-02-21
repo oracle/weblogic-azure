@@ -19,6 +19,8 @@ Please refer to the README for [documentation on WebLogic Server running on an A
 
 Please refer to the README for [documentation on WebLogic Server running on an Azure Virtual Machine](https://docs.oracle.com/en/middleware/standalone/weblogic-server/wlazu/get-started-oracle-weblogic-server-microsoft-azure-iaas.html#GUID-E0B24A45-F496-4509-858E-103F5EBF67A7)
 
+Please refer to the README for [documentation about how to run the CI/CD](.github/it/README.md).
+
 ## Local Build Setup and Requirements
 
 This project utilizes [GitHub Packages](https://github.com/features/packages) for hosting and retrieving some dependencies. To ensure you can smoothly run and build the project in your local environment, specific configuration settings are required.
